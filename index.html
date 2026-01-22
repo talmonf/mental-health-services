@@ -17,6 +17,14 @@
             min-height: 100vh;
         }
     </style>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J0TYE2PZ4E"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-J0TYE2PZ4E');
+    </script>
 </head>
 <body>
     <div id="root"></div>
@@ -515,5 +523,38 @@
         root.render(<MentalHealthIsrael />);
     </script>
     <script defer src="https://va.vercel-scripts.com/v1/script.js"></script>
+    <!-- Auto-track clicks for Vercel Analytics -->
+    <script>
+    window.addEventListener('load', function() {
+        document.addEventListener('click', function(e) {
+        const element = e.target.closest('button, a');
+        if (element) {
+            const label = element.textContent.trim() || element.getAttribute('aria-label') || element.href || 'unknown';
+            if (window.va) {
+            window.va('event', { 
+                name: 'click', 
+                data: { element: label }
+            });
+            }
+        }
+        });
+    });
+    </script>
+
+    <!-- Auto-track clicks for Google Analytics -->
+    <script>
+    window.addEventListener('load', function() {
+        document.addEventListener('click', function(e) {
+        const element = e.target.closest('button, a');
+        if (element && typeof gtag !== 'undefined') {
+            const label = element.textContent.trim() || element.getAttribute('aria-label') || element.href || 'unknown';
+            gtag('event', 'click', {
+            'event_category': 'engagement',
+            'event_label': label
+            });
+        }
+        });
+    });
+    </script>
 </body>
 </html>
