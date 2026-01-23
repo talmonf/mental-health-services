@@ -779,31 +779,68 @@
     });
     </script>
 
-<!-- Debug: Auto-track clicks for Google Analytics -->
-    <script>
-      window.addEventListener('load', function() {
-        console.log('✅ Click tracking initialized');
+<!-- Improved Button Click Tracking for Google Analytics -->
+<script>
+  window.addEventListener('load', function() {
+    console.log('✅ Click tracking initialized');
+    
+    document.addEventListener('click', function(e) {
+      const element = e.target.closest('button, a, [role="button"]');
+      
+      if (element && typeof gtag !== 'undefined') {
+        let buttonName = 'unknown';
+        let buttonType = element.tagName.toLowerCase();
+        let destination = '';
         
-        document.addEventListener('click', function(e) {
-          console.log('🖱️ Click detected on:', e.target);
-          
-          const element = e.target.closest('button, a');
-          if (element) {
-            const label = element.textContent.trim() || element.getAttribute('aria-label') || element.href || 'unknown';
-            
-            console.log('📊 Tracking click:', label);
-            
-            if (typeof gtag !== 'undefined') {
-              gtag('event', 'button_click', {
-                'button_name': label
-              });
-              console.log('✅ Event sent to Google Analytics');
-            } else {
-              console.log('❌ ERROR: gtag not found');
+        // Priority order for getting button name:
+        // 1. data-tracking-name (custom attribute you can add)
+        // 2. aria-label (accessibility label)
+        // 3. title attribute
+        // 4. Button text (cleaned up)
+        // 5. href for links
+        
+        if (element.hasAttribute('data-tracking-name')) {
+          buttonName = element.getAttribute('data-tracking-name');
+        } else if (element.hasAttribute('aria-label')) {
+          buttonName = element.getAttribute('aria-label');
+        } else if (element.hasAttribute('title')) {
+          buttonName = element.getAttribute('title');
+        } else if (element.textContent.trim()) {
+          buttonName = element.textContent.trim().substring(0, 100); // Limit to 100 chars
+        }
+        
+        // For links, capture the destination
+        if (element.tagName === 'A' && element.href) {
+          destination = element.href;
+          // If button name is just the emoji, use a cleaned URL instead
+          if (buttonName === 'לאתר 🔗' || buttonName.length < 3) {
+            try {
+              const url = new URL(element.href);
+              buttonName = url.hostname.replace('www.', '');
+            } catch (e) {
+              buttonName = element.href;
             }
           }
+        }
+        
+        console.log('📊 Tracking click:', {
+          name: buttonName,
+          type: buttonType,
+          destination: destination
         });
-      });
-    </script>
+        
+        // Send to Google Analytics
+        gtag('event', 'button_click', {
+          'button_name': buttonName,
+          'button_type': buttonType,
+          'link_url': destination,
+          'page_location': window.location.href
+        });
+        
+        console.log('✅ Event sent to Google Analytics');
+      }
+    });
+  });
+</script>
 </body>
 </html>
