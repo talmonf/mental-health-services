@@ -779,20 +779,31 @@
     });
     </script>
 
-    <!-- Auto-track clicks for Google Analytics -->
+<!-- Debug: Auto-track clicks for Google Analytics -->
     <script>
-    window.addEventListener('load', function() {
+      window.addEventListener('load', function() {
+        console.log('✅ Click tracking initialized');
+        
         document.addEventListener('click', function(e) {
-        const element = e.target.closest('button, a');
-        if (element && typeof gtag !== 'undefined') {
+          console.log('🖱️ Click detected on:', e.target);
+          
+          const element = e.target.closest('button, a');
+          if (element) {
             const label = element.textContent.trim() || element.getAttribute('aria-label') || element.href || 'unknown';
-            gtag('event', 'click', {
-            'event_category': 'engagement',
-            'event_label': label
-            });
-        }
+            
+            console.log('📊 Tracking click:', label);
+            
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'button_click', {
+                'button_name': label
+              });
+              console.log('✅ Event sent to Google Analytics');
+            } else {
+              console.log('❌ ERROR: gtag not found');
+            }
+          }
         });
-    });
+      });
     </script>
 </body>
 </html>
