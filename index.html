@@ -293,6 +293,11 @@
         {"row": 87, "org": "ענת אופיר", "svc": "מומחית בהפרעות אכילה/תזונה/כושר/דיאטה, מטפלת בפגועי נפש עם רישיון. בעלות סימלית, חברות ביטוח מחזירות", "phone": "054-2224646", "web": "https://www.fiteat.com", "target": "", "region": "", "cost": "", "specialty": "הפרעות אכילה", "notes": "", "languages": "", "diseases": "", "add": ""}
         ]}, 
 
+         "local": {"icon": "📍","title": "שירותים מקומיים","desc": "שירותי בריאות נפש באזורים ספציפיים","services": [
+         {"row": 91, "org": "Hakshiva Therapy Clinic - הקשיבה", "svc": "Therapy for teenagers, couples therapy and parenting guidance", "phone": "", "whatsapp": "02-992-5152", "web": "https://hakshiva.org/therapy-clinic/#", "target": "", "region": "Ramat Bet Shemesh", "cost": "", "specialty": "", "notes": "", "languages": "English, Hebrew", "diseases": "", "add": "https://hakshiva.org/he/%d7%a7%d7%9c%d7%99%d7%a0%d7%99%d7%a7%d7%94-%d7%98%d7%99%d7%a4%d7%95%d7%9c%d7%99%d7%aa/", "dir": "ltr", "iconOnly": true},
+         {"row": 92, "org": "Hevlei Kesher - חבלי קשר", "svc": "Support and treatment for Maternal Mental Health through Tipat Halav. Services for mothers and families impacted by perinatal mental health disorders (PMHD) such as postpartum depression", "phone": "052-603-9181", "email": "contact@hevleikesher.org", "web": "https://hevleikesher.org/", "target": "", "region": "Jerusalem", "cost": "", "specialty": "", "notes": "", "languages": "English, Hebrew", "diseases": "", "add": "https://hevleikesher.org/he/%D7%97%D7%91%D7%9C%D7%99-%D7%A7%D7%A9%D7%A8-%D7%93%D7%A3-%D7%94%D7%91%D7%99%D7%AA/", "dir": "ltr", "iconOnly": true}
+        ]},
+
          "transport": {"icon": "🚑", "title": "הסעות ואמבולנסים", "desc": "סיוע בהסעות, אמבולנסים, על ידי מתנדבים ללא עלות", "services": [
          {"row": 83, "org": "עזר מציון הסעות", "svc": "הסעות חולים, אמבולנסים, נהגים מתנדבים", "phone": "03-5742742", "phoneLabel": "כללי", "phoneShowNumber": true, "phone2": "1800-236-236", "phoneLabel2": "כללי", "phoneShowNumber2": true, "phone3": "*2236", "phoneLabel3": "כללי", "phoneShowNumber3": true, "phone4": "03-6144666", "phoneLabel4": "אמבולנסים", "phoneShowNumber4": false, "phone5": "073-3956218", "phoneLabel5": "נהגים מתנדבים", "phoneShowNumber5": false, "phone6": "073-2477777", "phoneLabel6": "הסעות חולים ושינוע רפואי", "phoneShowNumber6": false, "web": "https://www.ami.org.il/services", "target": "", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 84, "org": "לב מלכה", "svc": "סיוע באמבולנסים בהעברת חולים ונכים", "phone": "02-5376666", "web": "https://levmalka.org.il/", "target": "חולים ונכים", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
@@ -392,7 +397,7 @@
                                 fontSize: '0.9rem',
                                 fontWeight: 600
                             }}>
-                                לאתר הנוסף 🔗
+                               {s.dir === 'ltr' ? 'לאתר' : 'לאתר נוסף'} 🔗
                             </a>
                         )}
                     </div>
@@ -783,7 +788,7 @@
                             <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#4a90a4', fontSize: '20px' }}>🔍</span>
                             <input
                                 type="text"
-                                placeholder="חיפוש... (נסו למשל: משפחות, טראומה, כללית, נוער, אנגלית, חרדי )"
+                                placeholder="חיפוש... (נסו למשל: טראומה, כללית, נוער )"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
@@ -792,7 +797,8 @@
                                     fontSize: '1.1rem',
                                     border: '2px solid #e0e0e0',
                                     borderRadius: '15px',
-                                    fontFamily: 'inherit'
+                                    fontFamily: 'inherit',
+                                    boxSizing: 'border-box'
                                 }}
                             />
                         </div>
