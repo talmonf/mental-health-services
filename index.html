@@ -313,6 +313,7 @@
             const [showTerms, setShowTerms] = useState(false);
 
             const data = DATA;
+            const LAST_UPDATED = "13.2.2026";            
             
             const terms = {
                 disability: { title: "קצבת נכות", text: "קצבה חודשית למי שיש ירידה ביכולת השתכרות. 3 רמות: חלקית (20-74%), מלאה (75-100%), מלאה+תוספת. וועדה רפואית. טלפון: *6050" },
@@ -823,13 +824,13 @@
                                 alignItems: 'center'
                             }}>
                             <span>{expandedCats.includes(id) ? '▲' : '▼'}</span>
-                            <h2 style={{ margin: 0, fontSize: '1.4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'nowrap', gap: '8px' }}>
+                                <span style={{ fontSize: '1.2rem', opacity: 0.9, textAlign: 'left', alignSelf: 'center' }}>{cat.titleEn}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                                     <span style={{ fontSize: '1.8rem' }}>{cat.icon}</span>
-                                    {cat.title}
                                     <span style={{ background: '#e8734e', padding: '2px 8px', borderRadius: '10px', fontSize: '0.85rem' }}>{cat.services.length}</span>
                                 </span>
-                                <span style={{ fontSize: '1.2rem', opacity: 0.9 }}>{cat.titleEn}</span>
+                                <span style={{ fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'right' }}>{cat.title}</span>
                             </h2>
                                 
                             </div>
@@ -865,7 +866,7 @@
                             המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי
                         </p>
                         <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
-                            עודכן: ינואר 2026
+                            {`עודכן: ${LAST_UPDATED}`}
                         </p>
                     </div>
                 </div>
