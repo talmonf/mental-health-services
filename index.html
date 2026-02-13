@@ -16,7 +16,18 @@
         #root {
             min-height: 100vh;
         }
+
+        @media (max-width: 600px) {
+            .cat-title-en {
+                font-size: 0.75rem !important;
+            }
+            .cat-title-he {
+                font-size: 0.85rem !important;
+            }
+        }
+
     </style>
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-J0TYE2PZ4E"></script>
     <script>
@@ -814,26 +825,26 @@
                             overflow: 'hidden',
                             boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
                         }}>
-                            <div onClick={() => toggleCat(id)} style={{
-                                background: 'linear-gradient(135deg, #2d5a7b 0%, #4a90a4 100%)',
-                                color: 'white',
-                                padding: '20px 30px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                            <span>{expandedCats.includes(id) ? '▲' : '▼'}</span>
-                            <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'nowrap', gap: '8px' }}>
-                                <span style={{ fontSize: '1.2rem', opacity: 0.9, textAlign: 'left', alignSelf: 'center' }}>{cat.titleEn}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                        <div onClick={() => toggleCat(id)} style={{
+                            background: 'linear-gradient(135deg, #2d5a7b 0%, #4a90a4 100%)',
+                            color: 'white',
+                            padding: '20px 30px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
+                            <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', gap: '8px' }}>
+                                <span className="cat-title-he" style={{ fontSize: '1rem', fontWeight: 'bold', textAlign: 'right', wordBreak: 'break-word', paddingRight: '8px' }}>{cat.title}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
                                     <span style={{ fontSize: '1.8rem' }}>{cat.icon}</span>
                                     <span style={{ background: '#e8734e', padding: '2px 8px', borderRadius: '10px', fontSize: '0.85rem' }}>{cat.services.length}</span>
                                 </span>
-                                <span style={{ fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'right' }}>{cat.title}</span>
+                                <span className="cat-title-en" style={{ fontSize: '1rem', opacity: 0.9, textAlign: 'left', wordBreak: 'break-word' }}>{cat.titleEn}</span>
                             </h2>
-                                
-                            </div>
+                        </div>
 
                             {expandedCats.includes(id) && (
                                 <div>
