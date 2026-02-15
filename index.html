@@ -7,25 +7,96 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2d5a7b;
+            --primary-dark: #1e3f5a;
+            --accent: #52b788;
+            --danger: #c0392b;
+            --danger-bg: #d63447;
+            --text: #333;
+            --text-muted: #5a5a5a;
+            --border: #e0e0e0;
+            --bg: #f0f2f5;
+            --bg-card: #fff;
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 24px;
+            --space-2xl: 32px;
+            --space-3xl: 40px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-card: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-elevated: 0 10px 25px rgba(0,0,0,0.1);
+            --touch-min: 44px;
+            --font-hebrew: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --text-sm: 0.9rem;
+            --text-base: 1rem;
+            --text-lg: 1.1rem;
+            --text-xl: 1.2rem;
+            --text-2xl: 1.5rem;
+        }
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            font-family: var(--font-hebrew);
+            background: var(--bg);
+            overflow-x: hidden;
         }
         #root {
             min-height: 100vh;
         }
-
-        @media (max-width: 600px) {
-            .cat-title-en {
-                font-size: 0.75rem !important;
-            }
-            .cat-title-he {
-                font-size: 0.85rem !important;
-            }
+        .mh-app { max-width: 1200px; margin: 0 auto; padding: var(--space-lg); min-height: 100vh; font-family: var(--font-hebrew); }
+        .mh-hero { color: white; border-radius: var(--radius-lg); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
+        .mh-hero-inner { padding: var(--space-xl) var(--space-lg); }
+        .mh-btns { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl); }
+        .mh-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-xl); border: none; border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-base); font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; transition: opacity 0.2s; }
+        .mh-btn:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-app a:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-emergency a:focus { outline: 2px solid white; outline-offset: 2px; }
+        .mh-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); transition: all 0.2s; }
+        .mh-card-inner { padding: var(--space-md); }
+        .mh-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); }
+        .mh-card-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+        .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
+        .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-search-wrap { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
+        .mh-search-input { width: 100%; min-height: var(--touch-min); padding: var(--space-md) 44px var(--space-md) var(--space-lg); font-size: var(--text-base); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; }
+        .mh-search-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
+        .mh-cat-header { padding: var(--space-lg) var(--space-md); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); min-height: var(--touch-min); color: white; }
+        .mh-cat-title { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; text-align: right; }
+        .mh-cat-title-he { font-weight: bold; word-break: break-word; font-size: var(--text-base); }
+        .mh-cat-title-en { font-size: 0.75rem; opacity: 0.9; }
+        .mh-cat-meta { display: flex; align-items: center; gap: var(--space-md); flex-shrink: 0; }
+        .mh-cat-desc { padding: var(--space-md) var(--space-lg) var(--space-sm); margin: 0; color: var(--text-muted); font-size: var(--text-base); }
+        .mh-cat-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); }
+        .mh-emergency { background: var(--danger-bg); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
+        .mh-emergency-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
+        .mh-footer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; }
+        .mh-modal { background: var(--bg-card); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); position: relative; max-height: 85vh; overflow-y: auto; }
+        .mh-modal-close { position: absolute; top: var(--space-md); left: var(--space-md); min-width: var(--touch-min); min-height: var(--touch-min); padding: 0; background: var(--danger); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); }
+        .mh-modal-close:focus { outline: 2px solid white; outline-offset: 2px; }
+        .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
+        .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
+        @media (min-width: 600px) {
+            .mh-app { padding: var(--space-xl); }
+            .mh-hero-inner { padding: var(--space-3xl) var(--space-xl); }
+            .mh-card-inner { padding: var(--space-xl); }
+            .mh-cat-header { padding: var(--space-xl) var(--space-xl); }
+            .mh-cat-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding: var(--space-xl) var(--space-xl) var(--space-2xl); }
+            .mh-emergency { padding: var(--space-2xl); }
+            .mh-emergency-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+            .mh-cat-title { flex-direction: row; align-items: center; grid-template-columns: 1fr auto 1fr; display: grid; }
+            .mh-cat-title-he { order: 1; text-align: right; padding-left: var(--space-sm); }
+            .mh-cat-title-en { order: 3; text-align: left; font-size: 0.85rem; }
+            .mh-cat-meta { order: 2; justify-content: center; }
+            .mh-modal { padding: var(--space-3xl); }
+            .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-2xl); }
         }
-
     </style>
 
     <!-- Google Analytics -->
@@ -316,6 +387,8 @@
         ]}};
          
 
+        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', hmo: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical' };
+
         const MentalHealthIsrael = () => {
             const [searchTerm, setSearchTerm] = useState('');
             const [expandedCats, setExpandedCats] = useState(['emergency']);
@@ -358,176 +431,83 @@
             }, [searchTerm]);
 
             const Card = ({ s }) => (
-                <div style={{
-                    background: '#fff',
-                    border: '2px solid #e0e0e0',
-                    borderRadius: '15px',
-                    padding: '20px',
-                    transition: 'all 0.3s',
-                    direction: s.dir || 'rtl',  
-                    textAlign: s.dir === 'ltr' ? 'left' : 'right'
-                }}
-                onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-                    e.currentTarget.style.borderColor = '#4a90a4';
-                }}
-                onMouseLeave={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = '#e0e0e0';
-                }}>
-                    <h3 style={{ color: '#2d5a7b', fontSize: '1.1rem', margin: '0 0 10px', fontWeight: 600 }}>{s.org}</h3>
-                    {s.svc && <p style={{ color: '#5a5a5a', margin: '0 0 12px', fontSize: '0.95rem', lineHeight: 1.6 }}>{s.svc}</p>}
-                    {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases) && (
-                        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '12px', marginBottom: '12px', fontSize: '0.9rem' }}>
-                            {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
-                            {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
-                            {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {s.cost}</div>}
-                            {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
-                            {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {s.languages}</div>}
-                            {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {s.diseases}</div>}
-                            {s.notes && <div><strong style={{ color: '#2d5a7b' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {s.notes}</div>}
+                <div className="mh-card">
+                    <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
+                        <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
+                        {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
+                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases) && (
+                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
+                                {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
+                                {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
+                                {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {s.cost}</div>}
+                                {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
+                                {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {s.languages}</div>}
+                                {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {s.diseases}</div>}
+                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {s.notes}</div>}
                             </div>
-                    )}
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}} title={s.iconOnly ? s.phone : undefined}>📞 {s.iconOnly ? '' : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
-                        {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>📞 {s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2}</a>)}
-                        {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>📞 {s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3}</a>)}
-                        {s.phone4 && (<a href={`tel:${s.phone4.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>📞 {s.phoneLabel4 ? (s.phoneShowNumber4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phoneLabel4) : s.phone4}</a>)}
-                        {s.phone5 && (<a href={`tel:${s.phone5.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>📞 {s.phoneLabel5 ? (s.phoneShowNumber5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phoneLabel5) : s.phone5}</a>)}
-                        {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: '#52b788', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>📞 {s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6}</a>)}
-                        {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px'}} title={s.iconOnly ? `WhatsApp: ${s.whatsapp}` : undefined}><i className="fab fa-whatsapp" style={{fontSize: '1.2rem'}}></i> {s.iconOnly ? '' : s.whatsapp}</a>)}
-                        {s.email && (<a href={`mailto:${s.email}`} style={{background: '#ffa500', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}} title={s.iconOnly ? s.email : undefined}>✉️ {s.iconOnly ? '' : s.email}</a>)}
-                        {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.trackingName || s.org} style={{background: 'linear-gradient(135deg, #4a90a4 0%, #2d5a7b 100%)', color: 'white', padding: '8px 14px', borderRadius: '20px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600}}>{s.dir === 'ltr' ? 'Website' : 'לאתר'} 🔗</a>)}
-                        {s.add && (
-                            <a href={s.add} target="_blank" rel="noopener noreferrer" style={{
-                                background: 'linear-gradient(135deg, #4a90a4 0%, #2d5a7b 100%)',
-                                color: 'white',
-                                padding: '8px 14px',
-                                borderRadius: '20px',
-                                textDecoration: 'none',
-                                fontSize: '0.9rem',
-                                fontWeight: 600
-                            }}>
-                               {s.dir === 'ltr' ? 'לאתר' : 'לאתר נוסף'} 🔗
-                            </a>
                         )}
+                        <div className="mh-card-actions">
+                            {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? '' : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
+                            {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}}><i className="fas fa-phone"></i> {s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2}</a>)}
+                            {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}}><i className="fas fa-phone"></i> {s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3}</a>)}
+                            {s.phone4 && (<a href={`tel:${s.phone4.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}}><i className="fas fa-phone"></i> {s.phoneLabel4 ? (s.phoneShowNumber4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phoneLabel4) : s.phone4}</a>)}
+                            {s.phone5 && (<a href={`tel:${s.phone5.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}}><i className="fas fa-phone"></i> {s.phoneLabel5 ? (s.phoneShowNumber5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phoneLabel5) : s.phone5}</a>)}
+                            {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}}><i className="fas fa-phone"></i> {s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6}</a>)}
+                            {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.iconOnly ? `WhatsApp: ${s.whatsapp}` : undefined}><i className="fab fa-whatsapp"></i> {s.iconOnly ? '' : s.whatsapp}</a>)}
+                            {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.iconOnly ? s.email : undefined}><i className="fas fa-envelope"></i> {s.iconOnly ? '' : s.email}</a>)}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.trackingName || s.org} style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר'}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
+                        </div>
                     </div>
                 </div>
             );
 
             if (showTerms) {
                 return (
-                    <div style={{
-                        fontFamily: 'system-ui, sans-serif',
-                        maxWidth: '900px',
-                        margin: '0 auto',
-                        padding: '20px',
-                        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-                        minHeight: '100vh'
-                    }}>
-                        <button onClick={() => setShowTerms(false)} style={{
-                            background: 'linear-gradient(135deg, #2d5a7b 0%, #4a90a4 100%)',
-                            color: 'white',
-                            padding: '12px 24px',
-                            border: 'none',
-                            borderRadius: '25px',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            fontWeight: 600,
-                            marginBottom: '20px'
-                        }}>
+                    <div className="mh-app" style={{ maxWidth: '900px' }}>
+                        <button onClick={() => setShowTerms(false)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}>
                             ← חזרה
                         </button>
+                        <div className="mh-modal">
+                            <div className="mh-terms-wrap">
+                                <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-xl)' }}><i className="fas fa-book"></i> מילון מונחים</h1>
 
-                        <div style={{ background: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-                            <h1 style={{ color: '#2d5a7b', marginBottom: '30px' }}>📖 מילון מונחים</h1>
-
-                            {Object.entries(terms).map(([k, t]) => (
-                                <div key={k} style={{
-                                    marginBottom: '25px',
-                                    padding: '20px',
-                                    background: '#f8f9fa',
-                                    borderRadius: '12px',
-                                    borderRight: '4px solid #4a90a4'
-                                }}>
-                                    <h2 style={{ color: '#2d5a7b', marginBottom: '10px', fontSize: '1.3rem' }}>{t.title}</h2>
-                                    <p style={{ lineHeight: 1.7, fontSize: '1.05rem' }}>{t.text}</p>
-                                </div>
-                            ))}
+                                {Object.entries(terms).map(([k, t]) => (
+                                    <div key={k} style={{ marginBottom: 'var(--space-xl)', padding: 'var(--space-xl)', background: 'var(--bg)', borderRadius: 'var(--radius-md)', borderRight: '4px solid var(--primary)' }}>
+                                        <h2 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-xl)' }}>{t.title}</h2>
+                                        <p style={{ lineHeight: 1.7, fontSize: 'var(--text-base)' }}>{t.text}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 );
             }
 
             return (
-                <div style={{
-                    fontFamily: 'system-ui, sans-serif',
-                    maxWidth: '1200px',
-                    margin: '0 auto',
-                    padding: '20px',
-                    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-                    minHeight: '100vh'
-                }}>
-                    <div style={{
-                        background: 'linear-gradient(135deg, #2d5a7b 0%, #4a90a4 100%)',
-                        color: 'white',
-                        padding: '40px 30px',
-                        borderRadius: '20px',
-                        marginBottom: '30px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                    }}>
-                        <h1 style={{ margin: '0 0 10px', fontSize: '2.5rem', fontWeight: 'bold' }}>
-                            🌟 מדריך בריאות הנפש בישראל
-                        </h1>
-                        <p style={{ margin: 0, fontSize: '1.2rem', opacity: 0.95 }}>
-                            מידע מקיף למתמודדי נפש ומשפחותיהם
-                        </p>
+                <div className="mh-app">
+                    <div className="mh-hero" style={{ background: 'var(--primary)' }}>
+                        <div className="mh-hero-inner">
+                            <h1 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-2xl)', fontWeight: 'bold' }}>
+                                מדריך בריאות הנפש בישראל
+                            </h1>
+                            <p style={{ margin: 0, fontSize: 'var(--text-xl)', opacity: 0.95 }}>
+                                מידע מקיף למתמודדי נפש ומשפחותיהם
+                            </p>
+                        </div>
                     </div>
-
-                    <div style={{ marginBottom: '30px', textAlign: 'center', display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div className="mh-btns">
                         {!showIntro && (
-                            <button onClick={() => setShowIntro(true)} style={{
-                                background: 'linear-gradient(135deg, #4a90a4 0%, #2d5a7b 100%)',
-                                color: 'white',
-                                padding: '15px 30px',
-                                border: 'none',
-                                borderRadius: '25px',
-                                cursor: 'pointer',
-                                fontSize: '1.1rem',
-                                fontWeight: 600,
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                            }}>
-                                ❤️ אתם לא לבד
+                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+                                <i className="fas fa-heart"></i> אתם לא לבד
                             </button>
                         )}
-                        <button onClick={() => setShowTerms(true)} style={{
-                            background: 'linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%)',
-                            color: 'white',
-                            padding: '15px 30px',
-                            border: 'none',
-                            borderRadius: '25px',
-                            cursor: 'pointer',
-                            fontSize: '1.1rem',
-                            fontWeight: 600,
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}>
-                            📖 מילון מונחים
+                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }}>
+                            <i className="fas fa-book"></i> מילון מונחים
                         </button>
                     </div>
 
-                    {/* Credits */}
-                    <div style={{
-                        background: 'white',
-                        padding: '20px',
-                        borderRadius: '15px',
-                        marginBottom: '30px',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
-                        fontSize: '0.95rem',
-                        color: '#555',
-                        textAlign: 'center'
-                    }}>
+                    <div className="mh-credits" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', textAlign: 'center' }}>
                         <p style={{ marginBottom: '10px' }}>
                             דף זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר
                         </p>
@@ -550,70 +530,26 @@
                     </div>
 
                     {showIntro && (
-                        <div style={{
-                            background: 'white',
-                            padding: '40px',
-                            borderRadius: '20px',
-                            marginBottom: '30px',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
-                            position: 'relative',
-                            lineHeight: 1.8
-                        }}>
-                            <button onClick={() => setShowIntro(false)} style={{
-                                position: 'absolute',
-                                top: '15px',
-                                left: '15px',
-                                background: '#d63447',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                cursor: 'pointer',
-                                padding: '8px 12px',
-                                fontSize: '20px',
-                                fontWeight: 'bold',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                transition: 'all 0.3s'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#c0392b';
-                                e.currentTarget.style.transform = 'scale(1.1)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#d63447';
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}>
-                                ✕
+                        <div className="mh-modal" style={{ lineHeight: 1.8 }}>
+                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור">
+                                <i className="fas fa-times"></i>
                             </button>
 
-                            <div style={{ fontSize: '1.05rem', color: '#333' }}>
-                                <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#2d5a7b', marginBottom: '20px' }}>
+                            <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
+                                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginBottom: 'var(--space-xl)' }}>
                                     ברוכים הבאים. אתם לא לבד.
                                 </p>
-
-                                <p style={{ marginBottom: '15px' }}>
+                                <p style={{ marginBottom: 'var(--space-lg)' }}>
                                     אם הגעתם לכאן, סביר להניח שאתם או מישהו קרוב לכם עוברים תקופה לא פשוטה. אולי אתם מתמודדים עם דיכאון, חרדה, טראומה או קושי נפשי אחר.
                                 </p>
-
-                                <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2d5a7b', marginBottom: '15px' }}>
+                                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginBottom: 'var(--space-lg)' }}>
                                     רוצים לומר לכם שלוש מילים חשובות: יש פה עזרה.
                                 </p>
-
-                                <p style={{ marginBottom: '20px',  direction: 'ltr', textAlign: 'left', fontSize: '1.05rem', color: '#555' }}>
-                                    If you are here, it is likely that you or someone close to you is going through a difficult time. <strong>You are not alone!</strong>.
+                                <p style={{ marginBottom: 'var(--space-xl)', direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-base)', color: 'var(--text-muted)' }}>
+                                    If you are here, it is likely that you or someone close to you is going through a difficult time. <strong>You are not alone!</strong>
                                 </p>
-
                                 {!showFullIntro && (
-                                    <button onClick={() => setShowFullIntro(true)} style={{
-                                        background: 'linear-gradient(135deg, #4a90a4 0%, #2d5a7b 100%)',
-                                        color: 'white',
-                                        padding: '12px 24px',
-                                        border: 'none',
-                                        borderRadius: '25px',
-                                        cursor: 'pointer',
-                                        fontSize: '1rem',
-                                        fontWeight: 600,
-                                        marginTop: '15px'
-                                    }}>
+                                    <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-lg)' }}>
                                         קרא עוד ← | Read More
                                     </button>
                                 )}
@@ -624,20 +560,13 @@
                                             מערכת בריאות הנפש בישראל מורכבת, ולפעמים מרגישה מסובכת ומבלבלת. יש הרבה גורמים, הרבה מונחים, הרבה טפסים. אבל מאחורי כל זה - יש שירותים אמיתיים, אנשי מקצוע מסורים, וזכויות שמגיעות לכם. המדריך הזה קיים כדי לעזור לכם למצוא את הדרך.
                                         </p>
 
-                                        <h3 style={{ color: '#2d5a7b', marginTop: '30px', marginBottom: '20px', fontSize: '1.3rem' }}>
+                                        <h3 style={{ color: 'var(--primary)', marginTop: 'var(--space-xl)', marginBottom: 'var(--space-xl)', fontSize: 'var(--text-xl)' }}>
                                             איך משתמשים במדריך הזה?
                                         </h3>
 
-                                        <div style={{
-                                            background: 'linear-gradient(135deg, #d63447 0%, #c0392b 100%)',
-                                            color: 'white',
-                                            padding: '30px',
-                                            borderRadius: '20px',
-                                            marginBottom: '20px',
-                                            boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
-                                        }}>
-                                            <p style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.2rem' }}>
-                                                🚨 אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
+                                        <div style={{ background: 'var(--danger-bg)', color: 'white', padding: 'var(--space-xl)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-xl)', boxShadow: 'var(--shadow-elevated)' }}>
+                                            <p style={{ fontWeight: 'bold', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-xl)' }}>
+                                                <i className="fas fa-exclamation-triangle"></i> אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
                                                 <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
@@ -652,18 +581,9 @@
                                             </p>
                                         </div>
 
-                                        <div style={{
-                                            background: 'linear-gradient(135deg, #d63447 0%, #c0392b 100%)',
-                                            color: 'white',
-                                            padding: '30px',
-                                            borderRadius: '20px',
-                                            marginBottom: '20px',
-                                            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                                            direction: 'ltr',
-                                            textAlign: 'left'
-                                        }}>
-                                            <p style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.2rem' }}>
-                                                🚨 If you are in a crisis situation or immediate danger - don't search. Just call now:
+                                        <div style={{ background: 'var(--danger-bg)', color: 'white', padding: 'var(--space-xl)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-xl)', boxShadow: 'var(--shadow-elevated)', direction: 'ltr', textAlign: 'left' }}>
+                                            <p style={{ fontWeight: 'bold', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-xl)' }}>
+                                                <i className="fas fa-exclamation-triangle"></i> If you are in a crisis situation or immediate danger - don't search. Just call now:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
                                                 <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
@@ -711,7 +631,7 @@
                                             <strong>אם אתם קרוב משפחה</strong> - אתם עושים עבודה קשה ומתישה, ומגיע לכם תמיכה. יש קווי סיוע ייעודיים למשפחות, מרכזי ייעוץ, וקבוצות הורים. <strong>למטה בדף</strong>, תחת "תמיכה למשפחות", תמצאו משאבים בשבילכם.
                                         </p>
 
-                                        <h3 style={{ color: '#2d5a7b', marginTop: '30px', marginBottom: '15px', fontSize: '1.3rem' }}>
+                                        <h3 style={{ color: 'var(--primary)', marginTop: 'var(--space-xl)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-xl)' }}>
                                             אתם לא צריכים לעשות את זה לבד
                                         </h3>
 
@@ -731,22 +651,11 @@
                                             <strong>תתחילו מאיפה שנוח לכם.</strong> גללו למטה, השתמשו בחיפוש, או לחצו על כפתור "מילון מונחים" אם אתם רוצים להבין מונחים שלא מוכרים. אין דרך "נכונה" - יש רק את הדרך שלכם.
                                         </p>
 
-                                        <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2d5a7b', marginTop: '20px' }}>
+                                        <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginTop: 'var(--space-xl)' }}>
                                             אתם מגיעים לכאן. אתם עושים את זה. ואנחנו כאן לעזור.
                                         </p>
-
-                                        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                                            <button onClick={() => setShowIntro(false)} style={{
-                                                background: 'linear-gradient(135deg, #d63447 0%, #c0392b 100%)',
-                                                color: 'white',
-                                                padding: '15px 40px',
-                                                border: 'none',
-                                                borderRadius: '25px',
-                                                cursor: 'pointer',
-                                                fontSize: '1.1rem',
-                                                fontWeight: 600,
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
+                                        <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
+                                            <button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }}>
                                                 סגור | Close
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
@@ -758,105 +667,62 @@
                             </div>
                         </div>
                     )}
-                    <div style={{
-                        background: 'linear-gradient(135deg, #d63447 0%, #c0392b 100%)',
-                        color: 'white',
-                        padding: '30px',
-                        borderRadius: '20px',
-                        marginBottom: '30px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
-                    }}>
-                        <h2 style={{ margin: '0 0 20px', fontSize: '1.8rem' }}>
-                            🚨 עזרה דחופה
+                    <div className="mh-emergency">
+                        <h2 style={{ margin: '0 0 var(--space-xl)', fontSize: 'var(--text-xl)' }}>
+                            <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
                         </h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px' }}>
-                                <h3 style={{ margin: '0 0 10px' }}>ער"ן</h3>
-                                <a href="tel:1201" style={{ color: 'white', fontSize: '2rem', fontWeight: 'bold', textDecoration: 'none' }}>1201</a>
-                                <p style={{ margin: '10px 0 0', fontSize: '0.9rem' }}>24/7 | חינם | אנונימי</p>
+                        <div className="mh-emergency-grid">
+                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                                <h3 style={{ margin: '0 0 var(--space-md)' }}>ער"ן</h3>
+                                <a href="tel:1201" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>1201</a>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px' }}>
-                                <h3 style={{ margin: '0 0 10px' }}>נפש אחת</h3>
-                                <a href="tel:*8944" style={{ color: 'white', fontSize: '2rem', fontWeight: 'bold', textDecoration: 'none' }}>*8944</a>
-                                <p style={{ margin: '10px 0 0', fontSize: '0.9rem' }}>חיילים וכוחות ביטחון</p>
+                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                                <h3 style={{ margin: '0 0 var(--space-md)' }}>נפש אחת</h3>
+                                <a href="tel:*8944" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>*8944</a>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px' }}>
-                                <h3 style={{ margin: '0 0 10px' }}>סה"ר - צ'אט</h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: '1.2rem', fontWeight: 'bold', textDecoration: 'underline' }}>
+                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                                <h3 style={{ margin: '0 0 var(--space-md)' }}>סה"ר - צ'אט</h3>
+                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'underline', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>
                                     לצ'אט →
                                 </a>
-                                <p style={{ margin: '10px 0 0', fontSize: '0.9rem' }}>ווואטסאפ | אנונימי</p>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{
-                        background: 'white',
-                        padding: '25px',
-                        borderRadius: '20px',
-                        marginBottom: '30px',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
-                    }}>
+                    <div className="mh-search-wrap">
                         <div style={{ position: 'relative' }}>
-                            <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#4a90a4', fontSize: '20px' }}>🔍</span>
+                            <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-lg)', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '1.1rem' }}></i>
                             <input
                                 type="text"
                                 placeholder="חיפוש... (נסו למשל: טראומה, כללית, נוער )"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '15px 50px 15px 20px',
-                                    fontSize: '1.1rem',
-                                    border: '2px solid #e0e0e0',
-                                    borderRadius: '15px',
-                                    fontFamily: 'inherit',
-                                    boxSizing: 'border-box'
-                                }}
+                                className="mh-search-input"
+                                aria-label="חיפוש שירותים"
                             />
                         </div>
                     </div>
 
                     {Object.entries(filtered).map(([id, cat]) => (
-                        <div key={id} style={{
-                            background: 'white',
-                            marginBottom: '20px',
-                            borderRadius: '20px',
-                            overflow: 'hidden',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
-                        }}>
-                        <div onClick={() => toggleCat(id)} style={{
-                            background: 'linear-gradient(135deg, #2d5a7b 0%, #4a90a4 100%)',
-                            color: 'white',
-                            padding: '20px 30px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: '12px'
-                        }}>
-                            <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
-                            <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', gap: '8px' }}>
-                                <span className="cat-title-he" style={{ fontSize: '1rem', fontWeight: 'bold', textAlign: 'right', wordBreak: 'break-word', paddingRight: '8px' }}>{cat.title}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
-                                    <span style={{ fontSize: '1.8rem' }}>{cat.icon}</span>
-                                    <span style={{ background: '#e8734e', padding: '2px 8px', borderRadius: '10px', fontSize: '0.85rem' }}>{cat.services.length}</span>
-                                </span>
-                                <span className="cat-title-en" style={{ fontSize: '1rem', opacity: 0.9, textAlign: 'left', wordBreak: 'break-word' }}>{cat.titleEn}</span>
-                            </h2>
-                        </div>
-
+                        <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                            <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
+                                <div className="mh-cat-title">
+                                    <span className="mh-cat-title-he">{cat.title}</span>
+                                    <span className="mh-cat-meta">
+                                        <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
+                                        <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{cat.services.length}</span>
+                                    </span>
+                                    <span className="mh-cat-title-en">{cat.titleEn}</span>
+                                </div>
+                            </div>
                             {expandedCats.includes(id) && (
                                 <div>
-                                    <p style={{ padding: '20px 30px 10px', margin: 0, color: '#5a5a7b', fontSize: '1rem' }}>
-                                        {cat.desc}
-                                    </p>
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                                        gap: '20px',
-                                        padding: '20px 30px 30px'
-                                    }}>
+                                    <p className="mh-cat-desc">{cat.desc}</p>
+                                    <div className="mh-cat-grid">
                                         {cat.services.map((s, i) => <Card key={i} s={s} />)}
                                     </div>
                                 </div>
@@ -864,19 +730,12 @@
                         </div>
                     ))}
 
-                    <div style={{
-                        background: '#1e3f5a',
-                        color: 'white',
-                        padding: '30px',
-                        borderRadius: '20px',
-                        marginTop: '40px',
-                        textAlign: 'center'
-                    }}>
-                        <p style={{ margin: '0 0 10px', fontWeight: 'bold' }}>⚠️ הצהרת אחריות</p>
-                        <p style={{ margin: '0 0 20px', opacity: 0.9 }}>
+                    <div className="mh-footer">
+                        <p style={{ margin: '0 0 var(--space-md)', fontWeight: 'bold' }}><i className="fas fa-info-circle"></i> הצהרת אחריות</p>
+                        <p style={{ margin: '0 0 var(--space-xl)', opacity: 0.9 }}>
                             המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי
                         </p>
-                        <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+                        <p style={{ margin: 0, fontSize: 'var(--text-sm)', opacity: 0.7 }}>
                             {`עודכן: ${LAST_UPDATED}`}
                         </p>
                     </div>
