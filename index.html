@@ -84,6 +84,22 @@
         .mh-modal-close:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
         .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
         .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
+        .mh-category-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
+        .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); }
+        .mh-category-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
+        .mh-category-card.mh-category-card-urgent { border-color: var(--danger-bg); border-width: 3px; box-shadow: 0 4px 12px rgba(214, 52, 71, 0.25); }
+        .mh-category-card.mh-category-card-urgent:hover { box-shadow: 0 6px 20px rgba(214, 52, 71, 0.35); }
+        .mh-category-card-icon { font-size: 2rem; color: var(--primary); }
+        .mh-category-card.mh-category-card-urgent .mh-category-card-icon { color: var(--danger-bg); }
+        .mh-category-card-title { font-weight: 700; font-size: var(--text-lg); color: var(--primary); }
+        .mh-category-card.mh-category-card-urgent .mh-category-card-title { color: var(--danger-bg); }
+        .mh-category-card-desc { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
+        .mh-category-card-meta { display: flex; align-items: center; gap: var(--space-md); }
+        .mh-category-card-badge { background: rgba(45, 90, 123, 0.15); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
+        .mh-category-card.mh-category-card-urgent .mh-category-card-badge { background: rgba(214, 52, 71, 0.2); color: var(--danger-bg); }
+        .mh-helper-text { text-align: center; color: var(--text-muted); font-size: var(--text-base); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .mh-subcategory-back { margin-bottom: var(--space-lg); }
+        .mh-disclaimer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; border: 2px solid rgba(255,255,255,0.2); }
         @media (min-width: 600px) {
             .mh-app { padding: var(--space-xl); }
             .mh-hero-inner { padding: var(--space-3xl) var(--space-xl); }
@@ -98,6 +114,10 @@
             .mh-cat-meta { order: 2; justify-content: center; }
             .mh-modal { padding: var(--space-3xl); }
             .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-2xl); }
+            .mh-category-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 900px) {
+            .mh-category-cards { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 
@@ -392,12 +412,55 @@
          {"row": 84, "org": "לב מלכה", "svc": "סיוע באמבולנסים בהעברת חולים ונכים", "phone": "02-5376666", "web": "https://levmalka.org.il/", "target": "חולים ונכים", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
         ]}};
          
+        const CATEGORY_GROUPS = {
+            emergency: {
+                title: "עזרה דחופה ותמיכה במשבר",
+                titleEn: "Emergency & Crisis Support",
+                desc: "קווי חירום ותמיכה מיידית במצבי משבר",
+                icon: "fa-life-ring",
+                priority: "urgent",
+                subcategories: ["emergency", "helplines"]
+            },
+            treatment: {
+                title: "טיפול וטיפולים",
+                titleEn: "Treatment & Therapy",
+                desc: "מטפלים, סוגי טיפולים, קופות חולים, אשפוז וחלופות",
+                icon: "fa-user-doctor",
+                priority: "normal",
+                subcategories: ["therapists", "treatments", "hmo", "hospitalization", "alternatives", "addictions", "trauma", "nutrition"]
+            },
+            rightsGov: {
+                title: "זכויות ושירותים ממשלתיים",
+                titleEn: "Rights & Government Services",
+                desc: "מיצוי זכויות, ביטוח לאומי, משרד הבריאות והביטחון, שיקום",
+                icon: "fa-coins",
+                priority: "normal",
+                subcategories: ["rights", "moh", "mod", "rehabilitation"]
+            },
+            support: {
+                title: "תמיכה וקהילה",
+                titleEn: "Support & Community",
+                desc: "תמיכה למשפחות, נוער, אוכלוסיות מיוחדות וקהילות תמיכה",
+                icon: "fa-people-group",
+                priority: "normal",
+                subcategories: ["families", "youth", "populations", "facebook"]
+            },
+            information: {
+                title: "מידע ושירותים מעשיים",
+                titleEn: "Information & Practical Services",
+                desc: "פורטלי מידע, שירותים מקומיים והסעות",
+                icon: "fa-globe",
+                priority: "normal",
+                subcategories: ["portals", "local", "transport"]
+            }
+        };
 
-        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', hmo: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical' };
+        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
 
         const MentalHealthIsrael = () => {
             const [searchTerm, setSearchTerm] = useState('');
             const [expandedCats, setExpandedCats] = useState([]);
+            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(null);
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -422,6 +485,15 @@
             };
 
             const toggleCat = (id) => setExpandedCats(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
+            const getGroupServiceCount = (groupId) => {
+                const group = CATEGORY_GROUPS[groupId];
+                if (!group) return 0;
+                return group.subcategories.reduce((sum, subId) => {
+                    const cat = filtered[subId];
+                    return sum + (cat ? cat.services.length : 0);
+                }, 0);
+            };
 
             const filtered = useMemo(() => {
                 if (!searchTerm) return data;
@@ -467,6 +539,37 @@
                     </div>
                 </div>
             );
+
+            const CategoryCard = ({ groupId }) => {
+                const group = CATEGORY_GROUPS[groupId];
+                const count = getGroupServiceCount(groupId);
+                const isUrgent = group.priority === 'urgent';
+                return (
+                    <div
+                        className={`mh-category-card ${isUrgent ? 'mh-category-card-urgent' : ''}`}
+                        onClick={() => setSelectedCategoryGroup(groupId)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedCategoryGroup(groupId)}
+                        aria-label={`${group.title} - ${group.titleEn}. ${count} שירותים. לחצו לצפייה`}
+                    >
+                        <div className="mh-category-card-icon">
+                            <i className={`fas ${isUrgent ? 'fa-exclamation-triangle' : group.icon}`}></i>
+                        </div>
+                        <div>
+                            <div className="mh-category-card-title">{group.title}</div>
+                            <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>{group.titleEn}</div>
+                        </div>
+                        {group.desc && <p className="mh-category-card-desc">{group.desc}</p>}
+                        <div className="mh-category-card-meta">
+                            <span className="mh-category-card-badge">
+                                {count} {count === 1 ? 'שירות' : 'שירותים'}
+                            </span>
+                            {isUrgent && <span className="mh-category-card-badge">דחוף</span>}
+                        </div>
+                    </div>
+                );
+            };
 
             if (showTerms) {
                 return (
@@ -718,41 +821,85 @@
                             <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-lg)', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '1.1rem' }}></i>
                             <input
                                 type="text"
-                                placeholder="חיפוש... (נסו למשל: טראומה, כללית, נוער )"
+                                placeholder="חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); if (e.target.value) setSelectedCategoryGroup(null); }}
                                 className="mh-search-input"
                                 aria-label="חיפוש שירותים"
                             />
                         </div>
                     </div>
 
-                    {Object.entries(filtered).map(([id, cat]) => (
-                        <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-                            <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
-                                <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
-                                <div className="mh-cat-title">
-                                    <span className="mh-cat-title-he">{cat.title}</span>
-                                    <span className="mh-cat-meta">
-                                        <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
-                                        <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{cat.services.length}</span>
-                                    </span>
-                                    <span className="mh-cat-title-en">{cat.titleEn}</span>
-                                </div>
-                            </div>
-                            {expandedCats.includes(id) && (
-                                <div>
-                                    <p className="mh-cat-desc">{cat.desc}</p>
-                                    <div className="mh-cat-grid">
-                                        {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                    {!searchTerm && !selectedCategoryGroup && (
+                        <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
+                    )}
+
+                    {searchTerm ? (
+                        Object.entries(filtered).map(([id, cat]) => (
+                            <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                                <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                    <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
+                                    <div className="mh-cat-title">
+                                        <span className="mh-cat-title-he">{cat.title}</span>
+                                        <span className="mh-cat-meta">
+                                            <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
+                                            <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{cat.services.length}</span>
+                                        </span>
+                                        <span className="mh-cat-title-en">{cat.titleEn}</span>
                                     </div>
                                 </div>
-                            )}
+                                {expandedCats.includes(id) && (
+                                    <div>
+                                        <p className="mh-cat-desc">{cat.desc}</p>
+                                        <div className="mh-cat-grid">
+                                            {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    ) : selectedCategoryGroup ? (
+                        <>
+                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }}>
+                                ← חזרה לכל הקטגוריות
+                            </button>
+                            {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
+                                const cat = filtered[id];
+                                return (
+                                    <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                                        <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                            <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
+                                            <div className="mh-cat-title">
+                                                <span className="mh-cat-title-he">{cat.title}</span>
+                                                <span className="mh-cat-meta">
+                                                    <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
+                                                    <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{cat.services.length}</span>
+                                                </span>
+                                                <span className="mh-cat-title-en">{cat.titleEn}</span>
+                                            </div>
+                                        </div>
+                                        {expandedCats.includes(id) && (
+                                            <div>
+                                                <p className="mh-cat-desc">{cat.desc}</p>
+                                                <div className="mh-cat-grid">
+                                                    {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <div className="mh-category-cards">
+                            {Object.keys(CATEGORY_GROUPS).map(groupId => (
+                                <CategoryCard key={groupId} groupId={groupId} />
+                            ))}
                         </div>
-                    ))}
+                    )}
 
-                    <div className="mh-footer">
-                        <p style={{ margin: '0 0 var(--space-md)', fontWeight: 'bold' }}><i className="fas fa-info-circle"></i> הצהרת אחריות</p>
+                    <div className="mh-footer mh-disclaimer">
+                        <p style={{ margin: '0 0 var(--space-md)', fontWeight: 'bold', fontSize: 'var(--text-lg)' }}><i className="fas fa-info-circle"></i> הצהרת אחריות | Disclaimer</p>
                         <p style={{ margin: '0 0 var(--space-xl)', opacity: 0.9 }}>
                             המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי
                         </p>
