@@ -76,10 +76,12 @@
         .mh-cat-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); }
         .mh-emergency { background: var(--danger-bg); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
         .mh-emergency-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
+        .mh-emergency-call:hover { background: rgba(255,255,255,0.3) !important; }
         .mh-footer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; }
         .mh-modal { background: var(--bg-card); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); position: relative; max-height: 85vh; overflow-y: auto; }
-        .mh-modal-close { position: absolute; top: var(--space-md); left: var(--space-md); min-width: var(--touch-min); min-height: var(--touch-min); padding: 0; background: var(--danger); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); }
-        .mh-modal-close:focus { outline: 2px solid white; outline-offset: 2px; }
+        .mh-modal-close { position: absolute; top: var(--space-md); left: var(--space-md); min-width: var(--touch-min); min-height: var(--touch-min); padding: 0; background: transparent; color: var(--danger); border: 2px solid var(--danger); border-radius: 50%; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; }
+        .mh-modal-close:hover { background: rgba(192, 57, 43, 0.1); }
+        .mh-modal-close:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
         .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
         .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
         @media (min-width: 600px) {
@@ -401,7 +403,7 @@
             const [showTerms, setShowTerms] = useState(false);
 
             const data = DATA;
-            const LAST_UPDATED = "15.2.2026";            
+            const LAST_UPDATED = "17.2.2026";            
             
             const terms = {
                 disability: { title: "קצבת נכות", text: "קצבה חודשית למי שיש ירידה ביכולת השתכרות. 3 רמות: חלקית (20-74%), מלאה (75-100%), מלאה+תוספת. וועדה רפואית. טלפון: *6050" },
@@ -535,31 +537,33 @@
 
                     {showIntro && (
                         <div className="mh-modal" style={{ lineHeight: 1.8 }}>
-                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור">
+                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה.">
                                 <i className="fas fa-times"></i>
                             </button>
 
                             <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
                                 <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginBottom: 'var(--space-xl)' }}>
-                                    ברוכים הבאים. אתם לא לבד.
+                                    ברוכים הבאים
                                 </p>
                                 <p style={{ marginBottom: 'var(--space-lg)' }}>
-                                    אם הגעתם לכאן, סביר להניח שאתם או מישהו קרוב לכם עוברים תקופה לא פשוטה. אולי אתם מתמודדים עם דיכאון, חרדה, טראומה או קושי נפשי אחר.
+                                    אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
                                 </p>
-                                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginBottom: 'var(--space-lg)' }}>
-                                    רוצים לומר לכם שלוש מילים חשובות: יש פה עזרה.
-                                </p>
-                                <p style={{ marginBottom: 'var(--space-xl)', direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-base)', color: 'var(--text-muted)' }}>
-                                    If you are here, it is likely that you or someone close to you is going through a difficult time. <strong>You are not alone!</strong>
+                                <p style={{ marginBottom: 'var(--space-xl)', direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+                                    If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
                                 </p>
                                 {!showFullIntro && (
-                                    <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-lg)' }}>
-                                        קרא עוד ← | Read More
-                                    </button>
+                                    <>
+                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }}>
+                                            קרא עוד | Read More
+                                        </button>
+                                    </>
                                 )}
 
                                 {showFullIntro && (
                                     <>
+                                        <p style={{ marginBottom: '10px', color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
+                                            בעמוד זה: מידע, קישורים לשירותים וקווי סיוע — ללא הבטחה לזמינות השירותים.
+                                        </p>
                                         <p style={{ marginBottom: '20px' }}>
                                             מערכת בריאות הנפש בישראל מורכבת, ולפעמים מרגישה מסובכת ומבלבלת. יש הרבה גורמים, הרבה מונחים, הרבה טפסים. אבל מאחורי כל זה - יש שירותים אמיתיים, אנשי מקצוע מסורים, וזכויות שמגיעות לכם. המדריך הזה קיים כדי לעזור לכם למצוא את הדרך.
                                         </p>
@@ -672,24 +676,37 @@
                         </div>
                     )}
                     <div className="mh-emergency">
-                        <h2 style={{ margin: '0 0 var(--space-xl)', fontSize: 'var(--text-xl)' }}>
+                        <h2 style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-xl)' }}>
                             <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
                         </h2>
+                        <p style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-sm)', opacity: 0.95 }}>
+                            קווי חירום וקווי תמיכה. השירותים המפורטים זמינים בישראל. מחוץ לישראל יש לפנות לשירותי החירום והתמיכה המקומיים.
+                        </p>
+                        <p style={{ margin: '0 0 var(--space-lg)', fontSize: 'var(--text-sm)', opacity: 0.95, direction: 'ltr', textAlign: 'left' }}>
+                            Services listed are available in Israel. If you are outside Israel, please contact your local emergency or mental health services.
+                        </p>
+                        <p style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', opacity: 0.9 }}>
+                            לחצו על המספר לחיוג
+                        </p>
                         <div className="mh-emergency-grid">
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)' }}>ער"ן</h3>
-                                <a href="tel:1201" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>1201</a>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>ער"ן <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו חירום</span></h3>
+                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                    <i className="fas fa-phone"></i> 1201
+                                </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)' }}>נפש אחת</h3>
-                                <a href="tel:*8944" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>*8944</a>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
+                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                    <i className="fas fa-phone"></i> *8944
+                                </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)' }}>סה"ר - צ'אט</h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'underline', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center' }}>
-                                    לצ'אט →
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>סה"ר - צ'אט <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
+                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                    <i className="fas fa-comment"></i> לצ'אט →
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
                             </div>
