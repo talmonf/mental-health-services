@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "mental-health-services-il.vercel.app"
+        }
+      ],
+      "destination": "https://nefesh-il.org/$1",
+      "permanent": true
+    }
+  ]
+}
