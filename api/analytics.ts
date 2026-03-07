@@ -13,6 +13,20 @@ const ALLOWED_ORIGINS = process.env.ANALYTICS_ALLOWED_ORIGINS
   ? process.env.ANALYTICS_ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : ['*'];
 
+/** Use sslmode=verify-full when pg would treat prefer/require/verify-ca as verify-full, to avoid the deprecation warning. */
+function normalizePgSslMode(connectionString: string): string {
+  try {
+    const u = new URL(connectionString);
+    const mode = u.searchParams.get('sslmode');
+    if (mode === 'prefer' || mode === 'require' || mode === 'verify-ca') {
+      u.searchParams.set('sslmode', 'verify-full');
+    }
+    return u.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function corsHeaders(origin: string | undefined): Record<string, string> {
   const allowOrigin =
     ALLOWED_ORIGINS[0] === '*' || (origin && ALLOWED_ORIGINS.includes(origin))
@@ -73,11 +87,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Server misconfiguration' });
   }
 
+  // Use verify-full to avoid pg SSL mode warning and keep current secure behavior
+  const connectionString = normalizePgSslMode(databaseUrl);
+
   const country = (req.headers['x-vercel-ip-country'] as string) || null;
   const acceptLanguage = req.headers['accept-language'] as string | undefined;
   const language = acceptLanguage ? acceptLanguage.split(',')[0].trim().slice(0, 50) : null;
 
-  const client = new Client({ connectionString: databaseUrl });
+  const client = new Client({ connectionString });
   try {
     await client.connect();
 
