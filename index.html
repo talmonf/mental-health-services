@@ -146,7 +146,151 @@
     
     <script type="text/babel">
         const { useState, useMemo } = React;
-        
+
+        // Lightweight privacy-friendly analytics helper
+        const MH_ANALYTICS_CONFIG = {
+            enabled: false, // set to true once your /api/analytics backend is ready
+            endpoint: '/api/analytics'
+        };
+
+        const mhGenerateId = () => {
+            if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = (Math.random() * 16) | 0;
+                const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            });
+        };
+
+        const mhGetOrCreateSessionId = () => {
+            try {
+                const key = 'mh_session_id';
+                let id = sessionStorage.getItem(key);
+                if (!id) {
+                    id = mhGenerateId();
+                    sessionStorage.setItem(key, id);
+                }
+                return id;
+            } catch {
+                return mhGenerateId();
+            }
+        };
+
+        const mhGetOrCreateUserId = () => {
+            try {
+                const key = 'mh_user_pseudo_id';
+                let id = localStorage.getItem(key);
+                if (!id) {
+                    id = mhGenerateId();
+                    localStorage.setItem(key, id);
+                }
+                return id;
+            } catch {
+                return undefined;
+            }
+        };
+
+        const mhSanitizeSearchQuery = (raw) => {
+            if (!raw) return null;
+            let q = String(raw).trim();
+            if (!q) return null;
+            q = q.slice(0, 80);
+            q = q.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted_email]');
+            q = q.replace(/[\d\s+()-]{7,}/g, '[redacted_number]');
+            return q;
+        };
+
+        const mhTrackEvent = (eventType, props = {}) => {
+            try {
+                if (!MH_ANALYTICS_CONFIG.enabled || !MH_ANALYTICS_CONFIG.endpoint) return;
+                const url = window.location.href;
+                let referrerDomain = null;
+                if (document.referrer) {
+                    try {
+                        referrerDomain = new URL(document.referrer).hostname;
+                    } catch {
+                        referrerDomain = null;
+                    }
+                }
+                const payload = {
+                    event_id: mhGenerateId(),
+                    event_type: eventType,
+                    occurred_at: new Date().toISOString(),
+                    page_url: url,
+                    page_title: document.title || null,
+                    referrer_domain: referrerDomain,
+                    session_id: mhGetOrCreateSessionId(),
+                    user_pseudo_id: mhGetOrCreateUserId(),
+                    user_agent: navigator.userAgent,
+                    viewport_width: window.innerWidth,
+                    viewport_height: window.innerHeight,
+                    ...props
+                };
+
+                const body = JSON.stringify(payload);
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([body], { type: 'application/json' });
+                    navigator.sendBeacon(MH_ANALYTICS_CONFIG.endpoint, blob);
+                } else {
+                    fetch(MH_ANALYTICS_CONFIG.endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body,
+                        keepalive: true
+                    }).catch(() => {});
+                }
+            } catch {
+                // swallow errors to avoid impacting UX
+            }
+        };
+
+        const mhTrackSearch = (location, rawQuery, extra = {}) => {
+            const sanitized = mhSanitizeSearchQuery(rawQuery);
+            if (!sanitized) return;
+            mhTrackEvent('search', {
+                search_query: sanitized,
+                search_location: location,
+                ...extra
+            });
+        };
+
+        const mhInitClickTracking = () => {
+            document.addEventListener('click', (event) => {
+                const el = event.target.closest('[data-analytics-id],[data-tracking-name]');
+                if (!el) return;
+                const elementId = el.getAttribute('data-analytics-id') || el.getAttribute('data-tracking-name');
+                if (!elementId) return;
+                const tagName = el.tagName ? el.tagName.toLowerCase() : 'element';
+                const elementType = el.getAttribute('data-analytics-type') || tagName;
+                const sectionEl = el.closest('[data-analytics-section]');
+                const section = sectionEl ? sectionEl.getAttribute('data-analytics-section') : null;
+                const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
+                const elementTextShort = textSource.trim().slice(0, 80) || null;
+
+                mhTrackEvent('click', {
+                    element_id: elementId,
+                    element_type: elementType,
+                    element_text_short: elementTextShort,
+                    section
+                });
+            }, { capture: true });
+        };
+
+        window.mhAnalytics = {
+            trackEvent: mhTrackEvent,
+            trackSearch: mhTrackSearch
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                mhTrackEvent('page_view');
+                mhInitClickTracking();
+            });
+        } else {
+            mhTrackEvent('page_view');
+            mhInitClickTracking();
+        }
+
         // Embedded data
         const DATA = {
          "emergency": {"icon": "🆘", "title": "עזרה דחופה", "titleEn": "Emergency Assistance", "desc": "במצב משבר - התקשרו מיד", "services": [
@@ -939,6 +1083,8 @@
                 return (
                     <div
                         className={`mh-category-card ${isUrgent ? 'mh-category-card-urgent' : ''}`}
+                        data-analytics-id={`category_${groupId}`}
+                        data-analytics-section="category_overview"
                         onClick={() => setSelectedCategoryGroup(groupId)}
                         role="button"
                         tabIndex={0}
@@ -1057,6 +1203,7 @@
                                                 setTermsSearch(e.target.value);
                                                 setSelectedLetter(null);
                                             }}
+                                            onBlur={(e) => window.mhAnalytics?.trackSearch('terms_glossary', e.target.value, { results_count: filteredTerms.length })}
                                             style={{ paddingRight: '40px' }}
                                         />
                                     </div>
@@ -1732,6 +1879,10 @@
                                 placeholder="חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)"
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); if (e.target.value) setSelectedCategoryGroup(null); }}
+                                onBlur={(e) => {
+                                    const resultsCount = Object.values(filtered).reduce((sum, cat) => sum + cat.services.length, 0);
+                                    window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });
+                                }}
                                 className="mh-search-input"
                                 aria-label="חיפוש שירותים"
                             />
