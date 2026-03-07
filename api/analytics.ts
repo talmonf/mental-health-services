@@ -1,7 +1,7 @@
 /**
  * Vercel serverless: POST /api/analytics
  * Expects Neon DB with:
- * - sessions (session_id PK/unique, user_pseudo_id, country, device_type, first_seen_at, last_seen_at)
+ * - sessions (session_id PK/unique, user_pseudo_id, country, device_type, first_event_at, first_seen_at, last_seen_at)
  * - events (session_id, event_id, event_type, occurred_at, page_url, page_title, referrer_domain,
  *   user_agent, viewport_width, viewport_height, entry_id FK nullable, search_query, search_location,
  *   element_id, element_type, element_text_short, section, properties jsonb)
@@ -88,15 +88,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (!sessionId) continue;
 
+      const occurredAt = (e?.occurred_at as string) || new Date().toISOString();
       await client.query(
-        `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_seen_at, last_seen_at)
-         VALUES ($1, $2, $3, $4, $5, $5)
+        `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_event_at, first_seen_at, last_seen_at)
+         VALUES ($1, $2, $3, $4, $5, $5, $5)
          ON CONFLICT (session_id) DO UPDATE SET
            user_pseudo_id = COALESCE(EXCLUDED.user_pseudo_id, sessions.user_pseudo_id),
            country = COALESCE(EXCLUDED.country, sessions.country),
            device_type = COALESCE(EXCLUDED.device_type, sessions.device_type),
+           first_event_at = COALESCE(sessions.first_event_at, EXCLUDED.first_event_at),
            last_seen_at = EXCLUDED.last_seen_at`,
-        [sessionId, userPseudoId, country, device, (e?.occurred_at as string) || new Date().toISOString()]
+        [sessionId, userPseudoId, country, device, occurredAt]
       );
 
       await client.query(
