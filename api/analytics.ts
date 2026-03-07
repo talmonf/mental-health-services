@@ -2,9 +2,9 @@
  * Vercel serverless: POST /api/analytics
  * Expects Neon DB with:
  * - sessions (session_id PK/unique, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at)
- * - events (session_id, event_id, event_type, occurred_at, page_url, page_title, referrer_domain,
- *   user_agent, viewport_width, viewport_height, entry_id FK nullable, search_query, search_location,
- *   element_id, element_type, element_text_short, section, properties jsonb)
+ * - events (event_id uuid, session_id, event_type, occurred_at, page_url, page_route, section,
+ *   element_id, element_type, element_text_short, search_query, results_count, search_location,
+ *   extra jsonb, entry_id, country, device_type, browser_name, os_name, language, referrer_domain, utm_*)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
@@ -74,6 +74,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const country = (req.headers['x-vercel-ip-country'] as string) || null;
+  const acceptLanguage = req.headers['accept-language'] as string | undefined;
+  const language = acceptLanguage ? acceptLanguage.split(',')[0].trim().slice(0, 50) : null;
 
   const client = new Client({ connectionString: databaseUrl });
   try {
@@ -89,6 +91,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!sessionId) continue;
 
       const occurredAt = (e?.occurred_at as string) || new Date().toISOString();
+      const pageUrl = (e?.page_url as string) || null;
+      let pageRoute: string | null = null;
+      if (pageUrl) {
+        try {
+          pageRoute = new URL(pageUrl).pathname.slice(0, 500) || null;
+        } catch {
+          pageRoute = null;
+        }
+      }
       await client.query(
         `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at)
          VALUES ($1, $2, $3, $4, $5, $5, $5, $5)
@@ -102,50 +113,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         [sessionId, userPseudoId, country, device, occurredAt]
       );
 
+      const eventId = (e?.event_id as string) || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '');
+      if (!eventId) continue;
+
+      const extra: Record<string, unknown> = {
+        page_title: e?.page_title ?? null,
+        user_agent: ua || null,
+        viewport_width: typeof e?.viewport_width === 'number' ? e.viewport_width : null,
+        viewport_height: typeof e?.viewport_height === 'number' ? e.viewport_height : null,
+        user_pseudo_id: userPseudoId,
+      };
       await client.query(
         `INSERT INTO events (
-          session_id, event_id, event_type, occurred_at, page_url, page_title,
-          referrer_domain, user_agent, viewport_width, viewport_height,
-          entry_id, search_query, search_location, element_id, element_type, element_text_short, section, properties
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+          event_id, session_id, event_type, occurred_at, page_url, page_route, section,
+          element_id, element_type, element_text_short, search_query, results_count, search_location,
+          extra, entry_id, country, device_type, browser_name, os_name, language,
+          referrer_domain, utm_source, utm_medium, utm_campaign
+        ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)`,
         [
+          eventId,
           sessionId,
-          (e?.event_id as string) || null,
-          (e?.event_type as string) || null,
-          (e?.occurred_at as string) || new Date().toISOString(),
-          (e?.page_url as string) || null,
-          (e?.page_title as string) || null,
-          (e?.referrer_domain as string) || null,
-          ua || null,
-          typeof e?.viewport_width === 'number' ? e.viewport_width : null,
-          typeof e?.viewport_height === 'number' ? e.viewport_height : null,
-          (e?.entry_id as string) || null,
-          (e?.search_query as string) || null,
-          (e?.search_location as string) || null,
+          (e?.event_type as string) || 'unknown',
+          occurredAt,
+          pageUrl,
+          pageRoute,
+          (e?.section as string) || null,
           (e?.element_id as string) || null,
           (e?.element_type as string) || null,
           (e?.element_text_short as string) || null,
-          (e?.section as string) || null,
-          JSON.stringify({
-            ...e,
-            session_id: undefined,
-            event_id: undefined,
-            event_type: undefined,
-            occurred_at: undefined,
-            page_url: undefined,
-            page_title: undefined,
-            referrer_domain: undefined,
-            user_agent: undefined,
-            viewport_width: undefined,
-            viewport_height: undefined,
-            entry_id: undefined,
-            search_query: undefined,
-            search_location: undefined,
-            element_id: undefined,
-            element_type: undefined,
-            element_text_short: undefined,
-            section: undefined,
-          }),
+          (e?.search_query as string) || null,
+          (e?.results_count as number) ?? null,
+          (e?.search_location as string) || null,
+          JSON.stringify(extra),
+          (e?.entry_id as string) || null,
+          country,
+          device,
+          null, // browser_name
+          null, // os_name
+          language,
+          (e?.referrer_domain as string) || null,
+          (e?.utm_source as string) || null,
+          (e?.utm_medium as string) || null,
+          (e?.utm_campaign as string) || null,
         ]
       );
     }
