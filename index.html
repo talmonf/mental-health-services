@@ -1127,7 +1127,7 @@
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.iconOnly ? `WhatsApp: ${s.whatsapp}` : undefined}><i className="fab fa-whatsapp"></i> {s.iconOnly ? '' : s.whatsapp}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.iconOnly ? s.email : undefined}><i className="fas fa-envelope"></i> {s.iconOnly ? '' : s.email}</a>)}
                             {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.trackingName || s.org} style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר'}</a>)}
-                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
                         </div>
                     </div>
                 </div>
@@ -1236,7 +1236,7 @@
                             setTermsCategory(null);
                             setSelectedLetter(null);
                             setTermsViewMode('categories');
-                        }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}>
+                        }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
                             ← חזרה
                         </button>
                         <div className="mh-modal">
@@ -1280,6 +1280,7 @@
                                             color: termsViewMode === 'categories' ? 'white' : 'var(--primary)',
                                             border: '2px solid var(--primary)'
                                         }}
+                                        data-tracking-name="terms_view_categories"
                                     >
                                         <i className="fas fa-th-large"></i> לפי קטגוריות
                                     </button>
@@ -1294,6 +1295,7 @@
                                             color: termsViewMode === 'alphabetical' ? 'white' : 'var(--primary)',
                                             border: '2px solid var(--primary)'
                                         }}
+                                        data-tracking-name="terms_view_alphabetical"
                                     >
                                         <i className="fas fa-sort-alpha-down"></i> לפי א-ב
                                     </button>
@@ -1312,6 +1314,7 @@
                                                 fontSize: 'var(--text-sm)',
                                                 padding: 'var(--space-sm) var(--space-md)'
                                             }}
+                                            data-tracking-name="terms_filter_all"
                                         >
                                             הכל
                                         </button>
@@ -1330,6 +1333,7 @@
                                                     alignItems: 'center',
                                                     gap: 'var(--space-xs)'
                                                 }}
+                                                data-tracking-name={`terms_filter_${catId}`}
                                             >
                                                 <i className={`fas ${cat.icon}`}></i> {cat.title}
                                             </button>
@@ -1372,6 +1376,7 @@
                                                         opacity: hasTerms ? 1 : 0.4
                                                     }}
                                                     disabled={!hasTerms}
+                                                    data-tracking-name={`terms_letter_${letter}`}
                                                 >
                                                     {letter}
                                                 </button>
@@ -1467,7 +1472,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }}>
+                                                                            }} data-tracking-name={`terms_phone_${k}`}>
                                                                                 <i className="fas fa-phone"></i> {t.phone}
                                                                             </a>
                                                                         )}
@@ -1482,7 +1487,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }}>
+                                                                            }} data-tracking-name={`terms_phone2_${k}`}>
                                                                                 <i className="fas fa-phone"></i> {t.phone2}
                                                                             </a>
                                                                         )}
@@ -1519,6 +1524,7 @@
                                                                                                 padding: 0,
                                                                                                 fontSize: 'inherit'
                                                                                             }}
+                                                                                            data-tracking-name={`terms_related_${relKey}`}
                                                                                         >
                                                                                             {relTerm.title}
                                                                                         </button>
@@ -1628,7 +1634,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }}>
+                                                                                }} data-tracking-name={`terms_phone_${k}`}>
                                                                                     <i className="fas fa-phone"></i> {t.phone}
                                                                                 </a>
                                                                             )}
@@ -1643,7 +1649,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }}>
+                                                                                }} data-tracking-name={`terms_phone2_${k}`}>
                                                                                     <i className="fas fa-phone"></i> {t.phone2}
                                                                                 </a>
                                                                             )}
@@ -1682,6 +1688,7 @@
                                                                                                     padding: 0,
                                                                                                     fontSize: 'inherit'
                                                                                                 }}
+                                                                                                data-tracking-name={`terms_related_${relKey}`}
                                                                                             >
                                                                                                 {relTerm.title}
                                                                                             </button>
@@ -1720,11 +1727,11 @@
                     </div>
                     <div className="mh-btns">
                         {!showIntro && (
-                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="אתם לא לבד">
                                 <i className="fas fa-heart"></i> אתם לא לבד
                             </button>
                         )}
-                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }}>
+                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }} data-tracking-name="מילון מונחים">
                             <i className="fas fa-book"></i> מילון מונחים
                         </button>
                     </div>
@@ -1739,6 +1746,7 @@
                                 href="https://wa.me/972544787720" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
+                                data-tracking-name="contact_whatsapp"
                                 style={{
                                     color: '#25D366',
                                     fontWeight: 'bold',
@@ -1753,7 +1761,7 @@
 
                     {showIntro && (
                         <div className="mh-modal" style={{ lineHeight: 1.8 }}>
-                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה.">
+                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה." data-tracking-name="intro_close">
                                 <i className="fas fa-times"></i>
                             </button>
 
@@ -1769,7 +1777,7 @@
                                 </p>
                                 {!showFullIntro && (
                                     <>
-                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }}>
+                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }} data-tracking-name="intro_read_more">
                                             קרא עוד | Read More
                                         </button>
                                     </>
@@ -1793,11 +1801,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>זמין 24/7 | חינם | אנונימי לגמרי</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>לחיילים וכוחות ביטחון | אנונימי</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1810,11 +1818,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> If you are in a crisis situation or immediate danger - don't search. Just call now:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201_en">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>Available 24/7 | Free | Completely anonymous</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>For soldiers and security forces | Anonymous</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1879,8 +1887,8 @@
                                             אתם מגיעים לכאן. אתם עושים את זה. ואנחנו כאן לעזור.
                                         </p>
                                         <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
-                                            <button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }}>
-                                                סגור | Close
+<button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
+                                            סגור | Close
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
                                                 ניתן לפתוח שוב מהכפתור "אתם לא לבד" למעלה | Can be reopened from button above
@@ -1907,21 +1915,21 @@
                         <div className="mh-emergency-grid">
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>ער"ן <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו חירום</span></h3>
-                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201">
                                     <i className="fas fa-phone"></i> 1201
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944">
                                     <i className="fas fa-phone"></i> *8944
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>סה"ר - צ'אט <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat">
                                     <i className="fas fa-comment"></i> לצ'אט →
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
@@ -1954,7 +1962,7 @@
                     {searchTerm ? (
                         Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-                                <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                     <div className="mh-cat-title">
                                         <span className="mh-cat-title-he">{cat.title}</span>
@@ -1977,14 +1985,14 @@
                         ))
                     ) : selectedCategoryGroup ? (
                         <>
-                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }}>
+                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
                                 const cat = filtered[id];
                                 return (
                                     <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-                                        <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                        <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="category_group">
                                             <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                             <div className="mh-cat-title">
                                                 <span className="mh-cat-title-he">{cat.title}</span>
