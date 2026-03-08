@@ -154,6 +154,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         viewport_width: typeof e?.viewport_width === 'number' ? e.viewport_width : null,
         viewport_height: typeof e?.viewport_height === 'number' ? e.viewport_height : null,
         user_pseudo_id: userPseudoId,
+        entry_hostname: (e?.entry_hostname as string) || null,
+        entry_origin: (e?.entry_origin as string) || null,
+        entry_url: (e?.entry_url as string) || null,
       };
       await client.query(
         `INSERT INTO events (

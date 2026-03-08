@@ -314,13 +314,29 @@
             trackSearch: mhTrackSearch
         };
 
+        const mhTrackLanding = () => {
+            try {
+                const origin = window.location.origin || '';
+                const hostname = window.location.hostname || '';
+                mhTrackEvent('page_view', {
+                    section: 'landing',
+                    element_id: 'landing',
+                    element_type: 'page_load',
+                    entry_hostname: hostname,
+                    entry_origin: origin,
+                    entry_url: window.location.href
+                });
+            } catch (_) {
+                mhTrackEvent('page_view', { section: 'landing', element_id: 'landing' });
+            }
+        };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                mhTrackEvent('page_view');
+                mhTrackLanding();
                 mhInitClickTracking();
             });
         } else {
-            mhTrackEvent('page_view');
+            mhTrackLanding();
             mhInitClickTracking();
         }
 
