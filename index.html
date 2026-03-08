@@ -1137,16 +1137,16 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
-                            {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
-                            {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
-                            {s.phone4 && (<a href={`tel:${s.phone4.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel4 || '') : (s.phoneLabel4 ? (s.phoneShowNumber4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phoneLabel4) : s.phone4)}</a>)}
-                            {s.phone5 && (<a href={`tel:${s.phone5.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel5 || '') : (s.phoneLabel5 ? (s.phoneShowNumber5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phoneLabel5) : s.phone5)}</a>)}
-                            {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
-                            {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : `WhatsApp: ${s.whatsapp}`}><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : ''}</a>)}
-                            {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email}><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
-                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.trackingName || s.org} style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר'}</a>)}
-                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
+                            {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
+                            {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
+                            {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
+                            {s.phone4 && (<a href={`tel:${s.phone4.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone4`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel4 || '') : (s.phoneLabel4 ? (s.phoneShowNumber4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phoneLabel4) : s.phone4)}</a>)}
+                            {s.phone5 && (<a href={`tel:${s.phone5.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone5`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel5 || '') : (s.phoneLabel5 ? (s.phoneShowNumber5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phoneLabel5) : s.phone5)}</a>)}
+                            {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
+                            {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : `WhatsApp: ${s.whatsapp}`} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : ''}</a>)}
+                            {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email} data-tracking-name={`${s.trackingName || s.org}_email`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר'}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website"><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
                         </div>
                     </div>
                 </div>
@@ -1491,7 +1491,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }} data-tracking-name={`terms_phone_${k}`}>
+                                                                            }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
                                                                                 <i className="fas fa-phone"></i> {t.phone}
                                                                             </a>
                                                                         )}
@@ -1506,7 +1506,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }} data-tracking-name={`terms_phone2_${k}`}>
+                                                                            }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
                                                                                 <i className="fas fa-phone"></i> {t.phone2}
                                                                             </a>
                                                                         )}
@@ -1653,7 +1653,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }} data-tracking-name={`terms_phone_${k}`}>
+                                                                                }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
                                                                                     <i className="fas fa-phone"></i> {t.phone}
                                                                                 </a>
                                                                             )}
@@ -1668,7 +1668,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }} data-tracking-name={`terms_phone2_${k}`}>
+                                                                                }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
                                                                                     <i className="fas fa-phone"></i> {t.phone2}
                                                                                 </a>
                                                                             )}
@@ -1766,6 +1766,7 @@
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 data-tracking-name="contact_whatsapp"
+                                data-analytics-type="whatsapp"
                                 style={{
                                     color: '#25D366',
                                     fontWeight: 'bold',
@@ -1820,11 +1821,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201">1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201" data-analytics-type="phone">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>זמין 24/7 | חינם | אנונימי לגמרי</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944">*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>לחיילים וכוחות ביטחון | אנונימי</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1837,11 +1838,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> If you are in a crisis situation or immediate danger - don't search. Just call now:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201_en">1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201_en" data-analytics-type="phone">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>Available 24/7 | Free | Completely anonymous</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en">*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en" data-analytics-type="phone">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>For soldiers and security forces | Anonymous</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1934,21 +1935,21 @@
                         <div className="mh-emergency-grid">
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>ער"ן <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו חירום</span></h3>
-                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201">
+                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> 1201
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944">
+                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> *8944
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>סה"ר - צ'אט <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat">
+                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
                                     <i className="fas fa-comment"></i> לצ'אט →
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
