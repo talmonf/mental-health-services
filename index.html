@@ -145,7 +145,7 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        const { useState, useMemo, useEffect } = React;
 
         // Lightweight privacy-friendly analytics helper
         const MH_ANALYTICS_CONFIG = {
@@ -200,6 +200,32 @@
             return q;
         };
 
+        // Match generate_directory_entries_sql.js logic for directory_entries.entry_id
+        const mhSlugify = (str) => String(str || '')
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9א-ת]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 60);
+        const mhGetEntryId = (svc, categoryKey) => {
+            const org = svc.org || '';
+            const desc = svc.svc || '';
+            const displayName = org;
+            const rowId = (svc.row != null && svc.row !== '') ? String(svc.row) : mhSlugify(displayName || categoryKey || 'entry');
+            const baseSlug = (displayName && displayName.trim() !== '') ? mhSlugify(displayName) : `${categoryKey}_${rowId}`;
+            return `${baseSlug || categoryKey}_${rowId}`;
+        };
+
+        const mhParseUtmParams = () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    utm_source: params.get('utm_source') || null,
+                    utm_medium: params.get('utm_medium') || null,
+                    utm_campaign: params.get('utm_campaign') || null
+                };
+            } catch { return { utm_source: null, utm_medium: null, utm_campaign: null }; }
+        };
+
         const mhTrackEvent = (eventType, props = {}) => {
             try {
                 if (!MH_ANALYTICS_CONFIG.enabled || !MH_ANALYTICS_CONFIG.endpoint) return;
@@ -212,6 +238,7 @@
                         referrerDomain = null;
                     }
                 }
+                const utm = mhParseUtmParams();
                 const payload = {
                     event_id: mhGenerateId(),
                     event_type: eventType,
@@ -219,6 +246,9 @@
                     page_url: url,
                     page_title: document.title || null,
                     referrer_domain: referrerDomain,
+                    utm_source: utm.utm_source,
+                    utm_medium: utm.utm_medium,
+                    utm_campaign: utm.utm_campaign,
                     session_id: mhGetOrCreateSessionId(),
                     user_pseudo_id: mhGetOrCreateUserId(),
                     user_agent: navigator.userAgent,
@@ -267,11 +297,14 @@
                 const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
                 const elementTextShort = textSource.trim().slice(0, 80) || null;
 
+                const entryIdEl = el.closest('[data-entry-id]');
+                const entryId = entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null;
                 mhTrackEvent('click', {
                     element_id: elementId,
                     element_type: elementType,
                     element_text_short: elementTextShort,
-                    section
+                    section,
+                    entry_id: entryId
                 });
             }, { capture: true });
         };
@@ -622,7 +655,12 @@
         const MentalHealthIsrael = () => {
             const [searchTerm, setSearchTerm] = useState('');
             const [expandedCats, setExpandedCats] = useState([]);
-            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(null);
+            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => {
+                try {
+                    const g = (typeof window !== 'undefined' && window.location.hash || '').replace(/^#/, '');
+                    return Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
+                } catch { return null; }
+            });
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -631,6 +669,23 @@
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [selectedLetter, setSelectedLetter] = useState(null);
 
+            // Sync URL hash when selectedCategoryGroup changes (for analytics page_route)
+            useEffect(() => {
+                const want = selectedCategoryGroup ? '#' + selectedCategoryGroup : '';
+                if (window.location.hash !== want) {
+                    try { window.history.replaceState(null, '', (window.location.pathname || '/') + (window.location.search || '') + want); } catch (_) {}
+                }
+            }, [selectedCategoryGroup]);
+            // Sync state when user manually changes URL hash (e.g. bookmark, back/forward)
+            useEffect(() => {
+                const onHashChange = () => {
+                    const g = (window.location.hash || '').replace(/^#/, '');
+                    const next = Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
+                    setSelectedCategoryGroup(prev => (prev !== next ? next : prev));
+                };
+                window.addEventListener('hashchange', onHashChange);
+                return () => window.removeEventListener('hashchange', onHashChange);
+            }, []);
             const data = DATA;
             const LAST_UPDATED = "5.3.2026";            
             
@@ -1044,8 +1099,10 @@
                 return r;
             }, [searchTerm]);
 
-            const Card = ({ s }) => (
-                <div className="mh-card">
+            const Card = ({ s, categoryKey }) => {
+                const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
+                return (
+                <div className="mh-card" data-entry-id={entryId || undefined} data-tracking-name={s.trackingName || s.org}>
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
                         <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
@@ -1075,6 +1132,7 @@
                     </div>
                 </div>
             );
+            };
 
             const CategoryCard = ({ groupId }) => {
                 const group = CATEGORY_GROUPS[groupId];
@@ -1911,7 +1969,7 @@
                                     <div>
                                         <p className="mh-cat-desc">{cat.desc}</p>
                                         <div className="mh-cat-grid">
-                                            {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                            {cat.services.map((s, i) => <Card key={i} s={s} categoryKey={id} />)}
                                         </div>
                                     </div>
                                 )}
@@ -1941,7 +1999,7 @@
                                             <div>
                                                 <p className="mh-cat-desc">{cat.desc}</p>
                                                 <div className="mh-cat-grid">
-                                                    {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                                    {cat.services.map((s, i) => <Card key={i} s={s} categoryKey={id} />)}
                                                 </div>
                                             </div>
                                         )}

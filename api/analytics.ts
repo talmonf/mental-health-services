@@ -8,6 +8,7 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
+import { UAParser } from 'ua-parser-js';
 
 const ALLOWED_ORIGINS = process.env.ANALYTICS_ALLOWED_ORIGINS
   ? process.env.ANALYTICS_ALLOWED_ORIGINS.split(',').map((o) => o.trim())
@@ -112,7 +113,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let pageRoute: string | null = null;
       if (pageUrl) {
         try {
-          pageRoute = new URL(pageUrl).pathname.slice(0, 500) || null;
+          const parsed = new URL(pageUrl);
+          pageRoute = (parsed.pathname || '/') + (parsed.hash || '');
+          pageRoute = pageRoute.slice(0, 500) || null;
         } catch {
           pageRoute = null;
         }
@@ -132,6 +135,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const eventId = (e?.event_id as string) || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '');
       if (!eventId) continue;
+
+      let browserName: string | null = null;
+      let osName: string | null = null;
+      if (ua) {
+        try {
+          const parsed = UAParser(ua);
+          browserName = parsed.browser?.name ? parsed.browser.name.slice(0, 100) : null;
+          osName = parsed.os?.name ? parsed.os.name.slice(0, 100) : null;
+        } catch {
+          /* ignore parse errors */
+        }
+      }
 
       const extra: Record<string, unknown> = {
         page_title: e?.page_title ?? null,
@@ -162,16 +177,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           (e?.results_count as number) ?? null,
           (e?.search_location as string) || null,
           JSON.stringify(extra),
-          (e?.entry_id as string) || null,
+          ((e?.entry_id as string) || null)?.slice(0, 255) || null,
           country,
           device,
-          null, // browser_name
-          null, // os_name
+          browserName,
+          osName,
           language,
-          (e?.referrer_domain as string) || null,
-          (e?.utm_source as string) || null,
-          (e?.utm_medium as string) || null,
-          (e?.utm_campaign as string) || null,
+          ((e?.referrer_domain as string) || null)?.slice(0, 255) || null,
+          ((e?.utm_source as string) || null)?.slice(0, 255) || null,
+          ((e?.utm_medium as string) || null)?.slice(0, 255) || null,
+          ((e?.utm_campaign as string) || null)?.slice(0, 255) || null,
         ]
       );
     }
