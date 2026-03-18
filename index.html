@@ -145,7 +145,7 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        const { useState, useMemo, useEffect } = React;
 
         // Lightweight privacy-friendly analytics helper
         const MH_ANALYTICS_CONFIG = {
@@ -200,6 +200,32 @@
             return q;
         };
 
+        // Match generate_directory_entries_sql.js logic for directory_entries.entry_id
+        const mhSlugify = (str) => String(str || '')
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9א-ת]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 60);
+        const mhGetEntryId = (svc, categoryKey) => {
+            const org = svc.org || '';
+            const desc = svc.svc || '';
+            const displayName = org;
+            const rowId = (svc.row != null && svc.row !== '') ? String(svc.row) : mhSlugify(displayName || categoryKey || 'entry');
+            const baseSlug = (displayName && displayName.trim() !== '') ? mhSlugify(displayName) : `${categoryKey}_${rowId}`;
+            return `${baseSlug || categoryKey}_${rowId}`;
+        };
+
+        const mhParseUtmParams = () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    utm_source: params.get('utm_source') || null,
+                    utm_medium: params.get('utm_medium') || null,
+                    utm_campaign: params.get('utm_campaign') || null
+                };
+            } catch { return { utm_source: null, utm_medium: null, utm_campaign: null }; }
+        };
+
         const mhTrackEvent = (eventType, props = {}) => {
             try {
                 if (!MH_ANALYTICS_CONFIG.enabled || !MH_ANALYTICS_CONFIG.endpoint) return;
@@ -212,6 +238,7 @@
                         referrerDomain = null;
                     }
                 }
+                const utm = mhParseUtmParams();
                 const payload = {
                     event_id: mhGenerateId(),
                     event_type: eventType,
@@ -219,6 +246,9 @@
                     page_url: url,
                     page_title: document.title || null,
                     referrer_domain: referrerDomain,
+                    utm_source: utm.utm_source,
+                    utm_medium: utm.utm_medium,
+                    utm_campaign: utm.utm_campaign,
                     session_id: mhGetOrCreateSessionId(),
                     user_pseudo_id: mhGetOrCreateUserId(),
                     user_agent: navigator.userAgent,
@@ -267,11 +297,14 @@
                 const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
                 const elementTextShort = textSource.trim().slice(0, 80) || null;
 
+                const entryIdEl = el.closest('[data-entry-id]');
+                const entryId = entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null;
                 mhTrackEvent('click', {
                     element_id: elementId,
                     element_type: elementType,
                     element_text_short: elementTextShort,
-                    section
+                    section,
+                    entry_id: entryId
                 });
             }, { capture: true });
         };
@@ -281,13 +314,29 @@
             trackSearch: mhTrackSearch
         };
 
+        const mhTrackLanding = () => {
+            try {
+                const origin = window.location.origin || '';
+                const hostname = window.location.hostname || '';
+                mhTrackEvent('page_view', {
+                    section: 'landing',
+                    element_id: 'landing',
+                    element_type: 'page_load',
+                    entry_hostname: hostname,
+                    entry_origin: origin,
+                    entry_url: window.location.href
+                });
+            } catch (_) {
+                mhTrackEvent('page_view', { section: 'landing', element_id: 'landing' });
+            }
+        };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                mhTrackEvent('page_view');
+                mhTrackLanding();
                 mhInitClickTracking();
             });
         } else {
-            mhTrackEvent('page_view');
+            mhTrackLanding();
             mhInitClickTracking();
         }
 
@@ -467,6 +516,7 @@
          {"row": 18, "org": "GET HELP Israel", "svc": "Provides English-speakers with access to verified mental health specialists as well as resources and information on navigating the mental health system in Israel", "phone": "072-3971307", "web": "https://gethelpisrael.com/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "English", "diseases": "", "add": "", "dir": "ltr"},         
          {"row": 76, "org": "Avnei Chein", "svc": "Crisis Support, Family Support, Family & Sibling Therapy, Legal Support, Mentors and Volunteers, Network of Professionals", "phone": "058-613-6300", "web": "https://www.avneichein.org/services/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "English", "diseases": "", "add": "", "dir": "ltr"},
          {"row": 81, "org": "Relief Resources", "svc": "Help finding qualified mental health providers for English-speakers", "phone": "077-360-9070", "email": "israel@reliefhelp.org", "web": "https://www.reliefhelp.org/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "English", "diseases": "", "add": "", "dir": "ltr", "trackingName": "Relief Resources"},
+         {"row": 96, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים לכם וסבסוד טיפולים", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה מסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים, עם דגש על חוסן משפחתי.", "languages": "", "diseases": "", "add": ""},
 
          {"row": 90, "org": "ME-MENTAL EXPERTS", "svc": "מרכזים לטיפול רגשי", "phone": "*5806", "whatsapp": "+972723362227", "web": "https://mexp.co.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "iconOnly": true},
          {"row": 33, "org": "MEDREVIEWS", "svc": "אינדקס פסיכיאטרים", "phone": "", "web": "https://www.medreviews.co.il/search/psychiatry", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית, אנגלית, רוסית, וערבית, צרפתית", "diseases": "", "add": ""},
@@ -499,7 +549,8 @@
 
          {"row": 89, "org": "המרכז הישראלי להתמכרויות", "svc": "טיפול והתמודדות עם התמכרויות", "phone": "09-9789510", "email": "info@ica.org.il", "web": "https://ica.org.il/treatment_frames", "target": "", "region": "", "cost": "", "specialty": "התמכרויות", "notes": "", "languages": "", "diseases": "", "add": "https://ica.org.il/contact", "iconOnly": true},
          {"row": 65, "org": "מכון למרחב\n(מרכז טיפולי רב תחומי)", "svc": "מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.", "phone": "02-5954571", "web": "https://www.lamerchav.org.il/", "target": "", "region": "מרפאות בירושלים, בית שמש, ביתר עילית, רחובות\n", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
-         {"row": 69, "org": "דיאלוג פתוח בישראל (דפ\"י)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"}]}, 
+         {"row": 69, "org": "דיאלוג פתוח בישראל (דפ\"י)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"},
+         {"row": 96, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים וסבסוד טיפולים פסיכולוגיים", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה מסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים.", "languages": "", "diseases": "", "add": ""}]}, 
          
          "addictions": {"icon": "💊", "title": "התמכרויות", "titleEn": "Addictions", "desc": "טיפול, מניעה ומחקר בתחום ההתמכרויות", "services": [
          {"row": 94, "org": "המרכז הישראלי להתמכרויות (ICA)", "svc": "מרכז לאומי מוביל לצמצום תופעת ההתמכרויות ונזקיה. טיפול, מידע והכוונה למי שמתמודד עם התמכרות", "phone": "09-9789510", "phoneLabel": "כללי", "phone2": "09-9789500", "phoneLabel2": "מרפאה", "phoneShowNumber2": false, "email": "info@ica.org.il", "web": "https://ica.org.il/", "iconOnly": true},
@@ -523,7 +574,8 @@
          {"row": 52, "org": "מילם (מרכז ייעוץ למשפחות מתמודדים)", "svc": "מרכזי ייעוץ, הכוונה, סיוע והדרכה למשפחות מתמודדים", "phone": "*5873", "web": "https://www.milam.org.il/", "target": "משפחות מתמודדים", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "המרכזים ברחבי הארץ מופעלים על ידי עמותת אנוש, במימון ובפיקוח של משרד הבריאות.", "languages": "", "diseases": "", "add": ""},
          {"row": 66, "org": "מרכז יה״ל- ייעוץ והכוונה למשפחות", "svc": "ייעוץ והכוונה למשפחות בתחום בריאות הנפש", "phone": "03-9559596\n18:00 - 22:00", "web": "https://eychut.org.il/%d7%9e%d7%a8%d7%9b%d7%96-%d7%99%d7%94%d7%b4%d7%9c-%d7%99%d7%99%d7%a2%d7%95%d7%a5-%d7%95%d7%94%d7%9b%d7%95%d7%95%d7%a0%d7%94-%d7%9c%d7%9e%d7%a9%d7%a4%d7%97%d7%95%d7%aa-2/", "target": "", "region": "ערים שונות", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/Yahel.Families"},
          {"row": 68, "org": "בלב ובנפש (עזר מציון)\n", "svc": "סיוע למשפחות של מתמודדי נפש", "phone": "", "web": "https://www.ami.org.il/services", "target": "", "region": "ערים שונות", "cost": "", "specialty": "", "notes": "מרכז לליווי מתמודדים במימוש הזכויות ובתהליך השיקום", "languages": "", "diseases": "", "add": ""},
-         {"row": 69, "org": "דיאלוג פתוח בישראל (דפי)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"}]}, 
+         {"row": 69, "org": "דיאלוג פתוח בישראל (דפי)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"},
+         {"row": 96, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים לכם, סבסוד טיפולים, חוסן משפחתי. שינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה שמה בלב ליבה את החוסן המשפחתי ומסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים. מאז הקמתה מובילה העמותה, טיפין טיפין, לשינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.", "languages": "", "diseases": "", "add": ""}]}, 
          
         "youth": {"icon": "👶", "title": "נוער וצעירים", "titleEn": "Teenagers & Young Adults", "desc": "שירותים לגילאי 10-35", "services": [
          {"row": 45, "org": "שרן רפואה עד הבית", "svc": "הקול שבפנים – טיפול ביתי לצעירים במצבי משבר נפשי", "phone": "", "web": "https://sharanmedical.co.il/voiceover/", "target": "", "region": "", "cost": "שירות פרטי", "specialty": "", "notes": "שירות למשפחות וצעירים (12-35) החווים הסתגרות ונסיגה תפקודית. ", "languages": "", "diseases": "", "add": ""},
@@ -625,7 +677,12 @@
         const MentalHealthIsrael = () => {
             const [searchTerm, setSearchTerm] = useState('');
             const [expandedCats, setExpandedCats] = useState([]);
-            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(null);
+            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => {
+                try {
+                    const g = (typeof window !== 'undefined' && window.location.hash || '').replace(/^#/, '');
+                    return Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
+                } catch { return null; }
+            });
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -634,6 +691,23 @@
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [selectedLetter, setSelectedLetter] = useState(null);
 
+            // Sync URL hash when selectedCategoryGroup changes (for analytics page_route)
+            useEffect(() => {
+                const want = selectedCategoryGroup ? '#' + selectedCategoryGroup : '';
+                if (window.location.hash !== want) {
+                    try { window.history.replaceState(null, '', (window.location.pathname || '/') + (window.location.search || '') + want); } catch (_) {}
+                }
+            }, [selectedCategoryGroup]);
+            // Sync state when user manually changes URL hash (e.g. bookmark, back/forward)
+            useEffect(() => {
+                const onHashChange = () => {
+                    const g = (window.location.hash || '').replace(/^#/, '');
+                    const next = Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
+                    setSelectedCategoryGroup(prev => (prev !== next ? next : prev));
+                };
+                window.addEventListener('hashchange', onHashChange);
+                return () => window.removeEventListener('hashchange', onHashChange);
+            }, []);
             const data = DATA;
             const LAST_UPDATED = "5.3.2026";            
             
@@ -1047,8 +1121,10 @@
                 return r;
             }, [searchTerm]);
 
-            const Card = ({ s }) => (
-                <div className="mh-card">
+            const Card = ({ s, categoryKey }) => {
+                const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
+                return (
+                <div className="mh-card" data-entry-id={entryId || undefined} data-tracking-name={s.trackingName || s.org}>
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
                         <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
@@ -1064,7 +1140,6 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {(() => { return null; })()}
                             {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
                             {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
                             {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
@@ -1073,37 +1148,13 @@
                             {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined}><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.iconOnly ? `WhatsApp: ${s.whatsapp}` : undefined}><i className="fab fa-whatsapp"></i> {s.iconOnly ? '' : s.whatsapp}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.iconOnly ? s.email : undefined}><i className="fas fa-envelope"></i> {s.iconOnly ? '' : s.email}</a>)}
-                            {s.web && (
-                                <a
-                                    href={s.web}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    data-tracking-name={s.trackingName || s.org}
-                                    style={{background: 'var(--primary)'}}
-                                >
-                                    <i className="fas fa-external-link-alt"></i>{' '}
-                                    {s.org && s.org.startsWith("Kav L'Noar")
-                                        ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים')
-                                        : (s.dir === 'ltr' ? 'Website' : 'לאתר')}
-                                </a>
-                            )}
-                            {s.add && (
-                                <a
-                                    href={s.add}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{background: 'var(--primary)'}}
-                                >
-                                    <i className="fas fa-external-link-alt"></i>{' '}
-                                    {s.org && s.org.startsWith("Kav L'Noar")
-                                        ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש')
-                                        : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')}
-                                </a>
-                            )}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.trackingName || s.org} style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר'}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'}</a>)}
                         </div>
                     </div>
                 </div>
             );
+            };
 
             const CategoryCard = ({ groupId }) => {
                 const group = CATEGORY_GROUPS[groupId];
@@ -1207,7 +1258,7 @@
                             setTermsCategory(null);
                             setSelectedLetter(null);
                             setTermsViewMode('categories');
-                        }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}>
+                        }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
                             ← חזרה
                         </button>
                         <div className="mh-modal">
@@ -1251,6 +1302,7 @@
                                             color: termsViewMode === 'categories' ? 'white' : 'var(--primary)',
                                             border: '2px solid var(--primary)'
                                         }}
+                                        data-tracking-name="terms_view_categories"
                                     >
                                         <i className="fas fa-th-large"></i> לפי קטגוריות
                                     </button>
@@ -1265,6 +1317,7 @@
                                             color: termsViewMode === 'alphabetical' ? 'white' : 'var(--primary)',
                                             border: '2px solid var(--primary)'
                                         }}
+                                        data-tracking-name="terms_view_alphabetical"
                                     >
                                         <i className="fas fa-sort-alpha-down"></i> לפי א-ב
                                     </button>
@@ -1283,6 +1336,7 @@
                                                 fontSize: 'var(--text-sm)',
                                                 padding: 'var(--space-sm) var(--space-md)'
                                             }}
+                                            data-tracking-name="terms_filter_all"
                                         >
                                             הכל
                                         </button>
@@ -1301,6 +1355,7 @@
                                                     alignItems: 'center',
                                                     gap: 'var(--space-xs)'
                                                 }}
+                                                data-tracking-name={`terms_filter_${catId}`}
                                             >
                                                 <i className={`fas ${cat.icon}`}></i> {cat.title}
                                             </button>
@@ -1343,6 +1398,7 @@
                                                         opacity: hasTerms ? 1 : 0.4
                                                     }}
                                                     disabled={!hasTerms}
+                                                    data-tracking-name={`terms_letter_${letter}`}
                                                 >
                                                     {letter}
                                                 </button>
@@ -1438,7 +1494,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }}>
+                                                                            }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
                                                                                 <i className="fas fa-phone"></i> {t.phone}
                                                                             </a>
                                                                         )}
@@ -1453,7 +1509,7 @@
                                                                                 display: 'inline-flex',
                                                                                 alignItems: 'center',
                                                                                 gap: 'var(--space-xs)'
-                                                                            }}>
+                                                                            }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
                                                                                 <i className="fas fa-phone"></i> {t.phone2}
                                                                             </a>
                                                                         )}
@@ -1490,6 +1546,7 @@
                                                                                                 padding: 0,
                                                                                                 fontSize: 'inherit'
                                                                                             }}
+                                                                                            data-tracking-name={`terms_related_${relKey}`}
                                                                                         >
                                                                                             {relTerm.title}
                                                                                         </button>
@@ -1599,7 +1656,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }}>
+                                                                                }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
                                                                                     <i className="fas fa-phone"></i> {t.phone}
                                                                                 </a>
                                                                             )}
@@ -1614,7 +1671,7 @@
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
                                                                                     gap: 'var(--space-xs)'
-                                                                                }}>
+                                                                                }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
                                                                                     <i className="fas fa-phone"></i> {t.phone2}
                                                                                 </a>
                                                                             )}
@@ -1653,6 +1710,7 @@
                                                                                                     padding: 0,
                                                                                                     fontSize: 'inherit'
                                                                                                 }}
+                                                                                                data-tracking-name={`terms_related_${relKey}`}
                                                                                             >
                                                                                                 {relTerm.title}
                                                                                             </button>
@@ -1691,11 +1749,11 @@
                     </div>
                     <div className="mh-btns">
                         {!showIntro && (
-                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }}>
+                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="אתם לא לבד">
                                 <i className="fas fa-heart"></i> אתם לא לבד
                             </button>
                         )}
-                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }}>
+                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }} data-tracking-name="מילון מונחים">
                             <i className="fas fa-book"></i> מילון מונחים
                         </button>
                     </div>
@@ -1710,6 +1768,8 @@
                                 href="https://wa.me/972544787720" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
+                                data-tracking-name="contact_whatsapp"
+                                data-analytics-type="whatsapp"
                                 style={{
                                     color: '#25D366',
                                     fontWeight: 'bold',
@@ -1724,7 +1784,7 @@
 
                     {showIntro && (
                         <div className="mh-modal" style={{ lineHeight: 1.8 }}>
-                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה.">
+                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה." data-tracking-name="intro_close">
                                 <i className="fas fa-times"></i>
                             </button>
 
@@ -1740,7 +1800,7 @@
                                 </p>
                                 {!showFullIntro && (
                                     <>
-                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }}>
+                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }} data-tracking-name="intro_read_more">
                                             קרא עוד | Read More
                                         </button>
                                     </>
@@ -1764,11 +1824,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201" data-analytics-type="phone">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>זמין 24/7 | חינם | אנונימי לגמרי</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>לחיילים וכוחות ביטחון | אנונימי</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1781,11 +1841,11 @@
                                                 <i className="fas fa-exclamation-triangle"></i> If you are in a crisis situation or immediate danger - don't search. Just call now:
                                             </p>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>1201</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201_en" data-analytics-type="phone">1201</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>Available 24/7 | Free | Completely anonymous</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }}>*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en" data-analytics-type="phone">*8944</a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>For soldiers and security forces | Anonymous</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -1850,8 +1910,8 @@
                                             אתם מגיעים לכאן. אתם עושים את זה. ואנחנו כאן לעזור.
                                         </p>
                                         <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
-                                            <button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }}>
-                                                סגור | Close
+<button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
+                                            סגור | Close
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
                                                 ניתן לפתוח שוב מהכפתור "אתם לא לבד" למעלה | Can be reopened from button above
@@ -1878,21 +1938,21 @@
                         <div className="mh-emergency-grid">
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>ער"ן <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו חירום</span></h3>
-                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> 1201
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> *8944
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>סה"ר - צ'אט <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
                                     <i className="fas fa-comment"></i> לצ'אט →
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
@@ -1925,7 +1985,7 @@
                     {searchTerm ? (
                         Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-                                <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                     <div className="mh-cat-title">
                                         <span className="mh-cat-title-he">{cat.title}</span>
@@ -1940,7 +2000,7 @@
                                     <div>
                                         <p className="mh-cat-desc">{cat.desc}</p>
                                         <div className="mh-cat-grid">
-                                            {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                            {cat.services.map((s, i) => <Card key={i} s={s} categoryKey={id} />)}
                                         </div>
                                     </div>
                                 )}
@@ -1948,14 +2008,14 @@
                         ))
                     ) : selectedCategoryGroup ? (
                         <>
-                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }}>
+                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
                                 const cat = filtered[id];
                                 return (
                                     <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-                                        <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)}>
+                                        <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="category_group">
                                             <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                             <div className="mh-cat-title">
                                                 <span className="mh-cat-title-he">{cat.title}</span>
@@ -1970,7 +2030,7 @@
                                             <div>
                                                 <p className="mh-cat-desc">{cat.desc}</p>
                                                 <div className="mh-cat-grid">
-                                                    {cat.services.map((s, i) => <Card key={i} s={s} />)}
+                                                    {cat.services.map((s, i) => <Card key={i} s={s} categoryKey={id} />)}
                                                 </div>
                                             </div>
                                         )}
