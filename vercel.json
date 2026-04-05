@@ -1,5 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/link-check.ts": {
+      "maxDuration": 60,
+      "includeFiles": "index.html"
+    },
+    "api/link-probe.ts": {
+      "maxDuration": 15,
+      "includeFiles": "index.html"
+    }
+  },
   "redirects": [
     {
       "source": "/(.*)",

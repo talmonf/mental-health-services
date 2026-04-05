@@ -79,6 +79,8 @@
         .mh-emergency-call:hover { background: rgba(255,255,255,0.3) !important; }
         .mh-footer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; }
         .mh-modal { background: var(--bg-card); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); position: relative; max-height: 85vh; overflow-y: auto; }
+        /* Glossary: single page scroll instead of nested scroll inside the card */
+        .mh-modal.mh-modal-terms-flow { max-height: none; overflow-y: visible; }
         .mh-modal-close { position: absolute; top: var(--space-md); left: var(--space-md); min-width: var(--touch-min); min-height: var(--touch-min); padding: 0; background: transparent; color: var(--danger); border: 2px solid var(--danger); border-radius: 50%; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; }
         .mh-modal-close:hover { background: rgba(192, 57, 43, 0.1); }
         .mh-modal-close:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
@@ -100,6 +102,24 @@
         .mh-helper-text { text-align: center; color: var(--text-muted); font-size: var(--text-base); margin-bottom: var(--space-lg); line-height: 1.6; }
         .mh-subcategory-back { margin-bottom: var(--space-lg); }
         .mh-disclaimer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; border: 2px solid rgba(255,255,255,0.2); }
+        #mh-link-toast {
+            position: fixed;
+            bottom: var(--space-xl);
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: min(92vw, 420px);
+            padding: var(--space-lg) var(--space-xl);
+            background: var(--primary-dark);
+            color: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated);
+            z-index: 99999;
+            font-size: var(--text-base);
+            line-height: 1.5;
+            text-align: center;
+            display: none;
+        }
+        #mh-link-toast.mh-link-toast-visible { display: block; }
         .mh-terms-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
         .mh-term-card { transition: all 0.2s ease; }
         .mh-term-card:hover { transform: translateY(-2px); }
@@ -475,7 +495,7 @@
          {"row": 45, "org": "שרן רפואה עד הבית", "svc": "הקול שבפנים – טיפול ביתי לצעירים במצבי משבר נפשי", "phone": "", "web": "https://sharanmedical.co.il/voiceover/", "target": "", "region": "", "cost": "שירות פרטי", "specialty": "", "notes": "שירות למשפחות וצעירים (12-35) החווים הסתגרות ונסיגה תפקודית. ", "languages": "", "diseases": "", "add": ""},
 
          {"row": 48, "org": "צבר רפואה", "svc": "אשפוז בית פסיכיאטרי", "phone": "", "web": "https://www.sabarhealth.co.il/%d7%a4%d7%a1%d7%99%d7%9b%d7%99%d7%90%d7%98%d7%a8%d7%99%d7%94-%d7%91%d7%91%d7%99%d7%aa/", "target": "", "region": "", "cost": "ממונן ע\"י הקופות: מכבי, מאוחדת ולאומית", "specialty": "חלופת אשפוז", "notes": "", "languages": "", "diseases": "", "add": ""},
-         {"row": 53, "org": "בתים מאזנים", "svc": "חלופת אשפוז", "phone": "", "web": "https://www.gov.il/BlobFolder/reports/ballancing-homes/he/units_mental-health_ballancing-homes.pdf", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 53, "org": "בתים מאזנים", "svc": "חלופת אשפוז", "phone": "", "web": "https://www.gov.il/he/Departments/DynamicCollectors/ballancing-homes-db?skip=0", "webLabel": "רשימת הבתים", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://me.health.gov.il/mental-health/therapy-rehabilitation/public-care/community-treatment/balancing-homes/", "addLabel": "מהו בית מאזן"},
          {"row": 79, "org": "שרן רפואה עד הבית", "svc": "תוכנית טיפול ביתי ממושך למתמודדים עם מחלת נפש חמורה", "phone": "050-6222026", "email": "lynn.bortz@med-trix.com", "web": "", "target": "בני/ות +18 המתמודדים עם מחלה נפשית חמורה, חוסר התמדה במעקב וטיפול, ריבוי פניות למיון ואשפוזים", "region": "מרכז (כללית ומואחדת), ירושלים (מאוחדת)", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
         ]}, 
          
@@ -710,6 +730,109 @@
                 window.addEventListener('hashchange', onHashChange);
                 return () => window.removeEventListener('hashchange', onHashChange);
             }, []);
+
+            /* Outbound http(s) links: probe via same-origin API before navigation (404/410 → message; else open). */
+            useEffect(() => {
+                const ensureToast = () => {
+                    let el = document.getElementById('mh-link-toast');
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = 'mh-link-toast';
+                        el.setAttribute('role', 'alert');
+                        document.body.appendChild(el);
+                    }
+                    return el;
+                };
+                const showToast = (message) => {
+                    const el = ensureToast();
+                    el.textContent = message;
+                    el.classList.add('mh-link-toast-visible');
+                    clearTimeout(el._mhHide);
+                    el._mhHide = setTimeout(() => el.classList.remove('mh-link-toast-visible'), 9000);
+                };
+                const follow = (href, newTab) => {
+                    if (newTab) {
+                        window.open(href, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.location.href = href;
+                    }
+                };
+                const shouldHandleAnchor = (a) => {
+                    if (!a || a.closest?.('[data-skip-external-link-check]')) return null;
+                    if (a.hasAttribute('download')) return null;
+                    const href = a.getAttribute('href');
+                    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return null;
+                    if (/^mailto:/i.test(href) || /^tel:/i.test(href)) return null;
+                    let u;
+                    try {
+                        u = new URL(href, window.location.href);
+                    } catch {
+                        return null;
+                    }
+                    if (u.origin === window.location.origin) return null;
+                    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+                    return u.href;
+                };
+                const probeAndGo = async (absoluteHref, newTab) => {
+                    try {
+                        const res = await fetch('/api/link-probe', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: absoluteHref }),
+                        });
+                        let data = null;
+                        try {
+                            data = await res.json();
+                        } catch {
+                            data = null;
+                        }
+                        if (!data) {
+                            follow(absoluteHref, newTab);
+                            return;
+                        }
+                        if (data.ok === true) {
+                            follow(absoluteHref, newTab);
+                            return;
+                        }
+                        if (data.reason === 'http') {
+                            showToast('הקישור אינו זמין כרגע (הדף לא נמצא או הוסר). אפשר לנסות שוב מאוחר יותר או לחפש את המידע באתר המקורי.');
+                            window.mhAnalytics?.trackEvent('broken_external_link', {
+                                element_id: absoluteHref.slice(0, 240),
+                                element_type: 'outbound_link',
+                                section: 'link_probe',
+                            });
+                            return;
+                        }
+                        follow(absoluteHref, newTab);
+                    } catch {
+                        follow(absoluteHref, newTab);
+                    }
+                };
+                const onClick = (e) => {
+                    if (e.button !== 0) return;
+                    const a = e.target.closest?.('a[href]');
+                    const abs = shouldHandleAnchor(a);
+                    if (!abs) return;
+                    const newTab = e.metaKey || e.ctrlKey || e.shiftKey || a.getAttribute('target') === '_blank';
+                    e.preventDefault();
+                    probeAndGo(abs, newTab);
+                };
+                const onAuxClick = (e) => {
+                    if (e.button !== 1) return;
+                    const a = e.target.closest?.('a[href]');
+                    const abs = shouldHandleAnchor(a);
+                    if (!abs) return;
+                    e.preventDefault();
+                    probeAndGo(abs, true);
+                };
+                document.addEventListener('click', onClick, true);
+                document.addEventListener('auxclick', onAuxClick, true);
+                return () => {
+                    document.removeEventListener('click', onClick, true);
+                    document.removeEventListener('auxclick', onAuxClick, true);
+                };
+            }, []);
+
             const data = DATA;
             const LAST_UPDATED = "5.3.2026";            
             
@@ -918,7 +1041,8 @@
                     title: "בתים מאזנים",
                     text: "מסגרות דיור זמניות המהוות חלופת אשפוז. מספקות סביבה תומכת ומבנה יומיומי למתמודדים במשבר נפשי. השהות היא זמנית (מספר שבועות עד חודשים) ומטרתה לספק יציבות ותמיכה בתקופת משבר. כוללות צוות מקצועי, פעילויות שיקומיות, ותמיכה נפשית. חלק ממשרד הבריאות וחלק פרטיות.",
                     category: "hospitalization",
-                    related: ["hospitalization", "alternatives", "safe_house"]
+                    related: ["hospitalization", "alternatives", "safe_house"],
+                    readMoreUrl: "https://me.health.gov.il/mental-health/therapy-rehabilitation/public-care/community-treatment/balancing-homes/"
                 },
                 safe_house: {
                     title: "בית בטוח",
@@ -1150,8 +1274,8 @@
                             {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : `WhatsApp: ${s.whatsapp}`} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : ''}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email} data-tracking-name={`${s.trackingName || s.org}_email`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
-                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')}</a>)}
-                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website"><i className="fas fa-external-link-alt"></i> {s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')}</a>)}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר'))}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website"><i className="fas fa-external-link-alt"></i> {s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'))}</a>)}
                         </div>
                     </div>
                 </div>
@@ -1251,6 +1375,29 @@
             // Get Hebrew alphabet for A-Z navigation
             const hebrewAlphabet = 'אבגדהוזחטיכלמנסעפצקרשת';
 
+            const renderTermReadMore = (t) => {
+                if (!t?.readMoreUrl) return null;
+                return (
+                    <p style={{
+                        lineHeight: 1.8,
+                        fontSize: 'var(--text-base)',
+                        color: 'var(--text)',
+                        marginBottom: 'var(--space-md)',
+                        marginTop: 0
+                    }}>
+                        <a
+                            href={t.readMoreUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'underline' }}
+                            data-tracking-name="terms_read_more"
+                        >
+                            קרא עוד
+                        </a>
+                    </p>
+                );
+            };
+
             if (showTerms) {
                 return (
                     <div className="mh-app" style={{ maxWidth: '1000px' }}>
@@ -1263,7 +1410,7 @@
                         }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
                             ← חזרה
                         </button>
-                        <div className="mh-modal">
+                        <div className="mh-modal mh-modal-terms-flow">
                             <div className="mh-terms-wrap">
                                 <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                                     <i className="fas fa-book"></i> מילון מונחים
@@ -1476,6 +1623,7 @@
                                                                 }}>
                                                                     {t.text}
                                                                 </p>
+                                                                {renderTermReadMore(t)}
                                                                 {(t.phone || t.phone2) && (
                                                                     <div style={{ 
                                                                         marginTop: 'var(--space-md)', 
@@ -1638,6 +1786,7 @@
                                                                     }}>
                                                                         {t.text}
                                                                     </p>
+                                                                    {renderTermReadMore(t)}
                                                                     {(t.phone || t.phone2) && (
                                                                         <div style={{ 
                                                                             marginTop: 'var(--space-md)', 
