@@ -29,5 +29,5 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('mindme_104', 'MindMe', 'מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, CBT, טיפול זוגי ומשפחתי, פסיכיאטריה ותרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד', 'treatments', ARRAY['treatments', 'local']::text[]);
+  ('מיינדמי_mindme_104', 'מיינדמי (MindMe)', 'מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד', 'treatments', ARRAY['treatments', 'local']::text[]);
 
