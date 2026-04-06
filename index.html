@@ -610,7 +610,7 @@
          {"row": 51, "org": "טיפול סומטי \nSomatic Experiencing", "svc": "אינדקס מטפלים", "phone": "", "web": "https://directory.traumahealing.org/", "target": "", "region": "", "cost": "", "specialty": "SE", "notes": "", "languages": "", "diseases": "טראומה", "add": ""},
          {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""},
          {"row": 102, "org": "Kav L'Noar (Merchav L'Noar)", "svc": "Therapy clinic for teenagers & young adults (11-27) and parents; specializes in Anglo olim; Halachik framework; therapy for individuals, couples and families", "phone": "02-622-3039", "phoneLabel": "Jerusalem clinic", "phone2": "02-543-6846", "phoneLabel2": "Beit Shemesh clinic", "web": "https://www.kavlnoar.org/jerusalem-clinic", "target": "", "region": "Jerusalem, Beit Shemesh", "cost": "Mostly covered by the health fund, with a small co-payment", "languages": "English, Hebrew, Yiddish, Spanish, Swiss-German", "diseases": "Anxiety, Depression, OCD, Grief, Trauma, etc.", "add": "https://www.kavlnoar.org/beit-shemesh-clinic", "dir": "ltr"},
-         {"row": 36, "org": "משרד הבריאות", "svc": "אינדקס מהפנטים בעלי רשיון", "phone": "", "web": "https://practitioners.health.gov.il/Hypnotists/901", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 36, "org": "מהפנטים", "svc": "אינדקס משרד הבריאות - מהפנטים בעלי רשיון", "phone": "", "web": "https://practitioners.health.gov.il/Hypnotists/901", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 89, "org": "המרכז הישראלי להתמכרויות", "svc": "טיפול והתמודדות עם התמכרויות", "phone": "09-9789510", "email": "info@ica.org.il", "web": "https://ica.org.il/treatment_frames", "target": "", "region": "", "cost": "", "specialty": "התמכרויות", "notes": "", "languages": "", "diseases": "", "add": "https://ica.org.il/contact", "iconOnly": true},
          {"row": 65, "org": "מכון למרחב\n(מרכז טיפולי רב תחומי)", "svc": "מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.", "phone": "02-5954571", "web": "https://www.lamerchav.org.il/", "target": "", "region": "מרפאות בירושלים, בית שמש, ביתר עילית, רחובות\n", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 69, "org": "דיאלוג פתוח בישראל (דפ\"י)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"},
@@ -1298,6 +1298,24 @@
                 });
                 return r;
             }, [searchTerm]);
+
+            // Search results: auto-expand so matches are visible without extra clicks.
+            // When 3+ sections match: expand only sections with ≤3 items (keeps long lists folded).
+            // When 1–2 sections match: expand all (e.g. a single section with one hit).
+            useEffect(() => {
+                if (!searchTerm) return;
+                const entries = Object.entries(filtered);
+                const sectionCount = entries.length;
+                if (sectionCount === 0) {
+                    setExpandedCats([]);
+                    return;
+                }
+                const autoExpand =
+                    sectionCount >= 3
+                        ? entries.filter(([, cat]) => cat.services.length <= 3).map(([id]) => id)
+                        : entries.map(([id]) => id);
+                setExpandedCats(autoExpand);
+            }, [searchTerm, filtered]);
 
             const Card = ({ s, categoryKey }) => {
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
