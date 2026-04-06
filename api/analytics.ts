@@ -4,7 +4,10 @@
  * - sessions (session_id PK/unique, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at)
  * - events (event_id uuid, session_id, event_type, occurred_at, page_url, page_route, section,
  *   element_id, element_type, element_text_short, search_query, results_count, search_location,
- *   extra jsonb, entry_id, country, device_type, browser_name, os_name, language, referrer_domain, utm_*)
+ *   extra jsonb, entry_id, country, device_type, browser_name, os_name, language, referrer_domain, utm_*,
+ *   error text NULL, error_details text NULL)
+ *
+ * Migration: scripts/analytics_events_add_error_columns.sql
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
@@ -47,6 +50,34 @@ function deviceType(ua: string | undefined): string {
   if (/mobile|android|iphone|ipod|blackberry|iemobile|opera mini/i.test(u)) return 'mobile';
   if (/tablet|ipad|playbook|silk/i.test(u)) return 'tablet';
   return 'desktop';
+}
+
+const ERROR_DETAILS_MAX = 8000;
+
+/** Client may send error: 'error' and/or error_details (string or JSON-serializable). */
+function normalizeErrorFields(e: Record<string, unknown>): { error: string | null; error_details: string | null } {
+  let errorDetails: string | null = null;
+  const raw = e?.error_details;
+  if (raw != null) {
+    if (typeof raw === 'string') {
+      errorDetails = raw.slice(0, ERROR_DETAILS_MAX);
+    } else {
+      try {
+        errorDetails = JSON.stringify(raw).slice(0, ERROR_DETAILS_MAX);
+      } catch {
+        errorDetails = String(raw).slice(0, ERROR_DETAILS_MAX);
+      }
+    }
+  }
+  const er = e?.error;
+  const isErrorTag = typeof er === 'string' && er.trim() === 'error';
+  if (isErrorTag) {
+    return { error: 'error', error_details: errorDetails };
+  }
+  if (errorDetails) {
+    return { error: 'error', error_details: errorDetails };
+  }
+  return { error: null, error_details: null };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -158,13 +189,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         entry_origin: (e?.entry_origin as string) || null,
         entry_url: (e?.entry_url as string) || null,
       };
+      const { error: errorCol, error_details: errorDetailsCol } = normalizeErrorFields(e);
       await client.query(
         `INSERT INTO events (
           event_id, session_id, event_type, occurred_at, page_url, page_route, section,
           element_id, element_type, element_text_short, search_query, results_count, search_location,
           extra, entry_id, country, device_type, browser_name, os_name, language,
-          referrer_domain, utm_source, utm_medium, utm_campaign
-        ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)`,
+          referrer_domain, utm_source, utm_medium, utm_campaign,
+          error, error_details
+        ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
         [
           eventId,
           sessionId,
@@ -190,6 +223,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ((e?.utm_source as string) || null)?.slice(0, 255) || null,
           ((e?.utm_medium as string) || null)?.slice(0, 255) || null,
           ((e?.utm_campaign as string) || null)?.slice(0, 255) || null,
+          errorCol,
+          errorDetailsCol,
         ]
       );
     }
