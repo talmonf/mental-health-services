@@ -21,3 +21,13 @@ INSERT INTO directory_entries (
 VALUES
   ('המדריך_ל_ptsd_103', 'המדריך ל-PTSD', 'אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).', 'anxiety_apps', ARRAY['anxiety_apps']::text[]);
 
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('mindme_104', 'MindMe', 'מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, CBT, טיפול זוגי ומשפחתי, פסיכיאטריה ותרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד', 'treatments', ARRAY['treatments', 'local']::text[]);
+
