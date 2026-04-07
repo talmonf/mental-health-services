@@ -39,7 +39,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('brainsway_105', 'TMS / Deep TMS', 'טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+  ('brainsway_105', '(BrainsWay) TMS - גרייה מגנטית מוחית', 'טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,
@@ -69,7 +69,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('איכילוב_תל_השומר_גרייה_מגנטית_מוחית_108', 'TMS (גרייה מגנטית מוחית)', 'טיפול בגרייה מגנטית מוחית (TMS) במסגרת מרפאה פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+  ('איכילוב_תל_השומר_גרייה_מגנטית_מוחית_108', '(איכילוב) TMS - גרייה מגנטית מוחית', 'טיפול בגרייה מגנטית מוחית (TMS) במסגרת מרפאה פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,

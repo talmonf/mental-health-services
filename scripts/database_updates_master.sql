@@ -1,0 +1,2 @@
+[x] 001_directory_entries_treatments_subsections.sql
+[x] 002_directory_entries_tms_title_updates.sql

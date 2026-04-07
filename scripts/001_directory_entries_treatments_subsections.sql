@@ -1,9 +1,9 @@
--- Simple field updates only (no INSERT/UPSERT).
--- Run on the DB after new rows were added.
+-- Migration 001
+-- directory_entries: treatments subsections + title updates
+-- Note: this file mirrors the previously used migration content.
 
 BEGIN;
 
--- Subsection categorization updates
 UPDATE directory_entries
 SET category_keys = ARRAY['moh', 'hospitalization', 'alternatives', 'rehabilitation', 'treatments', 'treatments_psychiatry']::text[]
 WHERE entry_id = 'המרכז_הירושלמי_לבריאות_הנפש_כפר_שאול_איתנים_78';
@@ -52,7 +52,6 @@ UPDATE directory_entries
 SET category_keys = ARRAY['treatments', 'treatments_others']::text[]
 WHERE entry_id IN ('מהפנטים_36', 'המרכז_הישראלי_להתמכרויות_89');
 
--- Title/description updates for new Others cards
 UPDATE directory_entries
 SET
   display_name = '(BrainsWay) TMS - גרייה מגנטית מוחית',
