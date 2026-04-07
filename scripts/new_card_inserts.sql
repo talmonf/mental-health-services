@@ -39,7 +39,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('brainsway_105', 'BrainsWay', 'טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+  ('brainsway_105', 'TMS / Deep TMS', 'טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,
@@ -49,7 +49,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('acpt_israel_access_center_for_psychedelic_treatment_and_ther_106', 'ACPT Israel - Access Center for Psychedelic Treatment and Therapy', 'מרכז גישה לטיפול ותרפיה פסיכדלית.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
+  ('acpt_israel_access_center_for_psychedelic_treatment_and_ther_106', 'Psychedelic Treatment & Therapy', 'מרכז גישה לטיפול ותרפיה פסיכדלית.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,
@@ -59,7 +59,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('psycircle_107', 'PsyCircle', 'טיפול פסיכדלי ומידע מקצועי בתחום.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
+  ('psycircle_107', 'Psychedelic Therapy', 'טיפול פסיכדלי ומידע מקצועי בתחום.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,
@@ -69,7 +69,7 @@ INSERT INTO directory_entries (
   category_keys
 )
 VALUES
-  ('איכילוב_תל_השומר_גרייה_מגנטית_מוחית_108', 'איכילוב (תל השומר) - גרייה מגנטית מוחית', 'טיפול בגרייה מגנטית מוחית (TMS) במסגרת מרפאה פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+  ('איכילוב_תל_השומר_גרייה_מגנטית_מוחית_108', 'TMS (גרייה מגנטית מוחית)', 'טיפול בגרייה מגנטית מוחית (TMS) במסגרת מרפאה פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
 
 INSERT INTO directory_entries (
   entry_id,
