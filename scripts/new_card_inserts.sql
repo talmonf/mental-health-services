@@ -31,3 +31,53 @@ INSERT INTO directory_entries (
 VALUES
   ('מיינדמי_mindme_104', 'מיינדמי (MindMe)', 'מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד', 'treatments', ARRAY['treatments', 'local']::text[]);
 
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('brainsway_105', 'BrainsWay', 'טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('acpt_israel_access_center_for_psychedelic_treatment_and_ther_106', 'ACPT Israel - Access Center for Psychedelic Treatment and Therapy', 'מרכז גישה לטיפול ותרפיה פסיכדלית.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
+
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('psycircle_107', 'PsyCircle', 'טיפול פסיכדלי ומידע מקצועי בתחום.', 'treatments', ARRAY['treatments', 'treatments_others', 'psychedelics']::text[]);
+
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('איכילוב_תל_השומר_גרייה_מגנטית_מוחית_108', 'איכילוב (תל השומר) - גרייה מגנטית מוחית', 'טיפול בגרייה מגנטית מוחית (TMS) במסגרת מרפאה פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'tms']::text[]);
+
+INSERT INTO directory_entries (
+  entry_id,
+  display_name,
+  description,
+  primary_category,
+  category_keys
+)
+VALUES
+  ('ect_נזעי_חשמל_109', 'ECT (נזעי חשמל)', 'מידע על טיפול בנזעי חשמל (ECT) במסגרת פסיכיאטרית.', 'treatments', ARRAY['treatments', 'treatments_others', 'ect']::text[]);
+

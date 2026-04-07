@@ -110,15 +110,33 @@ function slugify(str) {
 const entries = new Map();
 
 for (const [categoryKey, cat] of Object.entries(DATA)) {
-  const services = cat && Array.isArray(cat.services) ? cat.services : [];
-  for (const svc of services) {
+  const sources = [];
+  if (cat && Array.isArray(cat.services)) {
+    sources.push({ services: cat.services, extraKeys: [] });
+  }
+  if (cat && cat.subsections && typeof cat.subsections === 'object') {
+    for (const [subsectionKey, subsection] of Object.entries(cat.subsections)) {
+      const subsectionServices = subsection && Array.isArray(subsection.services) ? subsection.services : [];
+      if (subsectionServices.length) {
+        sources.push({
+          services: subsectionServices,
+          extraKeys: [`${categoryKey}_${subsectionKey}`],
+        });
+      }
+    }
+  }
+
+  for (const { services, extraKeys } of sources) {
+    for (const svc of services) {
     const org = svc.org || '';
     const desc = svc.svc || '';
     const logicalKey = `${org}|||${desc}`;
 
     if (entries.has(logicalKey)) {
       // Already seen: just add category to set
-      entries.get(logicalKey).categoryKeys.add(categoryKey);
+      const existing = entries.get(logicalKey);
+      existing.categoryKeys.add(categoryKey);
+      for (const k of extraKeys) existing.categoryKeys.add(k);
       continue;
     }
 
@@ -146,8 +164,9 @@ for (const [categoryKey, cat] of Object.entries(DATA)) {
       displayName,
       description,
       primaryCategory,
-      categoryKeys: new Set([categoryKey]),
+      categoryKeys: new Set([categoryKey, ...extraKeys]),
     });
+  }
   }
 }
 
@@ -181,7 +200,7 @@ for (const entry of entries.values()) {
 // ... keep everything above unchanged ...
 
 if (rows.length === 0) {
-  console.error('No entries found in DATA. Check that DATA.services arrays are present.');
+  console.error('No entries found in DATA. Check that DATA.services or DATA.subsections[].services arrays are present.');
   process.exit(1);
 }
 
