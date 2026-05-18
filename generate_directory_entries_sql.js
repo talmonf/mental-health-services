@@ -1,7 +1,7 @@
 // generate_directory_entries_sql.js
-// Usage:
-//   cd to the folder that contains index.html
-//   node generate_directory_entries_sql.js > directory_entries_insert.sql
+// Optional: rebuild the legacy bulk snapshot directory_entries_insert.sql from index.html.
+// Normal workflow: edit index.html + add a numbered scripts/00N_*.sql migration (do not regenerate the snapshot).
+// Usage: node generate_directory_entries_sql.js
 
 const fs = require('fs');
 const path = require('path');

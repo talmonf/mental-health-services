@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 006_directory_entries_anat_rusman.sql
 [x] 005_directory_entries_mishpachot.sql
 [x] 004_directory_entries_emergency_local_patch.sql
 [x] 003_directory_entries_resources_may_2026.sql

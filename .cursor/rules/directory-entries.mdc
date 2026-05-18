@@ -1,0 +1,16 @@
+---
+description: How to add or update mental health directory entries (index.html + migrations only)
+alwaysApply: true
+---
+
+# Directory entries workflow
+
+When adding or updating directory listings:
+
+1. **Edit `index.html`** — update the `DATA` object (the live UI source).
+2. **Add a numbered migration** under `scripts/` (e.g. `006_...sql`) with `INSERT ... ON CONFLICT` for `directory_entries`.
+3. **Register the migration** at the top of `scripts/database_updates_master.sql`.
+
+**Do not** edit or regenerate `directory_entries_insert.sql`. That file is a legacy bulk snapshot; per-entry changes use migrations only.
+
+**Do not** run `generate_directory_entries_sql.js` unless the user explicitly asks to rebuild the full snapshot.
