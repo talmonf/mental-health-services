@@ -1423,7 +1423,10 @@
 
             const Card = ({ s, categoryKey }) => {
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
-                const addIsFacebook = s.add && /facebook\.com|fb\.com|fb\.watch/i.test(s.add);
+                const isFacebookUrl = (url) => url && /facebook\.com|fb\.com|fb\.watch/i.test(url);
+                const webIsFacebook = isFacebookUrl(s.web);
+                const addIsFacebook = isFacebookUrl(s.add);
+                const fbTitle = s.dir === 'ltr' ? 'Facebook' : 'פייסבוק';
                 return (
                 <div className="mh-card" data-entry-id={entryId || undefined} data-tracking-name={s.trackingName || s.org}>
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
@@ -1449,8 +1452,8 @@
                             {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : (s.dir === 'ltr' ? `WhatsApp: ${s.whatsapp}` : `וואטסאפ: ${s.whatsapp}`)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : (s.whatsappLabel || '')}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email} data-tracking-name={`${s.trackingName || s.org}_email`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
-                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר'))}</a>)}
-                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website"><i className={addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף'))}</a>)}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
+                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website" title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}><i className={addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {addIsFacebook ? '' : (s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')))}</a>)}
                         </div>
                     </div>
                 </div>
