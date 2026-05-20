@@ -1432,11 +1432,22 @@
                     setExpandedCats([]);
                     return;
                 }
-                const autoExpand =
+                let autoExpand =
                     sectionCount >= 3
                         ? entries.filter(([, cat]) => getCatServiceCount(cat) <= 3).map(([id]) => id)
                         : entries.map(([id]) => id);
+                const isHaravotBarzel = searchTerm === HARAVOT_BARZEL_SEARCH;
+                if (isHaravotBarzel && entries.some(([id]) => id === 'emergency')) {
+                    autoExpand = ['emergency', ...autoExpand.filter((id) => id !== 'emergency')];
+                }
                 setExpandedCats(autoExpand);
+                if (isHaravotBarzel && autoExpand.includes('emergency')) {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            document.querySelector('[data-analytics-id="subcategory_emergency"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        });
+                    });
+                }
             }, [searchTerm, filtered]);
 
             const renderCategoryContent = (cat, id) => {
@@ -2153,6 +2164,8 @@
                                 fontWeight: 700,
                                 boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
                             }}
+                            title="לחיצה תפעיל חיפוש לכל המענים הרלוונטיים לחרבות ברזל. הרחיבו את המקטעים הרלוונטיים בתוצאות כדי לראות את כל השירותים."
+                            aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים; הרחיבו את המקטעים בתוצאות"
                             data-tracking-name="haravot_barzel_filter"
                         >
                             <i className="fas fa-shield-halved"></i> חרבות ברזל
