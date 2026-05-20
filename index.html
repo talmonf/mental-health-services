@@ -226,6 +226,30 @@
             .replace(/[^a-zA-Z0-9א-ת]+/g, '_')
             .replace(/^_+|_+$/g, '')
             .slice(0, 60);
+        const HARAVOT_BARZEL_SEARCH = 'חרבות ברזל';
+        const HARAVOT_BARZEL_ROWS = new Set([10, 11, 12, 14, 19, 20, 21, 22, 23, 30, 39, 42, 77, 200, 202, 203, 206, 209]);
+        const HARAVOT_BARZEL_BOOKLET = {
+            row: 209,
+            org: 'חרבות ברזל',
+            svc: 'חוברת מענים פסיכוסוציאליים — מדריך מרוכז למלחמת חרבות ברזל',
+            phone: '',
+            web: '',
+            target: 'משרתים, מילואימניקים, משפחות, נוער, נפגעי טרור ונובה, ועוד',
+            region: 'כל הארץ',
+            cost: 'חינם',
+            specialty: '',
+            notes: 'עודכן לאחרונה: יוני 2024. החוברת עשויה להתעדכן; ייתכן שחלק מהפרטים השתנו.',
+            languages: '',
+            diseases: '',
+            add: '/downloads/haravot-barzel-maanaim-psycho-social.pdf',
+            addLabel: 'הורדת החוברת (PDF)',
+            tags: HARAVOT_BARZEL_SEARCH
+        };
+        const mhServiceSearchText = (s) => {
+            const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
+            return `${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${tagPart}`.toLowerCase();
+        };
+
         const mhGetEntryId = (svc, categoryKey) => {
             const org = svc.org || '';
             const desc = svc.svc || '';
@@ -408,9 +432,9 @@
         // Embedded data
         const DATA = {
          "emergency": {"icon": "🆘", "title": "עזרה דחופה", "titleEn": "Emergency Assistance", "desc": "במצב משבר - התקשרו מיד", "services": [
-         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל ומטרתו קבלת סיוע נפשי מיידי, זמין וממוקד. במקרים בהם מתרשם הגורם המטפל כי קיים צורך בהמשך התערבות יופנה המשרת להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
+         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל. זמין 24/7 לחיילים, מילואים וכוחות הביטחון. סיוע נפשי מיידי; במידת הצורך הפניה להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
          {"row": 11, "org": "\"נפש אחת בישראל\"\n(אגף השיקום, משרד הבטחון)", "svc": "קו המעניק תמיכה נפשית ראשונית", "phone": "*8944", "web": "https://shikum.mod.gov.il/ContactUs/helpline", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "קו המופעל על ידי אגף השיקום ומעניק תמיכה נפשית ראשונית לכוחות הביטחון וחיילים וחיילות משוחררים המתמודדים עם פוסט טראומה בעקבות שירותם הצבאי. ניתן לפנות באופן אנונימי.", "languages": "", "diseases": "", "add": ""},
-         {"row": 20, "org": "עמותת ער\"ן (עזרה ראשונה נפשית)", "svc": "קו סיוע והכוונה", "phone": "1201", "web": "https://www.eran.org.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 20, "org": "עמותת ער\"ן (עזרה ראשונה נפשית)", "svc": "קו סיוע והכוונה", "phone": "1201", "phoneLabel": "כללי", "phoneShowNumber": true, "phone2": "*2201", "phoneLabel2": "לחיילים ומילואים", "phoneShowNumber2": true, "whatsapp": "972528451202", "whatsappLabel": "לחיילים · וואטסאפ", "web": "https://www.eran.org.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "1201 — קו כללי. *2201 ו-052-8451202 — לחיילים ומילואים, 24/7.", "languages": "", "diseases": "", "add": ""},
          {"row": 200, "org": "איגוד מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית", "svc": "קווי המענה הארציים של ארגון הגג למרכזי הסיוע", "phone": "1202", "phoneLabel": "מענה נשים", "phoneShowNumber": true, "phone2": "1203", "phoneLabel2": "מענה גברים", "phoneShowNumber2": true, "phone3": "*2511", "phoneLabel3": "נשים · סיוע לחברה הדתית", "phoneShowNumber3": true, "phone4": "02-5328000", "phoneLabel4": "גברים · סיוע לחברה הדתית", "phoneShowNumber4": true, "whatsapp": "972528361202", "whatsappLabel": "סיוע ב-WhatsApp · קולמילה", "web": "https://1202.org.il/", "add": "https://1202kolmila.org.il/", "addLabel": "צ'אט אנונימי · קולמילה", "target": "נפגעות ונפגעי תקיפה מינית ובני משפחותיהם", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": ""},
          {"row": 30, "org": "מרכזי חוסן", "svc": "רשימת מרכזי חוסן ברחבי הארץ", "phone": "*5486", "phoneLabel": "מרכז החוסן הארצי הטיפולי", "phoneShowNumber": false, "web": "https://www.gov.il/he/Departments/DynamicCollectors/resilience-centers-list", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "המרכז פועל בימים א-ה בין השעות 08:00-20:00, ובזמני חירום פועל 24/7", "languages": "", "diseases": "", "add": ""},
 
@@ -420,13 +444,13 @@
 
         
          "helplines": {"icon": "📞", "title": "קווי סיוע", "titleEn": "Helplines", "desc": "תמיכה טלפונית", "services": [
-         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל ומטרתו קבלת סיוע נפשי מיידי, זמין וממוקד. במקרים בהם מתרשם הגורם המטפל כי קיים צורך בהמשך התערבות יופנה המשרת להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
+         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל. זמין 24/7 לחיילים, מילואים וכוחות הביטחון. סיוע נפשי מיידי; במידת הצורך הפניה להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
          {"row": 11, "org": "\"נפש אחת בישראל\"\n(אגף השיקום, משרד הבטחון)", "svc": "קו המעניק תמיכה נפשית ראשונית", "phone": "*8944", "web": "https://shikum.mod.gov.il/ContactUs/helpline", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "קו המופעל על ידי אגף השיקום ומעניק תמיכה נפשית ראשונית לכוחות הביטחון וחיילים וחיילות משוחררים המתמודדים עם פוסט טראומה בעקבות שירותם הצבאי. ניתן לפנות באופן אנונימי.", "languages": "", "diseases": "", "add": ""},
          {"row": 13, "org": "בנפש בריאה - משרד הבריאות", "svc": "קווי סיוע והכוונה", "phone": "", "web": "https://me.health.gov.il/mental-health/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית, אנגלית, רוסית, וערבית", "diseases": "", "add": ""},
          {"row": 15, "org": "מוקד הסיוע של משרד החינוך", "svc": "מוקד סיוע רגשי-חברתי להורים ולתלמידים", "phone": "*6312", "web": "", "target": "הורים ותלמידים", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "משרד החינוך מרחיב את פעילות מוקד הסיוע הרגשי-חברתי להורים ולתלמידים.", "languages": "", "diseases": "", "add": ""},
 
-         {"row": 14, "org": "ביטוח לאומי", "svc": "רשימת מוקדי הטיפול ומרכזי החוסן", "phone": "", "web": "https://www.btl.gov.il/HaravotBarzel1/Harada_HB/Pages/MrkaziHosenResima.aspx", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
-         {"row": 20, "org": "עמותת ער\"ן (עזרה ראשונה נפשית)", "svc": "קו סיוע והכוונה", "phone": "1201", "web": "https://www.eran.org.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 14, "org": "ביטוח לאומי", "svc": "רשימת מוקדי הטיפול ומרכזי החוסן", "phone": "02-6269999", "phoneLabel": "קו חירום לנפגעי טרור", "phoneShowNumber": true, "web": "https://www.btl.gov.il/HaravotBarzel1/Harada_HB/Pages/MrkaziHosenResima.aspx", "target": "נפגעי טרור, שכולות, חטופים ונעדרים", "region": "", "cost": "", "specialty": "", "notes": "מרכזי חוסן לחרבות ברזל. קו חירום: א-ה 8:00-17:00.", "languages": "", "diseases": "", "add": ""},
+         {"row": 20, "org": "עמותת ער\"ן (עזרה ראשונה נפשית)", "svc": "קו סיוע והכוונה", "phone": "1201", "phoneLabel": "כללי", "phoneShowNumber": true, "phone2": "*2201", "phoneLabel2": "לחיילים ומילואים", "phoneShowNumber2": true, "whatsapp": "972528451202", "whatsappLabel": "לחיילים · וואטסאפ", "web": "https://www.eran.org.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "1201 — קו כללי. *2201 ו-052-8451202 — לחיילים ומילואים, 24/7.", "languages": "", "diseases": "", "add": ""},
          {"row": 21, "org": "נט\"ל (נפגעי טראומה על רקע לאומי)", "svc": "תמיכה נפשית ותעסוקתית לנפגעי טראומה ממלחמה וטרור", "phone": "*3362", "web": "https://www.natal.org.il/", "target": "חיילי מילואים, משוחררים ומשפחותיהם", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
 
          {"row": 200, "org": "איגוד מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית", "svc": "קווי המענה הארציים של ארגון הגג למרכזי הסיוע", "phone": "1202", "phoneLabel": "מענה נשים", "phoneShowNumber": true, "phone2": "1203", "phoneLabel2": "מענה גברים", "phoneShowNumber2": true, "phone3": "*2511", "phoneLabel3": "נשים · סיוע לחברה הדתית", "phoneShowNumber3": true, "phone4": "02-5328000", "phoneLabel4": "גברים · סיוע לחברה הדתית", "phoneShowNumber4": true, "whatsapp": "972528361202", "whatsappLabel": "סיוע ב-WhatsApp · קולמילה", "web": "https://1202.org.il/", "add": "https://1202kolmila.org.il/", "addLabel": "צ'אט אנונימי · קולמילה", "target": "נפגעות ונפגעי תקיפה מינית ובני משפחותיהם", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": ""},
@@ -443,9 +467,9 @@
          {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""}]},
         
          "portals": {"icon": "🌐", "title": "פורטלים ומידע", "titleEn": "Information Portals", "desc": "אתרי מידע ואינדקסים", "services": [
-         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": ""},
+         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/treatment/therapy#3", "addLabel": "טיפולים רגשיים במימון"},
          {"row": 13, "org": "בנפש בריאה - משרד הבריאות", "svc": "קווי סיוע והכוונה", "phone": "", "web": "https://me.health.gov.il/mental-health/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית, אנגלית, רוסית, וערבית", "diseases": "", "add": ""},
-         {"row": 14, "org": "ביטוח לאומי", "svc": "רשימת מוקדי הטיפול ומרכזי החוסן", "phone": "", "web": "https://www.btl.gov.il/HaravotBarzel1/Harada_HB/Pages/MrkaziHosenResima.aspx", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 14, "org": "ביטוח לאומי", "svc": "רשימת מוקדי הטיפול ומרכזי החוסן", "phone": "02-6269999", "phoneLabel": "קו חירום לנפגעי טרור", "phoneShowNumber": true, "web": "https://www.btl.gov.il/HaravotBarzel1/Harada_HB/Pages/MrkaziHosenResima.aspx", "target": "נפגעי טרור, שכולות, חטופים ונעדרים", "region": "", "cost": "", "specialty": "", "notes": "מרכזי חוסן לחרבות ברזל. קו חירום: א-ה 8:00-17:00.", "languages": "", "diseases": "", "add": ""},
 
          {"row": 16, "org": "פורטל בריאות הנפש בישראל", "svc": "שירותים למתמודד\nאינדקס מטפלים\nפורומים\nועוד ועוד", "phone": "", "web": "https://www.mh-israel.co.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 17, "org": "החלמה - הנגשת מידע למתמודד נפש ומשפחתו", "svc": "", "phone": "יוסי שמעונוביץ\n054-4749809", "web": "", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -477,7 +501,7 @@
          {"row": 4, "org": "יד מכוונת", "svc": "ייעוץ והכנה בחינם לוועדה הרפואית", "phone": "*2496", "web": "https://www.btl.gov.il/snifim/Pages/yadMechavenet1.aspx", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 5, "org": "משרד הבריאות", "svc": "סל שיקום", "phone": "*5400", "web": "https://www.gov.il/he/service/rehabilitation-support-package", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000) מעניק סל שירותים מקיף, הכולל  שירותי ייעוץ, ליווי ותמיכה בתחומי חיים שונים: תעסוקה, דיור, חברה ופנאי ואחרים. סל השיקום נועד לסייע בתהליך השיקום ובהשתלבות בקהילה.", "languages": "", "diseases": "", "add": "https://www.kolzchut.org.il/he/%D7%A1%D7%9C_%D7%A9%D7%99%D7%A7%D7%95%D7%9D_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9"},
 
-         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": ""},
+         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/treatment/therapy#3", "addLabel": "טיפולים רגשיים במימון"},
          {"row": 57, "org": "מדברים על סל שיקום", "svc": "קבוצה בפייסבוק", "phone": "", "web": "https://www.facebook.com/groups/1391071081763987/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 59, "org": "זה מגיע לכם - ד\"ר גילי תמיר ", "svc": "מיצוי זכויות", "phone": "", "web": "https://www.facebook.com/drgilitamir/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.kan.org.il/content/kan/kan-b/p-10067/"},
 
@@ -504,9 +528,9 @@
          {"row": 62, "org": "עמותת בית חם", "svc": "מרפאות לבריאות הנפש\n", "phone": "כללי: 1599-510-550", "web": "https://www.bayit-cham.org.il/%d7%9e%d7%a8%d7%a4%d7%90%d7%aa-%d7%93%d7%a8%d7%95%d7%a8/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}]}, 
          
          "mod": {"icon": "🎖️", "title": "משרד הבטחון", "titleEn": "Ministry of Defense", "desc": "שירותים לחיילים ונכים", "services": [
-         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל ומטרתו קבלת סיוע נפשי מיידי, זמין וממוקד. במקרים בהם מתרשם הגורם המטפל כי קיים צורך בהמשך התערבות יופנה המשרת להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
+         {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל. זמין 24/7 לחיילים, מילואים וכוחות הביטחון. סיוע נפשי מיידי; במידת הצורך הפניה להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
          {"row": 11, "org": "\"נפש אחת בישראל\"\n(אגף השיקום, משרד הבטחון)", "svc": "קו המעניק תמיכה נפשית ראשונית", "phone": "*8944", "web": "https://shikum.mod.gov.il/ContactUs/helpline", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "קו המופעל על ידי אגף השיקום ומעניק תמיכה נפשית ראשונית לכוחות הביטחון וחיילים וחיילות משוחררים המתמודדים עם פוסט טראומה בעקבות שירותם הצבאי. ניתן לפנות באופן אנונימי.", "languages": "", "diseases": "", "add": ""},
-         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": ""},
+         {"row": 12, "org": "אגף השיקום, משרד הבטחון", "svc": "זכויות למתמודדים עם פגיעה נפשית", "phone": "", "web": "https://shikum.mod.gov.il/rights/injury-type/mental", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "מדריך המרכז את הזכויות העיקריות שחשוב להכיר בתהליך השיקום של המתמודדים עם פגיעה נפשית או פוסט טראומה", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/treatment/therapy#3", "addLabel": "טיפולים רגשיים במימון"},
 
          {"row": 19, "org": "בטיפולנט", "svc": "אינדקס שירותים למענה נפשי וטיפול בפוסט-טראומה", "phone": "", "web": "https://www.betipulnet.co.il/articles/%D7%97%D7%A8%D7%93%D7%94_%D7%95%D7%A4%D7%95%D7%A1%D7%98_%D7%98%D7%A8%D7%90%D7%95%D7%9E%D7%94_%D7%A2%D7%9C_%D7%A8%D7%A7%D7%A2_%D7%9C%D7%90%D7%95%D7%9E%D7%99/", "target": "חיילי סדיר, מילואים ומשוחררים", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 21, "org": "נט\"ל (נפגעי טראומה על רקע לאומי)", "svc": "תמיכה נפשית ותעסוקתית לנפגעי טראומה ממלחמה וטרור", "phone": "*3362", "web": "https://www.natal.org.il/", "target": "חיילי מילואים, משוחררים ומשפחותיהם", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -643,7 +667,7 @@
          {"row": 21, "org": "נט\"ל (נפגעי טראומה על רקע לאומי)", "svc": "תמיכה נפשית ותעסוקתית לנפגעי טראומה ממלחמה וטרור", "phone": "*3362", "web": "https://www.natal.org.il/", "target": "חיילי מילואים, משוחררים ומשפחותיהם", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 201, "org": "תאיר – מרכז הסיוע לנפגעות ולנפגעי תקיפה מינית", "svc": "סיוע וליווי, חינוך ומניעה, קבוצות תמיכה (פרונטלי וזום)", "phone": "", "web": "https://www.tair-1202.org/", "target": "נפגעות ונפגעי תקיפה מינית ובני משפחותיהם", "region": "השפלה מורחבת", "cost": "", "specialty": "", "notes": "קווי המענה הארציים 1202/1203 רשומים תחת \"איגוד מרכזי הסיוע\" בקטגוריית קווי סיוע.", "languages": "", "diseases": "", "add": "https://www.tair-1202.org/support-groups", "addLabel": "קבוצות תמיכה"},
          {"row": 202, "org": "הקואליציה הישראלית לטראומה", "svc": "מידע, הכשרות, מוקדי חוסן ושותפות ארצית בטראומה וחוסן (Israel Trauma Coalition)", "phone": "*5486", "phoneLabel": "מוקד חוסן ארצי", "phoneShowNumber": false, "phone2": "02-5844457", "phoneLabel2": "הדסה – המרכז לילדים לאחר טראומה", "phoneShowNumber2": false, "web": "https://israeltraumacoalition.org/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "שותפות ארגונים ומרכזי חוסן; מענים רגשיים בחירום ובשגרה. אתר דו-לשוני (עברית / English).", "languages": "עברית, English", "diseases": "", "add": ""},
-         {"row": 203, "org": "תלמ", "svc": "רשת ארצית לטיפול פסיכולוגי, אבחון והכשרה — כולל טיפול בטראומה ובמצוקה נפשית.", "phone": "074-7292600", "web": "https://www.telem.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 203, "org": "תלמ", "svc": "רשת ארצית לטיפול פסיכולוגי, אבחון והכשרה — כולל טיפול בטראומה ובמצוקה נפשית.", "phone": "074-7292600", "phoneLabel": "כללי", "phone2": "*2708", "phoneLabel2": "תמיכה נפשית (7:00-20:00)", "phone3": "072-2000272", "phoneLabel3": "תלם חירום", "phoneShowNumber3": true, "whatsapp": "972549297695", "whatsappLabel": "תלם חירום · וואטסאפ (8:00-22:00)", "web": "https://www.telem.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "קווי תמיכה נפשית בחרבות ברזל — פרטים נוספים באתר.", "languages": "", "diseases": "", "add": ""},
          {"row": 206, "org": "מרכז נשימה", "svc": "מודל נשימה — טיפול מסובסד, רשת מטפלים לטראומה מורכבת וגישת גוף–נפש קהילתית.", "phone": "", "web": "https://neshima-ptsd.co.il/%d7%9e%d7%95%d7%93%d7%9c-%d7%a0%d7%a9%d7%99%d7%9e%d7%94/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/share/1EwEPhGBFk/", "addLabel": "פייסבוק"},
          {"row": 39, "org": "אגף השיקום, משרד הבטחון", "svc": "בית בטוח לטיפול מיידי - חלופת אשפוז", "phone": "*8944", "phoneLabel": "מוקד", "phoneShowNumber": false, "phone2": "052-4614896", "phoneLabel2": "באר שבע", "phoneShowNumber2": false, "phone3": "02-6551303", "phoneLabel3": "ירושלים", "phoneShowNumber3": false, "phone4": "052-6669512", "phoneLabel4": "טירת הכרמל", "phoneShowNumber4": false, "phone5": "052-6669512", "phoneLabel5": "תל השומר", "phoneShowNumber5": false, "web": "https://shikum.mod.gov.il/medical/mental-therapy/safe_housing", "target": "נכי ונכות צה\"ל שהוכרו עם פוסט טראומה, או למי שנמצאים בתהליך הכרה על פגיעה נפשית, ונמצאים במשבר נפשי הדורש מיון, חלופת אשפוז זמנית או השגחה", "region": "", "cost": "", "specialty": "", "notes": "הבתים הבטוחים מהווים חלופת אשפוז מיידית ונקודתית למתמודדים עם פוסט טראומה בזמן של משבר נפשי ואישי. ירושלים שלוחה 2815", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/hospitalization/safehouse#1"},
          {"row": 51, "org": "טיפול סומטי \nSomatic Experiencing", "svc": "אינדקס מטפלים", "phone": "", "web": "https://directory.traumahealing.org/", "target": "", "region": "", "cost": "", "specialty": "SE", "notes": "", "languages": "", "diseases": "טראומה", "add": ""},
@@ -766,7 +790,14 @@
         const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
 
         const MentalHealthIsrael = () => {
-            const [searchTerm, setSearchTerm] = useState('');
+            const [searchTerm, setSearchTerm] = useState(() => {
+                try {
+                    const q = new URLSearchParams(window.location.search).get('q');
+                    return q ? decodeURIComponent(q.replace(/\+/g, ' ')).trim() : '';
+                } catch (_) {
+                    return '';
+                }
+            });
             const [expandedCats, setExpandedCats] = useState([]);
                 const [expandedSubsections, setExpandedSubsections] = useState([]);
             const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => {
@@ -911,7 +942,19 @@
                 };
             }, []);
 
-            const data = DATA;
+            const data = useMemo(() => {
+                const bookletCategories = ['emergency', 'helplines', 'trauma'];
+                const out = {};
+                Object.entries(DATA).forEach(([id, cat]) => {
+                    if (bookletCategories.includes(id) && Array.isArray(cat.services)) {
+                        const has = cat.services.some(s => Number(s.row) === 209);
+                        out[id] = has ? cat : { ...cat, services: [HARAVOT_BARZEL_BOOKLET, ...cat.services] };
+                    } else {
+                        out[id] = cat;
+                    }
+                });
+                return out;
+            }, []);
             const LAST_UPDATED = "18.05.2026";            
             
             const TERM_CATEGORIES = {
@@ -1343,24 +1386,33 @@
                 }, 0);
             };
 
+            const applyHaravotBarzelSearch = () => {
+                setSearchTerm(HARAVOT_BARZEL_SEARCH);
+                setSelectedCategoryGroup(null);
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('q', HARAVOT_BARZEL_SEARCH);
+                    window.history.replaceState(null, '', url.pathname + url.search + (window.location.hash || ''));
+                } catch (_) {}
+                requestAnimationFrame(() => {
+                    document.querySelector('.mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            };
+
             const filtered = useMemo(() => {
                 if (!searchTerm) return data;
                 const t = searchTerm.toLowerCase();
                 const r = {};
                 Object.entries(data).forEach(([id, cat]) => {
                     if (Array.isArray(cat.services)) {
-                        const m = cat.services.filter(s =>
-                            `${s.org} ${s.svc} ${s.target} ${s.notes} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''}`.toLowerCase().includes(t)
-                        );
+                        const m = cat.services.filter(s => mhServiceSearchText(s).includes(t));
                         if (m.length) r[id] = { ...cat, services: m };
                         return;
                     }
                     if (cat.subsections) {
                         const matchedSubsections = {};
                         Object.entries(cat.subsections).forEach(([subId, sub]) => {
-                            const m = (sub.services || []).filter(s =>
-                                `${s.org} ${s.svc} ${s.target} ${s.notes} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''}`.toLowerCase().includes(t)
-                            );
+                            const m = (sub.services || []).filter(s => mhServiceSearchText(s).includes(t));
                             if (m.length) matchedSubsections[subId] = { ...sub, services: m };
                         });
                         if (Object.keys(matchedSubsections).length) r[id] = { ...cat, subsections: matchedSubsections };
@@ -1454,7 +1506,18 @@
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : (s.dir === 'ltr' ? `WhatsApp: ${s.whatsapp}` : `וואטסאפ: ${s.whatsapp}`)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : (s.whatsappLabel || '')}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email} data-tracking-name={`${s.trackingName || s.org}_email`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
                             {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
-                            {s.add && (<a href={s.add} target="_blank" rel="noopener noreferrer" style={{background: 'var(--primary)'}} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type="website" title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}><i className={addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {addIsFacebook ? '' : (s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')))}</a>)}
+                            {s.add && (() => {
+                                const isPdfDownload = /\.pdf(\?|$)/i.test(s.add) || s.addDownload;
+                                const addProps = isPdfDownload
+                                    ? { download: s.addDownloadName || 'haravot-barzel-maanaim.pdf', 'data-skip-external-link-check': true }
+                                    : { target: '_blank', rel: 'noopener noreferrer' };
+                                return (
+                                    <a href={s.add} {...addProps} style={{ background: isPdfDownload ? '#c0392b' : 'var(--primary)' }} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type={isPdfDownload ? 'download' : 'website'} title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}>
+                                        <i className={isPdfDownload ? 'fas fa-file-pdf' : (addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt')}></i>
+                                        {addIsFacebook ? '' : (s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')))}
+                                    </a>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -2078,6 +2141,22 @@
                         </div>
                     </div>
                     <div className="mh-btns">
+                        <button
+                            type="button"
+                            onClick={applyHaravotBarzelSearch}
+                            className="mh-btn"
+                            style={{
+                                background: '#8b2635',
+                                color: 'white',
+                                border: '2px solid #6d1e2a',
+                                fontSize: 'var(--text-lg)',
+                                fontWeight: 700,
+                                boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
+                            }}
+                            data-tracking-name="haravot_barzel_filter"
+                        >
+                            <i className="fas fa-shield-halved"></i> חרבות ברזל
+                        </button>
                         {!showIntro && (
                             <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="אתם לא לבד">
                                 <i className="fas fa-heart"></i> אתם לא לבד
@@ -2331,7 +2410,9 @@
                     )}
 
                     {searchTerm ? (
-                        Object.entries(filtered).map(([id, cat]) => (
+                        Object.entries(filtered).length === 0 ? (
+                            <p className="mh-helper-text">לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.</p>
+                        ) : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
