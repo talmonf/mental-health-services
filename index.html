@@ -56,6 +56,65 @@
         .mh-btns { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl); }
         .mh-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-xl); border: none; border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-base); font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; transition: opacity 0.2s; }
         .mh-btn:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-hb-tooltip-wrap { position: relative; display: inline-flex; }
+        .mh-hb-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+            max-width: min(280px, 90vw);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--primary-dark);
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 400;
+            line-height: 1.45;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-elevated);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.15s, visibility 0.15s;
+            z-index: 200;
+        }
+        .mh-hb-tooltip-wrap:hover .mh-hb-tooltip,
+        .mh-hb-tooltip-wrap:focus-within .mh-hb-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mh-hb-launch-banner {
+            background: rgba(139, 38, 53, 0.08);
+            border: 1px solid rgba(139, 38, 53, 0.25);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+            color: var(--text);
+        }
+        .mh-hb-card-cta {
+            width: 100%;
+            min-height: var(--touch-min);
+            margin-bottom: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            border: 2px solid #8b2635;
+            border-radius: var(--radius-md);
+            background: #fff;
+            color: #8b2635;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            box-sizing: border-box;
+        }
+        .mh-hb-card-cta:hover { background: rgba(139, 38, 53, 0.06); }
+        .mh-hb-card-cta:focus { outline: 2px solid #8b2635; outline-offset: 2px; }
         .mh-app a:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-emergency a:focus { outline: 2px solid white; outline-offset: 2px; }
         .mh-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); transition: all 0.2s; }
@@ -813,6 +872,7 @@
             const [termsCategory, setTermsCategory] = useState(null);
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [selectedLetter, setSelectedLetter] = useState(null);
+            const [haravotBarzelLaunchedFrom, setHaravotBarzelLaunchedFrom] = useState(null);
 
             // Sync URL hash when selectedCategoryGroup changes (for analytics page_route)
             useEffect(() => {
@@ -943,7 +1003,7 @@
             }, []);
 
             const data = useMemo(() => {
-                const bookletCategories = ['emergency', 'helplines', 'trauma'];
+                const bookletCategories = ['emergency', 'trauma'];
                 const out = {};
                 Object.entries(DATA).forEach(([id, cat]) => {
                     if (bookletCategories.includes(id) && Array.isArray(cat.services)) {
@@ -1386,7 +1446,8 @@
                 }, 0);
             };
 
-            const applyHaravotBarzelSearch = () => {
+            const applyHaravotBarzelSearch = (launchFrom = 'hero') => {
+                setHaravotBarzelLaunchedFrom(launchFrom);
                 setSearchTerm(HARAVOT_BARZEL_SEARCH);
                 setSelectedCategoryGroup(null);
                 try {
@@ -1491,10 +1552,29 @@
                 const webIsFacebook = isFacebookUrl(s.web);
                 const addIsFacebook = isFacebookUrl(s.add);
                 const fbTitle = s.dir === 'ltr' ? 'Facebook' : 'פייסבוק';
+                const isHbBooklet = Number(s.row) === 209;
+                const hbSearchActive = searchTerm === HARAVOT_BARZEL_SEARCH;
+                const showHbLaunchBanner = isHbBooklet && hbSearchActive && haravotBarzelLaunchedFrom != null;
+                const showHbLaunchCta = isHbBooklet && !showHbLaunchBanner;
                 return (
                 <div className="mh-card" data-entry-id={entryId || undefined} data-tracking-name={s.trackingName || s.org}>
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
                         <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
+                        {showHbLaunchBanner && (
+                            <div className="mh-hb-launch-banner" role="status">
+                                החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.
+                            </div>
+                        )}
+                        {showHbLaunchCta && (
+                            <button
+                                type="button"
+                                className="mh-hb-card-cta"
+                                onClick={() => applyHaravotBarzelSearch('card')}
+                                data-tracking-name="haravot_barzel_filter_from_booklet"
+                            >
+                                <i className="fas fa-shield-halved"></i> הצגת כל המענים לחרבות ברזל
+                            </button>
+                        )}
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
                         {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
@@ -2152,24 +2232,30 @@
                         </div>
                     </div>
                     <div className="mh-btns">
-                        <button
-                            type="button"
-                            onClick={applyHaravotBarzelSearch}
-                            className="mh-btn"
-                            style={{
-                                background: '#8b2635',
-                                color: 'white',
-                                border: '2px solid #6d1e2a',
-                                fontSize: 'var(--text-lg)',
-                                fontWeight: 700,
-                                boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
-                            }}
-                            title="לחיצה תפעיל חיפוש לכל המענים הרלוונטיים לחרבות ברזל. הרחיבו את המקטעים הרלוונטיים בתוצאות כדי לראות את כל השירותים."
-                            aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים; הרחיבו את המקטעים בתוצאות"
-                            data-tracking-name="haravot_barzel_filter"
-                        >
-                            <i className="fas fa-shield-halved"></i> חרבות ברזל
-                        </button>
+                        <span className="mh-hb-tooltip-wrap">
+                            <button
+                                type="button"
+                                onClick={() => applyHaravotBarzelSearch('hero')}
+                                className="mh-btn"
+                                style={{
+                                    background: '#8b2635',
+                                    color: 'white',
+                                    border: '2px solid #6d1e2a',
+                                    fontSize: 'var(--text-lg)',
+                                    fontWeight: 700,
+                                    boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
+                                }}
+                                aria-describedby="mh-hb-tooltip-text"
+                                aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים"
+                                data-tracking-name="haravot_barzel_filter"
+                            >
+                                <i className="fas fa-shield-halved"></i> חרבות ברזל
+                            </button>
+                            <span id="mh-hb-tooltip-text" className="mh-hb-tooltip" role="tooltip">
+                                לחיצה מפעילה חיפוש לכל המענים הרלוונטיים לחרבות ברזל.<br />
+                                הרחיבו את המקטעים בתוצאות כדי לראות את כל השירותים.
+                            </span>
+                        </span>
                         {!showIntro && (
                             <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="אתם לא לבד">
                                 <i className="fas fa-heart"></i> אתם לא לבד
@@ -2407,7 +2493,12 @@
                                 type="text"
                                 placeholder="חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)"
                                 value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); if (e.target.value) setSelectedCategoryGroup(null); }}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    setSearchTerm(v);
+                                    if (v !== HARAVOT_BARZEL_SEARCH) setHaravotBarzelLaunchedFrom(null);
+                                    if (v) setSelectedCategoryGroup(null);
+                                }}
                                 onBlur={(e) => {
                                     const resultsCount = Object.values(filtered).reduce((sum, cat) => sum + getCatServiceCount(cat), 0);
                                     window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });

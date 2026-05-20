@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 008_directory_entries_haravot_barzel_categories.sql
 [x] 007_directory_entries_haravot_barzel.sql
 [x] 006_directory_entries_anat_rusman.sql
 [x] 005_directory_entries_mishpachot.sql
