@@ -7,9 +7,11 @@ alwaysApply: true
 
 When adding or updating directory listings:
 
-1. **Edit `index.html`** — update the `DATA` object (the live UI source).
+1. **Edit `index.html`** — update the `DATA` object (the live UI source) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`).
 2. **Add a numbered migration** under `scripts/` (e.g. `006_...sql`) with `INSERT ... ON CONFLICT` for `directory_entries`.
 3. **Register the migration** at the top of `scripts/database_updates_master.sql`.
+
+For any other published change to `index.html` (UI copy, layout, resources, etc.), update `LAST_UPDATED` the same way.
 
 **Do not** edit or regenerate `directory_entries_insert.sql`. That file is a legacy bulk snapshot; per-entry changes use migrations only.
 
