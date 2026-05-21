@@ -132,6 +132,8 @@
         .mh-cat-title-en { font-size: 0.75rem; opacity: 0.9; }
         .mh-cat-meta { display: flex; align-items: center; gap: var(--space-md); flex-shrink: 0; }
         .mh-cat-desc { padding: var(--space-md) var(--space-lg) var(--space-sm); margin: 0; color: var(--text-muted); font-size: var(--text-base); }
+        .mh-section-link { background: none; border: none; padding: 0; color: var(--primary); font-size: inherit; font-family: inherit; cursor: pointer; text-decoration: underline; text-align: right; }
+        .mh-section-link:hover { color: var(--primary-dark, #1e4460); }
         .mh-cat-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); }
         .mh-emergency { background: var(--danger-bg); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
         .mh-emergency-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
@@ -286,6 +288,7 @@
             .replace(/^_+|_+$/g, '')
             .slice(0, 60);
         const HARAVOT_BARZEL_SEARCH = 'חרבות ברזל';
+        const MH_CLINICS_HARAVOT_ROWS = new Set([221, 226]);
         const HARAVOT_BARZEL_ROWS = new Set([
             10, 11, 12, 14, 19, 20, 21, 22, 23, 30, 39, 42, 77, 200, 202, 203, 206, 209,
             ...Array.from({ length: 34 }, (_, i) => 210 + i)
@@ -319,12 +322,12 @@
             { categories: ["mod"], entry: {"row": 218, "org": "אגף השיקום — טיפולים רגשיים במימון", "svc": "טיפולים נפשיים מסובסדים ע\"י משרד הביטחון (חרבות ברזל)", "phone": "", "web": "https://shikum.mod.gov.il/medical/treatment/therapy#3", "target": "", "region": "כל הארץ", "cost": "במימון משרד הביטחון", "specialty": "", "notes": "גם מופיע בכרטיס זכויות שיקום (שורה 12).", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["trauma", "mod"], entry: {"row": 219, "org": "נשימה מרחב בעמק", "svc": "תוכנית טיפול לפוסט-טראומה — מושב משק פרזון (רישום מוקדם)", "phone": "050-6300138", "web": "", "target": "", "region": "עמק יזרעאל", "cost": "", "specialty": "", "notes": "יעל זיו 054-6633269 · טלי בשור 052-9555210", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "ליאורה דותן", "phoneShowNumber": true} },
             { categories: ["trauma", "therapists"], entry: {"row": 220, "org": "קליניקה לטיפול זוגי ב-PTSD (בר אילן)", "svc": "CBT זוגי במחקר — 15 מפגשים בזום", "phone": "054-7000283", "web": "https://www.biu.ac.il/", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "לזוגות שני בני זוג משתתפים.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "עמית", "phoneShowNumber": true} },
-            { categories: ["trauma", "hmo"], entry: {"row": 221, "org": "קמה — מרפאת כללית", "svc": "טיפול ממוקד טראומה למשרתי/מילואימניקים משוחררים (מלחמה/אובדן)", "phone": "09-7470349", "web": "", "target": "", "region": "כל הארץ", "cost": "במסגרת כללית", "specialty": "", "notes": "פקס 09-7478628 · קוד L0771 · א'-ה' 8:00-15:30", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "מזכירות", "phoneShowNumber": true} },
+            { categories: ["trauma", "mh_clinics"], entry: {"row": 221, "org": "קמה — מרפאת כללית", "svc": "טיפול ממוקד טראומה למשרתי/מילואימניקים משוחררים (מלחמה/אובדן)", "phone": "09-7470349", "web": "", "target": "", "region": "כל הארץ", "cost": "במסגרת כללית", "specialty": "", "notes": "פקס 09-7478628 · קוד L0771 · א'-ה' 8:00-15:30", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "מזכירות", "phoneShowNumber": true} },
             { categories: ["trauma", "youth"], entry: {"row": 222, "org": "אדוות להחלמה (בר אילן)", "svc": "טיפול קצר לילדי מילואימניקים 3-12 ומשפחות", "phone": "", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "התערבות משפחתית לאחר מלחמה.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "email": "family.center@biu.ac.il"} },
             { categories: ["mod", "trauma"], entry: {"row": 223, "org": "מרכז עד קשר", "svc": "סיוע מקצועי לנפגעים בצה\"ל ולבני משפחותיהם", "phone": "*6690", "web": "", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "שלוחה 1111.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "מערך בריאות הנפש", "phoneShowNumber": true} },
             { categories: ["mod", "trauma"], entry: {"row": 224, "org": "מטפלים באהבה", "svc": "רשת מטפלים מוסמכים לחיילים ומילואים — עד 10 מפגשים מסובסדים", "phone": "052-7014283", "web": "https://docs.google.com/spreadsheets/d/1ogTWzHK96WYWpxjwRFSI6ReZqnRE1wBRi0kAc_4RrWA/edit?usp=sharing", "target": "", "region": "כל הארץ", "cost": "מסובסד", "specialty": "", "notes": "החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "זהר", "phoneShowNumber": true} },
             { categories: ["mod", "trauma"], entry: {"row": 225, "org": "אור כי יהל", "svc": "טיפול נפשי ללוחמי גזית/שריון (חטיבה 188) — ללא תשלום", "phone": "052-5531825", "web": "", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "בתיאום עם מערך בריאות הנפש בצה\"ל.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "מיה גזית", "phoneShowNumber": true} },
-            { categories: ["trauma", "hmo"], entry: {"row": 226, "org": "שיב\"א — המרפאה הלאומית", "svc": "עד 12 מפגשים טיפול רגשי ללא עלות", "phone": "072-3553026", "web": "https://www.shiba.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
+            { categories: ["trauma", "mh_clinics"], entry: {"row": 226, "org": "שיב\"א — המרפאה הלאומית", "svc": "עד 12 מפגשים טיפול רגשי ללא עלות", "phone": "072-3553026", "web": "https://www.shiba.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["youth"], entry: {"row": 227, "org": "יתד (משרד הרווחה)", "svc": "שירותים חברתיים לצעירים 18-27", "phone": "", "web": "", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "הפניה דרך מחלקה לשירותים חברתיים.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "email": "YATED@MOLSA.GOV.IL"} },
             { categories: ["trauma"], entry: {"row": 228, "org": "מרפא מרחב (חוות מרפא)", "svc": "טיפול, ליווי ושיקום — רשפון", "phone": "074-7556155", "web": "https://healingspace.co.il/", "target": "", "region": "רשפון", "cost": "", "specialty": "", "notes": "074-7556155 — מוקצה לחוות מרפא מרחב (לא למוקד אנוש).", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "קו סיוע", "phoneShowNumber": true} },
             { categories: ["trauma", "local"], entry: {"row": 229, "org": "משאבים — מרכז גליל", "svc": "מוקד סיוע רגשי מרחוק (מגיל 12) — עברית, ערבית, רוסית, אנגלית", "phone": "04-6900603", "web": "https://forms.gle/3i4Zw5Wu3dHk2AqH8", "target": "", "region": "גליל מזרחי ומערבי", "cost": "חינם", "specialty": "", "notes": "ערבית 04-7702649 · רוסית 04-7702650 · אנגלית 04-7702651 · 24/6", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "עברית", "phoneShowNumber": true} },
@@ -341,7 +344,7 @@
             { categories: ["youth", "portals"], entry: {"row": 240, "org": "מאגר מענים — ילדים ונוער (חרבות ברזל)", "svc": "קישורים למטה להגנה, על\"ם, מצמיחים, בית בטוח לנוער, נע\"ן, עמותת ל.מ.ה, עמ\"י ועוד", "phone": "", "web": "https://www.gov.il/he/pages/children_online_safety", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "ראו גם: eran.org.il ותוכניות משרד הרווחה.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["youth"], entry: {"row": 241, "org": "יחידה להתערבות במשבר — מרכז רפואי העמק (כללית)", "svc": "טיפול משפחתי אינטנסיבי לילדים 6-18", "phone": "", "web": "", "target": "", "region": "עמק יזרעאל", "cost": "", "specialty": "", "notes": "2-3 טיפולים בשבוע, עד 6 שבועות. פנייה: ayol_clalit.org.il", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["populations"], entry: {"row": 242, "org": "מענים לקהילה הגאה (חרבות ברזל)", "svc": "קו סיוע וקישורים — להט\"ב, הורים, דתיים, נוער", "phone": "03-6205591", "web": "", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "קישורים: aguda.org.il, תהלה, נוער גאה.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "להט\"ב", "phoneShowNumber": true} },
-            { categories: ["hmo", "trauma", "helplines"], entry: {"row": 243, "org": "קווי תמיכה נפשית — קופות חולים (חרבות ברזל)", "svc": "3 שיחות טיפוליות מקוונות ללא עלות", "phone": "*2708", "web": "https://www.telem.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "תלם חירום 072-2000272 · מכבי *3028 (8:00-22:00) · מאוחדת *3833 · לאומית *507", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "כללית/תלם", "phoneShowNumber": true, "phone2": "072-2000272", "phoneLabel2": "תלם חירום", "phoneShowNumber2": true, "phone3": "*3028", "phoneLabel3": "מכבי (8:00-22:00)", "phoneShowNumber3": true} },
+            { categories: ["trauma", "helplines"], entry: {"row": 243, "org": "קווי תמיכה נפשית — קופות חולים (חרבות ברזל)", "svc": "3 שיחות טיפוליות מקוונות ללא עלות", "phone": "*2708", "web": "https://www.telem.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "תלם חירום 072-2000272 · מכבי *3028 (8:00-22:00) · מאוחדת *3833 · לאומית *507", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "כללית/תלם", "phoneShowNumber": true, "phone2": "072-2000272", "phoneLabel2": "תלם חירום", "phoneShowNumber2": true, "phone3": "*3028", "phoneLabel3": "מכבי (8:00-22:00)", "phoneShowNumber3": true} },
         ];
         const mhServiceSearchText = (s) => {
             const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
@@ -638,18 +641,22 @@
          {"row": 44, "org": "שרן רפואה עד הבית", "svc": "אשפוז בית פסיכיאטרי", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "כל הארץ", "cost": "זכאי משרד הבטחון", "specialty": "חלופת אשפוז\nמיצוי זכויות", "notes": "", "languages": "", "diseases": "", "add": ""}        
         ]},
          
-         "hmo": {"icon": "🏥", "title": "קופות חולים", "titleEn": "Health Funds", "desc": "מרפאות בריאות הנפש", "services": [
+         "mh_clinics": {"icon": "🏥", "title": "מרפאות בריאות הנפש", "titleEn": "Mental Health Clinics", "desc": "מרפאות ומרכזים לטיפול נפשי בקהילה — לרוב מסובסדים דרך קופת החולים (בהפניה מרופא משפחה)", "services": [
+         {"row": 62, "org": "עמותת בית חם", "svc": "מרפאות לבריאות הנפש\n", "phone": "כללי: 1599-510-550", "web": "https://www.bayit-cham.org.il/%d7%9e%d7%a8%d7%a4%d7%90%d7%aa-%d7%93%d7%a8%d7%95%d7%a8/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 78, "org": "המרכז הירושלמי לבריאות הנפש (כפר שאול-איתנים)", "svc": "המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.", "phone": "", "web": "http://www.psjer.org.il/", "target": "", "region": "ירושלים, בית שמש, מעלה אדומים, מבשרת ציון, יישובי פרוזדור ירושלים", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 65, "org": "מכון למרחב\n(מרכז טיפולי רב תחומי)", "svc": "מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.", "phone": "02-5954571", "web": "https://www.lamerchav.org.il/", "target": "", "region": "מרפאות בירושלים, בית שמש, ביתר עילית, רחובות\n", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
+         {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""},
+         {"row": 90, "org": "ME-MENTAL EXPERTS", "svc": "מרכזים לטיפול רגשי", "phone": "*5806", "whatsapp": "+972723362227", "web": "https://mexp.co.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "iconOnly": true}
+        ]},
+
+         "hmo": {"icon": "🏥", "title": "קופות חולים", "titleEn": "Health Funds", "desc": "מוקדי הקופות לבריאות הנפש", "intro": "קופות החולים מספקות לחבריהן שירותי בריאות נפש רחבים. להלן מוקדי הקופות למידע, תיאום והפניה. בין השירותים הנוספים שמכוסים דרך הקופה:", "sectionLinks": [
+         {"label": "מרפאות בריאות הנפש", "target": "mh_clinics"},
+         {"label": "חלופות אשפוז", "target": "alternatives"}
+         ], "services": [
          {"row": 28, "org": "כללית", "svc": "מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה", "phone": "*2700 | חירום: 1-700-50-70-50", "web": "https://www.clalit.co.il/he/your_health/family/mental_health/Pages/default.aspx", "target": "", "notes": "מסובסד עם המלצה מרופא משפחה", "add": ""},
          {"row": 29, "org": "מכבי", "svc": "מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה", "phone": "*3555 | חירום: 1-800-401-040", "web": "https://www.maccabi4u.co.il/eligibilites/2062/", "target": "", "notes": "מסובסד עם המלצה מרופא משפחה", "add": "https://www.maccabi4u.co.il/31276/digital-services/info/information_mental_health/"},
          {"row": 80, "org": "מאוחדת", "svc": "מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה", "phone": "*3833 | חירום: 1-800-20-20-60", "web": "https://www.meuhedet.co.il/%D7%9E%D7%90%D7%95%D7%97%D7%93%D7%AA-%D7%9C%D7%A0%D7%A4%D7%A9/", "target": "", "notes": "מסובסד עם המלצה מרופא משפחה", "add": ""},
-
-         {"row": 81, "org": "לאומית", "svc": "מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה", "phone": "*507 | חירום: 1-800-240-240", "web": "https://www.leumit.co.il/mental-health-arena/", "target": "", "notes": "מסובסד עם המלצה מרופא משפחה", "add": ""},
-         {"row": 48, "org": "צבר רפואה", "svc": "אשפוז בית פסיכיאטרי", "phone": "", "web": "https://www.sabarhealth.co.il/%d7%a4%d7%a1%d7%99%d7%9b%d7%99%d7%90%d7%98%d7%a8%d7%99%d7%94-%d7%91%d7%91%d7%99%d7%aa/", "target": "", "region": "", "cost": "ממונן ע\"י הקופות: מכבי, מאוחדת ולאומית", "specialty": "חלופת אשפוז", "notes": "", "languages": "", "diseases": "", "add": ""},
-
-         {"row": 43, "org": "שרן רפואה עד הבית", "svc": "אשפוז בית פסיכיאטרי", "phone": "", "web": "https://sharanmedical.co.il/psychiatric-home-hospitalization/", "target": "", "region": "כל הארץ\n(בכללית רק ל 5 מחוזות שלהם)", "cost": "ממונן ע\"י הקופות: כללית, מאוחדת ולאומית", "specialty": "חלופת אשפוז\nמיצוי זכויות", "notes": "חלופה לאשפוז בבית חולים בסביבה הטבעית. טיפול אינטנסיבי של צוות רב-מקצועי למשך 6-8 שבועות.", "languages": "", "diseases": "", "add": ""},
-         {"row": 79, "org": "שרן רפואה עד הבית", "svc": "תוכנית טיפול ביתי ממושך למתמודדים עם מחלת נפש חמורה", "phone": "050-6222026", "email": "lynn.bortz@med-trix.com", "web": "", "target": "בני/ות +18 המתמודדים עם מחלה נפשית חמורה, חוסר התמדה במעקב וטיפול, ריבוי פניות למיון ואשפוזים", "region": "מרכז (כללית ומואחדת), ירושלים (מאוחדת)", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
-         {"row": 46, "org": "שרן רפואה עד הבית", "svc": "פסיכותרפיה מקוונת", "phone": "", "web": "https://sharanmedical.co.il/online-therapy/", "target": "", "region": "", "cost": "ממונן ע\"י הקופות: כללית, \nמאוחדת (בירושלים)", "specialty": "", "notes": "טיפול רגשי מרחוק (Zoom) ע\"י עו\"סים קליניים. \nהסכם ספציפי לירושלים של 30 מפגשים ללא עלות וללא רשימת המתנה.", "languages": "", "diseases": "", "add": ""}
-
+         {"row": 81, "org": "לאומית", "svc": "מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה", "phone": "*507 | חירום: 1-800-240-240", "web": "https://www.leumit.co.il/mental-health-arena/", "target": "", "notes": "מסובסד עם המלצה מרופא משפחה", "add": ""}
         ]}, 
          
          "hospitalization": {"icon": "🏨", "title": "אשפוז", "titleEn": "Hospitalization", "desc": "בתי חולים פסיכיאטריים", "services": [
@@ -857,7 +864,7 @@
                 desc: "מטפלים, סוגי טיפולים, קופות חולים, אשפוז וחלופות",
                 icon: "fa-user-doctor",
                 priority: "normal",
-                subcategories: ["therapists", "treatments", "hmo", "hospitalization", "alternatives", "addictions", "trauma", "nutrition"]
+                subcategories: ["therapists", "treatments", "hmo", "mh_clinics", "hospitalization", "alternatives", "addictions", "trauma", "nutrition"]
             },
             rightsGov: {
                 title: "זכויות ושירותים ממשלתיים",
@@ -885,7 +892,7 @@
             }
         };
 
-        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
+        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
 
         const MentalHealthIsrael = () => {
             const [searchTerm, setSearchTerm] = useState(() => {
@@ -1045,6 +1052,15 @@
                 const bookletCategories = ['emergency', 'trauma'];
                 const out = {};
                 Object.entries(DATA).forEach(([id, cat]) => {
+                    if (cat.subsections) {
+                        const subsections = {};
+                        Object.entries(cat.subsections).forEach(([subId, sub]) => {
+                            const services = (sub.services || []).filter(s => Number(s.row) !== 209);
+                            subsections[subId] = { ...sub, services };
+                        });
+                        out[id] = { ...cat, subsections };
+                        return;
+                    }
                     if (!Array.isArray(cat.services)) {
                         out[id] = cat;
                         return;
@@ -1054,7 +1070,11 @@
                         services = [HARAVOT_BARZEL_BOOKLET, ...services];
                     }
                     const inject = HARAVOT_BARZEL_NEW_ENTRIES
-                        .filter(x => x.categories.includes(id))
+                        .filter(x => {
+                            if (!x.categories.includes(id)) return false;
+                            if (id === 'mh_clinics') return MH_CLINICS_HARAVOT_ROWS.has(Number(x.entry.row));
+                            return true;
+                        })
                         .map(x => x.entry)
                         .filter(e => Number(e.row) !== 209)
                         .filter(e => !services.some(s => Number(s.row) === Number(e.row)));
@@ -1078,6 +1098,7 @@
                 hospitalization: { title: "אשפוז וחלופות", icon: "fa-hospital", color: "#c0392b" },
                 rehabilitation: { title: "שיקום", icon: "fa-arrows-rotate", color: "#9b59b6" },
                 hmo: { title: "קופות חולים", icon: "fa-hospital", color: "#3498db" },
+                mh_clinics: { title: "מרפאות בריאות הנפש", icon: "fa-stethoscope", color: "#3498db" },
                 conditions: { title: "הפרעות ומצבים", icon: "fa-heart-pulse", color: "#e74c3c" },
                 other: { title: "אחר", icon: "fa-info-circle", color: "#95a5a6" }
             };
@@ -1360,7 +1381,7 @@
                     category: "hmo",
                     phone: "*2700",
                     phone2: "1-700-50-70-50",
-                    related: ["hmo", "mental_health_clinic"]
+                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
                 },
                 maccabi: {
                     title: "מכבי",
@@ -1368,7 +1389,7 @@
                     category: "hmo",
                     phone: "*3555",
                     phone2: "1-800-401-040",
-                    related: ["hmo", "mental_health_clinic"]
+                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
                 },
                 meuhedet: {
                     title: "מאוחדת",
@@ -1376,7 +1397,7 @@
                     category: "hmo",
                     phone: "*3833",
                     phone2: "1-800-20-20-60",
-                    related: ["hmo", "mental_health_clinic"]
+                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
                 },
                 leumit: {
                     title: "לאומית",
@@ -1384,7 +1405,7 @@
                     category: "hmo",
                     phone: "*507",
                     phone2: "1-800-240-240",
-                    related: ["hmo", "mental_health_clinic"]
+                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
                 },
                 // Conditions & Disorders
                 ptsd: { 
@@ -1446,8 +1467,8 @@
                 mental_health_clinic: {
                     title: "מרפאת בריאות הנפש",
                     text: "מרפאה של קופת החולים המספקת שירותי בריאות הנפש. כוללת: פסיכיאטרים, פסיכולוגים, עובדים סוציאליים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. ניתן לקבוע תור דרך קופת החולים. חשוב להביא הפניה מרופא משפחה ומסמכים רפואיים רלוונטיים.",
-                    category: "other",
-                    related: ["hmo", "psychiatrist", "psychologist"]
+                    category: "mh_clinics",
+                    related: ["mh_clinics", "hmo", "psychiatrist", "psychologist"]
                 },
                 psychiatric_er: {
                     title: "חדר מיון פסיכיאטרי",
@@ -1480,6 +1501,40 @@
             const toggleSubsection = (categoryId, subId) => {
                 const key = `${categoryId}_${subId}`;
                 setExpandedSubsections(p => p.includes(key) ? p.filter(x => x !== key) : [...p, key]);
+            };
+            const scrollToTreatmentSubcategory = (catId) => {
+                setSelectedCategoryGroup('treatment');
+                setExpandedCats(p => (p.includes(catId) ? p : [...p, catId]));
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        document.querySelector(`[data-analytics-id="subcategory_${catId}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+            };
+            const CategoryIntro = ({ cat, showSectionLinks }) => {
+                if (!cat.intro && !cat.desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
+                return (
+                    <div className="mh-cat-desc">
+                        {cat.intro && <p style={{ margin: '0 0 var(--space-md)' }}>{cat.intro}</p>}
+                        {showSectionLinks && cat.sectionLinks?.length > 0 && (
+                            <ul style={{ margin: '0 0 var(--space-md)', paddingRight: 'var(--space-lg)' }}>
+                                {cat.sectionLinks.map(link => (
+                                    <li key={link.target} style={{ marginBottom: 'var(--space-xs)' }}>
+                                        <button
+                                            type="button"
+                                            className="mh-section-link"
+                                            onClick={() => scrollToTreatmentSubcategory(link.target)}
+                                            data-tracking-name={`jump_${link.target}`}
+                                        >
+                                            {link.label}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {cat.desc && <p style={{ margin: 0 }}>{cat.desc}</p>}
+                    </div>
+                );
             };
             const getCatServices = (cat) => {
                 if (!cat) return [];
@@ -2585,7 +2640,7 @@
                                 </div>
                                 {expandedCats.includes(id) && (
                                     <div>
-                                        <p className="mh-cat-desc">{cat.desc}</p>
+                                        <CategoryIntro cat={cat} showSectionLinks={!!cat.sectionLinks?.length} />
                                         {renderCategoryContent(cat, id)}
                                     </div>
                                 )}
@@ -2613,7 +2668,7 @@
                                         </div>
                                         {expandedCats.includes(id) && (
                                             <div>
-                                                <p className="mh-cat-desc">{cat.desc}</p>
+                                                <CategoryIntro cat={cat} showSectionLinks={!!cat.sectionLinks?.length} />
                                                 {renderCategoryContent(cat, id)}
                                             </div>
                                         )}

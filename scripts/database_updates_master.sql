@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 011_directory_entries_mh_clinics_section.sql
 [x] 010_directory_entries_haravot_barzel_patch.sql
 [x] 009_directory_entries_haravot_barzel_orgs.sql
 [x] 008_directory_entries_haravot_barzel_categories.sql
