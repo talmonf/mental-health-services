@@ -473,7 +473,9 @@
                 }
                 const utm = mhParseUtmParams();
                 const payload = {
+                    ...props,
                     event_id: mhGenerateId(),
+                    // Always win over any props.event_type so callers cannot accidentally overwrite.
                     event_type: eventType,
                     occurred_at: new Date().toISOString(),
                     page_url: url,
@@ -486,8 +488,7 @@
                     user_pseudo_id: mhGetOrCreateUserId(),
                     user_agent: navigator.userAgent,
                     viewport_width: window.innerWidth,
-                    viewport_height: window.innerHeight,
-                    ...props
+                    viewport_height: window.innerHeight
                 };
 
                 const body = JSON.stringify(payload);
@@ -520,10 +521,15 @@
         /** Avoid logging a duplicate search when focus moves to a share/copy control. */
         const mhBlurIsShareAction = (relatedTarget) => {
             try {
+                if (window.__mhSuppressSearchBlur) return true;
                 return !!(relatedTarget && relatedTarget.closest && relatedTarget.closest('[data-analytics-type="share"]'));
             } catch {
-                return false;
+                return !!window.__mhSuppressSearchBlur;
             }
+        };
+        const mhArmShareCopy = () => {
+            window.__mhSuppressSearchBlur = true;
+            window.setTimeout(() => { window.__mhSuppressSearchBlur = false; }, 800);
         };
 
         const mhInitClickTracking = () => {
@@ -606,13 +612,52 @@
             try {
                 const origin = window.location.origin || '';
                 const hostname = window.location.hostname || '';
-                mhTrackEvent('page_view', {
-                    section: 'landing',
+                let q = '';
+                let entry = '';
+                let section = '';
+                try {
+                    const params = new URLSearchParams(window.location.search || '');
+                    q = (params.get('q') || '').trim();
+                    entry = (params.get('entry') || '').trim();
+                    section = (params.get('section') || '').trim();
+                } catch (_) {}
+                const base = {
                     element_id: 'landing',
                     element_type: 'page_load',
                     entry_hostname: hostname,
                     entry_origin: origin,
                     entry_url: window.location.href
+                };
+                if (q) {
+                    window.__mhDeepLinkTracked = window.__mhDeepLinkTracked || {};
+                    window.__mhDeepLinkTracked.search = true;
+                    mhTrackEvent('search_link_opened', {
+                        ...base,
+                        section: 'deep_link',
+                        element_id: 'open_search_link',
+                        element_type: 'search_link_opened',
+                        element_text_short: q.slice(0, 80),
+                        search_query: mhSanitizeSearchQuery(q),
+                        search_location: 'search_link_opened'
+                    }, { forceFetch: true });
+                    return;
+                }
+                if (entry) {
+                    window.__mhDeepLinkTracked = window.__mhDeepLinkTracked || {};
+                    window.__mhDeepLinkTracked.entry = true;
+                    mhTrackEvent('entry_link_opened', {
+                        ...base,
+                        section: section || 'deep_link',
+                        element_id: 'open_entry_link',
+                        element_type: 'entry_link_opened',
+                        element_text_short: entry.slice(0, 80),
+                        entry_id: entry
+                    }, { forceFetch: true });
+                    return;
+                }
+                mhTrackEvent('page_view', {
+                    ...base,
+                    section: 'landing'
                 });
             } catch (_) {
                 mhTrackEvent('page_view', { section: 'landing', element_id: 'landing' });
@@ -1048,28 +1093,29 @@
                 handledDeepLinkRef.current = null;
             }, [requestedEntryId, requestedSectionId]);
 
-            // Record deep-link opens once per page load (shared search / shared card).
+            // Record deep-link opens once per page load if landing tracker did not already.
             useEffect(() => {
-                if (initialUrlState.q && !deepLinkAnalyticsRef.current.search) {
+                const already = window.__mhDeepLinkTracked || {};
+                if (initialUrlState.q && !deepLinkAnalyticsRef.current.search && !already.search) {
                     deepLinkAnalyticsRef.current.search = true;
-                    window.mhAnalytics?.trackEvent('deep_link', {
+                    window.mhAnalytics?.trackEvent('search_link_opened', {
                         section: 'deep_link',
                         element_id: 'open_search_link',
-                        element_type: 'open_search',
+                        element_type: 'search_link_opened',
                         element_text_short: initialUrlState.q.slice(0, 80),
                         search_query: mhSanitizeSearchQuery(initialUrlState.q),
-                        search_location: 'deep_link'
-                    });
+                        search_location: 'search_link_opened'
+                    }, { forceFetch: true });
                 }
-                if (initialUrlState.entry && !deepLinkAnalyticsRef.current.entry) {
+                if (initialUrlState.entry && !deepLinkAnalyticsRef.current.entry && !already.entry) {
                     deepLinkAnalyticsRef.current.entry = true;
-                    window.mhAnalytics?.trackEvent('deep_link', {
+                    window.mhAnalytics?.trackEvent('entry_link_opened', {
                         section: initialUrlState.section || 'deep_link',
                         element_id: 'open_entry_link',
-                        element_type: 'open_entry',
+                        element_type: 'entry_link_opened',
                         element_text_short: initialUrlState.entry.slice(0, 80),
                         entry_id: initialUrlState.entry
-                    });
+                    }, { forceFetch: true });
                 }
             }, []);
 
@@ -1707,8 +1753,8 @@
                 }, 2000);
             };
             const trackShareEvent = (props = {}) => {
-                // Keep event_type strictly `share` so these rows are distinct from `search`.
                 const {
+                    event_type = 'share',
                     element_id = 'copy_link',
                     element_type = 'share',
                     element_text_short = null,
@@ -1716,17 +1762,20 @@
                     entry_id = null,
                     section = 'deep_link'
                 } = props || {};
-                window.mhAnalytics?.trackEvent('share', {
+                const track = window.mhAnalytics?.trackEvent || mhTrackEvent;
+                track(event_type, {
                     section,
                     element_id,
                     element_type,
                     element_text_short,
                     search_query: search_query || null,
-                    search_location: 'share',
+                    search_location: event_type,
                     entry_id: entry_id || null
                 }, { forceFetch: true });
             };
             const copyText = async (text, { toastMessage: successToast = null, onSuccess = null, analyticsProps = null } = {}) => {
+                // Record the share attempt immediately so analytics does not depend on clipboard timing/permissions.
+                if (analyticsProps) trackShareEvent(analyticsProps);
                 try {
                     if (navigator.clipboard?.writeText) {
                         await navigator.clipboard.writeText(text);
@@ -1741,17 +1790,10 @@
                         document.execCommand('copy');
                         document.body.removeChild(textarea);
                     }
-                    if (analyticsProps) trackShareEvent(analyticsProps);
                     if (typeof onSuccess === 'function') onSuccess();
                     else if (successToast) showToast(successToast);
                 } catch (_) {
                     window.prompt('העתיקו את הקישור:', text);
-                    if (analyticsProps) {
-                        trackShareEvent({
-                            ...analyticsProps,
-                            element_text_short: ((analyticsProps.element_text_short || 'copy_link') + ' (prompt_fallback)').slice(0, 80)
-                        });
-                    }
                     if (typeof onSuccess === 'function') onSuccess();
                 }
             };
@@ -2001,20 +2043,24 @@
                             <button
                                 type="button"
                                 className={`mh-card-copy-link${s.dir === 'ltr' ? ' mh-card-copy-link-ltr' : ''}${copiedEntryId === entryId ? ' mh-card-copy-link-copied' : ''}`}
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => copyText(
-                                    buildEntryLink({ entryId, categoryId: categoryKey }),
-                                    {
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    mhArmShareCopy();
+                                }}
+                                onClick={() => {
+                                    const link = buildEntryLink({ entryId, categoryId: categoryKey });
+                                    copyText(link, {
                                         onSuccess: () => markEntryLinkCopied(entryId),
                                         analyticsProps: {
-                                            element_id: 'copy_entry_link',
-                                            element_type: 'share_entry',
-                                            element_text_short: `copied_entry:${s.org || entryId || ''}`.slice(0, 80),
+                                            event_type: 'card_link_copied',
+                                            element_id: 'copy_card_link',
+                                            element_type: 'card_link_copied',
+                                            element_text_short: `copied_card:${s.org || entryId || ''}`.slice(0, 80),
                                             entry_id: entryId,
                                             section: categoryKey || 'deep_link'
                                         }
-                                    }
-                                )}
+                                    });
+                                }}
                                 title={copiedEntryId === entryId
                                     ? (s.dir === 'ltr' ? 'Link copied' : 'הקישור הועתק')
                                     : (s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף')}
@@ -2994,14 +3040,18 @@
                                 <button
                                     type="button"
                                     className="mh-btn"
-                                    onMouseDown={(e) => e.preventDefault()}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        mhArmShareCopy();
+                                    }}
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
                                         {
                                             toastMessage: 'קישור לחיפוש הועתק',
                                             analyticsProps: {
+                                                event_type: 'search_link_copied',
                                                 element_id: 'copy_search_link',
-                                                element_type: 'share_search',
+                                                element_type: 'search_link_copied',
                                                 element_text_short: `copied_search:${searchTerm.trim()}`.slice(0, 80),
                                                 search_query: mhSanitizeSearchQuery(searchTerm),
                                                 section: 'deep_link'
