@@ -134,6 +134,10 @@
         .mh-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); transition: all 0.2s; }
         .mh-card-inner { padding: var(--space-md); }
         .mh-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); }
+        .mh-card.mh-card-targeted {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18), var(--shadow-elevated);
+        }
         .mh-card-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
         .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -240,7 +244,7 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useMemo, useEffect, useRef } = React;
 
         // Lightweight privacy-friendly analytics helper
         const MH_ANALYTICS_CONFIG = {
@@ -373,6 +377,37 @@
             const baseSlug = (displayName && displayName.trim() !== '') ? mhSlugify(displayName) : `${categoryKey}_${rowId}`;
             return `${baseSlug || categoryKey}_${rowId}`;
         };
+        const mhGetCategoryGroupForCategory = (categoryId) => {
+            const found = Object.entries(CATEGORY_GROUPS).find(([, group]) => group.subcategories.includes(categoryId));
+            return found ? found[0] : null;
+        };
+        const mhReadUrlState = () => {
+            try {
+                const url = new URL(window.location.href);
+                const rawGroup = (url.hash || '').replace(/^#/, '').trim();
+                return {
+                    q: (url.searchParams.get('q') || '').trim(),
+                    entry: (url.searchParams.get('entry') || '').trim(),
+                    section: (url.searchParams.get('section') || '').trim(),
+                    group: Object.prototype.hasOwnProperty.call(CATEGORY_GROUPS, rawGroup) ? rawGroup : ''
+                };
+            } catch {
+                return { q: '', entry: '', section: '', group: '' };
+            }
+        };
+        const mhReplaceUrlState = ({ q, entry, section, group }) => {
+            try {
+                const url = new URL(window.location.href);
+                if (q) url.searchParams.set('q', q);
+                else url.searchParams.delete('q');
+                if (entry) url.searchParams.set('entry', entry);
+                else url.searchParams.delete('entry');
+                if (section) url.searchParams.set('section', section);
+                else url.searchParams.delete('section');
+                url.hash = group ? `#${group}` : '';
+                window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+            } catch (_) {}
+        };
 
         const mhParseUtmParams = () => {
             try {
@@ -448,6 +483,8 @@
                 const el = event.target.closest('[data-analytics-id],[data-tracking-name]');
                 if (!el) return;
                 if (el.matches?.('[data-probe-external-link]')) return;
+                // Share/deep-link copy buttons fire a dedicated `share` event after a successful copy.
+                if (el.getAttribute('data-analytics-type') === 'share') return;
                 const elementId = el.getAttribute('data-analytics-id') || el.getAttribute('data-tracking-name');
                 if (!elementId) return;
                 const tagName = el.tagName ? el.tagName.toLowerCase() : 'element';
@@ -910,22 +947,15 @@
         const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
 
         const MentalHealthIsrael = () => {
-            const [searchTerm, setSearchTerm] = useState(() => {
-                try {
-                    const q = new URLSearchParams(window.location.search).get('q');
-                    return q ? decodeURIComponent(q.replace(/\+/g, ' ')).trim() : '';
-                } catch (_) {
-                    return '';
-                }
-            });
+            const initialUrlState = mhReadUrlState();
+            const [searchTerm, setSearchTerm] = useState(() => initialUrlState.q);
             const [expandedCats, setExpandedCats] = useState([]);
-                const [expandedSubsections, setExpandedSubsections] = useState([]);
-            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => {
-                try {
-                    const g = (typeof window !== 'undefined' && window.location.hash || '').replace(/^#/, '');
-                    return Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
-                } catch { return null; }
-            });
+            const [expandedSubsections, setExpandedSubsections] = useState([]);
+            const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => initialUrlState.group || null);
+            const [requestedEntryId, setRequestedEntryId] = useState(() => initialUrlState.entry || null);
+            const [requestedSectionId, setRequestedSectionId] = useState(() => initialUrlState.section || null);
+            const [highlightedEntryKey, setHighlightedEntryKey] = useState(null);
+            const [toastMessage, setToastMessage] = useState('');
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -934,23 +964,63 @@
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [selectedLetter, setSelectedLetter] = useState(null);
             const [haravotBarzelLaunchedFrom, setHaravotBarzelLaunchedFrom] = useState(null);
+            const handledDeepLinkRef = useRef(null);
+            const highlightTimeoutRef = useRef(null);
+            const toastTimeoutRef = useRef(null);
+            const deepLinkAnalyticsRef = useRef({ search: false, entry: false });
 
-            // Sync URL hash when selectedCategoryGroup changes (for analytics page_route)
+            // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
-                const want = selectedCategoryGroup ? '#' + selectedCategoryGroup : '';
-                if (window.location.hash !== want) {
-                    try { window.history.replaceState(null, '', (window.location.pathname || '/') + (window.location.search || '') + want); } catch (_) {}
-                }
-            }, [selectedCategoryGroup]);
-            // Sync state when user manually changes URL hash (e.g. bookmark, back/forward)
+                mhReplaceUrlState({
+                    q: searchTerm.trim(),
+                    entry: requestedEntryId,
+                    section: requestedSectionId,
+                    group: selectedCategoryGroup
+                });
+            }, [searchTerm, requestedEntryId, requestedSectionId, selectedCategoryGroup]);
+            // Sync state when the browser URL changes manually or via navigation.
             useEffect(() => {
-                const onHashChange = () => {
-                    const g = (window.location.hash || '').replace(/^#/, '');
-                    const next = Object.keys(CATEGORY_GROUPS || {}).includes(g) ? g : null;
-                    setSelectedCategoryGroup(prev => (prev !== next ? next : prev));
+                const syncFromUrl = () => {
+                    const next = mhReadUrlState();
+                    setSearchTerm(prev => (prev !== next.q ? next.q : prev));
+                    setRequestedEntryId(prev => (prev !== (next.entry || null) ? (next.entry || null) : prev));
+                    setRequestedSectionId(prev => (prev !== (next.section || null) ? (next.section || null) : prev));
+                    setSelectedCategoryGroup(prev => (prev !== (next.group || null) ? (next.group || null) : prev));
                 };
-                window.addEventListener('hashchange', onHashChange);
-                return () => window.removeEventListener('hashchange', onHashChange);
+                window.addEventListener('hashchange', syncFromUrl);
+                window.addEventListener('popstate', syncFromUrl);
+                return () => {
+                    window.removeEventListener('hashchange', syncFromUrl);
+                    window.removeEventListener('popstate', syncFromUrl);
+                };
+            }, []);
+            useEffect(() => {
+                handledDeepLinkRef.current = null;
+            }, [requestedEntryId, requestedSectionId]);
+
+            // Record deep-link opens once per page load (shared search / shared card).
+            useEffect(() => {
+                if (initialUrlState.q && !deepLinkAnalyticsRef.current.search) {
+                    deepLinkAnalyticsRef.current.search = true;
+                    window.mhAnalytics?.trackEvent('deep_link', {
+                        section: 'deep_link',
+                        element_id: 'open_search_link',
+                        element_type: 'open_search',
+                        element_text_short: initialUrlState.q.slice(0, 80),
+                        search_query: mhSanitizeSearchQuery(initialUrlState.q),
+                        search_location: 'deep_link'
+                    });
+                }
+                if (initialUrlState.entry && !deepLinkAnalyticsRef.current.entry) {
+                    deepLinkAnalyticsRef.current.entry = true;
+                    window.mhAnalytics?.trackEvent('deep_link', {
+                        section: initialUrlState.section || 'deep_link',
+                        element_id: 'open_entry_link',
+                        element_type: 'open_entry',
+                        element_text_short: initialUrlState.entry.slice(0, 80),
+                        entry_id: initialUrlState.entry
+                    });
+                }
             }, []);
 
             /* Outbound http(s) links: probe via same-origin API before navigation (404/410/5xx → alert; else open). */
@@ -1116,6 +1186,27 @@
                 });
                 return out;
             }, []);
+            const entryTargets = useMemo(() => {
+                const targets = {};
+                Object.entries(data).forEach(([categoryId, cat]) => {
+                    const groupId = mhGetCategoryGroupForCategory(categoryId);
+                    const addTarget = (svc, subsectionId = null) => {
+                        const entryId = mhGetEntryId(svc, categoryId);
+                        if (!entryId) return;
+                        if (!targets[entryId]) targets[entryId] = [];
+                        targets[entryId].push({ entryId, groupId, categoryId, subsectionId });
+                    };
+                    if (Array.isArray(cat.services)) {
+                        cat.services.forEach((svc) => addTarget(svc));
+                    }
+                    if (cat.subsections) {
+                        Object.entries(cat.subsections).forEach(([subsectionId, subsection]) => {
+                            (subsection.services || []).forEach((svc) => addTarget(svc, subsectionId));
+                        });
+                    }
+                });
+                return targets;
+            }, [data]);
             const LAST_UPDATED = "04.08.2026";            
             
             const TERM_CATEGORIES = {
@@ -1538,6 +1629,66 @@
                     });
                 });
             };
+            const showToast = (message) => {
+                setToastMessage(message);
+                if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
+                toastTimeoutRef.current = window.setTimeout(() => {
+                    setToastMessage('');
+                    toastTimeoutRef.current = null;
+                }, 2600);
+            };
+            const trackShareEvent = (props = {}) => {
+                window.mhAnalytics?.trackEvent('share', {
+                    section: 'deep_link',
+                    element_type: 'share',
+                    ...props
+                });
+            };
+            const copyText = async (text, successMessage, analyticsProps = null) => {
+                try {
+                    if (navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(text);
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        textarea.setAttribute('readonly', '');
+                        textarea.style.position = 'absolute';
+                        textarea.style.left = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    }
+                    showToast(successMessage);
+                    if (analyticsProps) trackShareEvent(analyticsProps);
+                } catch (_) {
+                    window.prompt('העתיקו את הקישור:', text);
+                    if (analyticsProps) {
+                        trackShareEvent({
+                            ...analyticsProps,
+                            element_text_short: ((analyticsProps.element_text_short || '') + ' (prompt_fallback)').slice(0, 80)
+                        });
+                    }
+                }
+            };
+            const buildSearchLink = (query) => {
+                const trimmed = String(query || '').trim();
+                const url = new URL(window.location.href);
+                url.search = '';
+                url.hash = '';
+                if (trimmed) url.searchParams.set('q', trimmed);
+                return url.toString();
+            };
+            const buildEntryLink = ({ entryId, categoryId }) => {
+                const groupId = mhGetCategoryGroupForCategory(categoryId);
+                const url = new URL(window.location.href);
+                url.search = '';
+                url.hash = '';
+                url.searchParams.set('entry', entryId);
+                url.searchParams.set('section', categoryId);
+                if (groupId) url.hash = `#${groupId}`;
+                return url.toString();
+            };
             const CategoryIntro = ({ cat, showSectionLinks }) => {
                 if (!cat.intro && !cat.desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
                 return (
@@ -1586,11 +1737,9 @@
                 setHaravotBarzelLaunchedFrom(launchFrom);
                 setSearchTerm(HARAVOT_BARZEL_SEARCH);
                 setSelectedCategoryGroup(null);
-                try {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('q', HARAVOT_BARZEL_SEARCH);
-                    window.history.replaceState(null, '', url.pathname + url.search + (window.location.hash || ''));
-                } catch (_) {}
+                setRequestedEntryId(null);
+                setRequestedSectionId(null);
+                handledDeepLinkRef.current = null;
                 requestAnimationFrame(() => {
                     document.querySelector('.mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
@@ -1617,6 +1766,20 @@
                 });
                 return r;
             }, [searchTerm]);
+            const resolvedEntryTarget = useMemo(() => {
+                if (!requestedEntryId) return null;
+                const candidates = entryTargets[requestedEntryId] || [];
+                if (!candidates.length) return null;
+                if (requestedSectionId) {
+                    const exactSection = candidates.find((target) => target.categoryId === requestedSectionId);
+                    if (exactSection) return exactSection;
+                }
+                if (selectedCategoryGroup) {
+                    const sameGroup = candidates.find((target) => target.groupId === selectedCategoryGroup);
+                    if (sameGroup) return sameGroup;
+                }
+                return candidates[0];
+            }, [entryTargets, requestedEntryId, requestedSectionId, selectedCategoryGroup]);
 
             // Search results: auto-expand so matches are visible without extra clicks.
             // When 3+ sections match: expand only sections with ≤3 items (keeps long lists folded).
@@ -1646,6 +1809,53 @@
                     });
                 }
             }, [searchTerm, filtered]);
+            useEffect(() => {
+                if (!resolvedEntryTarget) return;
+                const { entryId, groupId, categoryId, subsectionId } = resolvedEntryTarget;
+                const subsectionKey = subsectionId ? `${categoryId}_${subsectionId}` : null;
+                let changed = false;
+                if (groupId && selectedCategoryGroup !== groupId) {
+                    setSelectedCategoryGroup(groupId);
+                    changed = true;
+                }
+                if (!expandedCats.includes(categoryId)) {
+                    setExpandedCats((prev) => (prev.includes(categoryId) ? prev : [...prev, categoryId]));
+                    changed = true;
+                }
+                if (subsectionKey && !expandedSubsections.includes(subsectionKey)) {
+                    setExpandedSubsections((prev) => (prev.includes(subsectionKey) ? prev : [...prev, subsectionKey]));
+                    changed = true;
+                }
+                if (changed) return;
+                const handledKey = `${groupId || ''}:${categoryId}:${subsectionId || ''}:${entryId}`;
+                if (handledDeepLinkRef.current === handledKey) return;
+                const runScroll = () => {
+                    const selector = [
+                        `.mh-card[data-entry-id="${entryId}"]`,
+                        `[data-entry-category="${categoryId}"]`,
+                        subsectionId ? `[data-entry-subsection="${subsectionId}"]` : ''
+                    ].join('');
+                    const targetEl = document.querySelector(selector);
+                    if (!targetEl) return;
+                    handledDeepLinkRef.current = handledKey;
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setHighlightedEntryKey(handledKey);
+                };
+                requestAnimationFrame(() => requestAnimationFrame(runScroll));
+            }, [resolvedEntryTarget, selectedCategoryGroup, expandedCats, expandedSubsections]);
+            useEffect(() => {
+                if (!highlightedEntryKey) return undefined;
+                if (highlightTimeoutRef.current) window.clearTimeout(highlightTimeoutRef.current);
+                highlightTimeoutRef.current = window.setTimeout(() => {
+                    setHighlightedEntryKey((current) => (current === highlightedEntryKey ? null : current));
+                }, 4000);
+                return () => {
+                    if (highlightTimeoutRef.current) {
+                        window.clearTimeout(highlightTimeoutRef.current);
+                        highlightTimeoutRef.current = null;
+                    }
+                };
+            }, [highlightedEntryKey]);
 
             const renderCategoryContent = (cat, id) => {
                 if (cat.subsections) {
@@ -1669,7 +1879,7 @@
                             </div>
                             {expandedSubsections.includes(`${id}_${subId}`) && (
                                 <div className="mh-cat-grid">
-                                    {(sub.services || []).map((s, i) => <Card key={`${subId}_${i}`} s={s} categoryKey={id} />)}
+                                    {(sub.services || []).map((s, i) => <Card key={`${subId}_${i}`} s={s} categoryKey={id} subsectionId={subId} />)}
                                 </div>
                             )}
                         </div>
@@ -1677,13 +1887,15 @@
                 }
                 return (
                     <div className="mh-cat-grid">
-                        {(cat.services || []).map((s, i) => <Card key={i} s={s} categoryKey={id} />)}
+                        {(cat.services || []).map((s, i) => <Card key={i} s={s} categoryKey={id} subsectionId={null} />)}
                     </div>
                 );
             };
 
-            const Card = ({ s, categoryKey }) => {
+            const Card = ({ s, categoryKey, subsectionId }) => {
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
+                const entryTargetKey = `${mhGetCategoryGroupForCategory(categoryKey) || ''}:${categoryKey}:${subsectionId || ''}:${entryId || ''}`;
+                const isTargeted = entryId && highlightedEntryKey === entryTargetKey;
                 const isFacebookUrl = (url) => url && /facebook\.com|fb\.com|fb\.watch/i.test(url);
                 const webIsFacebook = isFacebookUrl(s.web);
                 const addIsFacebook = isFacebookUrl(s.add);
@@ -1693,7 +1905,13 @@
                 const showHbLaunchBanner = isHbBooklet && hbSearchActive && haravotBarzelLaunchedFrom != null;
                 const showHbLaunchCta = isHbBooklet && !showHbLaunchBanner;
                 return (
-                <div className="mh-card" data-entry-id={entryId || undefined} data-tracking-name={s.trackingName || s.org}>
+                <div
+                    className={`mh-card ${isTargeted ? 'mh-card-targeted' : ''}`}
+                    data-entry-id={entryId || undefined}
+                    data-entry-category={categoryKey || undefined}
+                    data-entry-subsection={subsectionId || undefined}
+                    data-tracking-name={s.trackingName || s.org}
+                >
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
                         <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
                         {showHbLaunchBanner && (
@@ -1724,6 +1942,28 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
+                            {entryId && (
+                                <button
+                                    type="button"
+                                    onClick={() => copyText(
+                                        buildEntryLink({ entryId, categoryId: categoryKey }),
+                                        'קישור לכרטיס הועתק',
+                                        {
+                                            element_id: 'copy_entry_link',
+                                            element_type: 'share_entry',
+                                            element_text_short: (s.org || entryId || '').slice(0, 80),
+                                            entry_id: entryId,
+                                            section: categoryKey || 'deep_link'
+                                        }
+                                    )}
+                                    style={{ background: '#6c757d' }}
+                                    title={s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף'}
+                                    data-tracking-name={`${s.trackingName || s.org}_copy_link`}
+                                    data-analytics-type="share"
+                                >
+                                    <i className="fas fa-link"></i> {s.dir === 'ltr' ? 'Copy link' : 'העתק קישור'}
+                                </button>
+                            )}
                             {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
                             {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
                             {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
@@ -2634,6 +2874,11 @@
                                     const v = e.target.value;
                                     setSearchTerm(v);
                                     if (v !== HARAVOT_BARZEL_SEARCH) setHaravotBarzelLaunchedFrom(null);
+                                    if (requestedEntryId) {
+                                        setRequestedEntryId(null);
+                                        setRequestedSectionId(null);
+                                        handledDeepLinkRef.current = null;
+                                    }
                                     if (v) setSelectedCategoryGroup(null);
                                 }}
                                 onBlur={(e) => {
@@ -2644,10 +2889,48 @@
                                 aria-label="חיפוש שירותים"
                             />
                         </div>
+                        {searchTerm.trim() ? (
+                            <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                <button
+                                    type="button"
+                                    className="mh-btn"
+                                    onClick={() => copyText(
+                                        buildSearchLink(searchTerm),
+                                        'קישור לחיפוש הועתק',
+                                        {
+                                            element_id: 'copy_search_link',
+                                            element_type: 'share_search',
+                                            element_text_short: searchTerm.trim().slice(0, 80),
+                                            search_query: mhSanitizeSearchQuery(searchTerm),
+                                            search_location: 'share_search_link',
+                                            section: 'deep_link'
+                                        }
+                                    )}
+                                    style={{ background: 'var(--primary)', color: 'white', padding: 'var(--space-sm) var(--space-lg)', fontSize: 'var(--text-sm)' }}
+                                    data-tracking-name="copy_search_link"
+                                    data-analytics-type="share"
+                                >
+                                    <i className="fas fa-link"></i> העתק קישור לחיפוש
+                                </button>
+                                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                    אפשר לשלוח את הקישור — הוא יפתח את אותו חיפוש בדף
+                                </span>
+                            </div>
+                        ) : (
+                            <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                <i className="fas fa-link" style={{ marginLeft: '6px', opacity: 0.85 }}></i>
+                                אפשר לשתף חיפוש או כרטיס ספציפי: אחרי חיפוש יופיע «העתק קישור לחיפוש», ובכל כרטיס יש «העתק קישור»
+                            </p>
+                        )}
                     </div>
 
                     {!searchTerm && !selectedCategoryGroup && (
                         <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
+                    )}
+                    {!searchTerm && selectedCategoryGroup && (
+                        <p className="mh-helper-text" style={{ marginTop: 0 }}>
+                            בכל כרטיס: «העתק קישור» — לשליחה ישירה לאותו שירות בדף
+                        </p>
                     )}
 
                     {searchTerm ? (
@@ -2720,6 +3003,9 @@
                         <p style={{ margin: 0, fontSize: 'var(--text-sm)', opacity: 0.7 }}>
                             {`עודכן: ${LAST_UPDATED}`}
                         </p>
+                    </div>
+                    <div id="mh-link-toast" className={toastMessage ? 'mh-link-toast-visible' : ''} role="status" aria-live="polite">
+                        {toastMessage}
                     </div>
                 </div>
             );
