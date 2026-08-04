@@ -131,13 +131,44 @@
         .mh-hb-card-cta:focus { outline: 2px solid #8b2635; outline-offset: 2px; }
         .mh-app a:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-emergency a:focus { outline: 2px solid white; outline-offset: 2px; }
-        .mh-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); transition: all 0.2s; }
-        .mh-card-inner { padding: var(--space-md); }
+        .mh-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); transition: all 0.2s; position: relative; }
+        .mh-card-inner { padding: var(--space-md); position: relative; }
         .mh-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); }
         .mh-card.mh-card-targeted {
             border-color: #f59e0b;
             box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18), var(--shadow-elevated);
         }
+        .mh-card-copy-link {
+            position: absolute;
+            top: var(--space-sm);
+            left: var(--space-sm);
+            z-index: 2;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            opacity: 0.65;
+            transition: color 0.15s, background 0.15s, opacity 0.15s;
+        }
+        .mh-card-copy-link-ltr { left: auto; right: var(--space-sm); }
+        .mh-card:hover .mh-card-copy-link,
+        .mh-card-copy-link:focus {
+            opacity: 1;
+            color: var(--primary);
+        }
+        .mh-card-copy-link:hover {
+            background: rgba(45, 90, 123, 0.1);
+            color: var(--primary);
+        }
+        .mh-card-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-card-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
         .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -476,6 +507,15 @@
                 search_location: location,
                 ...extra
             });
+        };
+
+        /** Avoid logging a duplicate search when focus moves to a share/copy control. */
+        const mhBlurIsShareAction = (relatedTarget) => {
+            try {
+                return !!(relatedTarget && relatedTarget.closest && relatedTarget.closest('[data-analytics-type="share"]'));
+            } catch {
+                return false;
+            }
         };
 
         const mhInitClickTracking = () => {
@@ -1021,6 +1061,16 @@
                         entry_id: initialUrlState.entry
                     });
                 }
+            }, []);
+
+            // Shared search links open scrolled to the search field (entry deep-links handle their own scroll).
+            useEffect(() => {
+                if (!initialUrlState.q || initialUrlState.entry) return;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        document.querySelector('.mh-app > .mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
             }, []);
 
             /* Outbound http(s) links: probe via same-origin API before navigation (404/410/5xx → alert; else open). */
@@ -1638,10 +1688,23 @@
                 }, 2600);
             };
             const trackShareEvent = (props = {}) => {
+                // Keep event_type strictly `share` so these rows are distinct from `search`.
+                const {
+                    element_id = 'copy_link',
+                    element_type = 'share',
+                    element_text_short = null,
+                    search_query = null,
+                    entry_id = null,
+                    section = 'deep_link'
+                } = props || {};
                 window.mhAnalytics?.trackEvent('share', {
-                    section: 'deep_link',
-                    element_type: 'share',
-                    ...props
+                    section,
+                    element_id,
+                    element_type,
+                    element_text_short,
+                    search_query: search_query || null,
+                    search_location: 'share',
+                    entry_id: entry_id || null
                 });
             };
             const copyText = async (text, successMessage, analyticsProps = null) => {
@@ -1666,7 +1729,7 @@
                     if (analyticsProps) {
                         trackShareEvent({
                             ...analyticsProps,
-                            element_text_short: ((analyticsProps.element_text_short || '') + ' (prompt_fallback)').slice(0, 80)
+                            element_text_short: ((analyticsProps.element_text_short || 'copy_link') + ' (prompt_fallback)').slice(0, 80)
                         });
                     }
                 }
@@ -1913,7 +1976,38 @@
                     data-tracking-name={s.trackingName || s.org}
                 >
                     <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
-                        <h3 style={{ color: 'var(--primary)', fontSize: 'var(--text-lg)', margin: '0 0 var(--space-md)', fontWeight: 600 }}>{s.org}</h3>
+                        {entryId && (
+                            <button
+                                type="button"
+                                className={`mh-card-copy-link${s.dir === 'ltr' ? ' mh-card-copy-link-ltr' : ''}`}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => copyText(
+                                    buildEntryLink({ entryId, categoryId: categoryKey }),
+                                    'קישור לכרטיס הועתק',
+                                    {
+                                        element_id: 'copy_entry_link',
+                                        element_type: 'share_entry',
+                                        element_text_short: `copied_entry:${s.org || entryId || ''}`.slice(0, 80),
+                                        entry_id: entryId,
+                                        section: categoryKey || 'deep_link'
+                                    }
+                                )}
+                                title={s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף'}
+                                aria-label={s.dir === 'ltr' ? 'Copy link to this card' : 'העתק קישור לכרטיס'}
+                                data-tracking-name={`${s.trackingName || s.org}_copy_link`}
+                                data-analytics-type="share"
+                            >
+                                <i className="fas fa-link" aria-hidden="true"></i>
+                            </button>
+                        )}
+                        <h3 style={{
+                            color: 'var(--primary)',
+                            fontSize: 'var(--text-lg)',
+                            margin: '0 0 var(--space-md)',
+                            fontWeight: 600,
+                            paddingLeft: entryId && s.dir !== 'ltr' ? '40px' : undefined,
+                            paddingRight: entryId && s.dir === 'ltr' ? '40px' : undefined
+                        }}>{s.org}</h3>
                         {showHbLaunchBanner && (
                             <div className="mh-hb-launch-banner" role="status">
                                 החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.
@@ -1942,28 +2036,6 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {entryId && (
-                                <button
-                                    type="button"
-                                    onClick={() => copyText(
-                                        buildEntryLink({ entryId, categoryId: categoryKey }),
-                                        'קישור לכרטיס הועתק',
-                                        {
-                                            element_id: 'copy_entry_link',
-                                            element_type: 'share_entry',
-                                            element_text_short: (s.org || entryId || '').slice(0, 80),
-                                            entry_id: entryId,
-                                            section: categoryKey || 'deep_link'
-                                        }
-                                    )}
-                                    style={{ background: '#6c757d' }}
-                                    title={s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף'}
-                                    data-tracking-name={`${s.trackingName || s.org}_copy_link`}
-                                    data-analytics-type="share"
-                                >
-                                    <i className="fas fa-link"></i> {s.dir === 'ltr' ? 'Copy link' : 'העתק קישור'}
-                                </button>
-                            )}
                             {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
                             {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
                             {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
@@ -2882,6 +2954,7 @@
                                     if (v) setSelectedCategoryGroup(null);
                                 }}
                                 onBlur={(e) => {
+                                    if (mhBlurIsShareAction(e.relatedTarget)) return;
                                     const resultsCount = Object.values(filtered).reduce((sum, cat) => sum + getCatServiceCount(cat), 0);
                                     window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });
                                 }}
@@ -2894,15 +2967,15 @@
                                 <button
                                     type="button"
                                     className="mh-btn"
+                                    onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
                                         'קישור לחיפוש הועתק',
                                         {
                                             element_id: 'copy_search_link',
                                             element_type: 'share_search',
-                                            element_text_short: searchTerm.trim().slice(0, 80),
+                                            element_text_short: `copied_search:${searchTerm.trim()}`.slice(0, 80),
                                             search_query: mhSanitizeSearchQuery(searchTerm),
-                                            search_location: 'share_search_link',
                                             section: 'deep_link'
                                         }
                                     )}
@@ -2919,7 +2992,7 @@
                         ) : (
                             <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                                 <i className="fas fa-link" style={{ marginLeft: '6px', opacity: 0.85 }}></i>
-                                אפשר לשתף חיפוש או כרטיס ספציפי: אחרי חיפוש יופיע «העתק קישור לחיפוש», ובכל כרטיס יש «העתק קישור»
+                                אפשר לשתף חיפוש או כרטיס ספציפי: אחרי חיפוש יופיע «העתק קישור לחיפוש», ובפינת כל כרטיס יש סמל קישור
                             </p>
                         )}
                     </div>
@@ -2929,7 +3002,7 @@
                     )}
                     {!searchTerm && selectedCategoryGroup && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
-                            בכל כרטיס: «העתק קישור» — לשליחה ישירה לאותו שירות בדף
+                            בפינת כל כרטיס: סמל הקישור — לשליחה ישירה לאותו שירות בדף
                         </p>
                     )}
 
