@@ -169,6 +169,12 @@
             color: var(--primary);
         }
         .mh-card-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-card-copy-link.mh-card-copy-link-copied,
+        .mh-card:hover .mh-card-copy-link.mh-card-copy-link-copied {
+            opacity: 1;
+            color: var(--accent);
+            background: rgba(82, 183, 136, 0.12);
+        }
         .mh-card-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
         .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -214,7 +220,8 @@
         .mh-disclaimer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; border: 2px solid rgba(255,255,255,0.2); }
         #mh-link-toast {
             position: fixed;
-            bottom: var(--space-xl);
+            top: var(--space-xl);
+            bottom: auto;
             left: 50%;
             transform: translateX(-50%);
             max-width: min(92vw, 420px);
@@ -228,6 +235,7 @@
             line-height: 1.5;
             text-align: center;
             display: none;
+            pointer-events: none;
         }
         #mh-link-toast.mh-link-toast-visible { display: block; }
         .mh-terms-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
@@ -996,6 +1004,7 @@
             const [requestedSectionId, setRequestedSectionId] = useState(() => initialUrlState.section || null);
             const [highlightedEntryKey, setHighlightedEntryKey] = useState(null);
             const [toastMessage, setToastMessage] = useState('');
+            const [copiedEntryId, setCopiedEntryId] = useState(null);
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -1007,6 +1016,7 @@
             const handledDeepLinkRef = useRef(null);
             const highlightTimeoutRef = useRef(null);
             const toastTimeoutRef = useRef(null);
+            const copiedEntryTimeoutRef = useRef(null);
             const deepLinkAnalyticsRef = useRef({ search: false, entry: false });
 
             // Sync URL state as search, entry target, or selected group changes.
@@ -1687,6 +1697,15 @@
                     toastTimeoutRef.current = null;
                 }, 2600);
             };
+            const markEntryLinkCopied = (entryId) => {
+                if (!entryId) return;
+                setCopiedEntryId(entryId);
+                if (copiedEntryTimeoutRef.current) window.clearTimeout(copiedEntryTimeoutRef.current);
+                copiedEntryTimeoutRef.current = window.setTimeout(() => {
+                    setCopiedEntryId((current) => (current === entryId ? null : current));
+                    copiedEntryTimeoutRef.current = null;
+                }, 2000);
+            };
             const trackShareEvent = (props = {}) => {
                 // Keep event_type strictly `share` so these rows are distinct from `search`.
                 const {
@@ -1705,9 +1724,9 @@
                     search_query: search_query || null,
                     search_location: 'share',
                     entry_id: entry_id || null
-                });
+                }, { forceFetch: true });
             };
-            const copyText = async (text, successMessage, analyticsProps = null) => {
+            const copyText = async (text, { toastMessage: successToast = null, onSuccess = null, analyticsProps = null } = {}) => {
                 try {
                     if (navigator.clipboard?.writeText) {
                         await navigator.clipboard.writeText(text);
@@ -1722,8 +1741,9 @@
                         document.execCommand('copy');
                         document.body.removeChild(textarea);
                     }
-                    showToast(successMessage);
                     if (analyticsProps) trackShareEvent(analyticsProps);
+                    if (typeof onSuccess === 'function') onSuccess();
+                    else if (successToast) showToast(successToast);
                 } catch (_) {
                     window.prompt('העתיקו את הקישור:', text);
                     if (analyticsProps) {
@@ -1732,6 +1752,7 @@
                             element_text_short: ((analyticsProps.element_text_short || 'copy_link') + ' (prompt_fallback)').slice(0, 80)
                         });
                     }
+                    if (typeof onSuccess === 'function') onSuccess();
                 }
             };
             const buildSearchLink = (query) => {
@@ -1979,25 +2000,31 @@
                         {entryId && (
                             <button
                                 type="button"
-                                className={`mh-card-copy-link${s.dir === 'ltr' ? ' mh-card-copy-link-ltr' : ''}`}
+                                className={`mh-card-copy-link${s.dir === 'ltr' ? ' mh-card-copy-link-ltr' : ''}${copiedEntryId === entryId ? ' mh-card-copy-link-copied' : ''}`}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={() => copyText(
                                     buildEntryLink({ entryId, categoryId: categoryKey }),
-                                    'קישור לכרטיס הועתק',
                                     {
-                                        element_id: 'copy_entry_link',
-                                        element_type: 'share_entry',
-                                        element_text_short: `copied_entry:${s.org || entryId || ''}`.slice(0, 80),
-                                        entry_id: entryId,
-                                        section: categoryKey || 'deep_link'
+                                        onSuccess: () => markEntryLinkCopied(entryId),
+                                        analyticsProps: {
+                                            element_id: 'copy_entry_link',
+                                            element_type: 'share_entry',
+                                            element_text_short: `copied_entry:${s.org || entryId || ''}`.slice(0, 80),
+                                            entry_id: entryId,
+                                            section: categoryKey || 'deep_link'
+                                        }
                                     }
                                 )}
-                                title={s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף'}
-                                aria-label={s.dir === 'ltr' ? 'Copy link to this card' : 'העתק קישור לכרטיס'}
+                                title={copiedEntryId === entryId
+                                    ? (s.dir === 'ltr' ? 'Link copied' : 'הקישור הועתק')
+                                    : (s.dir === 'ltr' ? 'Copy a link that opens this card on the page' : 'העתקת קישור שפותח את הכרטיס הזה בדף')}
+                                aria-label={copiedEntryId === entryId
+                                    ? (s.dir === 'ltr' ? 'Link copied' : 'הקישור הועתק')
+                                    : (s.dir === 'ltr' ? 'Copy link to this card' : 'העתק קישור לכרטיס')}
                                 data-tracking-name={`${s.trackingName || s.org}_copy_link`}
                                 data-analytics-type="share"
                             >
-                                <i className="fas fa-link" aria-hidden="true"></i>
+                                <i className={`fas ${copiedEntryId === entryId ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
                             </button>
                         )}
                         <h3 style={{
@@ -2970,13 +2997,15 @@
                                     onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
-                                        'קישור לחיפוש הועתק',
                                         {
-                                            element_id: 'copy_search_link',
-                                            element_type: 'share_search',
-                                            element_text_short: `copied_search:${searchTerm.trim()}`.slice(0, 80),
-                                            search_query: mhSanitizeSearchQuery(searchTerm),
-                                            section: 'deep_link'
+                                            toastMessage: 'קישור לחיפוש הועתק',
+                                            analyticsProps: {
+                                                element_id: 'copy_search_link',
+                                                element_type: 'share_search',
+                                                element_text_short: `copied_search:${searchTerm.trim()}`.slice(0, 80),
+                                                search_query: mhSanitizeSearchQuery(searchTerm),
+                                                section: 'deep_link'
+                                            }
                                         }
                                     )}
                                     style={{ background: 'var(--primary)', color: 'white', padding: 'var(--space-sm) var(--space-lg)', fontSize: 'var(--text-sm)' }}
