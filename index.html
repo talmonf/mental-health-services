@@ -385,7 +385,7 @@
             } catch { return { utm_source: null, utm_medium: null, utm_campaign: null }; }
         };
 
-        const mhTrackEvent = (eventType, props = {}) => {
+        const mhTrackEvent = (eventType, props = {}, options = {}) => {
             try {
                 if (!MH_ANALYTICS_CONFIG.enabled || !MH_ANALYTICS_CONFIG.endpoint) return;
                 const url = window.location.href;
@@ -417,7 +417,7 @@
                 };
 
                 const body = JSON.stringify(payload);
-                if (navigator.sendBeacon) {
+                if (navigator.sendBeacon && !options.forceFetch) {
                     const blob = new Blob([body], { type: 'application/json' });
                     navigator.sendBeacon(MH_ANALYTICS_CONFIG.endpoint, blob);
                 } else {
@@ -852,7 +852,7 @@
 
        "local": {"icon": "📍","title": "שירותים מקומיים", "titleEn": "Local Services", "desc": "שירותי בריאות נפש באזורים ספציפיים","services": [
        {"row": 91, "org": "Hakshiva Therapy Clinic - הקשיבה", "svc": "Therapy for teenagers, couples therapy and parenting guidance", "phone": "", "whatsapp": "02-992-5152", "web": "https://hakshiva.org/therapy-clinic/#", "target": "", "region": "Ramat Bet Shemesh", "cost": "", "specialty": "", "notes": "", "languages": "English, Hebrew", "diseases": "", "add": "https://hakshiva.org/he/%d7%a7%d7%9c%d7%99%d7%a0%d7%99%d7%a7%d7%94-%d7%98%d7%99%d7%a4%d7%95%d7%9c%d7%99%d7%aa/", "dir": "ltr", "iconOnly": true},
-       {"row": 92, "org": "חבלי קשר - Hevlei Kesher", "svc": "דיכאון אחרי לידה ועוד, דרך טיפת חלב בירושלים\nSupport and treatment for Maternal Mental Health through Tipat Halav. Services for mothers and families impacted by perinatal mental health disorders (PMHD) such as postpartum depression", "phone": "052-603-9181", "email": "contact@hevleikesher.org", "web": "https://hevleikesher.org/", "target": "", "region": "Jerusalem", "cost": "", "specialty": "", "notes": "", "languages": "English, Hebrew", "diseases": "", "add": "https://www.jerusalem.muni.il/he/residents/earlychildhood/messeges/knot-ropes/", "dir": "ltr", "iconOnly": true},
+       {"row": 92, "org": "חבלי קשר - Hevlei Kesher", "svc": "דיכאון אחרי לידה ועוד, דרך טיפת חלב בירושלים\nSupport and treatment for Maternal Mental Health through Tipat Halav. Services for mothers and families impacted by perinatal mental health disorders (PMHD) such as postpartum depression", "phone": "052-603-9181", "email": "contact@hevleikesher.org", "web": "https://hevleikesher.org/", "webLabel": "Main site", "webTrackingName": "hevlei_kesher_main_site", "target": "", "region": "Jerusalem", "cost": "", "specialty": "", "notes": "", "languages": "English, Hebrew", "diseases": "", "add": "https://www.jerusalem.muni.il/he/residents/earlychildhood/messeges/knot-ropes/", "addLabel": "Jerusalem municipality", "addTrackingName": "hevlei_kesher_jerusalem_municipality", "dir": "ltr", "iconOnly": true},
        {"row": 93, "org": "Modi'in Behavioral", "svc": "CBT, DBT, and Exposure-Based Therapies", "phone": "053-304-8701", "email": "steven.schlager@gmail.com", "web": "https://www.modiinbehavioral.com/", "target": "", "region": "Modi'in", "cost": "Private", "specialty": "", "notes": "", "languages": "English", "diseases": "", "add": "", "dir": "ltr", "iconOnly": true},
        {"row": 104, "org": "מיינדמי (MindMe)", "svc": "מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד", "phone": "03-6511229", "phoneLabel": "קווי", "phone2": "050-953-6345", "phoneLabel2": "נייד", "whatsapp": "972509536345", "email": "office@mindme.co.il", "web": "https://mindme.co.il/", "target": "", "region": "תל אביב", "cost": "פרטי", "specialty": "", "notes": "כתובת: מנחם בגין 148, תל אביב", "languages": "עברית, אנגלית", "diseases": "", "add": "https://www.facebook.com/MindMeTLV/", "addLabel": "פייסבוק", "iconOnly": true},
        {"row": 205, "org": "רזולוציה", "svc": "יישומים פסיכולוגיים ממוקדים — הערכה ראשונית והתאמת טיפול (פגישות בקליניקה או זום).", "phone": "03-6919961", "web": "https://www.resolution.co.il/", "target": "", "region": "תל אביב", "cost": "", "specialty": "", "notes": "מרכז בתל אביב — פרטים באתר.", "languages": "", "diseases": "", "add": ""}
@@ -994,7 +994,17 @@
                     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
                     return u.href;
                 };
-                const probeAndGo = async (absoluteHref, newTab) => {
+                const getAnchorAnalyticsMeta = (a, absoluteHref) => {
+                    const elementId = a?.getAttribute?.('data-analytics-id') || a?.getAttribute?.('data-tracking-name') || absoluteHref.slice(0, 240);
+                    const tagName = a?.tagName ? a.tagName.toLowerCase() : 'a';
+                    const elementType = a?.getAttribute?.('data-analytics-type') || tagName;
+                    const textSource = a?.getAttribute?.('data-analytics-text') || a?.innerText || a?.textContent || '';
+                    const elementTextShort = textSource.trim().slice(0, 80) || null;
+                    const entryIdEl = a?.closest?.('[data-entry-id]');
+                    const entryId = entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null;
+                    return { elementId, elementType, elementTextShort, entryId };
+                };
+                const probeAndGo = async (absoluteHref, newTab, meta) => {
                     try {
                         const res = await fetch('/api/link-probe', {
                             method: 'POST',
@@ -1018,9 +1028,11 @@
                         if (data.reason === 'http') {
                             showToast('הקישור אינו זמין כרגע (הדף לא נמצא, הוסר, או שיש תקלה באתר). אפשר לנסות שוב מאוחר יותר או לחפש את המידע באתר המקורי.');
                             window.mhAnalytics?.trackEvent('broken_external_link', {
-                                element_id: absoluteHref.slice(0, 240),
-                                element_type: 'outbound_link',
+                                element_id: meta?.elementId || absoluteHref.slice(0, 240),
+                                element_type: meta?.elementType || 'outbound_link',
+                                element_text_short: meta?.elementTextShort || null,
                                 section: 'link_probe',
+                                entry_id: meta?.entryId || null,
                                 error: 'error',
                                 error_details: JSON.stringify({
                                     kind: 'broken_external_link',
@@ -1029,7 +1041,7 @@
                                     final_url: data.finalUrl,
                                     requested_url: absoluteHref,
                                 }),
-                            });
+                            }, { forceFetch: true });
                             return;
                         }
                         follow(absoluteHref, newTab);
@@ -1042,17 +1054,19 @@
                     const a = e.target.closest?.('a[href]');
                     const abs = shouldHandleAnchor(a);
                     if (!abs) return;
+                    const meta = getAnchorAnalyticsMeta(a, abs);
                     const newTab = e.metaKey || e.ctrlKey || e.shiftKey || a.getAttribute('target') === '_blank';
                     e.preventDefault();
-                    probeAndGo(abs, newTab);
+                    probeAndGo(abs, newTab, meta);
                 };
                 const onAuxClick = (e) => {
                     if (e.button !== 1) return;
                     const a = e.target.closest?.('a[href]');
                     const abs = shouldHandleAnchor(a);
                     if (!abs) return;
+                    const meta = getAnchorAnalyticsMeta(a, abs);
                     e.preventDefault();
-                    probeAndGo(abs, true);
+                    probeAndGo(abs, true, meta);
                 };
                 document.addEventListener('click', onClick, true);
                 document.addEventListener('auxclick', onAuxClick, true);
@@ -1719,14 +1733,14 @@
                             {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : (s.dir === 'ltr' ? `WhatsApp: ${s.whatsapp}` : `וואטסאפ: ${s.whatsapp}`)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : (s.whatsappLabel || '')}</a>)}
                             {s.email && (<a href={`mailto:${s.email}`} style={{background: '#e67e22'}} title={s.showContactText ? undefined : s.email} data-tracking-name={`${s.trackingName || s.org}_email`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.showContactText ? s.email : ''}</a>)}
-                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={`${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
+                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-tracking-name={s.webTrackingName || `${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
                             {s.add && (() => {
                                 const isPdfDownload = /\.pdf(\?|$)/i.test(s.add) || s.addDownload;
                                 const addProps = isPdfDownload
                                     ? { download: s.addDownloadName || 'haravot-barzel-maanaim.pdf', 'data-skip-external-link-check': true }
                                     : { target: '_blank', rel: 'noopener noreferrer' };
                                 return (
-                                    <a href={s.add} {...addProps} style={{ background: isPdfDownload ? '#c0392b' : 'var(--primary)' }} data-tracking-name={`${s.trackingName || s.org}_add`} data-analytics-type={isPdfDownload ? 'download' : 'website'} title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}>
+                                    <a href={s.add} {...addProps} style={{ background: isPdfDownload ? '#c0392b' : 'var(--primary)' }} data-tracking-name={s.addTrackingName || `${s.trackingName || s.org}_add`} data-analytics-type={isPdfDownload ? 'download' : 'website'} title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}>
                                         <i className={isPdfDownload ? 'fas fa-file-pdf' : (addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt')}></i>
                                         {addIsFacebook ? '' : (s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')))}
                                     </a>
