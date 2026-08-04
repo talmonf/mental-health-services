@@ -75,8 +75,8 @@ async function probe(url: string, timeoutMs: number): Promise<ProbeResult> {
     if (res.ok) {
       return { tag: 'ok', status: res.status, finalUrl };
     }
-    /* Many sites return 403/401 to datacenter probes while browsers work — only treat clear "missing" as broken. */
-    if (res.status === 404 || res.status === 410) {
+    /* Many sites return 403/401 to datacenter probes while browsers work — treat clear missing + server errors as broken. */
+    if (res.status === 404 || res.status === 410 || res.status >= 500) {
       return { tag: 'missing', status: res.status, finalUrl };
     }
     return { tag: 'ok', status: res.status, finalUrl };
