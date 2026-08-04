@@ -8,6 +8,7 @@
  *   error text NULL, error_details text NULL)
  *
  * Migration: scripts/analytics_events_add_error_columns.sql
+ * Migration: scripts/012_events_allow_deep_link_event_types.sql (required for deep-link event_type values)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
@@ -16,6 +17,22 @@ import { UAParser } from 'ua-parser-js';
 const ALLOWED_ORIGINS = process.env.ANALYTICS_ALLOWED_ORIGINS
   ? process.env.ANALYTICS_ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : ['*'];
+
+/** Known-safe event_type values if the DB still has the old CHECK/ENUM. */
+const LEGACY_EVENT_TYPES = new Set(['search', 'click', 'page_view']);
+
+/**
+ * If deep-link types are still blocked by a DB constraint, store under a legacy
+ * event_type and keep the intended name in search_location / element_type.
+ */
+const EVENT_TYPE_FALLBACK: Record<string, string> = {
+  share: 'click',
+  search_link_copied: 'click',
+  card_link_copied: 'click',
+  entry_link_copied: 'click',
+  search_link_opened: 'search',
+  card_link_opened: 'page_view',
+};
 
 /** Use sslmode=verify-full when pg would treat prefer/require/verify-ca as verify-full, to avoid the deprecation warning. */
 function normalizePgSslMode(connectionString: string): string {
@@ -78,6 +95,100 @@ function normalizeErrorFields(e: Record<string, unknown>): { error: string | nul
     return { error: 'error', error_details: errorDetails };
   }
   return { error: null, error_details: null };
+}
+
+function isEventTypeConstraintError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string };
+  const code = e?.code || '';
+  // 23514 = check_violation, 22P02 = invalid_text_representation (enum)
+  if (code === '23514' || code === '22P02') return true;
+  const msg = (e?.message || '').toLowerCase();
+  return msg.includes('event_type') || msg.includes('check constraint') || msg.includes('invalid input value for enum');
+}
+
+/** Expand CHECK/ENUM so deep-link event_type values can be stored. Idempotent. */
+async function ensureDeepLinkEventTypesAllowed(client: Client): Promise<void> {
+  await client.query(`
+DO $$
+DECLARE
+  col_udt text;
+  is_enum boolean := false;
+  con record;
+  enum_label text;
+  labels text[] := ARRAY[
+    'search',
+    'click',
+    'page_view',
+    'share',
+    'search_link_copied',
+    'card_link_copied',
+    'search_link_opened',
+    'card_link_opened',
+    'entry_link_copied',
+    'unknown'
+  ];
+BEGIN
+  SELECT c.udt_name
+  INTO col_udt
+  FROM information_schema.columns c
+  WHERE c.table_schema = 'public'
+    AND c.table_name = 'events'
+    AND c.column_name = 'event_type';
+
+  IF col_udt IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM pg_type t
+    JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE n.nspname = 'public'
+      AND t.typname = col_udt
+      AND t.typtype = 'e'
+  ) INTO is_enum;
+
+  IF is_enum THEN
+    FOREACH enum_label IN ARRAY labels LOOP
+      BEGIN
+        EXECUTE format('ALTER TYPE public.%I ADD VALUE IF NOT EXISTS %L', col_udt, enum_label);
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END;
+    END LOOP;
+    RETURN;
+  END IF;
+
+  FOR con IN
+    SELECT c.conname
+    FROM pg_constraint c
+    JOIN pg_class t ON c.conrelid = t.oid
+    JOIN pg_namespace n ON n.oid = t.relnamespace
+    WHERE n.nspname = 'public'
+      AND t.relname = 'events'
+      AND c.contype = 'c'
+      AND pg_get_constraintdef(c.oid) ILIKE '%event_type%'
+  LOOP
+    EXECUTE format('ALTER TABLE public.events DROP CONSTRAINT %I', con.conname);
+  END LOOP;
+
+  ALTER TABLE public.events
+    ADD CONSTRAINT events_event_type_check
+    CHECK (
+      event_type IN (
+        'search',
+        'click',
+        'page_view',
+        'share',
+        'search_link_copied',
+        'card_link_copied',
+        'search_link_opened',
+        'card_link_opened',
+        'entry_link_copied',
+        'unknown'
+      )
+    );
+END $$;
+`);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -190,43 +301,85 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         entry_url: (e?.entry_url as string) || null,
       };
       const { error: errorCol, error_details: errorDetailsCol } = normalizeErrorFields(e);
-      await client.query(
-        `INSERT INTO events (
-          event_id, session_id, event_type, occurred_at, page_url, page_route, section,
-          element_id, element_type, element_text_short, search_query, results_count, search_location,
-          extra, entry_id, country, device_type, browser_name, os_name, language,
-          referrer_domain, utm_source, utm_medium, utm_campaign,
-          error, error_details
-        ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
-        [
-          eventId,
-          sessionId,
-          (e?.event_type as string) || 'unknown',
-          occurredAt,
-          pageUrl,
-          pageRoute,
-          (e?.section as string) || null,
-          (e?.element_id as string) || null,
-          (e?.element_type as string) || null,
-          (e?.element_text_short as string) || null,
-          (e?.search_query as string) || null,
-          (e?.results_count as number) ?? null,
-          (e?.search_location as string) || null,
-          JSON.stringify(extra),
-          ((e?.entry_id as string) || null)?.slice(0, 255) || null,
-          country,
-          device,
-          browserName,
-          osName,
-          language,
-          ((e?.referrer_domain as string) || null)?.slice(0, 255) || null,
-          ((e?.utm_source as string) || null)?.slice(0, 255) || null,
-          ((e?.utm_medium as string) || null)?.slice(0, 255) || null,
-          ((e?.utm_campaign as string) || null)?.slice(0, 255) || null,
-          errorCol,
-          errorDetailsCol,
-        ]
-      );
+
+      const requestedType = ((e?.event_type as string) || 'unknown').trim() || 'unknown';
+      let eventType = requestedType;
+      let searchLocation = (e?.search_location as string) || null;
+      let elementType = (e?.element_type as string) || null;
+      // Preserve intended deep-link type even if we must fall back on insert.
+      if (!LEGACY_EVENT_TYPES.has(requestedType)) {
+        if (!searchLocation) searchLocation = requestedType;
+        if (!elementType) elementType = requestedType;
+        extra.requested_event_type = requestedType;
+      }
+
+      const insertEvent = async (type: string, loc: string | null, elType: string | null) => {
+        await client.query(
+          `INSERT INTO events (
+            event_id, session_id, event_type, occurred_at, page_url, page_route, section,
+            element_id, element_type, element_text_short, search_query, results_count, search_location,
+            extra, entry_id, country, device_type, browser_name, os_name, language,
+            referrer_domain, utm_source, utm_medium, utm_campaign,
+            error, error_details
+          ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
+          [
+            eventId,
+            sessionId,
+            type,
+            occurredAt,
+            pageUrl,
+            pageRoute,
+            (e?.section as string) || null,
+            (e?.element_id as string) || null,
+            elType,
+            (e?.element_text_short as string) || null,
+            (e?.search_query as string) || null,
+            (e?.results_count as number) ?? null,
+            loc,
+            JSON.stringify(extra),
+            ((e?.entry_id as string) || null)?.slice(0, 255) || null,
+            country,
+            device,
+            browserName,
+            osName,
+            language,
+            ((e?.referrer_domain as string) || null)?.slice(0, 255) || null,
+            ((e?.utm_source as string) || null)?.slice(0, 255) || null,
+            ((e?.utm_medium as string) || null)?.slice(0, 255) || null,
+            ((e?.utm_campaign as string) || null)?.slice(0, 255) || null,
+            errorCol,
+            errorDetailsCol,
+          ]
+        );
+      };
+
+      try {
+        await insertEvent(eventType, searchLocation, elementType);
+      } catch (insertErr) {
+        if (!isEventTypeConstraintError(insertErr)) throw insertErr;
+
+        // Self-heal: expand DB allowlist, then retry with the intended event_type.
+        try {
+          console.warn(
+            `Analytics event_type "${requestedType}" rejected by DB; expanding allowlist and retrying`
+          );
+          await ensureDeepLinkEventTypesAllowed(client);
+          await insertEvent(requestedType, searchLocation || requestedType, elementType || requestedType);
+        } catch (healErr) {
+          const fallback = EVENT_TYPE_FALLBACK[requestedType];
+          if (!fallback) throw healErr;
+          console.warn(
+            `Analytics allowlist expand failed; storing "${requestedType}" as "${fallback}"`,
+            healErr
+          );
+          extra.event_type_fallback_from = requestedType;
+          await insertEvent(
+            fallback,
+            searchLocation || requestedType,
+            elementType || requestedType
+          );
+        }
+      }
     }
   } catch (err) {
     console.error('Analytics API error:', err);

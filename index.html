@@ -530,6 +530,8 @@
         };
 
         const mhTrackSearch = (location, rawQuery, extra = {}) => {
+            // Skip duplicate search rows while a share/copy (or deep-link open) is in progress.
+            if (window.__mhSuppressSearchBlur) return;
             const sanitized = mhSanitizeSearchQuery(rawQuery);
             if (!sanitized) return;
             mhTrackEvent('search', {
@@ -571,7 +573,9 @@
                 if (!el) return;
                 const kind = el.getAttribute('data-share-kind') || '';
                 if (kind === 'search') {
+                    mhArmShareCopy();
                     const q = (el.getAttribute('data-share-query') || '').trim();
+                    // forceFetch: deep-link types may need API constraint fallback (sendBeacon hides HTTP errors).
                     mhTrackEvent('search_link_copied', {
                         section: 'deep_link',
                         element_id: 'copy_search_link',
@@ -579,10 +583,11 @@
                         element_text_short: ('copied_search:' + q).slice(0, 80),
                         search_query: mhSanitizeSearchQuery(q),
                         search_location: 'search_link_copied'
-                    });
+                    }, { forceFetch: true });
                     return;
                 }
                 if (kind === 'card') {
+                    mhArmShareCopy();
                     const entryId = el.getAttribute('data-share-entry-id') || el.closest('[data-entry-id]')?.getAttribute('data-entry-id') || null;
                     const section = el.getAttribute('data-share-section') || el.closest('[data-entry-category]')?.getAttribute('data-entry-category') || 'deep_link';
                     const label = el.getAttribute('data-share-label') || entryId || '';
@@ -593,7 +598,7 @@
                         element_text_short: ('copied_card:' + label).slice(0, 80),
                         entry_id: entryId,
                         search_location: 'card_link_copied'
-                    });
+                    }, { forceFetch: true });
                 }
             }, true);
         };
@@ -696,6 +701,8 @@
                 };
                 if (q) {
                     window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), search: true };
+                    // Avoid a blur→search duplicate right after landing on ?q=
+                    mhArmShareCopy();
                     mhTrackEvent('search_link_opened', {
                         ...base,
                         section: 'deep_link',
@@ -704,7 +711,7 @@
                         element_text_short: q.slice(0, 80),
                         search_query: mhSanitizeSearchQuery(q),
                         search_location: 'search_link_opened'
-                    });
+                    }, { forceFetch: true });
                     return;
                 }
                 if (entry) {
@@ -717,7 +724,7 @@
                         element_text_short: entry.slice(0, 80),
                         entry_id: entry,
                         search_location: 'card_link_opened'
-                    });
+                    }, { forceFetch: true });
                     return;
                 }
                 mhTrackEvent('page_view', {
