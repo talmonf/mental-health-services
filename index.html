@@ -472,10 +472,9 @@
                     }
                 }
                 const utm = mhParseUtmParams();
+                // Explicit allowlisted payload — do not spread arbitrary props.
                 const payload = {
-                    ...props,
                     event_id: mhGenerateId(),
-                    // Always win over any props.event_type so callers cannot accidentally overwrite.
                     event_type: eventType,
                     occurred_at: new Date().toISOString(),
                     page_url: url,
@@ -488,14 +487,36 @@
                     user_pseudo_id: mhGetOrCreateUserId(),
                     user_agent: navigator.userAgent,
                     viewport_width: window.innerWidth,
-                    viewport_height: window.innerHeight
+                    viewport_height: window.innerHeight,
+                    section: props.section ?? null,
+                    element_id: props.element_id ?? null,
+                    element_type: props.element_type ?? null,
+                    element_text_short: props.element_text_short ?? null,
+                    search_query: props.search_query ?? null,
+                    results_count: typeof props.results_count === 'number' ? props.results_count : null,
+                    search_location: props.search_location ?? null,
+                    entry_id: props.entry_id ?? null,
+                    entry_hostname: props.entry_hostname ?? null,
+                    entry_origin: props.entry_origin ?? null,
+                    entry_url: props.entry_url ?? null,
+                    error: props.error ?? null,
+                    error_details: props.error_details ?? null
                 };
 
                 const body = JSON.stringify(payload);
-                if (navigator.sendBeacon && !options.forceFetch) {
-                    const blob = new Blob([body], { type: 'application/json' });
-                    navigator.sendBeacon(MH_ANALYTICS_CONFIG.endpoint, blob);
-                } else {
+                let queued = false;
+                // Prefer sendBeacon (same path as working search/click events).
+                if (!options.forceFetch && navigator.sendBeacon) {
+                    try {
+                        queued = navigator.sendBeacon(
+                            MH_ANALYTICS_CONFIG.endpoint,
+                            new Blob([body], { type: 'application/json' })
+                        );
+                    } catch (_) {
+                        queued = false;
+                    }
+                }
+                if (!queued) {
                     fetch(MH_ANALYTICS_CONFIG.endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -514,11 +535,19 @@
             mhTrackEvent('search', {
                 search_query: sanitized,
                 search_location: location,
-                ...extra
+                results_count: typeof extra.results_count === 'number' ? extra.results_count : null,
+                section: extra.section ?? null,
+                element_id: extra.element_id ?? null,
+                element_type: extra.element_type ?? null,
+                entry_id: extra.entry_id ?? null
             });
         };
 
-        /** Avoid logging a duplicate search when focus moves to a share/copy control. */
+        /** Suppress blur→search when the user is clicking a share/copy control. */
+        const mhArmShareCopy = () => {
+            window.__mhSuppressSearchBlur = true;
+            window.setTimeout(() => { window.__mhSuppressSearchBlur = false; }, 1000);
+        };
         const mhBlurIsShareAction = (relatedTarget) => {
             try {
                 if (window.__mhSuppressSearchBlur) return true;
@@ -527,9 +556,46 @@
                 return !!window.__mhSuppressSearchBlur;
             }
         };
-        const mhArmShareCopy = () => {
-            window.__mhSuppressSearchBlur = true;
-            window.setTimeout(() => { window.__mhSuppressSearchBlur = false; }, 800);
+
+        const mhInitShareLinkTracking = () => {
+            // Capture early so blur-from-search cannot race ahead of suppress.
+            document.addEventListener('pointerdown', (event) => {
+                if (event.target?.closest?.('[data-analytics-type="share"]')) mhArmShareCopy();
+            }, true);
+            document.addEventListener('mousedown', (event) => {
+                if (event.target?.closest?.('[data-analytics-type="share"]')) mhArmShareCopy();
+            }, true);
+            // Dedicated share tracking — independent of React handlers / clipboard success.
+            document.addEventListener('click', (event) => {
+                const el = event.target?.closest?.('[data-analytics-type="share"]');
+                if (!el) return;
+                const kind = el.getAttribute('data-share-kind') || '';
+                if (kind === 'search') {
+                    const q = (el.getAttribute('data-share-query') || '').trim();
+                    mhTrackEvent('search_link_copied', {
+                        section: 'deep_link',
+                        element_id: 'copy_search_link',
+                        element_type: 'search_link_copied',
+                        element_text_short: ('copied_search:' + q).slice(0, 80),
+                        search_query: mhSanitizeSearchQuery(q),
+                        search_location: 'search_link_copied'
+                    });
+                    return;
+                }
+                if (kind === 'card') {
+                    const entryId = el.getAttribute('data-share-entry-id') || el.closest('[data-entry-id]')?.getAttribute('data-entry-id') || null;
+                    const section = el.getAttribute('data-share-section') || el.closest('[data-entry-category]')?.getAttribute('data-entry-category') || 'deep_link';
+                    const label = el.getAttribute('data-share-label') || entryId || '';
+                    mhTrackEvent('card_link_copied', {
+                        section,
+                        element_id: 'copy_card_link',
+                        element_type: 'card_link_copied',
+                        element_text_short: ('copied_card:' + label).slice(0, 80),
+                        entry_id: entryId,
+                        search_location: 'card_link_copied'
+                    });
+                }
+            }, true);
         };
 
         const mhInitClickTracking = () => {
@@ -537,7 +603,7 @@
                 const el = event.target.closest('[data-analytics-id],[data-tracking-name]');
                 if (!el) return;
                 if (el.matches?.('[data-probe-external-link]')) return;
-                // Share/deep-link copy buttons fire a dedicated `share` event after a successful copy.
+                // Share/deep-link copy buttons are handled by mhInitShareLinkTracking.
                 if (el.getAttribute('data-analytics-type') === 'share') return;
                 const elementId = el.getAttribute('data-analytics-id') || el.getAttribute('data-tracking-name');
                 if (!elementId) return;
@@ -629,8 +695,7 @@
                     entry_url: window.location.href
                 };
                 if (q) {
-                    window.__mhDeepLinkTracked = window.__mhDeepLinkTracked || {};
-                    window.__mhDeepLinkTracked.search = true;
+                    window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), search: true };
                     mhTrackEvent('search_link_opened', {
                         ...base,
                         section: 'deep_link',
@@ -639,20 +704,20 @@
                         element_text_short: q.slice(0, 80),
                         search_query: mhSanitizeSearchQuery(q),
                         search_location: 'search_link_opened'
-                    }, { forceFetch: true });
+                    });
                     return;
                 }
                 if (entry) {
-                    window.__mhDeepLinkTracked = window.__mhDeepLinkTracked || {};
-                    window.__mhDeepLinkTracked.entry = true;
-                    mhTrackEvent('entry_link_opened', {
+                    window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), entry: true };
+                    mhTrackEvent('card_link_opened', {
                         ...base,
                         section: section || 'deep_link',
-                        element_id: 'open_entry_link',
-                        element_type: 'entry_link_opened',
+                        element_id: 'open_card_link',
+                        element_type: 'card_link_opened',
                         element_text_short: entry.slice(0, 80),
-                        entry_id: entry
-                    }, { forceFetch: true });
+                        entry_id: entry,
+                        search_location: 'card_link_opened'
+                    });
                     return;
                 }
                 mhTrackEvent('page_view', {
@@ -666,11 +731,13 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 mhTrackLanding();
+                mhInitShareLinkTracking();
                 mhInitClickTracking();
                 mhInitDirectoryEntryTouch();
             });
         } else {
             mhTrackLanding();
+            mhInitShareLinkTracking();
             mhInitClickTracking();
             mhInitDirectoryEntryTouch();
         }
@@ -1062,7 +1129,6 @@
             const highlightTimeoutRef = useRef(null);
             const toastTimeoutRef = useRef(null);
             const copiedEntryTimeoutRef = useRef(null);
-            const deepLinkAnalyticsRef = useRef({ search: false, entry: false });
 
             // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
@@ -1092,32 +1158,6 @@
             useEffect(() => {
                 handledDeepLinkRef.current = null;
             }, [requestedEntryId, requestedSectionId]);
-
-            // Record deep-link opens once per page load if landing tracker did not already.
-            useEffect(() => {
-                const already = window.__mhDeepLinkTracked || {};
-                if (initialUrlState.q && !deepLinkAnalyticsRef.current.search && !already.search) {
-                    deepLinkAnalyticsRef.current.search = true;
-                    window.mhAnalytics?.trackEvent('search_link_opened', {
-                        section: 'deep_link',
-                        element_id: 'open_search_link',
-                        element_type: 'search_link_opened',
-                        element_text_short: initialUrlState.q.slice(0, 80),
-                        search_query: mhSanitizeSearchQuery(initialUrlState.q),
-                        search_location: 'search_link_opened'
-                    }, { forceFetch: true });
-                }
-                if (initialUrlState.entry && !deepLinkAnalyticsRef.current.entry && !already.entry) {
-                    deepLinkAnalyticsRef.current.entry = true;
-                    window.mhAnalytics?.trackEvent('entry_link_opened', {
-                        section: initialUrlState.section || 'deep_link',
-                        element_id: 'open_entry_link',
-                        element_type: 'entry_link_opened',
-                        element_text_short: initialUrlState.entry.slice(0, 80),
-                        entry_id: initialUrlState.entry
-                    }, { forceFetch: true });
-                }
-            }, []);
 
             // Shared search links open scrolled to the search field (entry deep-links handle their own scroll).
             useEffect(() => {
@@ -1752,30 +1792,7 @@
                     copiedEntryTimeoutRef.current = null;
                 }, 2000);
             };
-            const trackShareEvent = (props = {}) => {
-                const {
-                    event_type = 'share',
-                    element_id = 'copy_link',
-                    element_type = 'share',
-                    element_text_short = null,
-                    search_query = null,
-                    entry_id = null,
-                    section = 'deep_link'
-                } = props || {};
-                const track = window.mhAnalytics?.trackEvent || mhTrackEvent;
-                track(event_type, {
-                    section,
-                    element_id,
-                    element_type,
-                    element_text_short,
-                    search_query: search_query || null,
-                    search_location: event_type,
-                    entry_id: entry_id || null
-                }, { forceFetch: true });
-            };
-            const copyText = async (text, { toastMessage: successToast = null, onSuccess = null, analyticsProps = null } = {}) => {
-                // Record the share attempt immediately so analytics does not depend on clipboard timing/permissions.
-                if (analyticsProps) trackShareEvent(analyticsProps);
+            const copyText = async (text, { toastMessage: successToast = null, onSuccess = null } = {}) => {
                 try {
                     if (navigator.clipboard?.writeText) {
                         await navigator.clipboard.writeText(text);
@@ -2050,15 +2067,7 @@
                                 onClick={() => {
                                     const link = buildEntryLink({ entryId, categoryId: categoryKey });
                                     copyText(link, {
-                                        onSuccess: () => markEntryLinkCopied(entryId),
-                                        analyticsProps: {
-                                            event_type: 'card_link_copied',
-                                            element_id: 'copy_card_link',
-                                            element_type: 'card_link_copied',
-                                            element_text_short: `copied_card:${s.org || entryId || ''}`.slice(0, 80),
-                                            entry_id: entryId,
-                                            section: categoryKey || 'deep_link'
-                                        }
+                                        onSuccess: () => markEntryLinkCopied(entryId)
                                     });
                                 }}
                                 title={copiedEntryId === entryId
@@ -2069,6 +2078,10 @@
                                     : (s.dir === 'ltr' ? 'Copy link to this card' : 'העתק קישור לכרטיס')}
                                 data-tracking-name={`${s.trackingName || s.org}_copy_link`}
                                 data-analytics-type="share"
+                                data-share-kind="card"
+                                data-share-entry-id={entryId}
+                                data-share-section={categoryKey || ''}
+                                data-share-label={s.org || entryId || ''}
                             >
                                 <i className={`fas ${copiedEntryId === entryId ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
                             </button>
@@ -3046,21 +3059,13 @@
                                     }}
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
-                                        {
-                                            toastMessage: 'קישור לחיפוש הועתק',
-                                            analyticsProps: {
-                                                event_type: 'search_link_copied',
-                                                element_id: 'copy_search_link',
-                                                element_type: 'search_link_copied',
-                                                element_text_short: `copied_search:${searchTerm.trim()}`.slice(0, 80),
-                                                search_query: mhSanitizeSearchQuery(searchTerm),
-                                                section: 'deep_link'
-                                            }
-                                        }
+                                        { toastMessage: 'קישור לחיפוש הועתק' }
                                     )}
                                     style={{ background: 'var(--primary)', color: 'white', padding: 'var(--space-sm) var(--space-lg)', fontSize: 'var(--text-sm)' }}
                                     data-tracking-name="copy_search_link"
                                     data-analytics-type="share"
+                                    data-share-kind="search"
+                                    data-share-query={searchTerm.trim()}
                                 >
                                     <i className="fas fa-link"></i> העתק קישור לחיפוש
                                 </button>
