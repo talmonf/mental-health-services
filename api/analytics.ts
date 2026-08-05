@@ -9,6 +9,7 @@
  *
  * Migration: scripts/analytics_events_add_error_columns.sql
  * Migration: scripts/012_events_allow_deep_link_event_types.sql (required for deep-link event_type values)
+ * Migration: scripts/014_events_allow_section_link_event_types.sql (section_link_copied / section_link_opened)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
@@ -30,8 +31,10 @@ const EVENT_TYPE_FALLBACK: Record<string, string> = {
   search_link_copied: 'click',
   card_link_copied: 'click',
   entry_link_copied: 'click',
+  section_link_copied: 'click',
   search_link_opened: 'search',
   card_link_opened: 'page_view',
+  section_link_opened: 'page_view',
 };
 
 /** Use sslmode=verify-full when pg would treat prefer/require/verify-ca as verify-full, to avoid the deprecation warning. */
@@ -124,6 +127,8 @@ DECLARE
     'card_link_copied',
     'search_link_opened',
     'card_link_opened',
+    'section_link_copied',
+    'section_link_opened',
     'entry_link_copied',
     'unknown'
   ];
@@ -183,6 +188,8 @@ BEGIN
         'card_link_copied',
         'search_link_opened',
         'card_link_opened',
+        'section_link_copied',
+        'section_link_opened',
         'entry_link_copied',
         'unknown'
       )

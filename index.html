@@ -175,6 +175,79 @@
             color: var(--accent);
             background: rgba(82, 183, 136, 0.12);
         }
+        .mh-section-copy-link {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            flex-shrink: 0;
+            transition: color 0.15s, background 0.15s, opacity 0.15s;
+        }
+        .mh-section-copy-link:hover,
+        .mh-section-copy-link:focus {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .mh-section-copy-link:focus { outline: 2px solid rgba(255, 255, 255, 0.7); outline-offset: 2px; }
+        .mh-section-copy-link.mh-section-copy-link-copied {
+            opacity: 1;
+            color: #b8f0d4;
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .mh-subsection-copy-link {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+        .mh-subsection-copy-link:hover,
+        .mh-subsection-copy-link:focus {
+            color: var(--primary);
+            background: rgba(45, 90, 123, 0.1);
+            opacity: 1;
+        }
+        .mh-subsection-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-subsection-copy-link.mh-section-copy-link-copied {
+            color: var(--accent);
+            background: rgba(82, 183, 136, 0.12);
+            opacity: 1;
+        }
+        .mh-group-copy-link {
+            position: absolute;
+            top: var(--space-sm);
+            left: var(--space-sm);
+            z-index: 2;
+            color: var(--text-muted);
+            opacity: 0.65;
+        }
+        .mh-category-card:hover .mh-group-copy-link,
+        .mh-group-copy-link:focus {
+            opacity: 1;
+            color: var(--primary);
+        }
+        .mh-group-copy-link:hover {
+            background: rgba(45, 90, 123, 0.1);
+            color: var(--primary);
+        }
+        .mh-group-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-group-copy-link.mh-section-copy-link-copied,
+        .mh-category-card:hover .mh-group-copy-link.mh-section-copy-link-copied {
+            opacity: 1;
+            color: var(--accent);
+            background: rgba(82, 183, 136, 0.12);
+        }
+        .mh-cat-header,
+        [data-section-anchor] {
+            scroll-margin-top: var(--space-md);
+        }
         .mh-card-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
         .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -203,7 +276,7 @@
         .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
         .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
         .mh-category-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
-        .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); }
+        .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); position: relative; }
         .mh-category-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
         .mh-category-card.mh-category-card-urgent { border-color: var(--danger-bg); border-width: 3px; box-shadow: 0 4px 12px rgba(214, 52, 71, 0.25); }
         .mh-category-card.mh-category-card-urgent:hover { box-shadow: 0 6px 20px rgba(214, 52, 71, 0.35); }
@@ -290,6 +363,8 @@
             enabled: true, // set to true once your /api/analytics backend is ready
             endpoint: '/api/analytics'
         };
+        // Known top-level group ids (must stay in sync with CATEGORY_GROUPS below).
+        const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information']);
 
         const mhGenerateId = () => {
             if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -428,13 +503,14 @@
                     q: (url.searchParams.get('q') || '').trim(),
                     entry: (url.searchParams.get('entry') || '').trim(),
                     section: (url.searchParams.get('section') || '').trim(),
+                    subsection: (url.searchParams.get('subsection') || '').trim(),
                     group: Object.prototype.hasOwnProperty.call(CATEGORY_GROUPS, rawGroup) ? rawGroup : ''
                 };
             } catch {
-                return { q: '', entry: '', section: '', group: '' };
+                return { q: '', entry: '', section: '', subsection: '', group: '' };
             }
         };
-        const mhReplaceUrlState = ({ q, entry, section, group }) => {
+        const mhReplaceUrlState = ({ q, entry, section, subsection, group }) => {
             try {
                 const url = new URL(window.location.href);
                 if (q) url.searchParams.set('q', q);
@@ -443,6 +519,8 @@
                 else url.searchParams.delete('entry');
                 if (section) url.searchParams.set('section', section);
                 else url.searchParams.delete('section');
+                if (subsection) url.searchParams.set('subsection', subsection);
+                else url.searchParams.delete('subsection');
                 url.hash = group ? `#${group}` : '';
                 window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
             } catch (_) {}
@@ -599,6 +677,19 @@
                         entry_id: entryId,
                         search_location: 'card_link_copied'
                     }, { forceFetch: true });
+                    return;
+                }
+                if (kind === 'section') {
+                    mhArmShareCopy();
+                    const section = el.getAttribute('data-share-section') || 'deep_link';
+                    const label = el.getAttribute('data-share-label') || section;
+                    mhTrackEvent('section_link_copied', {
+                        section,
+                        element_id: 'copy_section_link',
+                        element_type: 'section_link_copied',
+                        element_text_short: ('copied_section:' + label).slice(0, 80),
+                        search_location: 'section_link_copied'
+                    }, { forceFetch: true });
                 }
             }, true);
         };
@@ -686,11 +777,16 @@
                 let q = '';
                 let entry = '';
                 let section = '';
+                let subsection = '';
+                let group = '';
                 try {
                     const params = new URLSearchParams(window.location.search || '');
                     q = (params.get('q') || '').trim();
                     entry = (params.get('entry') || '').trim();
                     section = (params.get('section') || '').trim();
+                    subsection = (params.get('subsection') || '').trim();
+                    const rawGroup = (window.location.hash || '').replace(/^#/, '').trim();
+                    group = MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : '';
                 } catch (_) {}
                 const base = {
                     element_id: 'landing',
@@ -724,6 +820,21 @@
                         element_text_short: entry.slice(0, 80),
                         entry_id: entry,
                         search_location: 'card_link_opened'
+                    }, { forceFetch: true });
+                    return;
+                }
+                if (section || group) {
+                    window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), section: true };
+                    const sectionKey = section
+                        ? (subsection ? `${section}_${subsection}` : section)
+                        : `group_${group}`;
+                    mhTrackEvent('section_link_opened', {
+                        ...base,
+                        section: sectionKey || 'deep_link',
+                        element_id: 'open_section_link',
+                        element_type: 'section_link_opened',
+                        element_text_short: sectionKey.slice(0, 80),
+                        search_location: 'section_link_opened'
                     }, { forceFetch: true });
                     return;
                 }
@@ -1125,9 +1236,11 @@
             const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => initialUrlState.group || null);
             const [requestedEntryId, setRequestedEntryId] = useState(() => initialUrlState.entry || null);
             const [requestedSectionId, setRequestedSectionId] = useState(() => initialUrlState.section || null);
+            const [requestedSubsectionId, setRequestedSubsectionId] = useState(() => initialUrlState.subsection || null);
             const [highlightedEntryKey, setHighlightedEntryKey] = useState(null);
             const [toastMessage, setToastMessage] = useState('');
             const [copiedEntryId, setCopiedEntryId] = useState(null);
+            const [copiedSectionKey, setCopiedSectionKey] = useState(null);
             const [showIntro, setShowIntro] = useState(true);
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
@@ -1140,6 +1253,7 @@
             const highlightTimeoutRef = useRef(null);
             const toastTimeoutRef = useRef(null);
             const copiedEntryTimeoutRef = useRef(null);
+            const copiedSectionTimeoutRef = useRef(null);
 
             // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
@@ -1147,9 +1261,10 @@
                     q: searchTerm.trim(),
                     entry: requestedEntryId,
                     section: requestedSectionId,
+                    subsection: requestedSubsectionId,
                     group: selectedCategoryGroup
                 });
-            }, [searchTerm, requestedEntryId, requestedSectionId, selectedCategoryGroup]);
+            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, selectedCategoryGroup]);
             // Sync state when the browser URL changes manually or via navigation.
             useEffect(() => {
                 const syncFromUrl = () => {
@@ -1157,6 +1272,7 @@
                     setSearchTerm(prev => (prev !== next.q ? next.q : prev));
                     setRequestedEntryId(prev => (prev !== (next.entry || null) ? (next.entry || null) : prev));
                     setRequestedSectionId(prev => (prev !== (next.section || null) ? (next.section || null) : prev));
+                    setRequestedSubsectionId(prev => (prev !== (next.subsection || null) ? (next.subsection || null) : prev));
                     setSelectedCategoryGroup(prev => (prev !== (next.group || null) ? (next.group || null) : prev));
                 };
                 window.addEventListener('hashchange', syncFromUrl);
@@ -1168,14 +1284,25 @@
             }, []);
             useEffect(() => {
                 handledDeepLinkRef.current = null;
-            }, [requestedEntryId, requestedSectionId]);
+            }, [requestedEntryId, requestedSectionId, requestedSubsectionId]);
 
             // Shared search links open scrolled to the search field (entry deep-links handle their own scroll).
             useEffect(() => {
-                if (!initialUrlState.q || initialUrlState.entry) return;
+                if (!initialUrlState.q || initialUrlState.entry || initialUrlState.section) return;
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         document.querySelector('.mh-app > .mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+            }, []);
+
+            // Group-only deep link (#group): scroll to the top of the group view.
+            useEffect(() => {
+                if (initialUrlState.q || initialUrlState.entry || initialUrlState.section) return;
+                if (!initialUrlState.group) return;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        document.querySelector(`[data-section-anchor="group_${initialUrlState.group}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     });
                 });
             }, []);
@@ -1364,7 +1491,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "04.08.2026";            
+            const LAST_UPDATED = "05.08.2026";            
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -1803,6 +1930,15 @@
                     copiedEntryTimeoutRef.current = null;
                 }, 2000);
             };
+            const markSectionLinkCopied = (sectionKey) => {
+                if (!sectionKey) return;
+                setCopiedSectionKey(sectionKey);
+                if (copiedSectionTimeoutRef.current) window.clearTimeout(copiedSectionTimeoutRef.current);
+                copiedSectionTimeoutRef.current = window.setTimeout(() => {
+                    setCopiedSectionKey((current) => (current === sectionKey ? null : current));
+                    copiedSectionTimeoutRef.current = null;
+                }, 2000);
+            };
             const copyText = async (text, { toastMessage: successToast = null, onSuccess = null } = {}) => {
                 try {
                     if (navigator.clipboard?.writeText) {
@@ -1842,6 +1978,65 @@
                 url.searchParams.set('section', categoryId);
                 if (groupId) url.hash = `#${groupId}`;
                 return url.toString();
+            };
+            const buildSectionLink = ({ categoryId = null, subsectionId = null, groupId = null } = {}) => {
+                const url = new URL(window.location.href);
+                url.search = '';
+                url.hash = '';
+                if (categoryId) {
+                    const resolvedGroup = groupId || mhGetCategoryGroupForCategory(categoryId);
+                    url.searchParams.set('section', categoryId);
+                    if (subsectionId) url.searchParams.set('subsection', subsectionId);
+                    if (resolvedGroup) url.hash = `#${resolvedGroup}`;
+                } else if (groupId) {
+                    url.hash = `#${groupId}`;
+                }
+                return url.toString();
+            };
+            const sectionShareKey = ({ categoryId = null, subsectionId = null, groupId = null } = {}) => {
+                if (categoryId && subsectionId) return `${categoryId}_${subsectionId}`;
+                if (categoryId) return categoryId;
+                if (groupId) return `group_${groupId}`;
+                return '';
+            };
+            const SectionCopyButton = ({ categoryId = null, subsectionId = null, groupId = null, label = '', variant = 'section' }) => {
+                const shareKey = sectionShareKey({ categoryId, subsectionId, groupId });
+                if (!shareKey) return null;
+                const isCopied = copiedSectionKey === shareKey;
+                const className = [
+                    'mh-section-copy-link',
+                    variant === 'subsection' ? 'mh-subsection-copy-link' : '',
+                    variant === 'group' ? 'mh-group-copy-link' : '',
+                    isCopied ? 'mh-section-copy-link-copied' : ''
+                ].filter(Boolean).join(' ');
+                return (
+                    <button
+                        type="button"
+                        className={className}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            mhArmShareCopy();
+                        }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const link = buildSectionLink({ categoryId, subsectionId, groupId });
+                            copyText(link, {
+                                onSuccess: () => markSectionLinkCopied(shareKey)
+                            });
+                        }}
+                        title={isCopied ? 'הקישור הועתק' : 'העתקת קישור שפותח את המקטע הזה בדף'}
+                        aria-label={isCopied ? 'הקישור הועתק' : `העתק קישור למקטע ${label || shareKey}`}
+                        data-tracking-name={`copy_section_link_${shareKey}`}
+                        data-analytics-type="share"
+                        data-share-kind="section"
+                        data-share-section={shareKey}
+                        data-share-label={label || shareKey}
+                    >
+                        <i className={`fas ${isCopied ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
+                    </button>
+                );
             };
             const CategoryIntro = ({ cat, showSectionLinks }) => {
                 if (!cat.intro && !cat.desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
@@ -1893,6 +2088,7 @@
                 setSelectedCategoryGroup(null);
                 setRequestedEntryId(null);
                 setRequestedSectionId(null);
+                setRequestedSubsectionId(null);
                 handledDeepLinkRef.current = null;
                 requestAnimationFrame(() => {
                     document.querySelector('.mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1997,6 +2193,47 @@
                 };
                 requestAnimationFrame(() => requestAnimationFrame(runScroll));
             }, [resolvedEntryTarget, selectedCategoryGroup, expandedCats, expandedSubsections]);
+            // Section deep links (?section=…&subsection=…#group): expand path and scroll to section top.
+            useEffect(() => {
+                if (!requestedSectionId || requestedEntryId || searchTerm) return;
+                const categoryId = requestedSectionId;
+                if (!Object.prototype.hasOwnProperty.call(DATA, categoryId)) return;
+                const groupId = mhGetCategoryGroupForCategory(categoryId);
+                const subsectionId = requestedSubsectionId || null;
+                const cat = DATA[categoryId];
+                const validSubsection = subsectionId
+                    && cat?.subsections
+                    && Object.prototype.hasOwnProperty.call(cat.subsections, subsectionId)
+                    ? subsectionId
+                    : null;
+                const subsectionKey = validSubsection ? `${categoryId}_${validSubsection}` : null;
+                let changed = false;
+                if (groupId && selectedCategoryGroup !== groupId) {
+                    setSelectedCategoryGroup(groupId);
+                    changed = true;
+                }
+                if (!expandedCats.includes(categoryId)) {
+                    setExpandedCats((prev) => (prev.includes(categoryId) ? prev : [...prev, categoryId]));
+                    changed = true;
+                }
+                if (subsectionKey && !expandedSubsections.includes(subsectionKey)) {
+                    setExpandedSubsections((prev) => (prev.includes(subsectionKey) ? prev : [...prev, subsectionKey]));
+                    changed = true;
+                }
+                if (changed) return;
+                const handledKey = `section:${groupId || ''}:${categoryId}:${validSubsection || ''}`;
+                if (handledDeepLinkRef.current === handledKey) return;
+                const runScroll = () => {
+                    const selector = validSubsection
+                        ? `[data-section-anchor="subsection_${categoryId}_${validSubsection}"]`
+                        : `[data-analytics-id="subcategory_${categoryId}"]`;
+                    const targetEl = document.querySelector(selector);
+                    if (!targetEl) return;
+                    handledDeepLinkRef.current = handledKey;
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+                requestAnimationFrame(() => requestAnimationFrame(runScroll));
+            }, [requestedSectionId, requestedSubsectionId, requestedEntryId, searchTerm, selectedCategoryGroup, expandedCats, expandedSubsections]);
             useEffect(() => {
                 if (!highlightedEntryKey) return undefined;
                 if (highlightTimeoutRef.current) window.clearTimeout(highlightTimeoutRef.current);
@@ -2021,7 +2258,9 @@
                                 tabIndex={0}
                                 onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleSubsection(id, subId)}
                                 aria-expanded={expandedSubsections.includes(`${id}_${subId}`)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-md)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--space-sm)', cursor: 'pointer' }}
+                                data-section-anchor={`subsection_${id}_${subId}`}
+                                data-analytics-id={`subsection_${id}_${subId}`}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--space-sm)', cursor: 'pointer' }}
                             >
                                 <div>
                                     <strong style={{ color: 'var(--primary)', fontSize: 'var(--text-base)' }}>{expandedSubsections.includes(`${id}_${subId}`) ? '▼ ' : '▶ '} {sub.title}</strong>
@@ -2030,6 +2269,12 @@
                                         {(sub.services || []).length} רשומות
                                     </span>
                                 </div>
+                                <SectionCopyButton
+                                    categoryId={id}
+                                    subsectionId={subId}
+                                    label={sub.title}
+                                    variant="subsection"
+                                />
                             </div>
                             {expandedSubsections.includes(`${id}_${subId}`) && (
                                 <div className="mh-cat-grid">
@@ -2170,12 +2415,14 @@
                         className={`mh-category-card ${isUrgent ? 'mh-category-card-urgent' : ''}`}
                         data-analytics-id={`category_${groupId}`}
                         data-analytics-section="category_overview"
+                        data-section-anchor={`group_card_${groupId}`}
                         onClick={() => setSelectedCategoryGroup(groupId)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedCategoryGroup(groupId)}
                         aria-label={`${group.title} - ${group.titleEn}. ${count} שירותים. לחצו לצפייה`}
                     >
+                        <SectionCopyButton groupId={groupId} label={group.title} variant="group" />
                         <div className="mh-category-card-icon">
                             <i className={`fas ${isUrgent ? 'fa-exclamation-triangle' : group.icon}`}></i>
                         </div>
@@ -3046,6 +3293,7 @@
                                     if (requestedEntryId) {
                                         setRequestedEntryId(null);
                                         setRequestedSectionId(null);
+                                        setRequestedSubsectionId(null);
                                         handledDeepLinkRef.current = null;
                                     }
                                     if (v) setSelectedCategoryGroup(null);
@@ -3087,7 +3335,7 @@
                         ) : (
                             <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                                 <i className="fas fa-link" style={{ marginLeft: '6px', opacity: 0.85 }}></i>
-                                אפשר לשתף חיפוש או כרטיס ספציפי: אחרי חיפוש יופיע «העתק קישור לחיפוש», ובפינת כל כרטיס יש סמל קישור
+                                אפשר לשתף מקטע, חיפוש או כרטיס: סמל קישור ליד כל מקטע/כרטיס, ואחרי חיפוש — «העתק קישור לחיפוש»
                             </p>
                         )}
                     </div>
@@ -3097,7 +3345,7 @@
                     )}
                     {!searchTerm && selectedCategoryGroup && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
-                            בפינת כל כרטיס: סמל הקישור — לשליחה ישירה לאותו שירות בדף
+                            סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף
                         </p>
                     )}
 
@@ -3111,6 +3359,7 @@
                                     <div className="mh-cat-title">
                                         <span className="mh-cat-title-he">{cat.title}</span>
                                         <span className="mh-cat-meta">
+                                            <SectionCopyButton categoryId={id} label={cat.title} />
                                             <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
                                             <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{getCatServiceCount(cat)}</span>
                                         </span>
@@ -3126,8 +3375,13 @@
                             </div>
                         ))
                     ) : selectedCategoryGroup ? (
-                        <>
-                            <button onClick={() => setSelectedCategoryGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
+                        <div data-section-anchor={`group_${selectedCategoryGroup}`}>
+                            <button onClick={() => {
+                                setSelectedCategoryGroup(null);
+                                setRequestedSectionId(null);
+                                setRequestedSubsectionId(null);
+                                setRequestedEntryId(null);
+                            }} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
@@ -3139,6 +3393,7 @@
                                             <div className="mh-cat-title">
                                                 <span className="mh-cat-title-he">{cat.title}</span>
                                                 <span className="mh-cat-meta">
+                                                    <SectionCopyButton categoryId={id} label={cat.title} />
                                                     <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
                                                     <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{getCatServiceCount(cat)}</span>
                                                 </span>
@@ -3154,7 +3409,7 @@
                                     </div>
                                 );
                             })}
-                        </>
+                        </div>
                     ) : (
                         <div className="mh-category-cards">
                             {Object.keys(CATEGORY_GROUPS).map(groupId => (

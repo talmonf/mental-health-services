@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 014_events_allow_section_link_event_types.sql
 [x] 013_directory_entries_salshikum.sql
 [x] 012_events_allow_deep_link_event_types.sql
 [x] 011_directory_entries_mh_clinics_section.sql
