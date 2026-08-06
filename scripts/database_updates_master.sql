@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 016_directory_entries_ezra_lemarpe.sql
 [x] 015_directory_entries_ambulance_services.sql
 [x] 014_events_allow_section_link_event_types.sql
 [x] 013_directory_entries_salshikum.sql
