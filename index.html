@@ -360,12 +360,12 @@
         .mh-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-xl); }
         .mh-films-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); table-layout: auto; }
         .mh-films-table th, .mh-films-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border); text-align: right; vertical-align: top; line-height: 1.45; }
-        .mh-films-table th { background: rgba(45, 90, 123, 0.08); color: var(--primary); font-weight: 700; position: sticky; top: 0; white-space: nowrap; }
-        .mh-films-table thead tr:nth-child(2) th { top: 2.4em; }
-        .mh-films-table th.mh-films-rating-group { text-align: center; border-bottom: none; white-space: normal; }
-        .mh-films-table .mh-films-rating-hint { display: block; font-weight: 500; font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
+        .mh-films-table th { background: rgba(45, 90, 123, 0.08); color: var(--primary); font-weight: 700; position: sticky; top: 0; white-space: nowrap; vertical-align: middle; }
+        .mh-films-table thead tr:nth-child(2) th { top: 2.6em; }
+        .mh-films-table th.mh-films-rating-group { text-align: center; border-bottom: none; cursor: help; }
         .mh-films-table tr:hover td { background: rgba(45, 90, 123, 0.04); }
         .mh-films-table a { color: var(--primary); font-weight: 600; }
+        .mh-films-table .mh-films-year { direction: ltr; unicode-bidi: isolate; white-space: nowrap; text-align: left; }
         .mh-caution-chip { display: inline-block; background: rgba(214, 52, 71, 0.12); color: var(--danger-bg); border-radius: 999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; margin-inline-start: 6px; }
         .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); direction: ltr; text-align: left; }
         .mh-wiki-links a { color: var(--primary); font-weight: 600; }
@@ -1294,7 +1294,7 @@
     "languages": [
       "Spanish"
     ],
-    "year": "2024–26",
+    "year": "2024-2026",
     "hebrewSubs": "כתוביות",
     "platforms": [
       {
@@ -1319,7 +1319,7 @@
     "languages": [
       "English"
     ],
-    "year": "2019–",
+    "year": "2019-",
     "hebrewSubs": "",
     "platforms": [
       {
@@ -1343,7 +1343,7 @@
     "languages": [
       "עברית"
     ],
-    "year": "2005–08",
+    "year": "2005-2008",
     "hebrewSubs": "מקור עברי",
     "platforms": [
       {
@@ -3909,9 +3909,8 @@
                                                 <th rowSpan={showRatingCols ? 2 : 1}>חינם</th>
                                                 <th rowSpan={showRatingCols ? 2 : 1}>איפה לצפות</th>
                                                 {showRatingCols && (
-                                                    <th colSpan={2} className="mh-films-rating-group">
+                                                    <th colSpan={2} className="mh-films-rating-group" title="5 = הגבוהה ביותר">
                                                         רמת המלצה
-                                                        <span className="mh-films-rating-hint">5 = הגבוהה ביותר</span>
                                                     </th>
                                                 )}
                                             </tr>
@@ -3935,7 +3934,7 @@
                                                     </td>
                                                     <td>{FILM_TYPE_LABELS[film.type] || film.type}</td>
                                                     <td>{filmDisplayLanguages(film).join(', ')}</td>
-                                                    <td dir="ltr">{film.year}</td>
+                                                    <td className="mh-films-year">{film.year}</td>
                                                     <td>{film.hebrewSubs}</td>
                                                     <td>{(film.topics || []).join(', ')}</td>
                                                     <td>{filmIsFree(film) ? 'כן' : 'לא'}</td>
