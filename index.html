@@ -364,8 +364,8 @@
         .mh-films-table tr:hover td { background: rgba(45, 90, 123, 0.04); }
         .mh-films-table a { color: var(--primary); font-weight: 600; }
         .mh-caution-chip { display: inline-block; background: rgba(214, 52, 71, 0.12); color: var(--danger-bg); border-radius: 999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; margin-inline-start: 6px; }
-        .mh-taboo-links, .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); }
-        .mh-taboo-links a, .mh-wiki-links a { color: var(--primary); font-weight: 600; white-space: nowrap; }
+        .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); }
+        .mh-wiki-links a { color: var(--primary); font-weight: 600; white-space: nowrap; }
         .mh-inline-sep { margin: 0 0.35em; opacity: 0.55; }
         .mh-ted-playlists { display: grid; grid-template-columns: 1fr; gap: var(--space-md); margin-bottom: var(--space-xl); }
         .mh-ted-section { margin-bottom: var(--space-xl); }
@@ -2008,9 +2008,9 @@
       "Autism",
       "Adults on the spectrum"
     ],
-    "ratingTherapists": null,
-    "ratingPeers": null,
-    "brief": "חנוך דאום עם מבוגרים על הרצף האוטיסטי.",
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "חנוך דאום; דוקו-ריאליטי חינם בכאן (~50 דק׳) עם מבוגרים על הרצף האוטיסטי.",
     "series": "טאבו",
     "caution": null
   },
@@ -2037,9 +2037,9 @@
       "Combat PTSD",
       "טראומה"
     ],
-    "ratingTherapists": null,
-    "ratingPeers": null,
-    "brief": "חנוך דאום עם הלומי קרב.",
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "חנוך דאום; דוקו-ריאליטי חינם בכאן (~50 דק׳) עם הלומי קרב.",
     "series": "טאבו",
     "caution": null
   },
@@ -2066,9 +2066,9 @@
       "Anorexia",
       "Eating disorders"
     ],
-    "ratingTherapists": null,
-    "ratingPeers": null,
-    "brief": "חנוך דאום; עלול להיות מציף למי עם היסטוריה של הפרעות אכילה.",
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "חנוך דאום; דוקו-ריאליטי חינם בכאן (~50 דק׳). עלול להיות מציף למי עם היסטוריה של הפרעות אכילה.",
     "series": "טאבו",
     "caution": "ed"
   },
@@ -2095,20 +2095,13 @@
       "Addiction",
       "recovery"
     ],
-    "ratingTherapists": null,
-    "ratingPeers": null,
-    "brief": "חנוך דאום עם מכורים נקיים — התמכרות והחלמה.",
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "חנוך דאום; דוקו-ריאליטי חינם בכאן (~50 דק׳) עם מכורים נקיים — התמכרות והחלמה.",
     "series": "טאבו",
     "caution": null
   }
 ];
-
-        const TABOO_EPISODES = [
-            { id: "taboo_s2e3", title: "אוטיסטים", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526832/", caution: null },
-            { id: "taboo_s2e6", title: "הלומי קרב", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526887/", caution: null },
-            { id: "taboo_s3e4", title: "מתמודדים עם אנורקסיה", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924817/", caution: "ed" },
-            { id: "taboo_s3e5", title: "מכורים נקיים", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924791/", caution: null }
-        ];
 
         const TED_RESOURCES = {
   "playlists": [
@@ -3378,6 +3371,7 @@
 
             const filmIsFree = (film) => (film.platforms || []).some(p => p.free);
             const filmPlatformNames = (film) => (film.platforms || []).map(p => p.name);
+            const filmBriefIsHebrew = (text) => /[\u0590-\u05FF]/.test(String(text || ''));
 
             const filteredFilms = useMemo(() => {
                 return FILMS.filter(film => {
@@ -3805,17 +3799,6 @@
                                     רשימה למטפלים ולמתמודדים. זמינות סטרימינג משתנה תדיר — מומלץ לבדוק ב-<a href="https://www.justwatch.com/il" target="_blank" rel="noopener noreferrer">JustWatch</a> לפני הקרנה.
                                 </p>
 
-                                <p className="mh-taboo-links">
-                                    <strong>טאבו (חנוך דאום, חינם בכאן): </strong>
-                                    {TABOO_EPISODES.map((ep, i) => (
-                                        <span key={ep.id}>
-                                            {i > 0 && <span className="mh-inline-sep">·</span>}
-                                            <a href={ep.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`taboo_${ep.id}`}>{ep.title}</a>
-                                            {ep.caution === 'ed' && <span className="mh-caution-chip">הפרעות אכילה</span>}
-                                        </span>
-                                    ))}
-                                </p>
-
                                 <p className="mh-wiki-links">
                                     <strong>Wikipedia: </strong>
                                     <a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentaries</a>
@@ -3904,10 +3887,14 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filteredFilms.map(film => (
+                                            {filteredFilms.map(film => {
+                                                const primaryUrl = (film.platforms || []).find(p => p.url)?.url;
+                                                return (
                                                 <tr key={film.id}>
                                                     <td>
-                                                        <strong>{film.title}</strong>
+                                                        {primaryUrl
+                                                            ? <a href={primaryUrl} target="_blank" rel="noopener noreferrer"><strong>{film.title}</strong></a>
+                                                            : <strong>{film.title}</strong>}
                                                         {film.caution === 'ed' && <span className="mh-caution-chip">הפרעות אכילה</span>}
                                                     </td>
                                                     <td>{FILM_TYPE_LABELS[film.type] || film.type}</td>
@@ -3926,9 +3913,10 @@
                                                     </td>
                                                     {showRatingCols && <td>{film.ratingTherapists != null ? film.ratingTherapists : '—'}</td>}
                                                     {showRatingCols && <td>{film.ratingPeers != null ? film.ratingPeers : '—'}</td>}
-                                                    <td>{film.brief}</td>
+                                                    <td style={filmBriefIsHebrew(film.brief) ? undefined : { direction: 'ltr', textAlign: 'left' }}>{film.brief}</td>
                                                 </tr>
-                                            ))}
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
