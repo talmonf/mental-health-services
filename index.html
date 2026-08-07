@@ -364,9 +364,9 @@
         .mh-films-table tr:hover td { background: rgba(45, 90, 123, 0.04); }
         .mh-films-table a { color: var(--primary); font-weight: 600; }
         .mh-caution-chip { display: inline-block; background: rgba(214, 52, 71, 0.12); color: var(--danger-bg); border-radius: 999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; margin-inline-start: 6px; }
-        .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); }
-        .mh-wiki-links a { color: var(--primary); font-weight: 600; white-space: nowrap; }
-        .mh-inline-sep { margin: 0 0.35em; opacity: 0.55; }
+        .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); direction: ltr; text-align: left; }
+        .mh-wiki-links a { color: var(--primary); font-weight: 600; }
+        .mh-inline-sep { margin: 0 0.45em; opacity: 0.55; }
         .mh-ted-playlists { display: grid; grid-template-columns: 1fr; gap: var(--space-md); margin-bottom: var(--space-xl); }
         .mh-ted-section { margin-bottom: var(--space-xl); }
         .mh-ted-section h2 { color: var(--primary); font-size: var(--text-xl); margin: 0 0 var(--space-sm); }
@@ -1222,7 +1222,7 @@
        {"row": 205, "org": "רזולוציה", "svc": "יישומים פסיכולוגיים ממוקדים — הערכה ראשונית והתאמת טיפול (פגישות בקליניקה או זום).", "phone": "03-6919961", "web": "https://www.resolution.co.il/", "target": "", "region": "תל אביב", "cost": "", "specialty": "", "notes": "מרכז בתל אביב — פרטים באתר.", "languages": "", "diseases": "", "add": ""}
        ]},
 
-       "books_movies": {"icon": "🎬", "title": "ספרים, סרטים ו-TED", "titleEn": "Books, Movies & TED", "desc": "המלצות מדיה למטפלים ולמתעניינים — ספרים, סרטים והרצאות TED", "services": [], "resourceHub": true, "resourceCount": 3},
+       "books_movies": {"icon": "🎬", "title": "ספרים, סרטים ו-TED", "titleEn": "Books, Movies & TED", "desc": "המלצות מדיה — ספרים, סרטים והרצאות TED", "services": [], "resourceHub": true, "resourceCount": 3},
 
        "transport": {"icon": "🚑", "title": "הסעות ואמבולנסים", "titleEn": "Transportation Services", "desc": "סיוע בהסעות, אמבולנסים, על ידי מתנדבים ללא עלות", "services": [
        {"row": 83, "org": "עזר מציון הסעות", "svc": "הסעות חולים, אמבולנסים לצרכים רפואיים ואירועים משפחתיים, נהגים מתנדבים", "phone": "03-5742742", "phoneLabel": "כללי", "phoneShowNumber": true, "phone2": "1800-236-236", "phoneLabel2": "כללי", "phoneShowNumber2": true, "phone3": "*2236", "phoneLabel3": "כללי", "phoneShowNumber3": true, "phone4": "03-6144666", "phoneLabel4": "אמבולנסים", "phoneShowNumber4": true, "phone5": "073-3956218", "phoneLabel5": "נהגים מתנדבים", "phoneShowNumber5": false, "phone6": "073-2477777", "phoneLabel6": "הסעות חולים ושינוע רפואי", "phoneShowNumber6": false, "web": "https://www.ami.org.il/services/ambulances", "target": "", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "אמבולנסים ללא תשלום; לא תמיד יש אמבולנס פנוי — יש לפנות יום קודם עד 12:00", "languages": "", "diseases": "", "add": ""},
@@ -1252,8 +1252,8 @@
       }
     ],
     "topics": [
-      "Psychotherapy process",
-      "self-disclosure"
+      "תהליך פסיכותרפיה",
+      "חשיפה עצמית"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 4,
@@ -1276,9 +1276,9 @@
       }
     ],
     "topics": [
-      "Attachment",
-      "rupture",
-      "individual therapy"
+      "התקשרות",
+      "שבר בברית",
+      "טיפול פרטני"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 5,
@@ -1301,9 +1301,9 @@
       }
     ],
     "topics": [
-      "Envy",
-      "narcissistic injury",
-      "long-term analysis"
+      "קנאה",
+      "פגיעה נרקיסיסטית",
+      "אנליזה ארוכת טווח"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -1326,8 +1326,8 @@
       }
     ],
     "topics": [
-      "Couples therapy",
-      "countertransference"
+      "טיפול זוגי",
+      "העברה נגדית"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 4,
@@ -1374,9 +1374,9 @@
       }
     ],
     "topics": [
-      "Group therapy",
-      "masculinity",
-      "prison"
+      "טיפול קבוצתי",
+      "גבריות",
+      "כלא"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 3,
@@ -1399,9 +1399,9 @@
       }
     ],
     "topics": [
-      "Grief",
-      "survivor guilt",
-      "therapeutic alliance"
+      "אבל",
+      "אשמת ניצול",
+      "ברית טיפולית"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 4,
@@ -1424,9 +1424,9 @@
       }
     ],
     "topics": [
-      "Alliance",
-      "boundaries",
-      "trauma"
+      "ברית טיפולית",
+      "גבולות",
+      "טראומה"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -1449,8 +1449,8 @@
       }
     ],
     "topics": [
-      "Bipolar disorder",
-      "boundary violation"
+      "הפרעה דו־קוטבית",
+      "הפרת גבולות"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 2,
@@ -1473,7 +1473,7 @@
       }
     ],
     "topics": [
-      "Schizophrenia"
+      "סכיזופרניה"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 3,
@@ -1496,9 +1496,9 @@
       }
     ],
     "topics": [
-      "Memory",
-      "loss",
-      "repetition compulsion"
+      "זיכרון",
+      "אובדן",
+      "כפיית חזרה"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 3,
@@ -1521,8 +1521,8 @@
       }
     ],
     "topics": [
-      "Psychoanalytic history",
-      "transference"
+      "היסטוריה פסיכואנליטית",
+      "העברה"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 2,
@@ -1545,8 +1545,8 @@
       }
     ],
     "topics": [
-      "Institutional psychiatry",
-      "ethics"
+      "פסיכיאטריה מוסדית",
+      "אתיקה"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 1,
@@ -1569,8 +1569,8 @@
       }
     ],
     "topics": [
-      "Institutional power",
-      "group process"
+      "כוח מוסדי",
+      "תהליך קבוצתי"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 2,
@@ -1593,8 +1593,8 @@
       }
     ],
     "topics": [
-      "Psychosis",
-      "network-based care"
+      "פסיכוזה",
+      "טיפול מבוסס רשת"
     ],
     "ratingTherapists": 5,
     "ratingPeers": 3,
@@ -1617,36 +1617,12 @@
       }
     ],
     "topics": [
-      "Psychosis as transition",
-      "cross-cultural"
+      "פסיכוזה כמעבר",
+      "רב־תרבותי"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
     "brief": "Madness as initiation rather than only pathology."
-  },
-  {
-    "id": "wisdom_trauma",
-    "title": "The Wisdom of Trauma",
-    "type": "doc",
-    "languages": [
-      "EN"
-    ],
-    "year": "2021",
-    "hebrewSubs": "Unverified",
-    "platforms": [
-      {
-        "name": "Screenings / rental",
-        "url": "https://www.justwatch.com/il/search?q=The%20Wisdom%20of%20Trauma",
-        "free": false
-      }
-    ],
-    "topics": [
-      "Trauma",
-      "addiction"
-    ],
-    "ratingTherapists": 4,
-    "ratingPeers": 4,
-    "brief": "Gabor Maté. Popular and scientifically contested — screen it critically."
   },
   {
     "id": "aftersun",
@@ -1665,8 +1641,8 @@
       }
     ],
     "topics": [
-      "Paternal depression",
-      "memory"
+      "דיכאון אבהי",
+      "זיכרון"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 4,
@@ -1689,8 +1665,8 @@
       }
     ],
     "topics": [
-      "Second generation",
-      "legitimate vs psychic pain"
+      "דור שני",
+      "כאב לגיטימי מול כאב נפשי"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 4,
@@ -1809,8 +1785,8 @@
       }
     ],
     "topics": [
-      "Dementia",
-      "caregiver burden"
+      "דמנציה",
+      "נטל מטפלים"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -1833,7 +1809,7 @@
       }
     ],
     "topics": [
-      "Non-speaking autism"
+      "אוטיזם ללא דיבור"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -1856,8 +1832,8 @@
       }
     ],
     "topics": [
-      "Autism",
-      "communication"
+      "אוטיזם",
+      "תקשורת"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 4,
@@ -1880,10 +1856,10 @@
       }
     ],
     "topics": [
-      "Loss",
-      "acceptance",
-      "addiction",
-      "Deaf community"
+      "אובדן",
+      "קבלה",
+      "התמכרות",
+      "קהילת חירשים"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 5,
@@ -1906,7 +1882,7 @@
       }
     ],
     "topics": [
-      "OCD"
+      "הפרעה טורדנית־כפייתית (OCD)"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 3,
@@ -1929,7 +1905,7 @@
       }
     ],
     "topics": [
-      "Psychedelic-assisted therapy"
+      "טיפול בסיוע פסיכדליים"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 3,
@@ -1953,8 +1929,8 @@
       }
     ],
     "topics": [
-      "Psilocybin",
-      "contemplative practice"
+      "פסילוסיבין",
+      "תרגול התבוננות"
     ],
     "ratingTherapists": 3,
     "ratingPeers": 2,
@@ -1977,9 +1953,9 @@
       }
     ],
     "topics": [
-      "Regulation",
-      "attachment",
-      "healing"
+      "ויסות",
+      "התקשרות",
+      "ריפוי"
     ],
     "ratingTherapists": 2,
     "ratingPeers": 4,
@@ -2005,8 +1981,8 @@
       }
     ],
     "topics": [
-      "Autism",
-      "Adults on the spectrum"
+      "אוטיזם",
+      "מבוגרים על הרצף האוטיסטי"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -2034,7 +2010,7 @@
       }
     ],
     "topics": [
-      "Combat PTSD",
+      "הלם קרב / PTSD",
       "טראומה"
     ],
     "ratingTherapists": 4,
@@ -2063,8 +2039,8 @@
       }
     ],
     "topics": [
-      "Anorexia",
-      "Eating disorders"
+      "אנורקסיה",
+      "הפרעות אכילה"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -2092,8 +2068,8 @@
       }
     ],
     "topics": [
-      "Addiction",
-      "recovery"
+      "התמכרות",
+      "החלמה"
     ],
     "ratingTherapists": 4,
     "ratingPeers": 4,
@@ -2134,13 +2110,6 @@
           "note": "Still the best single talk on depression.",
           "duration": "~29 min",
           "url": "https://www.ted.com/search?q=Andrew%20Solomon%20Depression%2C%20the%20secret%20we%20share"
-        },
-        {
-          "speaker": "Nikki Webber Allen",
-          "title": "depression, race, and who is permitted to be unwell",
-          "note": "Depression, race, and who is permitted to be unwell.",
-          "duration": null,
-          "url": "https://www.ted.com/search?q=Nikki%20Webber%20Allen%20depression%2C%20race%2C%20and%20who%20is%20permitted%20to%20be%20unwell"
         }
       ]
     },
@@ -2156,13 +2125,6 @@
           "note": "TEDMED 2014. The ACEs study, clearly explained.",
           "duration": "~16 min",
           "url": "https://www.ted.com/search?q=Nadine%20Burke%20Harris%20How%20childhood%20trauma%20affects%20health%20across%20a%20lifetime"
-        },
-        {
-          "speaker": "Essam Daod",
-          "title": "psychological first aid for refugees",
-          "note": "Israeli psychiatrist, founder of Humanity Crew; brief interventions on rescue boats. Locally relevant.",
-          "duration": null,
-          "url": "https://www.ted.com/search?q=Essam%20Daod%20psychological%20first%20aid%20for%20refugees"
         },
         {
           "speaker": "Melissa Walker",
@@ -2195,10 +2157,10 @@
         },
         {
           "speaker": "Emily Anhalt",
-          "title": "therapy as maintenance rather than crisis response",
-          "note": "Therapy as maintenance rather than crisis response.",
+          "title": "Why we should all try therapy",
+          "note": "Therapy as ongoing practice, not only crisis response — increases depth and authenticity of happiness.",
           "duration": null,
-          "url": "https://www.ted.com/search?q=Emily%20Anhalt%20therapy%20as%20maintenance%20rather%20than%20crisis%20response"
+          "url": "https://www.ted.com/talks/emily_anhalt_why_we_should_all_try_therapy"
         },
         {
           "speaker": "Brené Brown",
@@ -2210,24 +2172,17 @@
       ]
     },
     {
-      "id": "contested",
-      "title": "Contested",
-      "note": "Useful precisely because of the controversy",
+      "id": "addiction",
+      "title": "Addiction",
+      "note": "Widely discussed — and widely criticised for overreach; useful for argument.",
       "caution": null,
       "talks": [
         {
           "speaker": "Johann Hari",
           "title": "Everything you think you know about addiction is wrong",
-          "note": "Rat Park, connection as cure. Widely criticised for overreach; a good 20-minute argument.",
+          "note": "Rat Park, connection as cure. Screen critically.",
           "duration": "~14 min",
           "url": "https://www.ted.com/search?q=Johann%20Hari%20Everything%20you%20think%20you%20know%20about%20addiction%20is%20wrong"
-        },
-        {
-          "speaker": "Sherwin Nuland",
-          "title": "on ECT and his own severe depression",
-          "note": "Rare first-person defence of a stigmatised treatment.",
-          "duration": null,
-          "url": "https://www.ted.com/search?q=Sherwin%20Nuland%20on%20ECT%20and%20his%20own%20severe%20depression"
         }
       ]
     },
@@ -3401,7 +3356,7 @@
                 if (cat.resourceHub) {
                     const cards = [
                         { page: 'books', icon: 'fa-book', title: 'ספרים', titleEn: 'Books', desc: 'המלצות קריאה (בקרוב)' },
-                        { page: 'movies', icon: 'fa-film', title: 'סרטים וסדרות', titleEn: 'Movies & Series', desc: 'רשימה מסוננת למטפלים ולמתמודדים' },
+                        { page: 'movies', icon: 'fa-film', title: 'סרטים וסדרות', titleEn: 'Movies & Series', desc: '' },
                         { page: 'ted', icon: 'fa-microphone-lines', title: 'TED Talks', titleEn: 'TED Talks', desc: 'פלייליסטים והרצאות נבחרות' }
                     ];
                     return (
@@ -3420,7 +3375,7 @@
                                     <div className="mh-resource-nav-card-icon"><i className={`fas ${card.icon}`}></i></div>
                                     <div className="mh-resource-nav-card-title">{card.title}</div>
                                     <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>{card.titleEn}</div>
-                                    <p className="mh-resource-nav-card-desc">{card.desc}</p>
+                                    {card.desc && <p className="mh-resource-nav-card-desc">{card.desc}</p>}
                                 </div>
                             ))}
                         </div>
@@ -3799,13 +3754,13 @@
                                     רשימה למטפלים ולמתמודדים. זמינות סטרימינג משתנה תדיר — מומלץ לבדוק ב-<a href="https://www.justwatch.com/il" target="_blank" rel="noopener noreferrer">JustWatch</a> לפני הקרנה.
                                 </p>
 
-                                <p className="mh-wiki-links">
-                                    <strong>Wikipedia: </strong>
-                                    <a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentaries</a>
+                                <p className="mh-wiki-links" dir="ltr" lang="en">
+                                    <strong>Wikipedia Category links: </strong>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentary films about mental health</a>
                                     <span className="mh-inline-sep">·</span>
-                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_health" target="_blank" rel="noopener noreferrer">Films</a>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_health" target="_blank" rel="noopener noreferrer">Films about mental health</a>
                                     <span className="mh-inline-sep">·</span>
-                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_disorders" target="_blank" rel="noopener noreferrer">Mental disorders</a>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_disorders" target="_blank" rel="noopener noreferrer">Films about mental disorders</a>
                                 </p>
 
                                 <div className="mh-resource-filters">
