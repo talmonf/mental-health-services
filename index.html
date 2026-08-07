@@ -349,6 +349,7 @@
         .mh-resource-nav-card-title { font-weight: 700; font-size: var(--text-lg); color: var(--primary); }
         .mh-resource-nav-card-desc { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; margin: 0; }
         .mh-resource-page { max-width: 1100px; }
+        .mh-resource-page.mh-resource-page-wide { max-width: min(1600px, 98vw); }
         .mh-resource-filters { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg); align-items: flex-end; }
         .mh-resource-filter { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
         .mh-resource-filter label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; }
@@ -357,19 +358,15 @@
         .mh-resource-chip { border: 1px solid var(--border); background: var(--bg); color: var(--primary); border-radius: 999px; padding: 4px 12px; font-size: var(--text-sm); cursor: pointer; font-family: inherit; }
         .mh-resource-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
         .mh-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-xl); }
-        .mh-films-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); min-width: 960px; }
+        .mh-films-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); table-layout: auto; }
         .mh-films-table th, .mh-films-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border); text-align: right; vertical-align: top; line-height: 1.45; }
         .mh-films-table th { background: rgba(45, 90, 123, 0.08); color: var(--primary); font-weight: 700; position: sticky; top: 0; white-space: nowrap; }
         .mh-films-table tr:hover td { background: rgba(45, 90, 123, 0.04); }
         .mh-films-table a { color: var(--primary); font-weight: 600; }
         .mh-caution-chip { display: inline-block; background: rgba(214, 52, 71, 0.12); color: var(--danger-bg); border-radius: 999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; margin-inline-start: 6px; }
-        .mh-spotlight { background: rgba(45, 90, 123, 0.06); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-xl); }
-        .mh-spotlight h2 { margin: 0 0 var(--space-sm); color: var(--primary); font-size: var(--text-xl); }
-        .mh-spotlight-eps { list-style: none; padding: 0; margin: var(--space-md) 0 0; display: grid; gap: var(--space-sm); }
-        .mh-spotlight-eps li { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: baseline; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border); }
-        .mh-spotlight-eps li:last-child { border-bottom: none; }
-        .mh-wiki-links { margin: var(--space-lg) 0; padding: var(--space-md); background: var(--bg); border-radius: var(--radius-md); border: 1px dashed var(--border); }
-        .mh-wiki-links ul { margin: var(--space-sm) 0 0; padding-inline-start: 1.25rem; }
+        .mh-taboo-links, .mh-wiki-links { margin: 0 0 var(--space-lg); font-size: var(--text-sm); line-height: 1.7; color: var(--text-muted); }
+        .mh-taboo-links a, .mh-wiki-links a { color: var(--primary); font-weight: 600; white-space: nowrap; }
+        .mh-inline-sep { margin: 0 0.35em; opacity: 0.55; }
         .mh-ted-playlists { display: grid; grid-template-columns: 1fr; gap: var(--space-md); margin-bottom: var(--space-xl); }
         .mh-ted-section { margin-bottom: var(--space-xl); }
         .mh-ted-section h2 { color: var(--primary); font-size: var(--text-xl); margin: 0 0 var(--space-sm); }
@@ -1989,35 +1986,6 @@
     "brief": "Divisive in clinical circles — some find it self-indulgent."
   },
   {
-    "id": "taboo_s2e1",
-    "title": "טאבו — מתמודדי נפש",
-    "episodeTitle": "מתמודדי נפש",
-    "season": "2",
-    "episode": "1",
-    "type": "doc_series",
-    "languages": [
-      "עברית"
-    ],
-    "year": "2023",
-    "hebrewSubs": "מקור עברי",
-    "platforms": [
-      {
-        "name": "כאן",
-        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526824/",
-        "free": true
-      }
-    ],
-    "topics": [
-      "Serious mental illness",
-      "מתמודדי נפש"
-    ],
-    "ratingTherapists": null,
-    "ratingPeers": null,
-    "brief": "חנוך דאום; דוקו-ריאליטי (~50 דק'). גילוי עצמי חריג בטלוויזיה הישראלית.",
-    "series": "טאבו",
-    "caution": null
-  },
-  {
     "id": "taboo_s2e3",
     "title": "טאבו — אוטיסטים",
     "episodeTitle": "אוטיסטים",
@@ -2135,80 +2103,29 @@
   }
 ];
 
-        const TABOO_SPOTLIGHT = {
-  "title": "טאבו",
-  "host": "חנוך דאום",
-  "hubUrl": "https://www.kan.org.il/content/kan/kan-11/p-12154/",
-  "format": "דוקו-ריאליטי, כאן 11, 3 עונות; פרקים ~50 דק׳ — מתאים לערב מועדון",
-  "blurb": "פורמט של טיול קבוצתי: דאום מבלה עם 4–5 אנשים החולקים מצב וצוחק איתם עליו. לא אחיד, וההומור לא יעבוד לכולם — אבל רמת הגילוי חריגה לטלוויזיה הישראלית. חינם באתר כאן.",
-  "episodes": [
-    {
-      "id": "taboo_s2e1",
-      "title": "מתמודדי נפש",
-      "season": 2,
-      "episode": 1,
-      "topic": "Serious mental illness",
-      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526824/",
-      "caution": null
-    },
-    {
-      "id": "taboo_s2e3",
-      "title": "אוטיסטים",
-      "season": 2,
-      "episode": 3,
-      "topic": "Adults on the spectrum",
-      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526832/",
-      "caution": null
-    },
-    {
-      "id": "taboo_s2e6",
-      "title": "הלומי קרב",
-      "season": 2,
-      "episode": 6,
-      "topic": "Combat PTSD",
-      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526887/",
-      "caution": null
-    },
-    {
-      "id": "taboo_s3e4",
-      "title": "מתמודדים עם אנורקסיה",
-      "season": 3,
-      "episode": 4,
-      "topic": "Anorexia",
-      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924817/",
-      "caution": "ed"
-    },
-    {
-      "id": "taboo_s3e5",
-      "title": "מכורים נקיים",
-      "season": 3,
-      "episode": 5,
-      "topic": "Addiction, recovery",
-      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924791/",
-      "caution": null
-    }
-  ]
-};
+        const TABOO_EPISODES = [
+            { id: "taboo_s2e3", title: "אוטיסטים", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526832/", caution: null },
+            { id: "taboo_s2e6", title: "הלומי קרב", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526887/", caution: null },
+            { id: "taboo_s3e4", title: "מתמודדים עם אנורקסיה", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924817/", caution: "ed" },
+            { id: "taboo_s3e5", title: "מכורים נקיים", url: "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924791/", caution: null }
+        ];
 
         const TED_RESOURCES = {
   "playlists": [
     {
       "title": "The struggle of mental health",
-      "url": "https://www.ted.com/playlists/175/the_struggle_of_mental_health",
-      "titleHe": "המאבק בבריאות הנפש"
+      "url": "https://www.ted.com/playlists/175/the_struggle_of_mental_health"
     },
     {
       "title": "How to practice emotional first aid",
-      "url": "https://www.ted.com/playlists/638/how_to_practice_emotional_first_aid",
-      "titleHe": "עזרה ראשונה רגשית"
+      "url": "https://www.ted.com/playlists/638/how_to_practice_emotional_first_aid"
     }
   ],
   "sections": [
     {
       "id": "lived",
-      "titleHe": "חוויה חיה",
-      "titleEn": "Lived experience",
-      "note": "חזק במיוחד לקבוצת מטפלים",
+      "title": "Lived experience",
+      "note": "Strongest for a therapists' group",
       "caution": null,
       "talks": [
         {
@@ -2236,8 +2153,7 @@
     },
     {
       "id": "trauma",
-      "titleHe": "טראומה",
-      "titleEn": "Trauma",
+      "title": "Trauma",
       "note": null,
       "caution": null,
       "talks": [
@@ -2266,8 +2182,7 @@
     },
     {
       "id": "practice",
-      "titleHe": "פרקטיקה ועמדה",
-      "titleEn": "Practice and stance",
+      "title": "Practice and stance",
       "note": null,
       "caution": null,
       "talks": [
@@ -2303,9 +2218,8 @@
     },
     {
       "id": "contested",
-      "titleHe": "שנוי במחלוקת",
-      "titleEn": "Contested",
-      "note": "שימושי דווקא בגלל המחלוקת",
+      "title": "Contested",
+      "note": "Useful precisely because of the controversy",
       "caution": null,
       "talks": [
         {
@@ -2326,9 +2240,8 @@
     },
     {
       "id": "suicide",
-      "titleHe": "אובדנות",
-      "titleEn": "Suicide",
-      "note": "להקרין בזהירות",
+      "title": "Suicide",
+      "note": "Screen with care",
       "caution": "suicide",
       "talks": [
         {
@@ -3454,6 +3367,13 @@
                 setSelectedCategoryGroup('information');
                 setRequestedSectionId('books_movies');
                 setExpandedCats(prev => prev.includes('books_movies') ? prev : [...prev, 'books_movies']);
+                handledDeepLinkRef.current = null;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        document.querySelector('[data-analytics-id="subcategory_books_movies"]')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
             };
 
             const filmIsFree = (film) => (film.platforms || []).some(p => p.free);
@@ -3820,39 +3740,45 @@
 
                 if (resourcePage === 'ted') {
                     return (
-                        <div className="mh-app mh-resource-page">
-                            {backBtn}
+                        <div className="mh-app mh-resource-page" dir="ltr" lang="en" style={{ direction: 'ltr', textAlign: 'left' }}>
+                            <button
+                                onClick={closeResourcePage}
+                                className="mh-btn"
+                                style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}
+                                data-tracking-name="resource_back_ted"
+                            >
+                                ← Back to Books, Movies & TED
+                            </button>
                             <div className="mh-modal mh-modal-terms-flow">
-                                <div className="mh-terms-wrap">
-                                    <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                <div className="mh-terms-wrap" style={{ direction: 'ltr', textAlign: 'left' }}>
+                                    <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', justifyContent: 'flex-start' }}>
                                         <i className="fas fa-microphone-lines"></i> TED Talks
                                     </h1>
                                     <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-xl)', fontSize: 'var(--text-base)' }}>
-                                        שני פלייליסטים מאומתים, ואחריהם הרצאות נבחרות לפי נושא. קישורי ההרצאות הבודדות מובילים לחיפוש ב-TED לפי שם הדובר והכותרת.
+                                        Two verified playlists, followed by curated talks by theme. Individual talk links open a TED search by speaker and title.
                                     </p>
                                     <div className="mh-ted-playlists">
                                         {TED_RESOURCES.playlists.map(pl => (
-                                            <a key={pl.url} href={pl.url} target="_blank" rel="noopener noreferrer" className="mh-resource-nav-card" style={{ textDecoration: 'none' }} data-tracking-name={`ted_playlist_${pl.title}`}>
+                                            <a key={pl.url} href={pl.url} target="_blank" rel="noopener noreferrer" className="mh-resource-nav-card" style={{ textDecoration: 'none', textAlign: 'left', direction: 'ltr' }} data-tracking-name={`ted_playlist_${pl.title}`}>
                                                 <div className="mh-resource-nav-card-icon"><i className="fas fa-list"></i></div>
-                                                <div className="mh-resource-nav-card-title">{pl.titleHe || pl.title}</div>
-                                                <div style={{ fontSize: '0.85rem', opacity: 0.85, direction: 'ltr', textAlign: 'left' }}>{pl.title}</div>
+                                                <div className="mh-resource-nav-card-title">{pl.title}</div>
                                             </a>
                                         ))}
                                     </div>
                                     {TED_RESOURCES.sections.map(sec => (
-                                        <section key={sec.id} className="mh-ted-section">
-                                            <h2>{sec.titleHe} <span style={{ fontWeight: 500, fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ {sec.titleEn}</span></h2>
+                                        <section key={sec.id} className="mh-ted-section" style={{ textAlign: 'left' }}>
+                                            <h2 style={{ textAlign: 'left' }}>{sec.title}</h2>
                                             {sec.note && <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{sec.note}</p>}
                                             {sec.caution === 'suicide' && (
-                                                <div className="mh-ted-caution" role="note">שימו לב: תוכן בנושא אובדנות — להקרין ולדון בזהירות.</div>
+                                                <div className="mh-ted-caution" role="note">Caution: suicide-related content — screen and discuss with care.</div>
                                             )}
                                             <ul className="mh-ted-list">
                                                 {sec.talks.map(talk => (
-                                                    <li key={`${talk.speaker}_${talk.title}`}>
+                                                    <li key={`${talk.speaker}_${talk.title}`} style={{ textAlign: 'left' }}>
                                                         <a href={talk.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`ted_talk_${talk.speaker}`}>
                                                             {talk.speaker} — {talk.title}
                                                         </a>
-                                                        {talk.duration && <span style={{ color: 'var(--text-muted)', marginInlineStart: '8px', fontSize: 'var(--text-sm)' }}>({talk.duration})</span>}
+                                                        {talk.duration && <span style={{ color: 'var(--text-muted)', marginLeft: '8px', fontSize: 'var(--text-sm)' }}>({talk.duration})</span>}
                                                         {talk.note && <div style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: 'var(--text-sm)', lineHeight: 1.5 }}>{talk.note}</div>}
                                                     </li>
                                                 ))}
@@ -3866,46 +3792,38 @@
                 }
 
                 // movies
+                const showRatingCols = filmFilters.audience === 'all';
                 return (
-                    <div className="mh-app mh-resource-page">
+                    <div className="mh-app mh-resource-page mh-resource-page-wide">
                         {backBtn}
                         <div className="mh-modal mh-modal-terms-flow">
                             <div className="mh-terms-wrap">
                                 <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                                     <i className="fas fa-film"></i> סרטים וסדרות
                                 </h1>
-                                <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-base)', lineHeight: 1.6 }}>
+                                <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-base)', lineHeight: 1.6 }}>
                                     רשימה למטפלים ולמתמודדים. זמינות סטרימינג משתנה תדיר — מומלץ לבדוק ב-<a href="https://www.justwatch.com/il" target="_blank" rel="noopener noreferrer">JustWatch</a> לפני הקרנה.
                                 </p>
 
-                                <div className="mh-spotlight">
-                                    <h2>טאבו — חנוך דאום</h2>
-                                    <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>{TABOO_SPOTLIGHT.format}</p>
-                                    <p style={{ margin: 'var(--space-sm) 0', lineHeight: 1.65 }}>{TABOO_SPOTLIGHT.blurb}</p>
-                                    <p style={{ margin: 0 }}>
-                                        <a href={TABOO_SPOTLIGHT.hubUrl} target="_blank" rel="noopener noreferrer" data-tracking-name="taboo_hub">לצפייה חינם באתר כאן</a>
-                                    </p>
-                                    <ul className="mh-spotlight-eps">
-                                        {TABOO_SPOTLIGHT.episodes.map(ep => (
-                                            <li key={ep.id}>
-                                                <a href={ep.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`taboo_${ep.id}`}>
-                                                    עונה {ep.season}, פרק {ep.episode} — {ep.title}
-                                                </a>
-                                                <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>{ep.topic}</span>
-                                                {ep.caution === 'ed' && <span className="mh-caution-chip">זהירות: הפרעות אכילה</span>}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                                <p className="mh-taboo-links">
+                                    <strong>טאבו (חנוך דאום, חינם בכאן): </strong>
+                                    {TABOO_EPISODES.map((ep, i) => (
+                                        <span key={ep.id}>
+                                            {i > 0 && <span className="mh-inline-sep">·</span>}
+                                            <a href={ep.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`taboo_${ep.id}`}>{ep.title}</a>
+                                            {ep.caution === 'ed' && <span className="mh-caution-chip">הפרעות אכילה</span>}
+                                        </span>
+                                    ))}
+                                </p>
 
-                                <div className="mh-wiki-links">
-                                    <strong>קטגוריות ויקיפדיה (אנגלית):</strong>
-                                    <ul>
-                                        <li><a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentary films about mental health</a></li>
-                                        <li><a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_health" target="_blank" rel="noopener noreferrer">Films about mental health</a></li>
-                                        <li><a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_disorders" target="_blank" rel="noopener noreferrer">Films about mental disorders</a></li>
-                                    </ul>
-                                </div>
+                                <p className="mh-wiki-links">
+                                    <strong>Wikipedia: </strong>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentaries</a>
+                                    <span className="mh-inline-sep">·</span>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_health" target="_blank" rel="noopener noreferrer">Films</a>
+                                    <span className="mh-inline-sep">·</span>
+                                    <a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_disorders" target="_blank" rel="noopener noreferrer">Mental disorders</a>
+                                </p>
 
                                 <div className="mh-resource-filters">
                                     <div className="mh-resource-filter">
@@ -3980,8 +3898,8 @@
                                                 <th>נושאים</th>
                                                 <th>חינם</th>
                                                 <th>איפה לצפות</th>
-                                                <th>מטפלים</th>
-                                                <th>מתמודדים</th>
+                                                {showRatingCols && <th>מטפלים</th>}
+                                                {showRatingCols && <th>מתמודדים</th>}
                                                 <th>במשפט אחד</th>
                                             </tr>
                                         </thead>
@@ -4006,9 +3924,9 @@
                                                             </span>
                                                         ))}
                                                     </td>
-                                                    <td>{film.ratingTherapists != null ? film.ratingTherapists : '—'}</td>
-                                                    <td>{film.ratingPeers != null ? film.ratingPeers : '—'}</td>
-                                                    <td style={{ minWidth: '220px' }}>{film.brief}</td>
+                                                    {showRatingCols && <td>{film.ratingTherapists != null ? film.ratingTherapists : '—'}</td>}
+                                                    {showRatingCols && <td>{film.ratingPeers != null ? film.ratingPeers : '—'}</td>}
+                                                    <td>{film.brief}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
