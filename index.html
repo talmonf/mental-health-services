@@ -340,6 +340,49 @@
         @media (min-width: 1200px) {
             .mh-terms-grid { grid-template-columns: repeat(2, 1fr); }
         }
+
+        /* Books / Movies / TED resource pages */
+        .mh-resource-nav-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); }
+        .mh-resource-nav-card { background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: var(--space-sm); text-align: right; min-height: var(--touch-min); }
+        .mh-resource-nav-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
+        .mh-resource-nav-card-icon { font-size: 1.75rem; color: var(--primary); }
+        .mh-resource-nav-card-title { font-weight: 700; font-size: var(--text-lg); color: var(--primary); }
+        .mh-resource-nav-card-desc { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; margin: 0; }
+        .mh-resource-page { max-width: 1100px; }
+        .mh-resource-filters { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg); align-items: flex-end; }
+        .mh-resource-filter { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+        .mh-resource-filter label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; }
+        .mh-resource-filter select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); background: var(--bg-card); }
+        .mh-resource-chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-md); }
+        .mh-resource-chip { border: 1px solid var(--border); background: var(--bg); color: var(--primary); border-radius: 999px; padding: 4px 12px; font-size: var(--text-sm); cursor: pointer; font-family: inherit; }
+        .mh-resource-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .mh-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-xl); }
+        .mh-films-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); min-width: 960px; }
+        .mh-films-table th, .mh-films-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border); text-align: right; vertical-align: top; line-height: 1.45; }
+        .mh-films-table th { background: rgba(45, 90, 123, 0.08); color: var(--primary); font-weight: 700; position: sticky; top: 0; white-space: nowrap; }
+        .mh-films-table tr:hover td { background: rgba(45, 90, 123, 0.04); }
+        .mh-films-table a { color: var(--primary); font-weight: 600; }
+        .mh-caution-chip { display: inline-block; background: rgba(214, 52, 71, 0.12); color: var(--danger-bg); border-radius: 999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; margin-inline-start: 6px; }
+        .mh-spotlight { background: rgba(45, 90, 123, 0.06); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-xl); }
+        .mh-spotlight h2 { margin: 0 0 var(--space-sm); color: var(--primary); font-size: var(--text-xl); }
+        .mh-spotlight-eps { list-style: none; padding: 0; margin: var(--space-md) 0 0; display: grid; gap: var(--space-sm); }
+        .mh-spotlight-eps li { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: baseline; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border); }
+        .mh-spotlight-eps li:last-child { border-bottom: none; }
+        .mh-wiki-links { margin: var(--space-lg) 0; padding: var(--space-md); background: var(--bg); border-radius: var(--radius-md); border: 1px dashed var(--border); }
+        .mh-wiki-links ul { margin: var(--space-sm) 0 0; padding-inline-start: 1.25rem; }
+        .mh-ted-playlists { display: grid; grid-template-columns: 1fr; gap: var(--space-md); margin-bottom: var(--space-xl); }
+        .mh-ted-section { margin-bottom: var(--space-xl); }
+        .mh-ted-section h2 { color: var(--primary); font-size: var(--text-xl); margin: 0 0 var(--space-sm); }
+        .mh-ted-caution { background: rgba(214, 52, 71, 0.1); border: 1px solid rgba(214, 52, 71, 0.35); color: var(--danger-bg); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md); font-weight: 600; }
+        .mh-ted-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-md); }
+        .mh-ted-list li { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); }
+        .mh-ted-list a { color: var(--primary); font-weight: 700; text-decoration: none; }
+        .mh-ted-list a:hover { text-decoration: underline; }
+        @media (min-width: 600px) {
+            .mh-resource-nav-grid { grid-template-columns: repeat(3, 1fr); }
+            .mh-ted-playlists { grid-template-columns: repeat(2, 1fr); }
+        }
+
     </style>
 
     <!-- Google Analytics -->
@@ -499,18 +542,20 @@
             try {
                 const url = new URL(window.location.href);
                 const rawGroup = (url.hash || '').replace(/^#/, '').trim();
+                const rawPage = (url.searchParams.get('page') || '').trim();
                 return {
                     q: (url.searchParams.get('q') || '').trim(),
                     entry: (url.searchParams.get('entry') || '').trim(),
                     section: (url.searchParams.get('section') || '').trim(),
                     subsection: (url.searchParams.get('subsection') || '').trim(),
+                    page: MH_RESOURCE_PAGES.has(rawPage) ? rawPage : '',
                     group: Object.prototype.hasOwnProperty.call(CATEGORY_GROUPS, rawGroup) ? rawGroup : ''
                 };
             } catch {
-                return { q: '', entry: '', section: '', subsection: '', group: '' };
+                return { q: '', entry: '', section: '', subsection: '', page: '', group: '' };
             }
         };
-        const mhReplaceUrlState = ({ q, entry, section, subsection, group }) => {
+        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group }) => {
             try {
                 const url = new URL(window.location.href);
                 if (q) url.searchParams.set('q', q);
@@ -521,6 +566,8 @@
                 else url.searchParams.delete('section');
                 if (subsection) url.searchParams.set('subsection', subsection);
                 else url.searchParams.delete('subsection');
+                if (page) url.searchParams.set('page', page);
+                else url.searchParams.delete('page');
                 url.hash = group ? `#${group}` : '';
                 window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
             } catch (_) {}
@@ -1178,6 +1225,8 @@
        {"row": 205, "org": "רזולוציה", "svc": "יישומים פסיכולוגיים ממוקדים — הערכה ראשונית והתאמת טיפול (פגישות בקליניקה או זום).", "phone": "03-6919961", "web": "https://www.resolution.co.il/", "target": "", "region": "תל אביב", "cost": "", "specialty": "", "notes": "מרכז בתל אביב — פרטים באתר.", "languages": "", "diseases": "", "add": ""}
        ]},
 
+       "books_movies": {"icon": "🎬", "title": "ספרים, סרטים ו-TED", "titleEn": "Books, Movies & TED", "desc": "המלצות מדיה למטפלים ולמתעניינים — ספרים, סרטים והרצאות TED", "services": [], "resourceHub": true, "resourceCount": 3},
+
        "transport": {"icon": "🚑", "title": "הסעות ואמבולנסים", "titleEn": "Transportation Services", "desc": "סיוע בהסעות, אמבולנסים, על ידי מתנדבים ללא עלות", "services": [
        {"row": 83, "org": "עזר מציון הסעות", "svc": "הסעות חולים, אמבולנסים לצרכים רפואיים ואירועים משפחתיים, נהגים מתנדבים", "phone": "03-5742742", "phoneLabel": "כללי", "phoneShowNumber": true, "phone2": "1800-236-236", "phoneLabel2": "כללי", "phoneShowNumber2": true, "phone3": "*2236", "phoneLabel3": "כללי", "phoneShowNumber3": true, "phone4": "03-6144666", "phoneLabel4": "אמבולנסים", "phoneShowNumber4": true, "phone5": "073-3956218", "phoneLabel5": "נהגים מתנדבים", "phoneShowNumber5": false, "phone6": "073-2477777", "phoneLabel6": "הסעות חולים ושינוע רפואי", "phoneShowNumber6": false, "web": "https://www.ami.org.il/services/ambulances", "target": "", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "אמבולנסים ללא תשלום; לא תמיד יש אמבולנס פנוי — יש לפנות יום קודם עד 12:00", "languages": "", "diseases": "", "add": ""},
        {"row": 84, "org": "לב מלכה", "svc": "סיוע באמבולנסים בהעברת חולים ונכים", "phone": "02-5376666", "web": "https://levmalka.org.il/", "target": "חולים ונכים", "region": "", "cost": "ללא עלות", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -1185,6 +1234,1136 @@
        {"row": 246, "org": "עזרה למרפא", "svc": "שירותי אמבולנס להסעת חולים, נכים ומוגבלים לטיפולים, בדיקות ואירועים משפחתיים", "phone": "03-5777000", "phoneLabel": "מרכז ודרום (שלוחה 5)", "phoneShowNumber": true, "phone2": "1599-51-51-61", "phoneLabel2": "מוקד ארצי", "phoneShowNumber2": true, "web": "https://www.ezra-lemarpe.org/ambulances/", "target": "חולים, נכים ומוגבלים בניידות", "region": "כל הארץ", "cost": "ללא עלות", "specialty": "", "notes": "מרכז ודרום: 09:30–14:30 (שלוחה 5). בשאר השעות וביתר הארץ — מוקד ארצי. נדרש מלווה לנסיעה", "languages": "", "diseases": "", "add": ""}
        ]}};
          
+
+        const MH_RESOURCE_PAGES = new Set(['books', 'movies', 'ted']);
+
+        const FILMS = [
+  {
+    "id": "stutz",
+    "title": "Stutz",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2022",
+    "hebrewSubs": "Heb. subs (Netflix)",
+    "platforms": [
+      {
+        "name": "Netflix",
+        "url": "https://www.netflix.com/search?q=Stutz",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Psychotherapy process",
+      "self-disclosure"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 4,
+    "brief": "Jonah Hill films his own psychiatrist; the frame collapses mid-film. Best single choice for a therapists' club."
+  },
+  {
+    "id": "loveable",
+    "title": "Loveable (Elskling)",
+    "type": "movie",
+    "languages": [
+      "Norwegian"
+    ],
+    "year": "2024",
+    "hebrewSubs": "Heb. subs (yes)",
+    "platforms": [
+      {
+        "name": "VOD",
+        "url": "https://www.justwatch.com/il/search?q=Loveable%20Elskling",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Attachment",
+      "rupture",
+      "individual therapy"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 5,
+    "brief": "A marriage ends; the film becomes a therapy process. Rare on-screen depiction of a working alliance."
+  },
+  {
+    "id": "envious",
+    "title": "Envious (Envidiosa)",
+    "type": "series",
+    "languages": [
+      "Spanish"
+    ],
+    "year": "2024–26",
+    "hebrewSubs": "Heb. subs (Netflix)",
+    "platforms": [
+      {
+        "name": "Netflix",
+        "url": "https://www.netflix.com/search?q=Envidiosa",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Envy",
+      "narcissistic injury",
+      "long-term analysis"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Comedy whose real love story is patient–analyst. S4 ends in the consulting room, not the altar. Pick 3–4 episodes."
+  },
+  {
+    "id": "couples_therapy",
+    "title": "Couples Therapy",
+    "type": "doc_series",
+    "languages": [
+      "EN"
+    ],
+    "year": "2019–",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Showtime / Paramount+",
+        "url": "https://www.justwatch.com/il/search?q=Couples%20Therapy",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Couples therapy",
+      "countertransference"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 4,
+    "brief": "Real sessions with Orna Guralnik, plus her own supervision. Closest thing to watching a clinician work."
+  },
+  {
+    "id": "betipul",
+    "title": "בטיפול",
+    "type": "series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2005–08",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "HOT / VOD ישראלי",
+        "url": "https://www.hot.net.il/heb/Pages/Search.aspx?q=%D7%91%D7%98%D7%99%D7%A4%D7%95%D7%9C",
+        "free": false
+      }
+    ],
+    "topics": [
+      "פסיכותרפיה דינמית",
+      "העברה"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 3,
+    "brief": "האב־טיפוס של הז'אנר. פרק בודד + הפרק המקביל של הסופרוויז'ן = ערב מושלם."
+  },
+  {
+    "id": "the_work",
+    "title": "The Work",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2017",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=The%20Work%20Folsom",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Group therapy",
+      "masculinity",
+      "prison"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 3,
+    "brief": "Four days inside Folsom's group program. Emotionally heavy; brief a debrief in advance."
+  },
+  {
+    "id": "ordinary_people",
+    "title": "Ordinary People",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "1980",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Ordinary%20People",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Grief",
+      "survivor guilt",
+      "therapeutic alliance"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 4,
+    "brief": "Still among the most accurate therapists ever filmed. Not innovative, but a benchmark."
+  },
+  {
+    "id": "good_will_hunting",
+    "title": "Good Will Hunting",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "1997",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Good%20Will%20Hunting",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Alliance",
+      "boundaries",
+      "trauma"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Useful precisely because the therapist breaks half the rules. Good ethics argument."
+  },
+  {
+    "id": "mr_jones",
+    "title": "Mr. Jones",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "1993",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Mr.%20Jones%201993",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Bipolar disorder",
+      "boundary violation"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 2,
+    "brief": "Psychiatrist sleeps with her patient. Dated and romanticising — screen it as a case in ethics, not as portrayal."
+  },
+  {
+    "id": "beautiful_mind",
+    "title": "A Beautiful Mind",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2001",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=A%20Beautiful%20Mind",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Schizophrenia"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 3,
+    "brief": "Visually inventive, clinically loose (hallucinations are largely visual, not auditory). Discuss the gap."
+  },
+  {
+    "id": "eternal_sunshine",
+    "title": "Eternal Sunshine of the Spotless Mind",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2004",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Eternal%20Sunshine%20of%20the%20Spotless%20Mind",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Memory",
+      "loss",
+      "repetition compulsion"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 3,
+    "brief": "The best cinematic argument for why we don't get to delete the painful object."
+  },
+  {
+    "id": "dangerous_method",
+    "title": "A Dangerous Method",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2011",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=A%20Dangerous%20Method",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Psychoanalytic history",
+      "transference"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 2,
+    "brief": "Freud–Jung–Spielrein. Mediocre film, excellent discussion trigger."
+  },
+  {
+    "id": "titicut_follies",
+    "title": "Titicut Follies",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "1967",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Kanopy / rental",
+        "url": "https://www.justwatch.com/il/search?q=Titicut%20Follies",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Institutional psychiatry",
+      "ethics"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 1,
+    "brief": "Wiseman inside a criminally-insane hospital. Banned for years. Brutal — therapists only."
+  },
+  {
+    "id": "cuckoos_nest",
+    "title": "One Flew Over the Cuckoo's Nest",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "1975",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=One%20Flew%20Over%20the%20Cuckoo%27s%20Nest",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Institutional power",
+      "group process"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 2,
+    "brief": "The anti-psychiatry canon. Pair with Open Dialogue for contrast."
+  },
+  {
+    "id": "open_dialogue",
+    "title": "Open Dialogue (Daniel Mackler)",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2011",
+    "hebrewSubs": "No",
+    "platforms": [
+      {
+        "name": "YouTube",
+        "url": "https://www.youtube.com/results?search_query=Open%20Dialogue%20Daniel%20Mackler",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Psychosis",
+      "network-based care"
+    ],
+    "ratingTherapists": 5,
+    "ratingPeers": 3,
+    "brief": "The Finnish model. Practical, low-budget, changes how you think about first-episode work."
+  },
+  {
+    "id": "crazywise",
+    "title": "Crazywise",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2017",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental / Vimeo",
+        "url": "https://www.justwatch.com/il/search?q=Crazywise",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Psychosis as transition",
+      "cross-cultural"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Madness as initiation rather than only pathology."
+  },
+  {
+    "id": "wisdom_trauma",
+    "title": "The Wisdom of Trauma",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2021",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Screenings / rental",
+        "url": "https://www.justwatch.com/il/search?q=The%20Wisdom%20of%20Trauma",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Trauma",
+      "addiction"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Gabor Maté. Popular and scientifically contested — screen it critically."
+  },
+  {
+    "id": "aftersun",
+    "title": "Aftersun",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2022",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental / MUBI",
+        "url": "https://www.justwatch.com/il/search?q=Aftersun",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Paternal depression",
+      "memory"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 4,
+    "brief": "Never names the illness. Devastating on rewatch."
+  },
+  {
+    "id": "a_real_pain",
+    "title": "A Real Pain",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2024",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Hulu / Disney+",
+        "url": "https://www.justwatch.com/il/search?q=A%20Real%20Pain",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Second generation",
+      "legitimate vs psychic pain"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 4,
+    "brief": "Newest on the list; very close to Israeli material."
+  },
+  {
+    "id": "waltz_bashir",
+    "title": "ואלס עם באשיר",
+    "type": "movie",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2008",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "השכרה",
+        "url": "https://www.justwatch.com/il/search?q=Waltz%20with%20Bashir",
+        "free": false
+      }
+    ],
+    "topics": [
+      "זיכרון טראומטי",
+      "דיסוציאציה"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 3,
+    "brief": "אמנזיה קרבית בשפה אנימטיבית. הסוף עלול להיות מציף."
+  },
+  {
+    "id": "because_of_war",
+    "title": "בגלל המלחמה הזאת",
+    "type": "doc",
+    "languages": [
+      "עברית"
+    ],
+    "year": "1988",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "ארכיונים / יוטיוב",
+        "url": "https://www.youtube.com/results?search_query=%D7%91%D7%92%D7%9C%D7%9C%20%D7%94%D7%9E%D7%9C%D7%97%D7%9E%D7%94%20%D7%94%D7%96%D7%90%D7%AA%20%D7%A4%D7%95%D7%9C%D7%99%D7%A7%D7%A8",
+        "free": true
+      }
+    ],
+    "topics": [
+      "דור שני לשואה"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 3,
+    "brief": "פוליקר וגלעד. קלאסיקה שלא התיישנה."
+  },
+  {
+    "id": "broken_wings",
+    "title": "כנפיים שבורות",
+    "type": "movie",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2002",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "השכרה",
+        "url": "https://www.justwatch.com/il/search?q=Broken%20Wings%20%D7%9B%D7%A0%D7%A4%D7%99%D7%99%D7%9D%20%D7%A9%D7%91%D7%95%D7%A8%D7%95%D7%AA",
+        "free": false
+      }
+    ],
+    "topics": [
+      "אובדן ואבל במשפחה"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 4,
+    "brief": "משפחה חיפאית אחרי מות האב. שקט, מדויק, בלי מלודרמה."
+  },
+  {
+    "id": "mr_gaga",
+    "title": "מר גאגא",
+    "type": "doc",
+    "languages": [
+      "עברית",
+      "אנגלית"
+    ],
+    "year": "2015",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "השכרה",
+        "url": "https://www.justwatch.com/il/search?q=Mr.%20Gaga",
+        "free": false
+      }
+    ],
+    "topics": [
+      "גוף",
+      "תחושה",
+      "יצירה"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 3,
+    "brief": "אוהד נהרין. מצוין למטפלים סומטיים ובתנועה."
+  },
+  {
+    "id": "the_father",
+    "title": "The Father",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2020",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=The%20Father%20Anthony%20Hopkins",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Dementia",
+      "caregiver burden"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Told from inside the disorientation. Formally brilliant."
+  },
+  {
+    "id": "reason_i_jump",
+    "title": "The Reason I Jump",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2020",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=The%20Reason%20I%20Jump",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Non-speaking autism"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 4,
+    "brief": "Sensory filmmaking rather than explanation."
+  },
+  {
+    "id": "life_animated",
+    "title": "Life, Animated",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2016",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Life%2C%20Animated",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Autism",
+      "communication"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 4,
+    "brief": "Disney films as a bridging language. Warmer companion piece."
+  },
+  {
+    "id": "sound_of_metal",
+    "title": "Sound of Metal",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "2019",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Amazon Prime",
+        "url": "https://www.amazon.com/s?k=Sound%20of%20Metal",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Loss",
+      "acceptance",
+      "addiction",
+      "Deaf community"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 5,
+    "brief": "The recovery-community scenes are the strongest part."
+  },
+  {
+    "id": "as_good_as_it_gets",
+    "title": "As Good as It Gets",
+    "type": "movie",
+    "languages": [
+      "EN"
+    ],
+    "year": "1997",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=As%20Good%20as%20It%20Gets",
+        "free": false
+      }
+    ],
+    "topics": [
+      "OCD"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 3,
+    "brief": "Dated and softened, but a familiar entry point to the OCD conversation."
+  },
+  {
+    "id": "how_to_change_mind",
+    "title": "How to Change Your Mind",
+    "type": "doc_series",
+    "languages": [
+      "EN"
+    ],
+    "year": "2022",
+    "hebrewSubs": "Heb. subs (Netflix)",
+    "platforms": [
+      {
+        "name": "Netflix",
+        "url": "https://www.netflix.com/search?q=How%20to%20Change%20Your%20Mind",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Psychedelic-assisted therapy"
+    ],
+    "ratingTherapists": 4,
+    "ratingPeers": 3,
+    "brief": "Pick the psilocybin episode."
+  },
+  {
+    "id": "descending_mountain",
+    "title": "Descending the Mountain",
+    "type": "doc",
+    "languages": [
+      "EN",
+      "German"
+    ],
+    "year": "2021",
+    "hebrewSubs": "Unverified",
+    "platforms": [
+      {
+        "name": "Rental",
+        "url": "https://www.justwatch.com/il/search?q=Descending%20the%20Mountain",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Psilocybin",
+      "contemplative practice"
+    ],
+    "ratingTherapists": 3,
+    "ratingPeers": 2,
+    "brief": "Zen monks meet a clinical trial. Slow, unusual."
+  },
+  {
+    "id": "octopus_teacher",
+    "title": "My Octopus Teacher",
+    "type": "doc",
+    "languages": [
+      "EN"
+    ],
+    "year": "2020",
+    "hebrewSubs": "Heb. subs (Netflix)",
+    "platforms": [
+      {
+        "name": "Netflix",
+        "url": "https://www.netflix.com/search?q=My%20Octopus%20Teacher",
+        "free": false
+      }
+    ],
+    "topics": [
+      "Regulation",
+      "attachment",
+      "healing"
+    ],
+    "ratingTherapists": 2,
+    "ratingPeers": 4,
+    "brief": "Divisive in clinical circles — some find it self-indulgent."
+  },
+  {
+    "id": "taboo_s2e1",
+    "title": "טאבו — מתמודדי נפש",
+    "episodeTitle": "מתמודדי נפש",
+    "season": "2",
+    "episode": "1",
+    "type": "doc_series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2023",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "כאן",
+        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526824/",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Serious mental illness",
+      "מתמודדי נפש"
+    ],
+    "ratingTherapists": null,
+    "ratingPeers": null,
+    "brief": "חנוך דאום; דוקו-ריאליטי (~50 דק'). גילוי עצמי חריג בטלוויזיה הישראלית.",
+    "series": "טאבו",
+    "caution": null
+  },
+  {
+    "id": "taboo_s2e3",
+    "title": "טאבו — אוטיסטים",
+    "episodeTitle": "אוטיסטים",
+    "season": "2",
+    "episode": "3",
+    "type": "doc_series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2023",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "כאן",
+        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526832/",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Autism",
+      "Adults on the spectrum"
+    ],
+    "ratingTherapists": null,
+    "ratingPeers": null,
+    "brief": "חנוך דאום עם מבוגרים על הרצף האוטיסטי.",
+    "series": "טאבו",
+    "caution": null
+  },
+  {
+    "id": "taboo_s2e6",
+    "title": "טאבו — הלומי קרב",
+    "episodeTitle": "הלומי קרב",
+    "season": "2",
+    "episode": "6",
+    "type": "doc_series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2023",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "כאן",
+        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526887/",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Combat PTSD",
+      "טראומה"
+    ],
+    "ratingTherapists": null,
+    "ratingPeers": null,
+    "brief": "חנוך דאום עם הלומי קרב.",
+    "series": "טאבו",
+    "caution": null
+  },
+  {
+    "id": "taboo_s3e4",
+    "title": "טאבו — מתמודדים עם אנורקסיה",
+    "episodeTitle": "מתמודדים עם אנורקסיה",
+    "season": "3",
+    "episode": "4",
+    "type": "doc_series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2025",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "כאן",
+        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924817/",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Anorexia",
+      "Eating disorders"
+    ],
+    "ratingTherapists": null,
+    "ratingPeers": null,
+    "brief": "חנוך דאום; עלול להיות מציף למי עם היסטוריה של הפרעות אכילה.",
+    "series": "טאבו",
+    "caution": "ed"
+  },
+  {
+    "id": "taboo_s3e5",
+    "title": "טאבו — מכורים נקיים",
+    "episodeTitle": "מכורים נקיים",
+    "season": "3",
+    "episode": "5",
+    "type": "doc_series",
+    "languages": [
+      "עברית"
+    ],
+    "year": "2025",
+    "hebrewSubs": "מקור עברי",
+    "platforms": [
+      {
+        "name": "כאן",
+        "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924791/",
+        "free": true
+      }
+    ],
+    "topics": [
+      "Addiction",
+      "recovery"
+    ],
+    "ratingTherapists": null,
+    "ratingPeers": null,
+    "brief": "חנוך דאום עם מכורים נקיים — התמכרות והחלמה.",
+    "series": "טאבו",
+    "caution": null
+  }
+];
+
+        const TABOO_SPOTLIGHT = {
+  "title": "טאבו",
+  "host": "חנוך דאום",
+  "hubUrl": "https://www.kan.org.il/content/kan/kan-11/p-12154/",
+  "format": "דוקו-ריאליטי, כאן 11, 3 עונות; פרקים ~50 דק׳ — מתאים לערב מועדון",
+  "blurb": "פורמט של טיול קבוצתי: דאום מבלה עם 4–5 אנשים החולקים מצב וצוחק איתם עליו. לא אחיד, וההומור לא יעבוד לכולם — אבל רמת הגילוי חריגה לטלוויזיה הישראלית. חינם באתר כאן.",
+  "episodes": [
+    {
+      "id": "taboo_s2e1",
+      "title": "מתמודדי נפש",
+      "season": 2,
+      "episode": 1,
+      "topic": "Serious mental illness",
+      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526824/",
+      "caution": null
+    },
+    {
+      "id": "taboo_s2e3",
+      "title": "אוטיסטים",
+      "season": 2,
+      "episode": 3,
+      "topic": "Adults on the spectrum",
+      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526832/",
+      "caution": null
+    },
+    {
+      "id": "taboo_s2e6",
+      "title": "הלומי קרב",
+      "season": 2,
+      "episode": 6,
+      "topic": "Combat PTSD",
+      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s2/526887/",
+      "caution": null
+    },
+    {
+      "id": "taboo_s3e4",
+      "title": "מתמודדים עם אנורקסיה",
+      "season": 3,
+      "episode": 4,
+      "topic": "Anorexia",
+      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924817/",
+      "caution": "ed"
+    },
+    {
+      "id": "taboo_s3e5",
+      "title": "מכורים נקיים",
+      "season": 3,
+      "episode": 5,
+      "topic": "Addiction, recovery",
+      "url": "https://www.kan.org.il/content/kan/kan-11/p-12154/s3/924791/",
+      "caution": null
+    }
+  ]
+};
+
+        const TED_RESOURCES = {
+  "playlists": [
+    {
+      "title": "The struggle of mental health",
+      "url": "https://www.ted.com/playlists/175/the_struggle_of_mental_health",
+      "titleHe": "המאבק בבריאות הנפש"
+    },
+    {
+      "title": "How to practice emotional first aid",
+      "url": "https://www.ted.com/playlists/638/how_to_practice_emotional_first_aid",
+      "titleHe": "עזרה ראשונה רגשית"
+    }
+  ],
+  "sections": [
+    {
+      "id": "lived",
+      "titleHe": "חוויה חיה",
+      "titleEn": "Lived experience",
+      "note": "חזק במיוחד לקבוצת מטפלים",
+      "caution": null,
+      "talks": [
+        {
+          "speaker": "Eleanor Longden",
+          "title": "The voices in my head",
+          "note": "Hearing voices reframed as meaningful rather than symptomatic. Pairs with Open Dialogue and Crazywise.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Eleanor%20Longden%20The%20voices%20in%20my%20head"
+        },
+        {
+          "speaker": "Andrew Solomon",
+          "title": "Depression, the secret we share",
+          "note": "Still the best single talk on depression.",
+          "duration": "~29 min",
+          "url": "https://www.ted.com/search?q=Andrew%20Solomon%20Depression%2C%20the%20secret%20we%20share"
+        },
+        {
+          "speaker": "Nikki Webber Allen",
+          "title": "depression, race, and who is permitted to be unwell",
+          "note": "Depression, race, and who is permitted to be unwell.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Nikki%20Webber%20Allen%20depression%2C%20race%2C%20and%20who%20is%20permitted%20to%20be%20unwell"
+        }
+      ]
+    },
+    {
+      "id": "trauma",
+      "titleHe": "טראומה",
+      "titleEn": "Trauma",
+      "note": null,
+      "caution": null,
+      "talks": [
+        {
+          "speaker": "Nadine Burke Harris",
+          "title": "How childhood trauma affects health across a lifetime",
+          "note": "TEDMED 2014. The ACEs study, clearly explained.",
+          "duration": "~16 min",
+          "url": "https://www.ted.com/search?q=Nadine%20Burke%20Harris%20How%20childhood%20trauma%20affects%20health%20across%20a%20lifetime"
+        },
+        {
+          "speaker": "Essam Daod",
+          "title": "psychological first aid for refugees",
+          "note": "Israeli psychiatrist, founder of Humanity Crew; brief interventions on rescue boats. Locally relevant.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Essam%20Daod%20psychological%20first%20aid%20for%20refugees"
+        },
+        {
+          "speaker": "Melissa Walker",
+          "title": "art therapy and mask-making with combat veterans",
+          "note": "Art therapy and mask-making with combat veterans.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Melissa%20Walker%20art%20therapy%20and%20mask-making%20with%20combat%20veterans"
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "titleHe": "פרקטיקה ועמדה",
+      "titleEn": "Practice and stance",
+      "note": null,
+      "caution": null,
+      "talks": [
+        {
+          "speaker": "Guy Winch",
+          "title": "Why we all need to practice emotional first aid",
+          "note": "The obvious opener; good to hand to clients.",
+          "duration": "~17 min",
+          "url": "https://www.ted.com/search?q=Guy%20Winch%20Why%20we%20all%20need%20to%20practice%20emotional%20first%20aid"
+        },
+        {
+          "speaker": "Susan David",
+          "title": "The gift and power of emotional courage",
+          "note": "Emotional agility against forced positivity.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Susan%20David%20The%20gift%20and%20power%20of%20emotional%20courage"
+        },
+        {
+          "speaker": "Emily Anhalt",
+          "title": "therapy as maintenance rather than crisis response",
+          "note": "Therapy as maintenance rather than crisis response.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Emily%20Anhalt%20therapy%20as%20maintenance%20rather%20than%20crisis%20response"
+        },
+        {
+          "speaker": "Brené Brown",
+          "title": "The power of vulnerability",
+          "note": "TEDxHouston 2010. Everyone's seen it; still worth arguing about.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Bren%C3%A9%20Brown%20The%20power%20of%20vulnerability"
+        }
+      ]
+    },
+    {
+      "id": "contested",
+      "titleHe": "שנוי במחלוקת",
+      "titleEn": "Contested",
+      "note": "שימושי דווקא בגלל המחלוקת",
+      "caution": null,
+      "talks": [
+        {
+          "speaker": "Johann Hari",
+          "title": "Everything you think you know about addiction is wrong",
+          "note": "Rat Park, connection as cure. Widely criticised for overreach; a good 20-minute argument.",
+          "duration": "~14 min",
+          "url": "https://www.ted.com/search?q=Johann%20Hari%20Everything%20you%20think%20you%20know%20about%20addiction%20is%20wrong"
+        },
+        {
+          "speaker": "Sherwin Nuland",
+          "title": "on ECT and his own severe depression",
+          "note": "Rare first-person defence of a stigmatised treatment.",
+          "duration": null,
+          "url": "https://www.ted.com/search?q=Sherwin%20Nuland%20on%20ECT%20and%20his%20own%20severe%20depression"
+        }
+      ]
+    },
+    {
+      "id": "suicide",
+      "titleHe": "אובדנות",
+      "titleEn": "Suicide",
+      "note": "להקרין בזהירות",
+      "caution": "suicide",
+      "talks": [
+        {
+          "speaker": "JD Schramm",
+          "title": "Break the silence for suicide attempt survivors",
+          "note": "Short talk for survivors of suicide attempts.",
+          "duration": "~4 min",
+          "url": "https://www.ted.com/search?q=JD%20Schramm%20Break%20the%20silence%20for%20suicide%20attempt%20survivors"
+        },
+        {
+          "speaker": "Kevin Briggs",
+          "title": "The bridge between suicide and life",
+          "note": "Golden Gate Bridge officer stories.",
+          "duration": "~14 min",
+          "url": "https://www.ted.com/search?q=Kevin%20Briggs%20The%20bridge%20between%20suicide%20and%20life"
+        }
+      ]
+    }
+  ]
+};
+
+        const FILM_TYPE_LABELS = {
+            doc: 'דוקו',
+            movie: 'סרט',
+            series: 'סדרה',
+            doc_series: 'סדרת דוקו'
+        };
+
+        const FILM_TYPE_GROUP = {
+            doc: 'film',
+            movie: 'film',
+            series: 'series',
+            doc_series: 'series'
+        };
+
         const CATEGORY_GROUPS = {
             emergency: {
                 title: "עזרה דחופה ותמיכה במשבר",
@@ -1221,14 +2400,14 @@
             information: {
                 title: "מידע ושירותים מעשיים",
                 titleEn: "Information & Practical Services",
-                desc: "פורטלי מידע, שירותים מקומיים והסעות",
+                desc: "פורטלי מידע, שירותים מקומיים, הסעות, ספרים, סרטים ו-TED",
                 icon: "fa-globe",
                 priority: "normal",
-                subcategories: ["portals", "local", "transport"]
+                subcategories: ["portals", "local", "transport", "books_movies"]
             }
         };
 
-        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical' };
+        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical', books_movies: 'fa-clapperboard' };
 
         const MentalHealthIsrael = () => {
             const initialUrlState = mhReadUrlState();
@@ -1239,6 +2418,8 @@
             const [requestedEntryId, setRequestedEntryId] = useState(() => initialUrlState.entry || null);
             const [requestedSectionId, setRequestedSectionId] = useState(() => initialUrlState.section || null);
             const [requestedSubsectionId, setRequestedSubsectionId] = useState(() => initialUrlState.subsection || null);
+            const [resourcePage, setResourcePage] = useState(() => initialUrlState.page || null);
+            const [filmFilters, setFilmFilters] = useState({ audience: 'peers', language: '', typeGroup: '', topic: '', free: '', platform: '' });
             const [highlightedEntryKey, setHighlightedEntryKey] = useState(null);
             const [toastMessage, setToastMessage] = useState('');
             const [copiedEntryId, setCopiedEntryId] = useState(null);
@@ -1264,9 +2445,10 @@
                     entry: requestedEntryId,
                     section: requestedSectionId,
                     subsection: requestedSubsectionId,
+                    page: resourcePage,
                     group: selectedCategoryGroup
                 });
-            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, selectedCategoryGroup]);
+            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup]);
             // Sync state when the browser URL changes manually or via navigation.
             useEffect(() => {
                 const syncFromUrl = () => {
@@ -1275,6 +2457,7 @@
                     setRequestedEntryId(prev => (prev !== (next.entry || null) ? (next.entry || null) : prev));
                     setRequestedSectionId(prev => (prev !== (next.section || null) ? (next.section || null) : prev));
                     setRequestedSubsectionId(prev => (prev !== (next.subsection || null) ? (next.subsection || null) : prev));
+                    setResourcePage(prev => (prev !== (next.page || null) ? (next.page || null) : prev));
                     setSelectedCategoryGroup(prev => (prev !== (next.group || null) ? (next.group || null) : prev));
                 };
                 window.addEventListener('hashchange', syncFromUrl);
@@ -1493,7 +2676,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "06.08.2026";            
+            const LAST_UPDATED = "07.08.2026";            
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -2073,7 +3256,7 @@
                 }
                 return [];
             };
-            const getCatServiceCount = (cat) => getCatServices(cat).length;
+            const getCatServiceCount = (cat) => (cat && cat.resourceCount != null ? cat.resourceCount : getCatServices(cat).length);
 
             const getGroupServiceCount = (groupId) => {
                 const group = CATEGORY_GROUPS[groupId];
@@ -2091,6 +3274,7 @@
                 setRequestedEntryId(null);
                 setRequestedSectionId(null);
                 setRequestedSubsectionId(null);
+                setResourcePage(null);
                 handledDeepLinkRef.current = null;
                 requestAnimationFrame(() => {
                     document.querySelector('.mh-search-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2250,7 +3434,84 @@
                 };
             }, [highlightedEntryKey]);
 
+            const openResourcePage = (page) => {
+                setShowTerms(false);
+                setShowIntro(false);
+                setSearchTerm('');
+                setSelectedCategoryGroup('information');
+                setRequestedSectionId('books_movies');
+                setRequestedSubsectionId(null);
+                setRequestedEntryId(null);
+                setExpandedCats(prev => prev.includes('books_movies') ? prev : [...prev, 'books_movies']);
+                setResourcePage(page);
+                setFilmFilters({ audience: 'peers', language: '', typeGroup: '', topic: '', free: '', platform: '' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const closeResourcePage = () => {
+                setResourcePage(null);
+                setFilmFilters({ audience: 'peers', language: '', typeGroup: '', topic: '', free: '', platform: '' });
+                setSelectedCategoryGroup('information');
+                setRequestedSectionId('books_movies');
+                setExpandedCats(prev => prev.includes('books_movies') ? prev : [...prev, 'books_movies']);
+            };
+
+            const filmIsFree = (film) => (film.platforms || []).some(p => p.free);
+            const filmPlatformNames = (film) => (film.platforms || []).map(p => p.name);
+
+            const filteredFilms = useMemo(() => {
+                return FILMS.filter(film => {
+                    if (filmFilters.audience === 'peers' && !(Number(film.ratingPeers) >= 4)) return false;
+                    if (filmFilters.audience === 'therapists' && !(Number(film.ratingTherapists) >= 4)) return false;
+                    if (filmFilters.language && !(film.languages || []).some(l => String(l).toLowerCase() === filmFilters.language.toLowerCase())) return false;
+                    if (filmFilters.typeGroup) {
+                        const g = FILM_TYPE_GROUP[film.type] || film.type;
+                        if (g !== filmFilters.typeGroup) return false;
+                    }
+                    if (filmFilters.topic && !(film.topics || []).some(t => String(t).toLowerCase() === filmFilters.topic.toLowerCase())) return false;
+                    if (filmFilters.free === 'yes' && !filmIsFree(film)) return false;
+                    if (filmFilters.free === 'no' && filmIsFree(film)) return false;
+                    if (filmFilters.platform && !filmPlatformNames(film).some(n => n.toLowerCase().includes(filmFilters.platform.toLowerCase()))) return false;
+                    return true;
+                });
+            }, [filmFilters]);
+
+            const filmFilterOptions = useMemo(() => {
+                const languages = [...new Set(FILMS.flatMap(f => f.languages || []))].sort((a, b) => String(a).localeCompare(String(b), 'he'));
+                const topics = [...new Set(FILMS.flatMap(f => f.topics || []))].sort((a, b) => String(a).localeCompare(String(b), 'he'));
+                const platforms = [...new Set(FILMS.flatMap(f => filmPlatformNames(f)))].sort((a, b) => String(a).localeCompare(String(b), 'he'));
+                return { languages, topics, platforms };
+            }, []);
+
             const renderCategoryContent = (cat, id) => {
+                if (cat.resourceHub) {
+                    const cards = [
+                        { page: 'books', icon: 'fa-book', title: 'ספרים', titleEn: 'Books', desc: 'המלצות קריאה (בקרוב)' },
+                        { page: 'movies', icon: 'fa-film', title: 'סרטים וסדרות', titleEn: 'Movies & Series', desc: 'רשימה מסוננת למטפלים ולמתמודדים' },
+                        { page: 'ted', icon: 'fa-microphone-lines', title: 'TED Talks', titleEn: 'TED Talks', desc: 'פלייליסטים והרצאות נבחרות' }
+                    ];
+                    return (
+                        <div className="mh-resource-nav-grid">
+                            {cards.map(card => (
+                                <div
+                                    key={card.page}
+                                    className="mh-resource-nav-card"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => openResourcePage(card.page)}
+                                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && openResourcePage(card.page)}
+                                    data-tracking-name={`resource_open_${card.page}`}
+                                    aria-label={`${card.title} — ${card.titleEn}`}
+                                >
+                                    <div className="mh-resource-nav-card-icon"><i className={`fas ${card.icon}`}></i></div>
+                                    <div className="mh-resource-nav-card-title">{card.title}</div>
+                                    <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>{card.titleEn}</div>
+                                    <p className="mh-resource-nav-card-desc">{card.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    );
+                }
                 if (cat.subsections) {
                     return Object.entries(cat.subsections).map(([subId, sub]) => (
                         <div key={`${id}_${subId}`} style={{ marginBottom: 'var(--space-xl)' }}>
@@ -2525,6 +3786,239 @@
                     </p>
                 );
             };
+
+
+            if (resourcePage) {
+                const backBtn = (
+                    <button
+                        onClick={closeResourcePage}
+                        className="mh-btn"
+                        style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}
+                        data-tracking-name={`resource_back_${resourcePage}`}
+                    >
+                        ← חזרה לספרים, סרטים ו-TED
+                    </button>
+                );
+
+                if (resourcePage === 'books') {
+                    return (
+                        <div className="mh-app mh-resource-page">
+                            {backBtn}
+                            <div className="mh-modal mh-modal-terms-flow">
+                                <div className="mh-terms-wrap">
+                                    <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                        <i className="fas fa-book"></i> ספרים מומלצים
+                                    </h1>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-base)', lineHeight: 1.7 }}>
+                                        בקרוב — רשימת ספרים מומלצים בתחום בריאות הנפש. בינתיים ניתן לעיין בסרטים ובהרצאות TED.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (resourcePage === 'ted') {
+                    return (
+                        <div className="mh-app mh-resource-page">
+                            {backBtn}
+                            <div className="mh-modal mh-modal-terms-flow">
+                                <div className="mh-terms-wrap">
+                                    <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                        <i className="fas fa-microphone-lines"></i> TED Talks
+                                    </h1>
+                                    <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-xl)', fontSize: 'var(--text-base)' }}>
+                                        שני פלייליסטים מאומתים, ואחריהם הרצאות נבחרות לפי נושא. קישורי ההרצאות הבודדות מובילים לחיפוש ב-TED לפי שם הדובר והכותרת.
+                                    </p>
+                                    <div className="mh-ted-playlists">
+                                        {TED_RESOURCES.playlists.map(pl => (
+                                            <a key={pl.url} href={pl.url} target="_blank" rel="noopener noreferrer" className="mh-resource-nav-card" style={{ textDecoration: 'none' }} data-tracking-name={`ted_playlist_${pl.title}`}>
+                                                <div className="mh-resource-nav-card-icon"><i className="fas fa-list"></i></div>
+                                                <div className="mh-resource-nav-card-title">{pl.titleHe || pl.title}</div>
+                                                <div style={{ fontSize: '0.85rem', opacity: 0.85, direction: 'ltr', textAlign: 'left' }}>{pl.title}</div>
+                                            </a>
+                                        ))}
+                                    </div>
+                                    {TED_RESOURCES.sections.map(sec => (
+                                        <section key={sec.id} className="mh-ted-section">
+                                            <h2>{sec.titleHe} <span style={{ fontWeight: 500, fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ {sec.titleEn}</span></h2>
+                                            {sec.note && <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{sec.note}</p>}
+                                            {sec.caution === 'suicide' && (
+                                                <div className="mh-ted-caution" role="note">שימו לב: תוכן בנושא אובדנות — להקרין ולדון בזהירות.</div>
+                                            )}
+                                            <ul className="mh-ted-list">
+                                                {sec.talks.map(talk => (
+                                                    <li key={`${talk.speaker}_${talk.title}`}>
+                                                        <a href={talk.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`ted_talk_${talk.speaker}`}>
+                                                            {talk.speaker} — {talk.title}
+                                                        </a>
+                                                        {talk.duration && <span style={{ color: 'var(--text-muted)', marginInlineStart: '8px', fontSize: 'var(--text-sm)' }}>({talk.duration})</span>}
+                                                        {talk.note && <div style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: 'var(--text-sm)', lineHeight: 1.5 }}>{talk.note}</div>}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </section>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // movies
+                return (
+                    <div className="mh-app mh-resource-page">
+                        {backBtn}
+                        <div className="mh-modal mh-modal-terms-flow">
+                            <div className="mh-terms-wrap">
+                                <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                    <i className="fas fa-film"></i> סרטים וסדרות
+                                </h1>
+                                <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-base)', lineHeight: 1.6 }}>
+                                    רשימה למטפלים ולמתמודדים. זמינות סטרימינג משתנה תדיר — מומלץ לבדוק ב-<a href="https://www.justwatch.com/il" target="_blank" rel="noopener noreferrer">JustWatch</a> לפני הקרנה.
+                                </p>
+
+                                <div className="mh-spotlight">
+                                    <h2>טאבו — חנוך דאום</h2>
+                                    <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>{TABOO_SPOTLIGHT.format}</p>
+                                    <p style={{ margin: 'var(--space-sm) 0', lineHeight: 1.65 }}>{TABOO_SPOTLIGHT.blurb}</p>
+                                    <p style={{ margin: 0 }}>
+                                        <a href={TABOO_SPOTLIGHT.hubUrl} target="_blank" rel="noopener noreferrer" data-tracking-name="taboo_hub">לצפייה חינם באתר כאן</a>
+                                    </p>
+                                    <ul className="mh-spotlight-eps">
+                                        {TABOO_SPOTLIGHT.episodes.map(ep => (
+                                            <li key={ep.id}>
+                                                <a href={ep.url} target="_blank" rel="noopener noreferrer" data-tracking-name={`taboo_${ep.id}`}>
+                                                    עונה {ep.season}, פרק {ep.episode} — {ep.title}
+                                                </a>
+                                                <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>{ep.topic}</span>
+                                                {ep.caution === 'ed' && <span className="mh-caution-chip">זהירות: הפרעות אכילה</span>}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="mh-wiki-links">
+                                    <strong>קטגוריות ויקיפדיה (אנגלית):</strong>
+                                    <ul>
+                                        <li><a href="https://en.wikipedia.org/wiki/Category:Documentary_films_about_mental_health" target="_blank" rel="noopener noreferrer">Documentary films about mental health</a></li>
+                                        <li><a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_health" target="_blank" rel="noopener noreferrer">Films about mental health</a></li>
+                                        <li><a href="https://en.wikipedia.org/wiki/Category:Films_about_mental_disorders" target="_blank" rel="noopener noreferrer">Films about mental disorders</a></li>
+                                    </ul>
+                                </div>
+
+                                <div className="mh-resource-filters">
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-audience">קהל יעד</label>
+                                        <select id="film-audience" value={filmFilters.audience} onChange={e => setFilmFilters(f => ({ ...f, audience: e.target.value }))}>
+                                            <option value="peers">מומלץ למתמודדים</option>
+                                            <option value="therapists">מומלץ למטפלים</option>
+                                            <option value="all">הכל</option>
+                                        </select>
+                                    </div>
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-lang">שפה</label>
+                                        <select id="film-lang" value={filmFilters.language} onChange={e => setFilmFilters(f => ({ ...f, language: e.target.value }))}>
+                                            <option value="">הכל</option>
+                                            {filmFilterOptions.languages.map(l => <option key={l} value={l}>{l}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-type">סוג</label>
+                                        <select id="film-type" value={filmFilters.typeGroup} onChange={e => setFilmFilters(f => ({ ...f, typeGroup: e.target.value }))}>
+                                            <option value="">הכל</option>
+                                            <option value="film">סרט / דוקו</option>
+                                            <option value="series">סדרה</option>
+                                        </select>
+                                    </div>
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-topic">נושא</label>
+                                        <select id="film-topic" value={filmFilters.topic} onChange={e => setFilmFilters(f => ({ ...f, topic: e.target.value }))}>
+                                            <option value="">הכל</option>
+                                            {filmFilterOptions.topics.map(t => <option key={t} value={t}>{t}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-free">חינם?</label>
+                                        <select id="film-free" value={filmFilters.free} onChange={e => setFilmFilters(f => ({ ...f, free: e.target.value }))}>
+                                            <option value="">הכל</option>
+                                            <option value="yes">כן</option>
+                                            <option value="no">לא / בתשלום</option>
+                                        </select>
+                                    </div>
+                                    <div className="mh-resource-filter">
+                                        <label htmlFor="film-platform">פלטפורמה</label>
+                                        <select id="film-platform" value={filmFilters.platform} onChange={e => setFilmFilters(f => ({ ...f, platform: e.target.value }))}>
+                                            <option value="">הכל</option>
+                                            {filmFilterOptions.platforms.map(p => <option key={p} value={p}>{p}</option>)}
+                                        </select>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="mh-btn"
+                                        style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }}
+                                        onClick={() => setFilmFilters({ audience: 'peers', language: '', typeGroup: '', topic: '', free: '', platform: '' })}
+                                        data-tracking-name="films_clear_filters"
+                                    >
+                                        נקה סינון
+                                    </button>
+                                </div>
+
+                                <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
+                                    מציג {filteredFilms.length} מתוך {FILMS.length}
+                                </p>
+
+                                <div className="mh-table-wrap">
+                                    <table className="mh-films-table">
+                                        <thead>
+                                            <tr>
+                                                <th>כותר</th>
+                                                <th>סוג</th>
+                                                <th>שפה</th>
+                                                <th>שנה</th>
+                                                <th>עברית</th>
+                                                <th>נושאים</th>
+                                                <th>חינם</th>
+                                                <th>איפה לצפות</th>
+                                                <th>מטפלים</th>
+                                                <th>מתמודדים</th>
+                                                <th>במשפט אחד</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredFilms.map(film => (
+                                                <tr key={film.id}>
+                                                    <td>
+                                                        <strong>{film.title}</strong>
+                                                        {film.caution === 'ed' && <span className="mh-caution-chip">הפרעות אכילה</span>}
+                                                    </td>
+                                                    <td>{FILM_TYPE_LABELS[film.type] || film.type}</td>
+                                                    <td>{(film.languages || []).join(', ')}</td>
+                                                    <td>{film.year}</td>
+                                                    <td>{film.hebrewSubs}</td>
+                                                    <td>{(film.topics || []).join(', ')}</td>
+                                                    <td>{filmIsFree(film) ? 'כן' : 'לא'}</td>
+                                                    <td>
+                                                        {(film.platforms || []).map((p, i) => (
+                                                            <span key={`${film.id}_${p.name}_${i}`}>
+                                                                {i > 0 ? ', ' : ''}
+                                                                {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer">{p.name}</a> : p.name}
+                                                            </span>
+                                                        ))}
+                                                    </td>
+                                                    <td>{film.ratingTherapists != null ? film.ratingTherapists : '—'}</td>
+                                                    <td>{film.ratingPeers != null ? film.ratingPeers : '—'}</td>
+                                                    <td style={{ minWidth: '220px' }}>{film.brief}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
 
             if (showTerms) {
                 return (
@@ -3383,6 +4877,7 @@
                                 setRequestedSectionId(null);
                                 setRequestedSubsectionId(null);
                                 setRequestedEntryId(null);
+                                setResourcePage(null);
                             }} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
