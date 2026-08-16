@@ -379,12 +379,17 @@
         .mh-ted-list a { color: var(--primary); font-weight: 700; text-decoration: none; }
         .mh-ted-list a:hover { text-decoration: underline; }
         .mh-map-btn { background: #1a73e8 !important; }
-        .mh-nearby-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); }
+        .mh-nearby-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); }
+        .mh-nearby-bar-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); }
         .mh-nearby-bar-label { font-weight: 600; color: var(--primary); white-space: nowrap; font-size: var(--text-sm); }
+        .mh-nearby-bar-hint { margin: 0; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.4; }
         .mh-nearby-bar input, .mh-nearby-bar select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); background: var(--bg); flex: 1 1 160px; }
         .mh-nearby-bar select { flex: 0 0 auto; }
         .mh-nearby-bar-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
-        .mh-nearby-bar-btn-gps { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .mh-nearby-or { color: var(--text-muted); font-size: var(--text-sm); font-weight: 700; }
+        .mh-nearby-bar-btn-gps { background: var(--accent); border: none; color: white; }
+        .mh-nearby-bar-btn-gps:hover { filter: brightness(0.95); }
+        .mh-nearby-gps-chip { display: inline-flex; align-items: center; gap: 6px; min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); background: rgba(82, 183, 136, 0.15); color: var(--primary); font-size: var(--text-sm); font-weight: 600; }
         .mh-nearby-bar-btn-clear { background: transparent; border: none; color: var(--text-muted); text-decoration: underline; padding-inline: var(--space-sm); }
         .mh-nearby-distance { font-size: var(--text-sm); color: var(--primary); font-weight: 600; margin: 0 0 var(--space-sm); }
         @media (min-width: 600px) {
@@ -3832,7 +3837,7 @@
                         setNearbyStatus('לא נמצאה כתובת בישראל. נסו יישוב או רחוב אחר.');
                         return;
                     }
-                    setNearbyOrigin({ lat: body.lat, lng: body.lng, label: body.display_name });
+                    setNearbyOrigin({ lat: body.lat, lng: body.lng, label: body.display_name, via: 'address' });
                     setNearbyStatus('');
                 } catch {
                     setNearbyOrigin(null);
@@ -3850,7 +3855,7 @@
                 setNearbyStatus('מאתר מיקום…');
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        setNearbyOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'המיקום שלי' });
+                        setNearbyOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'המיקום הנוכחי', via: 'gps' });
                         setNearbyAddress('');
                         setNearbyStatus('');
                         setNearbyBusy(false);
@@ -4987,6 +4992,12 @@
                                 אפשר לשתף מקטע, חיפוש או כרטיס: סמל קישור ליד כל מקטע/כרטיס, ואחרי חיפוש — «העתק קישור לחיפוש»
                             </p>
                         )}
+                        <div className="mh-nearby-bar-head">
+                            <span className="mh-nearby-bar-label" id="mh-nearby-bar-label">
+                                <i className="fas fa-location-dot" aria-hidden="true"></i> שירותים קרובים אלי
+                            </span>
+                            <p className="mh-nearby-bar-hint">הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן</p>
+                        </div>
                         <form
                             className="mh-nearby-bar"
                             onSubmit={(e) => {
@@ -4996,18 +5007,42 @@
                             }}
                             data-analytics-section="nearby"
                         >
-                            <span className="mh-nearby-bar-label" id="mh-nearby-bar-label">
-                                <i className="fas fa-location-dot" aria-hidden="true"></i> שירותים קרובים אלי
-                            </span>
-                            <input
-                                id="mh-nearby-address"
-                                type="text"
-                                value={nearbyAddress}
-                                onChange={(e) => setNearbyAddress(e.target.value)}
-                                placeholder="כתובת או יישוב"
-                                autoComplete="street-address"
-                                aria-labelledby="mh-nearby-bar-label"
-                            />
+                            {nearbyOrigin?.via === 'gps' ? (
+                                <span className="mh-nearby-gps-chip" role="status">
+                                    <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
+                                    מציג לפי המיקום שזיהה הדפדפן
+                                </span>
+                            ) : (
+                                <>
+                                    <input
+                                        id="mh-nearby-address"
+                                        type="text"
+                                        value={nearbyAddress}
+                                        onChange={(e) => setNearbyAddress(e.target.value)}
+                                        placeholder="כתובת או יישוב"
+                                        autoComplete="street-address"
+                                        aria-labelledby="mh-nearby-bar-label"
+                                    />
+                                    <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
+                                        {nearbyBusy ? 'מחפש…' : 'חפש כתובת'}
+                                    </button>
+                                    <span className="mh-nearby-or" aria-hidden="true">או</span>
+                                    <button
+                                        type="button"
+                                        className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            runNearbyGps();
+                                        }}
+                                        disabled={nearbyBusy}
+                                        data-tracking-name="nearby_gps"
+                                        aria-label="חפש לפי המיקום שזיהה הדפדפן"
+                                    >
+                                        <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
+                                        {nearbyBusy ? 'מאתר מיקום…' : 'חפש לפי המיקום שלי'}
+                                    </button>
+                                </>
+                            )}
                             <select
                                 id="mh-nearby-radius"
                                 value={nearbyRadiusKm}
@@ -5020,23 +5055,6 @@
                                 <option value={50}>50 ק״מ</option>
                                 <option value={100}>100 ק״מ</option>
                             </select>
-                            <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
-                                {nearbyBusy ? '…' : 'חפש'}
-                            </button>
-                            <button
-                                type="button"
-                                className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    runNearbyGps();
-                                }}
-                                disabled={nearbyBusy}
-                                data-tracking-name="nearby_gps"
-                                aria-label="השתמש במיקום הנוכחי"
-                                title="המיקום שלי"
-                            >
-                                <i className="fas fa-location-crosshairs" aria-hidden="true"></i> המיקום שלי
-                            </button>
                             {(nearbyOrigin || nearbyAddress) && (
                                 <button
                                     type="button"
