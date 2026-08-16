@@ -379,12 +379,14 @@
         .mh-ted-list a { color: var(--primary); font-weight: 700; text-decoration: none; }
         .mh-ted-list a:hover { text-decoration: underline; }
         .mh-map-btn { background: #1a73e8 !important; }
-        .mh-nearby-form { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end; margin-bottom: var(--space-xl); }
-        .mh-nearby-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; }
-        .mh-nearby-field label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; }
-        .mh-nearby-field input, .mh-nearby-field select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-base); background: var(--bg-card); }
+        .mh-nearby-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); }
+        .mh-nearby-bar-label { font-weight: 600; color: var(--primary); white-space: nowrap; font-size: var(--text-sm); }
+        .mh-nearby-bar input, .mh-nearby-bar select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); background: var(--bg); flex: 1 1 160px; }
+        .mh-nearby-bar select { flex: 0 0 auto; }
+        .mh-nearby-bar-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+        .mh-nearby-bar-btn-gps { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .mh-nearby-bar-btn-clear { background: transparent; border: none; color: var(--text-muted); text-decoration: underline; padding-inline: var(--space-sm); }
         .mh-nearby-distance { font-size: var(--text-sm); color: var(--primary); font-weight: 600; margin: 0 0 var(--space-sm); }
-        .mh-nearby-card { border-color: var(--primary); }
         @media (min-width: 600px) {
             .mh-resource-nav-grid { grid-template-columns: repeat(3, 1fr); }
             .mh-ted-playlists { grid-template-columns: repeat(2, 1fr); }
@@ -414,7 +416,7 @@
             endpoint: '/api/analytics'
         };
         // Known top-level group ids (must stay in sync with CATEGORY_GROUPS below).
-        const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information', 'nearby']);
+        const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information']);
 
         const mhGenerateId = () => {
             if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -832,13 +834,14 @@
                 if (!elementId) return;
                 const tagName = el.tagName ? el.tagName.toLowerCase() : 'element';
                 const elementType = el.getAttribute('data-analytics-type') || tagName;
-                const sectionEl = el.closest('[data-analytics-section]');
-                const section = sectionEl ? sectionEl.getAttribute('data-analytics-section') : null;
-                const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
-                const elementTextShort = textSource.trim().slice(0, 80) || null;
-
                 const entryIdEl = el.closest('[data-entry-id]');
                 const entryId = entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null;
+                const sectionEl = el.closest('[data-analytics-section]');
+                const section = sectionEl
+                    ? sectionEl.getAttribute('data-analytics-section')
+                    : (entryIdEl ? entryIdEl.getAttribute('data-entry-category') : null);
+                const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
+                const elementTextShort = textSource.trim().slice(0, 80) || null;
                 mhTrackEvent('click', {
                     element_id: elementId,
                     element_type: elementType,
@@ -2479,6 +2482,8 @@
                     }
                     if (u.origin === window.location.origin) return null;
                     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+                    const host = (u.hostname || '').replace(/^www\./, '').toLowerCase();
+                    if (host === 'maps.google.com' || (host === 'google.com' && u.pathname.startsWith('/maps'))) return null;
                     return u.href;
                 };
                 const getAnchorAnalyticsMeta = (a, absoluteHref) => {
@@ -3740,8 +3745,9 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mh-map-btn"
+                                    data-skip-external-link-check="true"
                                     data-tracking-name={`${s.trackingName || s.org}_map${mhGetLocationsForRow(s.row).length > 1 ? `_${locIdx + 1}` : ''}`}
-                                    data-analytics-type="website"
+                                    data-analytics-type="map"
                                     title={loc.address || loc.label}
                                 >
                                     <i className="fas fa-map-marker-alt"></i> {mhGetLocationsForRow(s.row).length === 1 ? (s.dir === 'ltr' ? 'Map' : 'מפה') : `${s.dir === 'ltr' ? 'Map' : 'מפה'} · ${loc.label}`}
@@ -3788,17 +3794,6 @@
                 );
             };
 
-            const openNearby = () => {
-                setShowTerms(false);
-                setShowIntro(false);
-                setSearchTerm('');
-                setSelectedCategoryGroup('nearby');
-                setRequestedSectionId(null);
-                setRequestedSubsectionId(null);
-                setRequestedEntryId(null);
-                setResourcePage(null);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
             const uniqueLocatedServices = useMemo(() => {
                 const map = new Map();
                 Object.entries(data).forEach(([catId, cat]) => {
@@ -4992,12 +4987,78 @@
                                 אפשר לשתף מקטע, חיפוש או כרטיס: סמל קישור ליד כל מקטע/כרטיס, ואחרי חיפוש — «העתק קישור לחיפוש»
                             </p>
                         )}
+                        <form
+                            className="mh-nearby-bar"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                setSearchTerm('');
+                                runNearbyGeocode(nearbyAddress);
+                            }}
+                            data-analytics-section="nearby"
+                        >
+                            <span className="mh-nearby-bar-label" id="mh-nearby-bar-label">
+                                <i className="fas fa-location-dot" aria-hidden="true"></i> שירותים קרובים אלי
+                            </span>
+                            <input
+                                id="mh-nearby-address"
+                                type="text"
+                                value={nearbyAddress}
+                                onChange={(e) => setNearbyAddress(e.target.value)}
+                                placeholder="כתובת או יישוב"
+                                autoComplete="street-address"
+                                aria-labelledby="mh-nearby-bar-label"
+                            />
+                            <select
+                                id="mh-nearby-radius"
+                                value={nearbyRadiusKm}
+                                onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}
+                                aria-label="רדיוס חיפוש"
+                            >
+                                <option value={5}>5 ק״מ</option>
+                                <option value={10}>10 ק״מ</option>
+                                <option value={25}>25 ק״מ</option>
+                                <option value={50}>50 ק״מ</option>
+                                <option value={100}>100 ק״מ</option>
+                            </select>
+                            <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
+                                {nearbyBusy ? '…' : 'חפש'}
+                            </button>
+                            <button
+                                type="button"
+                                className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    runNearbyGps();
+                                }}
+                                disabled={nearbyBusy}
+                                data-tracking-name="nearby_gps"
+                                aria-label="השתמש במיקום הנוכחי"
+                                title="המיקום שלי"
+                            >
+                                <i className="fas fa-location-crosshairs" aria-hidden="true"></i> המיקום שלי
+                            </button>
+                            {(nearbyOrigin || nearbyAddress) && (
+                                <button
+                                    type="button"
+                                    className="mh-nearby-bar-btn mh-nearby-bar-btn-clear"
+                                    onClick={() => {
+                                        setNearbyOrigin(null);
+                                        setNearbyAddress('');
+                                        setNearbyStatus('');
+                                    }}
+                                    data-tracking-name="nearby_clear"
+                                >
+                                    נקה
+                                </button>
+                            )}
+                        </form>
+                        {nearbyStatus && <p className="mh-helper-text" role="status" style={{ marginTop: 'var(--space-sm)', marginBottom: 0 }}>{nearbyStatus}</p>}
                     </div>
 
-                    {!searchTerm && !selectedCategoryGroup && (
+                    {!searchTerm && !selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
                     )}
-                    {!searchTerm && selectedCategoryGroup && selectedCategoryGroup !== 'nearby' && (
+                    {!searchTerm && selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
                             סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף
                         </p>
@@ -5028,69 +5089,16 @@
                                 )}
                             </div>
                         ))
-                    ) : selectedCategoryGroup === 'nearby' ? (
-                        <div data-section-anchor="group_nearby">
-                            <button onClick={() => {
-                                setSelectedCategoryGroup(null);
-                                setRequestedSectionId(null);
-                                setRequestedSubsectionId(null);
-                                setRequestedEntryId(null);
-                                setResourcePage(null);
-                            }} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories_nearby">
-                                ← חזרה לכל הקטגוריות
-                            </button>
-                            <h2 style={{ color: 'var(--primary)', margin: '0 0 var(--space-sm)', fontSize: 'var(--text-2xl)' }}>
-                                <i className="fas fa-location-dot"></i> קרוב אלי
-                            </h2>
-                            <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)', lineHeight: 1.6 }}>
-                                הזינו כתובת או יישוב בישראל, או השתמשו במיקום שלכם. יוצגו רק ארגונים עם כתובת פיזית במאגר — קווי סיוע ושירותים ארציים ללא סניף לא מופיעים כאן.
+                    ) : nearbyOrigin ? (
+                        <div data-section-anchor="nearby_results">
+                            <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)' }}>
+                                מציג {nearbyMatches.length} מענים בתוך {nearbyRadiusKm} ק״מ מ־{nearbyOrigin.label || 'הנקודה שנבחרה'}. רק ארגונים עם כתובת פיזית במאגר.
                             </p>
-                            <form
-                                className="mh-nearby-form"
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    runNearbyGeocode(nearbyAddress);
-                                }}
-                            >
-                                <div className="mh-nearby-field">
-                                    <label htmlFor="mh-nearby-address">כתובת או יישוב</label>
-                                    <input
-                                        id="mh-nearby-address"
-                                        type="text"
-                                        value={nearbyAddress}
-                                        onChange={(e) => setNearbyAddress(e.target.value)}
-                                        placeholder="לדוגמה: דיזנגוף 50 תל אביב"
-                                        autoComplete="street-address"
-                                    />
-                                </div>
-                                <div className="mh-nearby-field" style={{ flex: '0 0 140px' }}>
-                                    <label htmlFor="mh-nearby-radius">רדיוס</label>
-                                    <select id="mh-nearby-radius" value={nearbyRadiusKm} onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}>
-                                        <option value={5}>5 ק״מ</option>
-                                        <option value={10}>10 ק״מ</option>
-                                        <option value={25}>25 ק״מ</option>
-                                        <option value={50}>50 ק״מ</option>
-                                        <option value={100}>100 ק״מ</option>
-                                    </select>
-                                </div>
-                                <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
-                                    {nearbyBusy ? 'מחפש…' : 'חפש'}
-                                </button>
-                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }} onClick={runNearbyGps} disabled={nearbyBusy} data-tracking-name="nearby_gps">
-                                    <i className="fas fa-location-crosshairs"></i> המיקום שלי
-                                </button>
-                            </form>
-                            {nearbyStatus && <p className="mh-helper-text" role="status">{nearbyStatus}</p>}
-                            {nearbyOrigin && !nearbyStatus && (
-                                <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)' }}>
-                                    מציג {nearbyMatches.length} מענים בתוך {nearbyRadiusKm} ק״מ מ־{nearbyOrigin.label || 'הנקודה שנבחרה'}
-                                </p>
-                            )}
-                            {nearbyOrigin && nearbyMatches.length === 0 && !nearbyBusy && (
+                            {nearbyMatches.length === 0 && !nearbyBusy && (
                                 <p className="mh-helper-text">לא נמצאו מענים עם כתובת פיזית ברדיוס הזה. נסו להגדיל את הרדיוס, או חפשו לפי קטגוריה — רוב קווי הסיוע הם ארציים.</p>
                             )}
                             {nearbyMatches.length > 0 && (
-                                <div className="mh-cat-grid">
+                                <div className="mh-cat-grid" style={{ padding: 0 }}>
                                     {nearbyMatches.map(({ s, categoryKey, nearest }) => (
                                         <Card
                                             key={`nearby_${s.row}`}
@@ -5142,29 +5150,6 @@
                         </div>
                     ) : (
                         <div className="mh-category-cards">
-                            <div
-                                className="mh-category-card mh-nearby-card"
-                                data-analytics-id="category_nearby"
-                                data-analytics-section="category_overview"
-                                data-section-anchor="group_card_nearby"
-                                onClick={openNearby}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && openNearby()}
-                                aria-label="קרוב אלי — Nearby. חיפוש מענים לפי כתובת ורדיוס"
-                            >
-                                <div className="mh-category-card-icon">
-                                    <i className="fas fa-location-dot"></i>
-                                </div>
-                                <div>
-                                    <div className="mh-category-card-title">קרוב אלי</div>
-                                    <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>Nearby</div>
-                                </div>
-                                <p className="mh-category-card-desc">מענים עם כתובת פיזית במרחק מכתובת או מהמיקום שלכם</p>
-                                <div className="mh-category-card-meta">
-                                    <span className="mh-category-card-badge">רדיוס 25 ק״מ</span>
-                                </div>
-                            </div>
                             {Object.keys(CATEGORY_GROUPS).map(groupId => (
                                 <CategoryCard key={groupId} groupId={groupId} />
                             ))}
