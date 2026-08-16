@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 022_directory_entry_locations.sql
 [x] 021_directory_entries_mapalanefesh_description.sql
 [x] 020_directory_entries_mapalanefesh_ngos.sql
 [x] 019_directory_entries_mapalanefesh.sql

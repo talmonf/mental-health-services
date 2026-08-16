@@ -1,0 +1,16 @@
+[
+  {"row": 0, "org": "city", "label": "jerusalem", "query": "Jerusalem, Israel", "address": "ירושלים"},
+  {"row": 0, "org": "city", "label": "telaviv", "query": "Tel Aviv, Israel", "address": "תל אביב"},
+  {"row": 0, "org": "city", "label": "haifa", "query": "Haifa, Israel", "address": "חיפה"},
+  {"row": 0, "org": "city", "label": "beersheba", "query": "Beersheba, Israel", "address": "באר שבע"},
+  {"row": 0, "org": "city", "label": "bneibrak", "query": "Bnei Brak, Israel", "address": "בני ברק"},
+  {"row": 0, "org": "city", "label": "beitshemesh", "query": "Beit Shemesh, Israel", "address": "בית שמש"},
+  {"row": 0, "org": "city", "label": "ramatbeitshemesh", "query": "Ramat Beit Shemesh, Israel", "address": "רמת בית שמש"},
+  {"row": 0, "org": "city", "label": "ramatgan", "query": "Ramat Gan, Israel", "address": "רמת גן"},
+  {"row": 0, "org": "city", "label": "afula", "query": "Afula, Israel", "address": "עפולה"},
+  {"row": 0, "org": "city", "label": "netanya", "query": "Netanya, Israel", "address": "נתניה"},
+  {"row": 0, "org": "city", "label": "ichilov", "query": "Tel Aviv Sourasky Medical Center", "address": "איכילוב"},
+  {"row": 0, "org": "city", "label": "hadassah", "query": "Hadassah Ein Kerem, Jerusalem", "address": "הדסה עין כרם"},
+  {"row": 0, "org": "city", "label": "levhasharon", "query": "Lev Hasharon Medical Center, Israel", "address": "לב השרון"},
+  {"row": 0, "org": "city", "label": "parzon", "query": "Parzon, Israel", "address": "פרזון"}
+]

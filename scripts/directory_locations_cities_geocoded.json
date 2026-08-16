@@ -1,0 +1,156 @@
+[
+  {
+    "row": 0,
+    "org": "city",
+    "label": "jerusalem",
+    "address": "ירושלים",
+    "query": "Jerusalem, Israel",
+    "lat": 31.7788472,
+    "lng": 35.2257856,
+    "displayName": "ירושלים | القدس, נפת ירושלים, מחוז ירושלים, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "telaviv",
+    "address": "תל אביב",
+    "query": "Tel Aviv, Israel",
+    "lat": 32.0852997,
+    "lng": 34.7818064,
+    "displayName": "תל־אביב–יפו, נפת תל אביב, מחוז תל אביב, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "haifa",
+    "address": "חיפה",
+    "query": "Haifa, Israel",
+    "lat": 32.8191218,
+    "lng": 34.9983856,
+    "displayName": "חיפה, נפת חיפה, מחוז חיפה, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "beersheba",
+    "address": "באר שבע",
+    "query": "Beersheba, Israel",
+    "lat": 31.2457442,
+    "lng": 34.7925181,
+    "displayName": "באר שבע, נפת באר שבע, מחוז הדרום, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "bneibrak",
+    "address": "בני ברק",
+    "query": "Bnei Brak, Israel",
+    "lat": 32.0873899,
+    "lng": 34.8324376,
+    "displayName": "בני ברק, נפת תל אביב, מחוז תל אביב, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "beitshemesh",
+    "address": "בית שמש",
+    "query": "Beit Shemesh, Israel",
+    "lat": 31.746214,
+    "lng": 34.9886825,
+    "displayName": "בית שמש, נפת ירושלים, מחוז ירושלים, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "ramatbeitshemesh",
+    "address": "רמת בית שמש",
+    "query": "Ramat Beit Shemesh, Israel",
+    "lat": 31.7425447,
+    "lng": 34.9805969,
+    "displayName": "אהבת ישראל, קרית בן אליעזר, קרית אריה שיינפלד, רמת בית שמש ב', בית שמש, נפת ירושלים, מחוז ירושלים, 9901312, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "ramatgan",
+    "address": "רמת גן",
+    "query": "Ramat Gan, Israel",
+    "lat": 32.0686867,
+    "lng": 34.8246812,
+    "displayName": "רמת גן, נפת תל אביב, מחוז תל אביב, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "afula",
+    "address": "עפולה",
+    "query": "Afula, Israel",
+    "lat": 32.6075587,
+    "lng": 35.2890861,
+    "displayName": "עפולה, נפת יזרעאל, מחוז הצפון, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "netanya",
+    "address": "נתניה",
+    "query": "Netanya, Israel",
+    "lat": 32.3286181,
+    "lng": 34.8566246,
+    "displayName": "נתניה, נפת השרון, מחוז המרכז, 42***, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "ichilov",
+    "address": "איכילוב",
+    "query": "Tel Aviv Sourasky Medical Center",
+    "lat": null,
+    "lng": null,
+    "displayName": null,
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "hadassah",
+    "address": "הדסה עין כרם",
+    "query": "Hadassah Ein Kerem, Jerusalem",
+    "lat": 31.7653138,
+    "lng": 35.150195,
+    "displayName": "בית חולים הדסה עין כרם, ירושלים | القدس, נפת ירושלים, מחוז ירושלים, 9574320, ישראל",
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "levhasharon",
+    "address": "לב השרון",
+    "query": "Lev Hasharon Medical Center, Israel",
+    "lat": null,
+    "lng": null,
+    "displayName": null,
+    "error": null
+  },
+  {
+    "row": 0,
+    "org": "city",
+    "label": "parzon",
+    "address": "פרזון",
+    "query": "Parzon, Israel",
+    "lat": null,
+    "lng": null,
+    "displayName": null,
+    "error": null
+  }
+]

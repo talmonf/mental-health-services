@@ -378,6 +378,13 @@
         .mh-ted-list li { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); }
         .mh-ted-list a { color: var(--primary); font-weight: 700; text-decoration: none; }
         .mh-ted-list a:hover { text-decoration: underline; }
+        .mh-map-btn { background: #1a73e8 !important; }
+        .mh-nearby-form { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end; margin-bottom: var(--space-xl); }
+        .mh-nearby-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; }
+        .mh-nearby-field label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; }
+        .mh-nearby-field input, .mh-nearby-field select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-base); background: var(--bg-card); }
+        .mh-nearby-distance { font-size: var(--text-sm); color: var(--primary); font-weight: 600; margin: 0 0 var(--space-sm); }
+        .mh-nearby-card { border-color: var(--primary); }
         @media (min-width: 600px) {
             .mh-resource-nav-grid { grid-template-columns: repeat(3, 1fr); }
             .mh-ted-playlists { grid-template-columns: repeat(2, 1fr); }
@@ -407,7 +414,7 @@
             endpoint: '/api/analytics'
         };
         // Known top-level group ids (must stay in sync with CATEGORY_GROUPS below).
-        const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information']);
+        const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information', 'nearby']);
 
         const mhGenerateId = () => {
             if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -535,6 +542,65 @@
             { categories: ["youth", "local"], entry: {"row": 266, "org": "עמותת מיט\"ב", "svc": "מרכז רב-תחומי לייעוץ, טיפול וחינוך בקהילה — ילדים, מתבגרים ומבוגרים; כולל יחידת קשב", "phone": "04-6816367", "phoneShowNumber": true, "web": "https://www.meitav.net/", "target": "", "region": "גליל עליון / קריית שמונה", "cost": "", "specialty": "", "notes": "במתחם המועצה האזורית גליל עליון. כולל אבחונים, גישור משפחתי וסדנאות להורים", "languages": "", "diseases": "", "add": ""} },
             { categories: ["emergency", "helplines", "youth"], entry: {"row": 267, "org": "מוקד 105 — המטה הלאומי להגנה על ילדים ברשת", "svc": "דיווח ומענה 24/7 על פגיעות, בריונות, סחיטה ופשיעה נגד ילדים ונוער במרחב המקוון", "phone": "105", "phoneLabel": "חיוג", "phoneShowNumber": true, "web": "https://www.gov.il/he/departments/units/105_unit", "target": "ילדים, נוער, הורים וצוותי חינוך", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מענה משולב אזרחי-משטרתי בעברית, ערבית ואנגלית", "languages": "עברית, ערבית, אנגלית", "diseases": "", "add": ""} },
         ];
+        const ENTRY_LOCATIONS = {
+            6: [{ label: "תל אביב", address: "עמותת אנוש, תל אביב", lat: 32.0853, lng: 34.781806 }],
+            24: [{ label: "ירושלים", address: "מטיבת\"א, ירושלים", lat: 31.778847, lng: 35.225786 }],
+            39: [{ label: "באר שבע", address: "בית בטוח, באר שבע", lat: 31.245744, lng: 34.792518 }, { label: "טירת הכרמל", address: "טירת הכרמל", lat: 32.761383, lng: 34.971551 }, { label: "ירושלים", address: "בית בטוח, ירושלים", lat: 31.778847, lng: 35.225786 }, { label: "תל השומר", address: "מרכז רפואי שיבא, תל השומר", lat: 32.051486, lng: 34.83906 }],
+            52: [{ label: "תל אביב", address: "מילם / אנוש, תל אביב", lat: 32.0853, lng: 34.781806 }],
+            60: [{ label: "בני ברק", address: "עמותת בית חם, בני ברק", lat: 32.08739, lng: 34.832438 }],
+            62: [{ label: "בני ברק", address: "מרפאות בית חם, בני ברק", lat: 32.08739, lng: 34.832438 }],
+            63: [{ label: "באר שבע", address: "הדספייס, באר שבע", lat: 31.245744, lng: 34.792518 }, { label: "חיפה", address: "הדספייס, חיפה", lat: 32.819122, lng: 34.998386 }, { label: "ירושלים", address: "הדספייס, ירושלים", lat: 31.778847, lng: 35.225786 }, { label: "תל אביב", address: "הדספייס, תל אביב", lat: 32.0853, lng: 34.781806 }],
+            65: [{ label: "בית שמש", address: "מכון למרחב, בית שמש", lat: 31.746214, lng: 34.988683 }, { label: "ביתר עילית", address: "מכון למרחב, ביתר עילית", lat: 31.716315, lng: 35.120091 }, { label: "ירושלים", address: "מכון למרחב, ירושלים", lat: 31.778847, lng: 35.225786 }, { label: "רחובות", address: "מכון למרחב, רחובות", lat: 31.895253, lng: 34.810562 }],
+            70: [{ label: "חיפה", address: "עמך, חיפה", lat: 32.67956, lng: 34.985088 }, { label: "ירושלים", address: "עמך, ירושלים", lat: 31.763262, lng: 35.218457 }, { label: "תל אביב", address: "עמך, תל אביב", lat: 32.0853, lng: 34.781806 }],
+            78: [{ label: "איתנים", address: "המרכז הירושלמי לבריאות הנפש, איתנים", lat: 31.778627, lng: 35.096161 }, { label: "כפר שאול", address: "המרכז הירושלמי לבריאות הנפש, כפר שאול", lat: 31.786614, lng: 35.177992 }],
+            80: [{ label: "Jerusalem", address: "Amudim, Jerusalem", lat: 31.778847, lng: 35.225786 }],
+            89: [{ label: "נתניה", address: "ICA, נתניה", lat: 32.328618, lng: 34.856625 }],
+            91: [{ label: "רמת בית שמש", address: "הקשיבה, רמת בית שמש", lat: 31.742545, lng: 34.980597 }],
+            92: [{ label: "ירושלים", address: "חבלי קשר, ירושלים", lat: 31.778847, lng: 35.225786 }],
+            93: [{ label: "מודיעין", address: "Modi'in", lat: 31.908574, lng: 35.00693 }],
+            94: [{ label: "נתניה", address: "ICA, נתניה", lat: 32.328618, lng: 34.856625 }],
+            95: [{ label: "אור עקיבא", address: "מרכז גמילה אחרת, אור עקיבא", lat: 32.509015, lng: 34.919568 }],
+            102: [{ label: "Beit Shemesh", address: "Kav L'Noar, Beit Shemesh", lat: 31.746214, lng: 34.988683 }, { label: "Jerusalem", address: "Kav L'Noar, Jerusalem", lat: 31.778847, lng: 35.225786 }],
+            104: [{ label: "תל אביב", address: "מנחם בגין 148, תל אביב", lat: 32.066491, lng: 34.784266 }],
+            108: [{ label: "איכילוב", address: "בית החולים איכילוב, תל אביב", lat: 32.080381, lng: 34.790155 }],
+            205: [{ label: "תל אביב", address: "רזולוציה, תל אביב", lat: 32.0853, lng: 34.781806 }],
+            210: [{ label: "ירושלים", address: "מטיב, הדסה עין כרם", lat: 31.765314, lng: 35.150195 }],
+            211: [{ label: "מושב שמש", address: "חוות רטורנו, מושב שמש", lat: 31.74079, lng: 34.9778 }],
+            212: [{ label: "חיפה", address: "עמ\"ך, חיפה", lat: 32.819122, lng: 34.998386 }, { label: "נהריה", address: "עמ\"ך, נהריה", lat: 33.006639, lng: 35.098434 }, { label: "קריות", address: "עמ\"ך, קריות", lat: 32.836686, lng: 35.089334 }],
+            217: [{ label: "תל אביב", address: "אוניברסיטת תל אביב", lat: 32.112358, lng: 34.805013 }],
+            219: [{ label: "משק פרזון", address: "מושב משק פרזון, עמק יזרעאל", lat: 32.607559, lng: 35.289086 }],
+            226: [{ label: "תל השומר", address: "מרכז רפואי שיבא, תל השומר", lat: 32.051486, lng: 34.83906 }],
+            228: [{ label: "רשפון", address: "חוות מרפא מרחב, רשפון", lat: 32.199555, lng: 34.824437 }],
+            230: [{ label: "חוות שמש", address: "חוות רטורנו, מושב שמש", lat: 31.74079, lng: 34.9778 }],
+            233: [{ label: "הרצליה", address: "הרצליה", lat: 32.167684, lng: 34.830828 }],
+            235: [{ label: "מרכז רפואי לב השרון", address: "מרכז רפואי לב השרון", lat: 32.328618, lng: 34.856625 }, { label: "צור משה", address: "צור משה", lat: 32.297807, lng: 34.913546 }],
+            241: [{ label: "עפולה", address: "מרכז רפואי העמק, עפולה", lat: 32.607559, lng: 35.289086 }],
+            248: [{ label: "ירושלים", address: "עמותת אפשר, ירושלים", lat: 31.778847, lng: 35.225786 }, { label: "ראש פינה", address: "עמותת אפשר, ראש פינה", lat: 32.968215, lng: 35.543824 }, { label: "רחובות", address: "עמותת אפשר, רחובות", lat: 31.895253, lng: 34.810562 }, { label: "רמת גן", address: "עמותת אפשר, רמת גן", lat: 32.068687, lng: 34.824681 }],
+            249: [{ label: "גבעת שמש", address: "רטורנו, גבעת שמש / בית שמש", lat: 31.74079, lng: 34.977798 }],
+            250: [{ label: "בית שמש", address: "דרך אחרת, בית שמש", lat: 31.746214, lng: 34.988683 }],
+            254: [{ label: "מלכישוע", address: "כפר מלכישוע, גלבוע", lat: 32.438527, lng: 35.413007 }],
+            256: [{ label: "מטה בני ברק", address: "הירקון 35, בני ברק", lat: 32.096891, lng: 34.827396 }],
+            266: [{ label: "גליל עליון", address: "מתחם המועצה האזורית גליל עליון", lat: 33.125025, lng: 35.612424 }],
+        };
+        const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
+        const mhGoogleMapsUrl = (loc) => `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+        const mhHaversineKm = (lat1, lng1, lat2, lng2) => {
+            const toRad = (d) => d * Math.PI / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)));
+        };
+        const mhFormatKm = (km) => (km < 10 ? km.toFixed(1) : String(Math.round(km)));
+        const mhNearestLocation = (locs, origin) => {
+            if (!locs || !locs.length || !origin) return null;
+            let best = null;
+            locs.forEach((loc) => {
+                const km = mhHaversineKm(origin.lat, origin.lng, loc.lat, loc.lng);
+                if (!best || km < best.km) best = { loc, km };
+            });
+            return best;
+        };
         const mhServiceSearchText = (s) => {
             const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
             return `${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${tagPart}`.toLowerCase();
@@ -563,7 +629,7 @@
                     section: (url.searchParams.get('section') || '').trim(),
                     subsection: (url.searchParams.get('subsection') || '').trim(),
                     page: MH_RESOURCE_PAGES.has(rawPage) ? rawPage : '',
-                    group: Object.prototype.hasOwnProperty.call(CATEGORY_GROUPS, rawGroup) ? rawGroup : ''
+                    group: MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : ''
                 };
             } catch {
                 return { q: '', entry: '', section: '', subsection: '', page: '', group: '' };
@@ -2329,6 +2395,11 @@
             const toastTimeoutRef = useRef(null);
             const copiedEntryTimeoutRef = useRef(null);
             const copiedSectionTimeoutRef = useRef(null);
+            const [nearbyAddress, setNearbyAddress] = useState('');
+            const [nearbyRadiusKm, setNearbyRadiusKm] = useState(25);
+            const [nearbyOrigin, setNearbyOrigin] = useState(null);
+            const [nearbyStatus, setNearbyStatus] = useState('');
+            const [nearbyBusy, setNearbyBusy] = useState(false);
 
             // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
@@ -3546,7 +3617,7 @@
                 );
             };
 
-            const Card = ({ s, categoryKey, subsectionId }) => {
+            const Card = ({ s, categoryKey, subsectionId, distanceLabel }) => {
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
                 const entryTargetKey = `${mhGetCategoryGroupForCategory(categoryKey) || ''}:${categoryKey}:${subsectionId || ''}:${entryId || ''}`;
                 const isTargeted = entryId && highlightedEntryKey === entryTargetKey;
@@ -3605,6 +3676,7 @@
                             paddingLeft: entryId && s.dir !== 'ltr' ? '40px' : undefined,
                             paddingRight: entryId && s.dir === 'ltr' ? '40px' : undefined
                         }}>{s.org}</h3>
+                        {distanceLabel && <p className="mh-nearby-distance">{distanceLabel}</p>}
                         {showHbLaunchBanner && (
                             <div className="mh-hb-launch-banner" role="status">
                                 החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.
@@ -3621,10 +3693,16 @@
                             </button>
                         )}
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
-                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases) && (
+                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || mhGetLocationsForRow(s.row).length) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
                                 {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
+                                {mhGetLocationsForRow(s.row).length === 1 && mhGetLocationsForRow(s.row)[0].address && (
+                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {mhGetLocationsForRow(s.row)[0].address}</div>
+                                )}
+                                {mhGetLocationsForRow(s.row).length > 1 && (
+                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Sites:' : 'סניפים:'}</strong> {mhGetLocationsForRow(s.row).map(l => l.label).join(' · ')}</div>
+                                )}
                                 {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {s.cost}</div>}
                                 {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
                                 {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {s.languages}</div>}
@@ -3655,6 +3733,20 @@
                                     </a>
                                 );
                             })()}
+                            {mhGetLocationsForRow(s.row).map((loc, locIdx) => (
+                                <a
+                                    key={`${s.row}_map_${locIdx}`}
+                                    href={mhGoogleMapsUrl(loc)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mh-map-btn"
+                                    data-tracking-name={`${s.trackingName || s.org}_map${mhGetLocationsForRow(s.row).length > 1 ? `_${locIdx + 1}` : ''}`}
+                                    data-analytics-type="website"
+                                    title={loc.address || loc.label}
+                                >
+                                    <i className="fas fa-map-marker-alt"></i> {mhGetLocationsForRow(s.row).length === 1 ? (s.dir === 'ltr' ? 'Map' : 'מפה') : `${s.dir === 'ltr' ? 'Map' : 'מפה'} · ${loc.label}`}
+                                </a>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -3693,6 +3785,86 @@
                             {isUrgent && <span className="mh-category-card-badge">דחוף</span>}
                         </div>
                     </div>
+                );
+            };
+
+            const openNearby = () => {
+                setShowTerms(false);
+                setShowIntro(false);
+                setSearchTerm('');
+                setSelectedCategoryGroup('nearby');
+                setRequestedSectionId(null);
+                setRequestedSubsectionId(null);
+                setRequestedEntryId(null);
+                setResourcePage(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const uniqueLocatedServices = useMemo(() => {
+                const map = new Map();
+                Object.entries(data).forEach(([catId, cat]) => {
+                    getCatServices(cat).forEach((s) => {
+                        const row = Number(s.row);
+                        if (!row || !ENTRY_LOCATIONS[row] || map.has(row)) return;
+                        map.set(row, { s, categoryKey: catId });
+                    });
+                });
+                return map;
+            }, [data]);
+            const nearbyMatches = useMemo(() => {
+                if (!nearbyOrigin) return [];
+                const out = [];
+                uniqueLocatedServices.forEach(({ s, categoryKey }, row) => {
+                    const nearest = mhNearestLocation(mhGetLocationsForRow(row), nearbyOrigin);
+                    if (!nearest || nearest.km > nearbyRadiusKm) return;
+                    out.push({ s, categoryKey, nearest });
+                });
+                out.sort((a, b) => a.nearest.km - b.nearest.km);
+                return out;
+            }, [nearbyOrigin, nearbyRadiusKm, uniqueLocatedServices]);
+            const runNearbyGeocode = async (addr) => {
+                const q = String(addr || '').trim();
+                if (q.length < 2) {
+                    setNearbyStatus('נא להזין כתובת או יישוב');
+                    return;
+                }
+                setNearbyBusy(true);
+                setNearbyStatus('מחפש כתובת…');
+                try {
+                    const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+                    const body = await res.json();
+                    if (!res.ok || !body.found) {
+                        setNearbyOrigin(null);
+                        setNearbyStatus('לא נמצאה כתובת בישראל. נסו יישוב או רחוב אחר.');
+                        return;
+                    }
+                    setNearbyOrigin({ lat: body.lat, lng: body.lng, label: body.display_name });
+                    setNearbyStatus('');
+                } catch {
+                    setNearbyOrigin(null);
+                    setNearbyStatus('שגיאה בחיפוש הכתובת. נסו שוב.');
+                } finally {
+                    setNearbyBusy(false);
+                }
+            };
+            const runNearbyGps = () => {
+                if (!navigator.geolocation) {
+                    setNearbyStatus('הדפדפן אינו תומך במיקום.');
+                    return;
+                }
+                setNearbyBusy(true);
+                setNearbyStatus('מאתר מיקום…');
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        setNearbyOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'המיקום שלי' });
+                        setNearbyAddress('');
+                        setNearbyStatus('');
+                        setNearbyBusy(false);
+                    },
+                    () => {
+                        setNearbyBusy(false);
+                        setNearbyStatus('לא ניתן לקבל מיקום. בדקו הרשאות או הזינו כתובת.');
+                    },
+                    { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 }
                 );
             };
 
@@ -4825,7 +4997,7 @@
                     {!searchTerm && !selectedCategoryGroup && (
                         <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
                     )}
-                    {!searchTerm && selectedCategoryGroup && (
+                    {!searchTerm && selectedCategoryGroup && selectedCategoryGroup !== 'nearby' && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
                             סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף
                         </p>
@@ -4856,6 +5028,81 @@
                                 )}
                             </div>
                         ))
+                    ) : selectedCategoryGroup === 'nearby' ? (
+                        <div data-section-anchor="group_nearby">
+                            <button onClick={() => {
+                                setSelectedCategoryGroup(null);
+                                setRequestedSectionId(null);
+                                setRequestedSubsectionId(null);
+                                setRequestedEntryId(null);
+                                setResourcePage(null);
+                            }} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories_nearby">
+                                ← חזרה לכל הקטגוריות
+                            </button>
+                            <h2 style={{ color: 'var(--primary)', margin: '0 0 var(--space-sm)', fontSize: 'var(--text-2xl)' }}>
+                                <i className="fas fa-location-dot"></i> קרוב אלי
+                            </h2>
+                            <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)', lineHeight: 1.6 }}>
+                                הזינו כתובת או יישוב בישראל, או השתמשו במיקום שלכם. יוצגו רק ארגונים עם כתובת פיזית במאגר — קווי סיוע ושירותים ארציים ללא סניף לא מופיעים כאן.
+                            </p>
+                            <form
+                                className="mh-nearby-form"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    runNearbyGeocode(nearbyAddress);
+                                }}
+                            >
+                                <div className="mh-nearby-field">
+                                    <label htmlFor="mh-nearby-address">כתובת או יישוב</label>
+                                    <input
+                                        id="mh-nearby-address"
+                                        type="text"
+                                        value={nearbyAddress}
+                                        onChange={(e) => setNearbyAddress(e.target.value)}
+                                        placeholder="לדוגמה: דיזנגוף 50 תל אביב"
+                                        autoComplete="street-address"
+                                    />
+                                </div>
+                                <div className="mh-nearby-field" style={{ flex: '0 0 140px' }}>
+                                    <label htmlFor="mh-nearby-radius">רדיוס</label>
+                                    <select id="mh-nearby-radius" value={nearbyRadiusKm} onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}>
+                                        <option value={5}>5 ק״מ</option>
+                                        <option value={10}>10 ק״מ</option>
+                                        <option value={25}>25 ק״מ</option>
+                                        <option value={50}>50 ק״מ</option>
+                                        <option value={100}>100 ק״מ</option>
+                                    </select>
+                                </div>
+                                <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
+                                    {nearbyBusy ? 'מחפש…' : 'חפש'}
+                                </button>
+                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }} onClick={runNearbyGps} disabled={nearbyBusy} data-tracking-name="nearby_gps">
+                                    <i className="fas fa-location-crosshairs"></i> המיקום שלי
+                                </button>
+                            </form>
+                            {nearbyStatus && <p className="mh-helper-text" role="status">{nearbyStatus}</p>}
+                            {nearbyOrigin && !nearbyStatus && (
+                                <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)' }}>
+                                    מציג {nearbyMatches.length} מענים בתוך {nearbyRadiusKm} ק״מ מ־{nearbyOrigin.label || 'הנקודה שנבחרה'}
+                                </p>
+                            )}
+                            {nearbyOrigin && nearbyMatches.length === 0 && !nearbyBusy && (
+                                <p className="mh-helper-text">לא נמצאו מענים עם כתובת פיזית ברדיוס הזה. נסו להגדיל את הרדיוס, או חפשו לפי קטגוריה — רוב קווי הסיוע הם ארציים.</p>
+                            )}
+                            {nearbyMatches.length > 0 && (
+                                <div className="mh-cat-grid">
+                                    {nearbyMatches.map(({ s, categoryKey, nearest }) => (
+                                        <Card
+                                            key={`nearby_${s.row}`}
+                                            s={s}
+                                            categoryKey={categoryKey}
+                                            subsectionId={null}
+                                            distanceLabel={`${mhFormatKm(nearest.km)} ק״מ · ${nearest.loc.label}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ) : selectedCategoryGroup ? (
                         <div data-section-anchor={`group_${selectedCategoryGroup}`}>
                             <button onClick={() => {
@@ -4895,6 +5142,29 @@
                         </div>
                     ) : (
                         <div className="mh-category-cards">
+                            <div
+                                className="mh-category-card mh-nearby-card"
+                                data-analytics-id="category_nearby"
+                                data-analytics-section="category_overview"
+                                data-section-anchor="group_card_nearby"
+                                onClick={openNearby}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && openNearby()}
+                                aria-label="קרוב אלי — Nearby. חיפוש מענים לפי כתובת ורדיוס"
+                            >
+                                <div className="mh-category-card-icon">
+                                    <i className="fas fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <div className="mh-category-card-title">קרוב אלי</div>
+                                    <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>Nearby</div>
+                                </div>
+                                <p className="mh-category-card-desc">מענים עם כתובת פיזית במרחק מכתובת או מהמיקום שלכם</p>
+                                <div className="mh-category-card-meta">
+                                    <span className="mh-category-card-badge">רדיוס 25 ק״מ</span>
+                                </div>
+                            </div>
                             {Object.keys(CATEGORY_GROUPS).map(groupId => (
                                 <CategoryCard key={groupId} groupId={groupId} />
                             ))}
