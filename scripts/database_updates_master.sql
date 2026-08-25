@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 024_directory_entries_mnefesh.sql
 [x] 023_directory_entries_medical_treatments.sql
 [x] 022_directory_entry_locations.sql
 [x] 021_directory_entries_mapalanefesh_description.sql
