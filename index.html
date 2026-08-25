@@ -252,8 +252,64 @@
         .mh-card-actions a, .mh-card-actions button { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); text-decoration: none; font-size: var(--text-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; color: white; }
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-search-wrap { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
+        .mh-search-field { position: relative; }
         .mh-search-input { width: 100%; min-height: var(--touch-min); padding: var(--space-md) 44px var(--space-md) var(--space-lg); font-size: var(--text-base); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; }
         .mh-search-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
+        .mh-search-input-with-share { padding-left: 44px; }
+        .mh-search-copy-link {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            opacity: 0.75;
+            transition: color 0.15s, background 0.15s, opacity 0.15s;
+        }
+        .mh-search-copy-link:hover,
+        .mh-search-copy-link:focus {
+            opacity: 1;
+            color: var(--primary);
+            background: rgba(45, 90, 123, 0.1);
+        }
+        .mh-search-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-search-copy-link.mh-search-copy-link-copied {
+            opacity: 1;
+            color: var(--accent);
+            background: rgba(82, 183, 136, 0.12);
+        }
+        .mh-search-empty { margin: var(--space-md) 0 0; font-size: var(--text-sm); }
+        .mh-nearby-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+            min-height: var(--touch-min);
+            padding: var(--space-sm) var(--space-lg);
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .mh-nearby-toggle:hover,
+        .mh-nearby-toggle[aria-expanded="true"] { background: rgba(45, 90, 123, 0.08); }
+        .mh-nearby-toggle:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-nearby-panel { margin-top: var(--space-sm); }
         .mh-cat-header { padding: var(--space-lg) var(--space-md); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); min-height: var(--touch-min); color: white; }
         .mh-cat-title { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; text-align: right; }
         .mh-cat-title-he { font-weight: bold; word-break: break-word; font-size: var(--text-base); }
@@ -2426,6 +2482,9 @@
             const [nearbyOrigin, setNearbyOrigin] = useState(null);
             const [nearbyStatus, setNearbyStatus] = useState('');
             const [nearbyBusy, setNearbyBusy] = useState(false);
+            const [nearbyOpen, setNearbyOpen] = useState(false);
+            const [copiedSearchLink, setCopiedSearchLink] = useState(false);
+            const copiedSearchTimeoutRef = useRef(null);
 
             // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
@@ -2682,7 +2741,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "24.08.2026";            
+            const LAST_UPDATED = "25.08.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -3164,6 +3223,14 @@
                 copiedSectionTimeoutRef.current = window.setTimeout(() => {
                     setCopiedSectionKey((current) => (current === sectionKey ? null : current));
                     copiedSectionTimeoutRef.current = null;
+                }, 2000);
+            };
+            const markSearchLinkCopied = () => {
+                setCopiedSearchLink(true);
+                if (copiedSearchTimeoutRef.current) window.clearTimeout(copiedSearchTimeoutRef.current);
+                copiedSearchTimeoutRef.current = window.setTimeout(() => {
+                    setCopiedSearchLink(false);
+                    copiedSearchTimeoutRef.current = null;
                 }, 2000);
             };
             const copyText = async (text, { toastMessage: successToast = null, onSuccess = null } = {}) => {
@@ -3875,6 +3942,7 @@
                 out.sort((a, b) => a.nearest.km - b.nearest.km);
                 return out;
             }, [nearbyOrigin, nearbyRadiusKm, uniqueLocatedServices]);
+            const nearbyExpanded = nearbyOpen || !!nearbyOrigin || nearbyBusy;
             const runNearbyGeocode = async (addr) => {
                 const q = String(addr || '').trim();
                 if (q.length < 2) {
@@ -4988,7 +5056,7 @@
                     </div>
 
                     <div className="mh-search-wrap">
-                        <div style={{ position: 'relative' }}>
+                        <div className="mh-search-field">
                             <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-lg)', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '1.1rem' }}></i>
                             <input
                                 type="text"
@@ -5011,120 +5079,128 @@
                                     const resultsCount = Object.values(filtered).reduce((sum, cat) => sum + getCatServiceCount(cat), 0);
                                     window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });
                                 }}
-                                className="mh-search-input"
+                                className={`mh-search-input${searchTerm.trim() ? ' mh-search-input-with-share' : ''}`}
                                 aria-label="חיפוש שירותים"
                             />
-                        </div>
-                        {searchTerm.trim() ? (
-                            <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-md)' }}>
+                            {searchTerm.trim() ? (
                                 <button
                                     type="button"
-                                    className="mh-btn"
+                                    className={`mh-search-copy-link${copiedSearchLink ? ' mh-search-copy-link-copied' : ''}`}
                                     onMouseDown={(e) => {
                                         e.preventDefault();
                                         mhArmShareCopy();
                                     }}
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
-                                        { toastMessage: 'קישור לחיפוש הועתק' }
+                                        {
+                                            toastMessage: 'קישור לחיפוש הועתק',
+                                            onSuccess: markSearchLinkCopied
+                                        }
                                     )}
-                                    style={{ background: 'var(--primary)', color: 'white', padding: 'var(--space-sm) var(--space-lg)', fontSize: 'var(--text-sm)' }}
+                                    title={copiedSearchLink ? 'הקישור הועתק' : 'העתק קישור לחיפוש'}
+                                    aria-label={copiedSearchLink ? 'הקישור הועתק' : 'העתק קישור לחיפוש'}
                                     data-tracking-name="copy_search_link"
                                     data-analytics-type="share"
                                     data-share-kind="search"
                                     data-share-query={searchTerm.trim()}
                                 >
-                                    <i className="fas fa-link"></i> העתק קישור לחיפוש
+                                    <i className={`fas ${copiedSearchLink ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
                                 </button>
-                                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                                    אפשר לשלוח את הקישור — הוא יפתח את אותו חיפוש בדף
-                                </span>
-                            </div>
-                        ) : (
-                            <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                                <i className="fas fa-link" style={{ marginLeft: '6px', opacity: 0.85 }}></i>
-                                אפשר לשתף מקטע, חיפוש או כרטיס: סמל קישור ליד כל מקטע/כרטיס, ואחרי חיפוש — «העתק קישור לחיפוש»
-                            </p>
-                        )}
-                        <div className="mh-nearby-bar-head">
-                            <span className="mh-nearby-bar-label" id="mh-nearby-bar-label">
-                                <i className="fas fa-location-dot" aria-hidden="true"></i> שירותים קרובים אלי
-                            </span>
-                            <p className="mh-nearby-bar-hint">הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן</p>
+                            ) : null}
                         </div>
-                        <form
-                            className="mh-nearby-bar"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                setSearchTerm('');
-                                runNearbyGeocode(nearbyAddress);
-                            }}
-                            data-analytics-section="nearby"
+                        {searchTerm && Object.entries(filtered).length === 0 && (
+                            <p className="mh-helper-text mh-search-empty">לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.</p>
+                        )}
+                        <button
+                            type="button"
+                            className="mh-nearby-toggle"
+                            id="mh-nearby-bar-label"
+                            aria-expanded={nearbyExpanded}
+                            aria-controls="mh-nearby-panel"
+                            onClick={() => setNearbyOpen(open => !open)}
+                            data-tracking-name="nearby_toggle"
                         >
-                            {nearbyOrigin?.via === 'gps' ? (
-                                <span className="mh-nearby-gps-chip" role="status">
-                                    <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
-                                    מציג לפי המיקום שזיהה הדפדפן
-                                </span>
-                            ) : (
-                                <>
-                                    <input
-                                        id="mh-nearby-address"
-                                        type="text"
-                                        value={nearbyAddress}
-                                        onChange={(e) => setNearbyAddress(e.target.value)}
-                                        placeholder="כתובת או יישוב"
-                                        autoComplete="street-address"
-                                        aria-labelledby="mh-nearby-bar-label"
-                                    />
-                                    <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
-                                        {nearbyBusy ? 'מחפש…' : 'חפש כתובת'}
-                                    </button>
-                                    <span className="mh-nearby-or" aria-hidden="true">או</span>
-                                    <button
-                                        type="button"
-                                        className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            runNearbyGps();
-                                        }}
-                                        disabled={nearbyBusy}
-                                        data-tracking-name="nearby_gps"
-                                        aria-label="חפש לפי המיקום שזיהה הדפדפן"
-                                    >
-                                        <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
-                                        {nearbyBusy ? 'מאתר מיקום…' : 'חפש לפי המיקום שלי'}
-                                    </button>
-                                </>
-                            )}
-                            <select
-                                id="mh-nearby-radius"
-                                value={nearbyRadiusKm}
-                                onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}
-                                aria-label="רדיוס חיפוש"
-                            >
-                                <option value={5}>5 ק״מ</option>
-                                <option value={10}>10 ק״מ</option>
-                                <option value={25}>25 ק״מ</option>
-                                <option value={50}>50 ק״מ</option>
-                                <option value={100}>100 ק״מ</option>
-                            </select>
-                            {(nearbyOrigin || nearbyAddress) && (
-                                <button
-                                    type="button"
-                                    className="mh-nearby-bar-btn mh-nearby-bar-btn-clear"
-                                    onClick={() => {
-                                        setNearbyOrigin(null);
-                                        setNearbyAddress('');
-                                        setNearbyStatus('');
+                            <i className="fas fa-map-location-dot" aria-hidden="true"></i>
+                            שירותים קרובים אלי
+                        </button>
+                        {nearbyExpanded && (
+                            <div className="mh-nearby-panel" id="mh-nearby-panel">
+                                <p className="mh-nearby-bar-hint">הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן</p>
+                                <form
+                                    className="mh-nearby-bar"
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        setSearchTerm('');
+                                        runNearbyGeocode(nearbyAddress);
                                     }}
-                                    data-tracking-name="nearby_clear"
+                                    data-analytics-section="nearby"
                                 >
-                                    נקה
-                                </button>
-                            )}
-                        </form>
-                        {nearbyStatus && <p className="mh-helper-text" role="status" style={{ marginTop: 'var(--space-sm)', marginBottom: 0 }}>{nearbyStatus}</p>}
+                                    {nearbyOrigin?.via === 'gps' ? (
+                                        <span className="mh-nearby-gps-chip" role="status">
+                                            <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
+                                            מציג לפי המיקום שזיהה הדפדפן
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <input
+                                                id="mh-nearby-address"
+                                                type="text"
+                                                value={nearbyAddress}
+                                                onChange={(e) => setNearbyAddress(e.target.value)}
+                                                placeholder="כתובת או יישוב"
+                                                autoComplete="street-address"
+                                                aria-labelledby="mh-nearby-bar-label"
+                                            />
+                                            <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
+                                                {nearbyBusy ? 'מחפש…' : 'חפש כתובת'}
+                                            </button>
+                                            <span className="mh-nearby-or" aria-hidden="true">או</span>
+                                            <button
+                                                type="button"
+                                                className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
+                                                onClick={() => {
+                                                    setSearchTerm('');
+                                                    runNearbyGps();
+                                                }}
+                                                disabled={nearbyBusy}
+                                                data-tracking-name="nearby_gps"
+                                                aria-label="חפש לפי המיקום שזיהה הדפדפן"
+                                            >
+                                                <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
+                                                {nearbyBusy ? 'מאתר מיקום…' : 'חפש לפי המיקום שלי'}
+                                            </button>
+                                        </>
+                                    )}
+                                    <select
+                                        id="mh-nearby-radius"
+                                        value={nearbyRadiusKm}
+                                        onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}
+                                        aria-label="רדיוס חיפוש"
+                                    >
+                                        <option value={5}>5 ק״מ</option>
+                                        <option value={10}>10 ק״מ</option>
+                                        <option value={25}>25 ק״מ</option>
+                                        <option value={50}>50 ק״מ</option>
+                                        <option value={100}>100 ק״מ</option>
+                                    </select>
+                                    {(nearbyOrigin || nearbyAddress) && (
+                                        <button
+                                            type="button"
+                                            className="mh-nearby-bar-btn mh-nearby-bar-btn-clear"
+                                            onClick={() => {
+                                                setNearbyOrigin(null);
+                                                setNearbyAddress('');
+                                                setNearbyStatus('');
+                                            }}
+                                            data-tracking-name="nearby_clear"
+                                        >
+                                            נקה
+                                        </button>
+                                    )}
+                                </form>
+                                {nearbyStatus && <p className="mh-helper-text" role="status" style={{ marginTop: 'var(--space-sm)', marginBottom: 0 }}>{nearbyStatus}</p>}
+                            </div>
+                        )}
                     </div>
 
                     {!searchTerm && !selectedCategoryGroup && !nearbyOrigin && (
@@ -5137,9 +5213,7 @@
                     )}
 
                     {searchTerm ? (
-                        Object.entries(filtered).length === 0 ? (
-                            <p className="mh-helper-text">לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.</p>
-                        ) : Object.entries(filtered).map(([id, cat]) => (
+                        Object.entries(filtered).length === 0 ? null : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
