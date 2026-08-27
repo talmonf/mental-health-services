@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 025_directory_entries_facebook_certified_therapists.sql
 [x] 024_directory_entries_mnefesh.sql
 [x] 023_directory_entries_medical_treatments.sql
 [x] 022_directory_entry_locations.sql
