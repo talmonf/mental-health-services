@@ -1,4 +1,6 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 027_directory_entries_yozma.sql
+[x] 026_directory_entries_aguda.sql
 [x] 025_directory_entries_facebook_certified_therapists.sql
 [x] 024_directory_entries_mnefesh.sql
 [x] 023_directory_entries_medical_treatments.sql
