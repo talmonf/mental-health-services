@@ -4,7 +4,7 @@ This repo had no `buildCommand` before. Adding one changes the deployment's fail
 
 ## Why this is the risky change
 
-`vercel.json` now sets `buildCommand: "npm run build"` and deliberately **does not** set `outputDirectory`. With no `outputDirectory` and no `public/` directory in the repo, Vercel serves the repo root, which is what keeps `index.html` at `/`. If `outputDirectory` were ever set to something that does not contain `index.html`, the root would serve empty and the site would be down for everyone, including someone arriving from a WhatsApp link in a crisis.
+`vercel.json` sets `buildCommand: "npm run build"` and `outputDirectory: "."` (the repo root after the build). Vercel CLI requires an output directory whenever a build command is set; the default is `public/`, which this project does not use. `.` is the directory that already contains `index.html` plus the generated `/s/`, `/c/`, `sitemap.xml` and `directory.json`. Do **not** set it to `public` or any other folder that does not contain `index.html` — that would serve an empty root and take the crisis path down.
 
 If the build script throws, Vercel fails the deploy and the previous deployment keeps serving. That failure mode is stale, not down, and is acceptable.
 

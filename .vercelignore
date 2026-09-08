@@ -1,0 +1,8 @@
+# Uploaded to Vercel for the build. Do not exclude scripts/, api/, index.html,
+# robots.txt, or experiments/holdout.json — the page builder needs those.
+node_modules
+.cursor
+*.log
+tmp_*
+.env
+.env.*
