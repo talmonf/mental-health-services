@@ -2,7 +2,21 @@
   "name": "mental-health-services",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "build:pages": "node scripts/build_pages.js",
+    "build:export": "node scripts/build_export.js",
+    "build": "npm run build:pages && npm run build:export",
+    "check:pages": "node scripts/build_pages.js --check",
+    "clean:pages": "node scripts/build_pages.js --clean",
+    "facet:coverage": "node scripts/facet_coverage.js",
+    "referral:propose": "node scripts/propose_referral_routes.js",
+    "referral:write": "node scripts/propose_referral_routes.js --write",
+    "geo:run": "node experiments/run.js",
+    "geo:score": "node experiments/score.js",
+    "geo:backfill": "node experiments/backfill.js"
+  },
   "dependencies": {
+    "@vercel/functions": "^2.0.0",
     "@vercel/node": "^3.0.0",
     "pg": "^8.11.0",
     "ua-parser-js": "^2.0.9"

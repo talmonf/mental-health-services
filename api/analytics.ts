@@ -10,6 +10,7 @@
  * Migration: scripts/analytics_events_add_error_columns.sql
  * Migration: scripts/012_events_allow_deep_link_event_types.sql (required for deep-link event_type values)
  * Migration: scripts/014_events_allow_section_link_event_types.sql (section_link_copied / section_link_opened)
+ * Migration: scripts/029_events_server_headers.sql (server_user_agent / server_referrer — optional, see below)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
@@ -98,6 +99,32 @@ function normalizeErrorFields(e: Record<string, unknown>): { error: string | nul
     return { error: 'error', error_details: errorDetails };
   }
   return { error: null, error_details: null };
+}
+
+/**
+ * Whether migration 029 has been applied. Checked once per cold start rather than per event.
+ *
+ * The alternative — just naming the columns and letting the INSERT fail — would drop
+ * analytics for the whole window between deploying this and running the migration. The
+ * point of the columns is measurement; losing measurement to add measurement is silly.
+ */
+let serverHeaderColumnsExist: boolean | null = null;
+
+async function hasServerHeaderColumns(client: Client): Promise<boolean> {
+  if (serverHeaderColumnsExist !== null) return serverHeaderColumnsExist;
+  try {
+    const { rows } = await client.query(
+      `SELECT COUNT(*)::int AS n
+         FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'events'
+          AND column_name IN ('server_user_agent', 'server_referrer')`
+    );
+    serverHeaderColumnsExist = rows[0]?.n === 2;
+  } catch {
+    serverHeaderColumnsExist = false;
+  }
+  return serverHeaderColumnsExist;
 }
 
 function isEventTypeConstraintError(err: unknown): boolean {
@@ -244,9 +271,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const acceptLanguage = req.headers['accept-language'] as string | undefined;
   const language = acceptLanguage ? acceptLanguage.split(',')[0].trim().slice(0, 50) : null;
 
+  // What the server saw, as opposed to what the payload claims. Recorded so the two can be
+  // compared; see scripts/029_events_server_headers.sql for why that matters.
+  const serverUserAgent = ((req.headers['user-agent'] as string) || null)?.slice(0, 1000) || null;
+  const serverReferrer = ((req.headers['referer'] as string) || null)?.slice(0, 1000) || null;
+
   const client = new Client({ connectionString });
   try {
     await client.connect();
+    const withServerHeaders = await hasServerHeaderColumns(client);
 
     for (const ev of events) {
       const e = ev as Record<string, unknown>;
@@ -319,6 +352,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!elementType) elementType = requestedType;
         extra.requested_event_type = requestedType;
       }
+      extra.ga_client_id = ((e?.ga_client_id as string) || null)?.slice(0, 64) || null;
 
       const insertEvent = async (type: string, loc: string | null, elType: string | null) => {
         await client.query(
@@ -327,8 +361,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             element_id, element_type, element_text_short, search_query, results_count, search_location,
             extra, entry_id, country, device_type, browser_name, os_name, language,
             referrer_domain, utm_source, utm_medium, utm_campaign,
-            error, error_details
-          ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
+            error, error_details${withServerHeaders ? ',\n            server_user_agent, server_referrer' : ''}
+          ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26${withServerHeaders ? ', $27, $28' : ''})`,
           [
             eventId,
             sessionId,
@@ -356,6 +390,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ((e?.utm_campaign as string) || null)?.slice(0, 255) || null,
             errorCol,
             errorDetailsCol,
+            ...(withServerHeaders ? [serverUserAgent, serverReferrer] : []),
           ]
         );
       };

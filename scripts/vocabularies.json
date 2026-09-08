@@ -1,0 +1,18 @@
+{
+  "referral_route": {
+    "title_he": "מסלול הפניה",
+    "title_en": "Referral route",
+    "multi": true,
+    "terms": [
+      { "code": "self_referral", "label_he": "אפשר לפנות ישירות", "label_en": "Self-referral", "sort_order": 1 },
+      { "code": "gp_referral", "label_he": "הפניה מרופא משפחה", "label_en": "GP referral", "sort_order": 2 },
+      { "code": "hmo_form17", "label_he": "טופס 17 מקופת החולים", "label_en": "HMO form 17", "sort_order": 3 },
+      { "code": "psychiatrist_referral", "label_he": "הפניה מפסיכיאטר", "label_en": "Psychiatrist referral", "sort_order": 4 },
+      { "code": "mod_rehab_worker", "label_he": "הפניה מעובד שיקום (משרד הביטחון)", "label_en": "MoD rehab worker", "sort_order": 5 },
+      { "code": "nii_referral", "label_he": "הפניה מביטוח לאומי", "label_en": "NII referral", "sort_order": 6 },
+      { "code": "rehab_basket_committee", "label_he": "ועדת סל שיקום", "label_en": "Rehabilitation-basket committee", "sort_order": 7 },
+      { "code": "court_or_welfare", "label_he": "בית משפט או רווחה", "label_en": "Court or welfare", "sort_order": 8 },
+      { "code": "unknown", "label_he": "לא צוין", "label_en": "Not stated", "sort_order": 99 }
+    ]
+  }
+}

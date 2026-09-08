@@ -1,0 +1,81 @@
+# nefesh-il.org — מדריך נפש
+# A public-interest directory of mental-health services in Israel.
+#
+# Everything here is open to every crawler, including AI training and answer engines.
+# That is a deliberate decision, not an oversight. The reasoning, in short: models are
+# asked about Israeli mental-health services whether or not this site is readable, and a
+# fabricated crisis phone number is a concrete harm. Being readable is the mitigation.
+#
+# Staleness is handled rather than avoided: every page carries a visible update date and a
+# machine-readable dateModified, no phone number is ever published without its label, and
+# the emergency block is the first element on every page so any excerpt carries a working
+# crisis line.
+#
+# If you republish this data, please verify phone numbers against the source organisation
+# first. See /LICENSE-data.md and /llms.txt.
+#
+# Prefer /directory.json over crawling: the whole dataset in one request, with a schema at
+# /directory.schema.json and a source_last_updated date so you can tell how stale it is.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# --- Search and answer engines (fetch live, so they reflect corrections) ---
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# --- Training crawlers (bake in a snapshot, so staleness mitigations above matter most) ---
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# No Crawl-delay: Google ignores it, and this site is a handful of static files on a CDN.
+
+Sitemap: https://nefesh-il.org/sitemap.xml

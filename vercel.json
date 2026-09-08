@@ -1,5 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "crons": [
+    {
+      "path": "/api/retention",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "functions": {
     "api/link-check.ts": {
       "maxDuration": 60,
@@ -10,6 +19,12 @@
       "includeFiles": "index.html"
     }
   },
+  "rewrites": [
+    {
+      "source": "/s/:row(\\d+)/:slug*",
+      "destination": "/s/:row"
+    }
+  ],
   "redirects": [
     {
       "source": "/(.*)",
@@ -21,6 +36,58 @@
       ],
       "destination": "https://nefesh-il.org/$1",
       "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(s|c|g|term)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600" }]
+    },
+    {
+      "source": "/directory.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/directory.schema.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/schema+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=86400" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600" }
+      ]
+    },
+    {
+      "source": "/(.*).md",
+      "headers": [
+        { "key": "Content-Type", "value": "text/markdown; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600" }
+      ]
     }
   ]
 }

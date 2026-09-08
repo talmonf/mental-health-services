@@ -1,0 +1,23 @@
+node_modules/
+.vercel/
+.env
+.env.*
+!.env.example
+
+# Pre-rendered pages and data exports. Generated from index.html on every deploy by
+# `npm run build`, so they are never committed: a second committed copy of the phone
+# numbers is exactly the staleness risk this build exists to avoid.
+/s/
+/c/
+/g/
+/term/
+/terms/
+/directory/
+/sitemap.xml
+/directory.json
+/directory.schema.json
+/llms.txt
+
+# Local scratch
+tmp_*
+*.log

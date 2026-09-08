@@ -1,4 +1,9 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 032_directory_entries_referral.sql
+[x] 031_geo_experiment.sql
+[x] 030_retention.sql
+[x] 029_events_server_headers.sql
+[x] 028_request_log.sql
 [x] 027_directory_entries_yozma.sql
 [x] 026_directory_entries_aguda.sql
 [x] 025_directory_entries_facebook_certified_therapists.sql

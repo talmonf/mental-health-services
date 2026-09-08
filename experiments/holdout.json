@@ -1,0 +1,28 @@
+{
+  "frozen_at": "2026-09-08",
+  "cycle": 1,
+  "purpose": "Within-site control. These entries are excluded from pre-rendered pages, sitemap.xml and directory.json for one cycle, so that citation rates for questions answered by holdout entries can be compared against questions answered by published entries.",
+  "selection_constraints": [
+    "Never in the emergency category.",
+    "Never carrying a 24/7 crisis line or reachable from the crisis path.",
+    "Prefer low-traffic entries.",
+    "One cycle only, then published."
+  ],
+  "ethical_note": "Eight non-crisis entries stay less findable for one cycle in exchange for an interpretable result. This tradeoff must be restated in every report that uses the control arm. If any holdout entry is found on review to be crisis-adjacent, release it immediately and drop it from the analysis.",
+  "rows": [
+    { "row": 87, "org": "ענת אופיר", "category": "nutrition", "why_safe": "Private nutrition practice. No crisis function." },
+    { "row": 204, "org": "אדווה ליזר", "category": "nutrition", "why_safe": "Private naturopathy practice. No crisis function." },
+    { "row": 260, "org": "חוש\"ן — חינוך ושינוי", "category": "populations", "why_safe": "Schools education and workshops provider, not a service route." },
+    { "row": 258, "org": "כנפיים של קרמבו", "category": "youth", "why_safe": "Inclusive youth movement, social rather than clinical." },
+    { "row": 273, "org": "tDCS — המרכז הרפואי הרצוג", "category": "treatments", "why_safe": "Niche elective brain-stimulation treatment, referral-gated anyway." },
+    { "row": 275, "org": "DBS — גירוי מוחי עמוק (OCD עמיד)", "category": "treatments", "why_safe": "Neurosurgical last-resort procedure, heavily gated, never a first point of contact." },
+    { "row": 91, "org": "Hakshiva Therapy Clinic — הקשיבה", "category": "local", "why_safe": "Single private clinic with local reach." },
+    { "row": 93, "org": "Modi'in Behavioral", "category": "local", "why_safe": "Single private clinic with local reach." }
+  ],
+  "control_arm_coverage": {
+    "questions_touching_holdout": ["q30", "q32"],
+    "questions_answered_exclusively_by_holdout": [],
+    "assessment": "UNDER-POWERED. Only two questions in v1 touch a holdout entry, and neither is answered exclusively by one. The v1 control arm therefore supports description only and cannot carry any comparison on its own. This is a known weakness, recorded before the baseline rather than discovered after it.",
+    "fix_for_v2": "Add eight dedicated probe questions, one per holdout entry, each answerable only by that entry. That turns the control arm from two partial items into eight clean ones."
+  }
+}
