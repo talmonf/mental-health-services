@@ -257,6 +257,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
     const title = typeof body.title === 'string' ? body.title.trim() : null;
     const qualification = isQualification(body.qualification) ? body.qualification : null;
     const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : null;
+    const hideIntro = typeof body.hideIntro === 'boolean' ? body.hideIntro : null;
 
     if (country !== null && country.length === 0) {
       return res.status(400).json({ error: 'Country is required' });
@@ -276,6 +277,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
          organization = COALESCE($5, organization),
          title = COALESCE($6, title),
          email_preference = COALESCE($7, email_preference),
+         hide_intro = COALESCE($8::boolean, hide_intro),
          updated_at = now()
        WHERE id = $1
        RETURNING ${USER_PUBLIC_COLUMNS}`,
@@ -287,6 +289,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
         organization ? organization.slice(0, 200) : null,
         title ? title.slice(0, 200) : null,
         emailPreference,
+        hideIntro,
       ]
     );
     if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });

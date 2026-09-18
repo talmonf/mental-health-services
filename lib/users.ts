@@ -42,11 +42,12 @@ export type PublicUser = {
   foundViaOther: string | null;
   emailPreference: EmailPreference;
   emailVerified: boolean;
+  hideIntro: boolean;
 };
 
 export const USER_PUBLIC_COLUMNS = `
   id, email, is_admin, country, city, qualification, organization, title,
-  found_via, found_via_other, email_preference, email_verified_at
+  found_via, found_via_other, email_preference, email_verified_at, hide_intro
 `;
 
 export function isQualification(v: unknown): v is Qualification {
@@ -75,6 +76,7 @@ export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
     foundViaOther: row.found_via_other == null ? null : String(row.found_via_other),
     emailPreference: (row.email_preference as EmailPreference) || 'none',
     emailVerified: row.email_verified_at != null,
+    hideIntro: Boolean(row.hide_intro),
   };
 }
 

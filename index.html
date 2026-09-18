@@ -387,9 +387,31 @@
         .mh-credits p { margin: 0; display: inline; }
         .mh-credits p + p::before { content: ' · '; }
         .mh-intro-card { margin-bottom: var(--space-md); }
-        .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 52px; }
+        .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 40px; }
         .mh-intro-preview { display: grid; gap: var(--space-sm); }
         .mh-intro-title { font-size: var(--text-lg); font-weight: 700; color: var(--primary); margin: 0 0 var(--space-sm); }
+        .mh-intro-dismiss {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.45;
+        }
+        .mh-intro-dismiss:hover { opacity: 1; background: rgba(0,0,0,0.06); color: var(--text); }
+        .mh-intro-dismiss:focus { outline: 2px solid var(--primary); outline-offset: 2px; opacity: 1; }
         .mh-intro-more {
             display: inline;
             background: none;
@@ -477,7 +499,7 @@
             .mh-modal { padding: var(--space-3xl); }
             .mh-modal.mh-intro-card { padding: var(--space-md) var(--space-lg); }
             .mh-terms-wrap { padding: var(--space-2xl); }
-            .mh-intro-card .mh-intro-wrap { padding: 0 var(--space-md) 0 52px; }
+            .mh-intro-card .mh-intro-wrap { padding: 0 0 0 36px; }
             .mh-intro-preview { grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
             .mh-category-cards { grid-template-columns: repeat(2, 1fr); }
             .mh-terms-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2697,6 +2719,16 @@
             const data = await r.json().catch(() => ({}));
             return { ok: r.ok, status: r.status, data };
         };
+        const MH_HIDE_INTRO_KEY = 'mh_hide_intro';
+        const mhIntroHiddenLocal = () => {
+            try { return localStorage.getItem(MH_HIDE_INTRO_KEY) === '1'; } catch (_) { return false; }
+        };
+        const mhSetIntroHiddenLocal = (hidden) => {
+            try {
+                if (hidden) localStorage.setItem(MH_HIDE_INTRO_KEY, '1');
+                else localStorage.removeItem(MH_HIDE_INTRO_KEY);
+            } catch (_) {}
+        };
 
         const MentalHealthIsrael = () => {
             const initialUrlState = mhReadUrlState();
@@ -2713,7 +2745,7 @@
             const [toastMessage, setToastMessage] = useState('');
             const [copiedEntryId, setCopiedEntryId] = useState(null);
             const [copiedSectionKey, setCopiedSectionKey] = useState(null);
-            const [showIntro, setShowIntro] = useState(true);
+            const [showIntro, setShowIntro] = useState(() => !mhIntroHiddenLocal());
             const [showFullIntro, setShowFullIntro] = useState(false);
             const [showTerms, setShowTerms] = useState(false);
             const [termsSearch, setTermsSearch] = useState('');
@@ -2743,13 +2775,47 @@
             const [loginPassword, setLoginPassword] = useState('');
             const [reg, setReg] = useState(() => mhEmptyRegisterForm());
             const [profile, setProfile] = useState(null);
+            const introPrefAppliedRef = useRef(false);
+
+            const persistIntroHiddenToAccount = (hidden) => {
+                mhAuthFetch('/api/auth/me', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hideIntro: hidden })
+                }).then(({ ok, data }) => {
+                    if (ok && data.user) setAuthUser(data.user);
+                }).catch(() => {});
+            };
+            const applyAccountIntroPref = (user) => {
+                if (user && user.hideIntro) {
+                    setShowIntro(false);
+                    mhSetIntroHiddenLocal(true);
+                    return;
+                }
+                if (mhIntroHiddenLocal()) {
+                    setShowIntro(false);
+                    if (user) persistIntroHiddenToAccount(true);
+                }
+            };
+            const setIntroVisible = (visible) => {
+                setShowIntro(visible);
+                if (!visible) setShowFullIntro(false);
+                mhSetIntroHiddenLocal(!visible);
+                if (authUser) persistIntroHiddenToAccount(!visible);
+            };
 
             const pingAuthSession = async () => {
                 try {
                     const { data } = await mhAuthFetch('/api/auth/session');
-                    setAuthUser(data.user || null);
+                    const user = data.user || null;
+                    setAuthUser(user);
+                    if (!introPrefAppliedRef.current) {
+                        introPrefAppliedRef.current = true;
+                        applyAccountIntroPref(user);
+                    }
                 } catch (_) {
                     setAuthUser(null);
+                    introPrefAppliedRef.current = true;
                 }
             };
 
@@ -3550,6 +3616,7 @@
                         return;
                     }
                     setAuthUser(data.user);
+                    applyAccountIntroPref(data.user);
                     setLoginPassword('');
                     closeAuth();
                     showToast('ברוכים הבאים');
@@ -3586,6 +3653,7 @@
                         return;
                     }
                     setAuthUser(data.user);
+                    applyAccountIntroPref(data.user);
                     setReg(mhEmptyRegisterForm());
                     closeAuth();
                     showToast('נרשמתם. נשלח מייל לאישור הכתובת.');
@@ -5262,7 +5330,7 @@
                                     </span>
                                 </span>
                                 {!showIntro && (
-                                    <button type="button" onClick={() => setShowIntro(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="אתם לא לבד">
+                                    <button type="button" onClick={() => setIntroVisible(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="אתם לא לבד">
                                         <i className="fas fa-heart"></i> אתם לא לבד
                                     </button>
                                 )}
@@ -5443,10 +5511,9 @@
 
                     {showIntro && (
                         <div className="mh-modal mh-intro-card" style={{ lineHeight: 1.6 }}>
-                            <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה." data-tracking-name="intro_close">
+                            <button type="button" className="mh-intro-dismiss" onClick={() => setIntroVisible(false)} aria-label="הסתרת הודעת הפתיחה" title="הסתרה. אפשר לפתוח שוב מאתם לא לבד." data-tracking-name="intro_dismiss">
                                 <i className="fas fa-times"></i>
                             </button>
-
                             <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
                                 <p className="mh-intro-title">ברוכים הבאים</p>
                                 <div className="mh-intro-preview">
@@ -5568,7 +5635,7 @@
                                             אתם מגיעים לכאן. אתם עושים את זה. ואנחנו כאן לעזור.
                                         </p>
                                         <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
-<button onClick={() => setShowIntro(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
+<button type="button" onClick={() => setIntroVisible(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
                                             סגור | Close
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
