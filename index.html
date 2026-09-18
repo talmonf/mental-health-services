@@ -436,6 +436,29 @@
         .mh-auth-field select,
         .mh-auth-field textarea { width: 100%; min-height: var(--touch-min); padding: var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-base); box-sizing: border-box; }
         .mh-auth-field textarea { min-height: 72px; }
+        .mh-password-wrap { position: relative; }
+        .mh-auth-field .mh-password-wrap input:not([type="radio"]):not([type="checkbox"]) { padding-left: 44px; }
+        .mh-password-toggle {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mh-password-toggle:hover { color: var(--text); background: rgba(0,0,0,0.06); }
+        .mh-password-toggle:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-auth-consent { font-size: var(--text-sm); color: var(--text-muted); display: flex; gap: var(--space-sm); align-items: flex-start; line-height: 1.5; margin: var(--space-md) 0; }
         .mh-auth-consent input { margin-top: 4px; }
         .mh-auth-error { color: var(--danger); margin-bottom: var(--space-md); }
@@ -2793,6 +2816,8 @@
             const [authError, setAuthError] = useState('');
             const [loginEmail, setLoginEmail] = useState('');
             const [loginPassword, setLoginPassword] = useState('');
+            const [showLoginPassword, setShowLoginPassword] = useState(false);
+            const [showRegPassword, setShowRegPassword] = useState(false);
             const [reg, setReg] = useState(() => mhEmptyRegisterForm());
             const [profile, setProfile] = useState(null);
             const introPrefAppliedRef = useRef(false);
@@ -3615,11 +3640,15 @@
                     });
                 }
                 setShowAuth(true);
+                setShowLoginPassword(false);
+                setShowRegPassword(false);
             };
             const closeAuth = () => {
                 setShowAuth(false);
                 setAuthError('');
                 setAuthBusy(false);
+                setShowLoginPassword(false);
+                setShowRegPassword(false);
             };
             const submitLogin = async (ev) => {
                 ev.preventDefault();
@@ -5403,8 +5432,8 @@
                                 <button type="button" className="mh-modal-close" onClick={closeAuth} aria-label="סגור" data-tracking-name="auth_close"><i className="fas fa-times"></i></button>
                                 {authTab !== 'profile' && (
                                     <div className="mh-auth-tabs">
-                                        <button type="button" className="mh-btn" style={{ background: authTab === 'login' ? 'var(--primary)' : 'transparent', color: authTab === 'login' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('login'); setAuthError(''); }} data-tracking-name="auth_tab_login">כניסה</button>
-                                        <button type="button" className="mh-btn" style={{ background: authTab === 'register' ? 'var(--primary)' : 'transparent', color: authTab === 'register' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('register'); setAuthError(''); }} data-tracking-name="auth_tab_register">הרשמה</button>
+                                        <button type="button" className="mh-btn" style={{ background: authTab === 'login' ? 'var(--primary)' : 'transparent', color: authTab === 'login' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('login'); setAuthError(''); setShowLoginPassword(false); setShowRegPassword(false); }} data-tracking-name="auth_tab_login">כניסה</button>
+                                        <button type="button" className="mh-btn" style={{ background: authTab === 'register' ? 'var(--primary)' : 'transparent', color: authTab === 'register' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('register'); setAuthError(''); setShowLoginPassword(false); setShowRegPassword(false); }} data-tracking-name="auth_tab_register">הרשמה</button>
                                     </div>
                                 )}
                                 <h2 id="mh-auth-title" style={{ margin: '0 0 var(--space-md)', color: 'var(--primary)' }}>
@@ -5420,13 +5449,18 @@
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-login-password">סיסמה</label>
-                                            <input id="mh-login-password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                                            <div className="mh-password-wrap">
+                                                <input id="mh-login-password" type={showLoginPassword ? 'text' : 'password'} autoComplete="current-password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                                                <button type="button" className="mh-password-toggle" onClick={() => setShowLoginPassword((v) => !v)} aria-label={showLoginPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} title={showLoginPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_login_password">
+                                                    <i className={showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_login_submit">{authBusy ? 'נכנסים…' : 'כניסה'}</button>
                                     </form>
                                 )}
                                 {authTab === 'register' && (
-                                    <form onSubmit={submitRegister}>
+                                    <form autoComplete="off" onSubmit={submitRegister}>
                                         <p className="mh-auth-hint">השימוש באתר כשאתם מחוברים מקושר לחשבון לצורך הבנת שימוש באתר וליצירת קשר. החיפוש והשירותים נשארים פתוחים לכולם.</p>
                                         {authError && <p className="mh-auth-error">{authError}</p>}
                                         <div className="mh-auth-field">
@@ -5435,7 +5469,12 @@
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-reg-password">סיסמה (לפחות 8 תווים)</label>
-                                            <input id="mh-reg-password" type="password" autoComplete="new-password" required minLength={8} value={reg.password} onChange={(e) => setRegField('password', e.target.value)} />
+                                            <div className="mh-password-wrap">
+                                                <input id="mh-reg-password" type={showRegPassword ? 'text' : 'password'} name="mh-reg-password" autoComplete="off" data-lpignore="true" data-1p-ignore="true" required minLength={8} value={reg.password} onChange={(e) => setRegField('password', e.target.value)} />
+                                                <button type="button" className="mh-password-toggle" onClick={() => setShowRegPassword((v) => !v)} aria-label={showRegPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} title={showRegPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_reg_password">
+                                                    <i className={showRegPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-reg-country">מדינה</label>
