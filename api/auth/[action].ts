@@ -336,8 +336,16 @@ async function handleResendConfirm(req: VercelRequest, res: VercelResponse) {
     const user = publicUserFromRow(row);
     if (user.emailVerified) return res.status(400).json({ error: 'Email already verified' });
     await enqueueConfirmEmail(client, { id: user.id, email: user.email });
-    const send = await processOutbox(client);
+    const send = await processOutbox(client, 20, { userId: user.id, kind: 'confirm' });
     if (!send.sent) {
+      const last = await client.query(
+        `SELECT error FROM email_outbox
+          WHERE user_id = $1 AND kind = 'confirm'
+          ORDER BY created_at DESC
+          LIMIT 1`,
+        [user.id]
+      );
+      console.error('resend-confirm failed', { send, error: last.rows[0]?.error || null });
       return res.status(503).json({ error: 'Email could not be sent', send });
     }
     return res.status(200).json({ send });

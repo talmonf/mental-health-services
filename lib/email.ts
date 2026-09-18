@@ -220,22 +220,43 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-export async function processOutbox(client: Client, limit = 80): Promise<OutboxSendResult> {
-  const configured = Boolean(process.env.RESEND_API_KEY && fromAddress());
+export async function processOutbox(
+  client: Client,
+  limit = 80,
+  opts?: { userId?: string; kind?: OutboxRow['kind'] }
+): Promise<OutboxSendResult> {
+  const from = fromAddress();
+  const configured = Boolean(process.env.RESEND_API_KEY && from);
+  const params: unknown[] = [limit];
+  let extra = '';
+  if (opts?.userId) {
+    params.push(opts.userId);
+    extra += ` AND o.user_id = $${params.length}`;
+  }
+  if (opts?.kind) {
+    params.push(opts.kind);
+    extra += ` AND o.kind = $${params.length}`;
+  }
+
   const { rows } = await client.query(
     `SELECT o.id::text, o.user_id::text, o.kind, o.payload, u.email
        FROM email_outbox o
        LEFT JOIN users u ON u.id = o.user_id
       WHERE o.sent_at IS NULL
         AND o.scheduled_at <= now()
+        ${extra}
       ORDER BY o.scheduled_at ASC
       LIMIT $1`,
-    [limit]
+    params
   );
 
   let sent = 0;
   let failed = 0;
   let skipped = 0;
+
+  if (!configured && rows.length) {
+    console.error('email outbox skipped: missing RESEND_API_KEY or from address');
+  }
 
   for (const raw of rows) {
     const row: OutboxRow = {
@@ -261,11 +282,14 @@ export async function processOutbox(client: Client, limit = 80): Promise<OutboxS
         await client.query(`UPDATE email_outbox SET sent_at = now(), error = NULL WHERE id = $1`, [row.id]);
         sent += 1;
       } else {
-        await client.query(`UPDATE email_outbox SET error = $2 WHERE id = $1`, [row.id, result.error || 'send failed']);
+        const errText = result.error || 'send failed';
+        console.error('email send failed', { id: row.id, kind: row.kind, to: rendered.to, from, error: errText });
+        await client.query(`UPDATE email_outbox SET error = $2 WHERE id = $1`, [row.id, errText]);
         failed += 1;
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      console.error('email send threw', { id: row.id, kind: row.kind, error: message });
       await client.query(`UPDATE email_outbox SET error = $2 WHERE id = $1`, [row.id, message.slice(0, 500)]);
       failed += 1;
     }
