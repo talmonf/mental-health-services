@@ -1,15 +1,15 @@
 /**
- * GET /api/cron/email-digest
+ * GET /api/email-digest
  *
  * Weekly: enqueue one digest per verified weekly subscriber when there is something new,
  * then send pending outbox rows.
  *
- * Invoke: curl -H "Authorization: Bearer $CRON_SECRET" "https://<your-domain>/api/cron/email-digest"
+ * Invoke: curl -H "Authorization: Bearer $CRON_SECRET" "https://<your-domain>/api/email-digest"
  * Vercel Cron sends the same header when CRON_SECRET is set.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { pgClient } from '../../lib/db';
-import { enqueueWeeklyEmails, processOutbox } from '../../lib/email';
+import { pgClient } from '../lib/db';
+import { enqueueWeeklyEmails, processOutbox } from '../lib/email';
 
 function authorize(req: VercelRequest): boolean {
   const secret = process.env.CRON_SECRET;

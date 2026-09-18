@@ -1,0 +1,403 @@
+/**
+ * One Serverless Function for all /api/auth/* routes.
+ *
+ * Hobby deployments allow 12 functions. Separate files for login/register/session/…
+ * exceeded that (the build succeeded, then "Deploying outputs" failed).
+ */
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  clearSessionCookie,
+  clientKey,
+  getAuthFromRequest,
+  hashPassword,
+  normalizeEmail,
+  originAllowed,
+  parseJsonBody,
+  rateLimit,
+  setAuthCors,
+  setSessionCookie,
+  shouldRefreshSession,
+  signSession,
+  verifyPassword,
+} from '../../lib/auth';
+import { appUrl, pgClient } from '../../lib/db';
+import { enqueueConfirmEmail, processOutbox } from '../../lib/email';
+import { findValidToken } from '../../lib/tokens';
+import {
+  isAdminEmail,
+  isEmailPreference,
+  isFoundVia,
+  isQualification,
+  publicUserFromRow,
+  USER_PUBLIC_COLUMNS,
+} from '../../lib/users';
+
+function actionName(req: VercelRequest): string {
+  const raw = req.query.action;
+  return typeof raw === 'string' ? raw : Array.isArray(raw) ? raw[0] || '' : '';
+}
+
+function jwtFallbackUser(jwtUser: { id: string; email: string; isAdmin: boolean }) {
+  return {
+    id: jwtUser.id,
+    email: jwtUser.email,
+    isAdmin: jwtUser.isAdmin,
+    country: '',
+    city: null,
+    qualification: 'other',
+    organization: '',
+    title: '',
+    foundVia: 'other',
+    foundViaOther: null,
+    emailPreference: 'none',
+    emailVerified: false,
+  };
+}
+
+async function handleRegister(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  const ip = clientKey(req);
+  if (!rateLimit(`register:${ip}`, 8, 60 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many attempts' });
+  }
+
+  const body = parseJsonBody(req);
+  if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+
+  const email = normalizeEmail(body.email);
+  const password = typeof body.password === 'string' ? body.password : '';
+  const country = typeof body.country === 'string' ? body.country.trim() : '';
+  const city = typeof body.city === 'string' ? body.city.trim() : '';
+  const organization = typeof body.organization === 'string' ? body.organization.trim() : '';
+  const title = typeof body.title === 'string' ? body.title.trim() : '';
+  const foundViaOther = typeof body.foundViaOther === 'string' ? body.foundViaOther.trim() : '';
+  const consent = body.consent === true;
+  const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : 'none';
+
+  if (!email) return res.status(400).json({ error: 'Invalid email' });
+  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  if (!country) return res.status(400).json({ error: 'Country is required' });
+  if (!isQualification(body.qualification)) return res.status(400).json({ error: 'Invalid qualification' });
+  if (!organization) return res.status(400).json({ error: 'Organization is required' });
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (!isFoundVia(body.foundVia)) return res.status(400).json({ error: 'Invalid foundVia' });
+  if (body.foundVia === 'other' && !foundViaOther) {
+    return res.status(400).json({ error: 'Please describe how you found the site' });
+  }
+  if (!consent) return res.status(400).json({ error: 'Consent is required' });
+  if (!process.env.DATABASE_URL || !process.env.AUTH_SECRET) {
+    return res.status(500).json({ error: 'Server misconfiguration' });
+  }
+
+  const passwordHash = await hashPassword(password);
+  const admin = isAdminEmail(email);
+  const client = pgClient();
+  try {
+    await client.connect();
+    const inserted = await client.query(
+      `INSERT INTO users (
+         email, password_hash, is_admin, country, city, qualification,
+         organization, title, found_via, found_via_other, email_preference
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       RETURNING ${USER_PUBLIC_COLUMNS}`,
+      [
+        email,
+        passwordHash,
+        admin,
+        country.slice(0, 100),
+        city ? city.slice(0, 100) : null,
+        body.qualification,
+        organization.slice(0, 200),
+        title.slice(0, 200),
+        body.foundVia,
+        body.foundVia === 'other' ? foundViaOther.slice(0, 200) : null,
+        emailPreference,
+      ]
+    );
+    const user = publicUserFromRow(inserted.rows[0]);
+    await enqueueConfirmEmail(client, { id: user.id, email: user.email });
+    await processOutbox(client);
+    const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
+    setSessionCookie(res, token);
+    return res.status(201).json({ user });
+  } catch (err) {
+    const e = err as { code?: string };
+    if (e?.code === '23505') {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+    console.error('register error', err);
+    return res.status(500).json({ error: 'Registration failed' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleLogin(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  const body = parseJsonBody(req);
+  if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+
+  const email = normalizeEmail(body.email);
+  const password = typeof body.password === 'string' ? body.password : '';
+  const ip = clientKey(req);
+  if (!rateLimit(`login:${ip}:${email || 'none'}`, 10, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many attempts' });
+  }
+  if (!email || password.length < 1) {
+    return res.status(400).json({ error: 'Invalid email or password' });
+  }
+  if (!process.env.DATABASE_URL || !process.env.AUTH_SECRET) {
+    return res.status(500).json({ error: 'Server misconfiguration' });
+  }
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    const { rows } = await client.query(
+      `SELECT password_hash, ${USER_PUBLIC_COLUMNS} FROM users WHERE email = $1`,
+      [email]
+    );
+    const row = rows[0];
+    if (!row || !(await verifyPassword(password, row.password_hash))) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    if (!row.is_admin && isAdminEmail(email)) {
+      await client.query(`UPDATE users SET is_admin = true, updated_at = now() WHERE id = $1`, [row.id]);
+      row.is_admin = true;
+    }
+    const user = publicUserFromRow(row);
+    const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
+    setSessionCookie(res, token);
+    return res.status(200).json({ user });
+  } catch (err) {
+    console.error('login error', err);
+    return res.status(500).json({ error: 'Login failed' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleLogout(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+  clearSessionCookie(res);
+  return res.status(200).json({ ok: true });
+}
+
+async function handleSession(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  const jwtUser = await getAuthFromRequest(req);
+  if (!jwtUser) return res.status(200).json({ user: null });
+
+  if (!process.env.DATABASE_URL) {
+    return res.status(200).json({ user: jwtFallbackUser(jwtUser) });
+  }
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    const { rows } = await client.query(`SELECT ${USER_PUBLIC_COLUMNS} FROM users WHERE id = $1`, [jwtUser.id]);
+    if (!rows[0]) return res.status(200).json({ user: null });
+    if (!rows[0].is_admin && isAdminEmail(rows[0].email)) {
+      await client.query(`UPDATE users SET is_admin = true, updated_at = now() WHERE id = $1`, [rows[0].id]);
+      rows[0].is_admin = true;
+    }
+    const user = publicUserFromRow(rows[0]);
+    if (shouldRefreshSession(jwtUser)) {
+      const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
+      setSessionCookie(res, token);
+    }
+    return res.status(200).json({ user });
+  } catch (err) {
+    console.error('session error', err);
+    return res.status(200).json({ user: jwtFallbackUser(jwtUser) });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleMe(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET' && req.method !== 'PATCH') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (req.method === 'PATCH' && !originAllowed(req)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const jwtUser = await getAuthFromRequest(req);
+  if (!jwtUser) return res.status(401).json({ error: 'Unauthorized' });
+  if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'Server misconfiguration' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    if (req.method === 'GET') {
+      const { rows } = await client.query(`SELECT ${USER_PUBLIC_COLUMNS} FROM users WHERE id = $1`, [jwtUser.id]);
+      if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(200).json({ user: publicUserFromRow(rows[0]) });
+    }
+
+    const body = parseJsonBody(req);
+    if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+
+    const country = typeof body.country === 'string' ? body.country.trim() : null;
+    const cityRaw = body.city;
+    const city =
+      cityRaw === null || cityRaw === undefined
+        ? undefined
+        : typeof cityRaw === 'string'
+          ? cityRaw.trim()
+          : null;
+    const organization = typeof body.organization === 'string' ? body.organization.trim() : null;
+    const title = typeof body.title === 'string' ? body.title.trim() : null;
+    const qualification = isQualification(body.qualification) ? body.qualification : null;
+    const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : null;
+
+    if (country !== null && country.length === 0) {
+      return res.status(400).json({ error: 'Country is required' });
+    }
+    if (organization !== null && organization.length === 0) {
+      return res.status(400).json({ error: 'Organization is required' });
+    }
+    if (title !== null && title.length === 0) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const { rows } = await client.query(
+      `UPDATE users SET
+         country = COALESCE($2, country),
+         city = CASE WHEN $3::text = '__omit' THEN city WHEN $3 = '' THEN NULL ELSE $3 END,
+         qualification = COALESCE($4, qualification),
+         organization = COALESCE($5, organization),
+         title = COALESCE($6, title),
+         email_preference = COALESCE($7, email_preference),
+         updated_at = now()
+       WHERE id = $1
+       RETURNING ${USER_PUBLIC_COLUMNS}`,
+      [
+        jwtUser.id,
+        country ? country.slice(0, 100) : null,
+        city === undefined ? '__omit' : city ? city.slice(0, 100) : '',
+        qualification,
+        organization ? organization.slice(0, 200) : null,
+        title ? title.slice(0, 200) : null,
+        emailPreference,
+      ]
+    );
+    if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(200).json({ user: publicUserFromRow(rows[0]) });
+  } catch (err) {
+    console.error('me error', err);
+    return res.status(500).json({ error: 'Failed' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleConfirm(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const raw = typeof req.query.token === 'string' ? req.query.token : '';
+  const dest = (ok: boolean) => `${appUrl()}/?confirmed=${ok ? '1' : 'invalid'}`;
+  if (!raw || !process.env.DATABASE_URL) {
+    res.statusCode = 302;
+    res.setHeader('Location', dest(false));
+    return res.end();
+  }
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    const token = await findValidToken(client, raw, 'confirm');
+    if (!token) {
+      res.statusCode = 302;
+      res.setHeader('Location', dest(false));
+      return res.end();
+    }
+    await client.query(`UPDATE email_tokens SET consumed_at = now() WHERE id = $1 AND consumed_at IS NULL`, [
+      token.id,
+    ]);
+    await client.query(
+      `UPDATE users SET email_verified_at = COALESCE(email_verified_at, now()), updated_at = now() WHERE id = $1`,
+      [token.user_id]
+    );
+    res.statusCode = 302;
+    res.setHeader('Location', dest(true));
+    return res.end();
+  } catch (err) {
+    console.error('confirm error', err);
+    res.statusCode = 302;
+    res.setHeader('Location', dest(false));
+    return res.end();
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleUnsubscribe(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const raw = typeof req.query.token === 'string' ? req.query.token : '';
+  const dest = (ok: boolean) => `${appUrl()}/?unsubscribed=${ok ? '1' : 'invalid'}`;
+  if (!raw || !process.env.DATABASE_URL) {
+    res.statusCode = 302;
+    res.setHeader('Location', dest(false));
+    return res.end();
+  }
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    const token = await findValidToken(client, raw, 'unsubscribe');
+    if (!token) {
+      res.statusCode = 302;
+      res.setHeader('Location', dest(false));
+      return res.end();
+    }
+    await client.query(`UPDATE users SET email_preference = 'none', updated_at = now() WHERE id = $1`, [
+      token.user_id,
+    ]);
+    res.statusCode = 302;
+    res.setHeader('Location', dest(true));
+    return res.end();
+  } catch (err) {
+    console.error('unsubscribe error', err);
+    res.statusCode = 302;
+    res.setHeader('Location', dest(false));
+    return res.end();
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const action = actionName(req);
+  const skipCors = action === 'confirm' || action === 'unsubscribe';
+  if (!skipCors) {
+    setAuthCors(req, res);
+    if (req.method === 'OPTIONS') return res.status(204).end();
+  }
+
+  switch (action) {
+    case 'register':
+      return handleRegister(req, res);
+    case 'login':
+      return handleLogin(req, res);
+    case 'logout':
+      return handleLogout(req, res);
+    case 'session':
+      return handleSession(req, res);
+    case 'me':
+      return handleMe(req, res);
+    case 'confirm':
+      return handleConfirm(req, res);
+    case 'unsubscribe':
+      return handleUnsubscribe(req, res);
+    default:
+      if (!skipCors) setAuthCors(req, res);
+      return res.status(404).json({ error: 'Not found' });
+  }
+}
