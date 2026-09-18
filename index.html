@@ -386,10 +386,12 @@
         .mh-credits { background: transparent; box-shadow: none; padding: 2px var(--space-sm) var(--space-sm); margin-bottom: var(--space-sm); font-size: var(--text-sm); color: var(--text-muted); text-align: center; line-height: 1.45; }
         .mh-credits p { margin: 0; display: inline; }
         .mh-credits p + p::before { content: ' · '; }
-        .mh-intro-card { margin-bottom: var(--space-md); }
+        .mh-credits-phone { white-space: nowrap; }
+        .mh-modal.mh-intro-card { margin-bottom: var(--space-md); max-height: none; overflow: visible; }
         .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 40px; }
         .mh-intro-preview { display: grid; gap: var(--space-sm); }
         .mh-intro-title { font-size: var(--text-lg); font-weight: 700; color: var(--primary); margin: 0 0 var(--space-sm); }
+        .mh-intro-more-end { display: none; margin: var(--space-sm) 0 0; }
         .mh-intro-dismiss {
             position: absolute;
             top: 6px;
@@ -551,6 +553,8 @@
             .mh-hero-inner { flex-direction: column; align-items: stretch; justify-content: flex-start; }
             .mh-hero-text, .mh-hero-actions { flex: 0 0 auto; }
             .mh-hero-actions { justify-content: flex-start; }
+            .mh-intro-more-split { display: none !important; }
+            .mh-intro-more-end { display: block; }
         }
         @media (min-width: 900px) {
             .mh-category-cards { grid-template-columns: repeat(3, 1fr); }
@@ -5412,13 +5416,15 @@
                                 href="https://wa.me/972544787720"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="mh-credits-phone"
                                 data-tracking-name="contact_whatsapp"
                                 data-analytics-type="whatsapp"
                                 style={{
                                     color: '#25D366',
                                     fontWeight: 'bold',
                                     textDecoration: 'none',
-                                    borderBottom: '2px solid #25D366'
+                                    borderBottom: '2px solid #25D366',
+                                    whiteSpace: 'nowrap'
                                 }}
                             >
                                 054-478-7720
@@ -5579,16 +5585,21 @@
                                     <p style={{ margin: 0 }}>
                                         אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
                                         {!showFullIntro && (
-                                            <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_he">קרא עוד</button>
+                                            <button type="button" className="mh-intro-more mh-intro-more-split" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_he">קרא עוד</button>
                                         )}
                                     </p>
                                     <p style={{ margin: 0, direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
                                         If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
                                         {!showFullIntro && (
-                                            <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_en">Read More</button>
+                                            <button type="button" className="mh-intro-more mh-intro-more-split" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_en">Read More</button>
                                         )}
                                     </p>
                                 </div>
+                                {!showFullIntro && (
+                                    <p className="mh-intro-more-end">
+                                        <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_mobile">קרא עוד | Read More</button>
+                                    </p>
+                                )}
 
                                 {showFullIntro && (
                                     <>
