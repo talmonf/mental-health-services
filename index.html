@@ -105,8 +105,17 @@
             min-height: 100vh;
         }
         .mh-app { max-width: 1200px; margin: 0 auto; padding: var(--space-lg); min-height: 100vh; font-family: var(--font-hebrew); }
-        .mh-hero { color: white; border-radius: var(--radius-lg); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
-        .mh-hero-inner { padding: var(--space-xl) var(--space-lg); }
+        .mh-hero { color: white; border-radius: var(--radius-lg); margin-bottom: var(--space-md); box-shadow: var(--shadow-elevated); }
+        .mh-hero-inner { padding: var(--space-md) var(--space-lg); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md); }
+        .mh-hero-text { flex: 1 0 auto; }
+        .mh-hero-text h1 { margin: 0; font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
+        .mh-hero-text p { margin: 4px 0 0; font-size: var(--text-sm); opacity: 0.95; }
+        .mh-hero-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-sm); flex: 0 1 auto; }
+        .mh-hero-actions .mh-btn { min-height: 40px; padding: 6px 12px; font-size: var(--text-sm); }
+        .mh-hero-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.75); color: white; }
+        .mh-hero-btn-ghost:hover { background: rgba(255,255,255,0.12); }
+        .mh-hero-btn-ghost:focus { outline: 2px solid #fff; outline-offset: 2px; }
+        .mh-auth-chip { font-size: var(--text-sm); opacity: 0.95; }
         .mh-btns { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl); }
         .mh-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-xl); border: none; border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-base); font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; transition: opacity 0.2s; }
         .mh-btn:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -132,6 +141,10 @@
             pointer-events: none;
             transition: opacity 0.15s, visibility 0.15s;
             z-index: 200;
+        }
+        .mh-hero .mh-hb-tooltip {
+            bottom: auto;
+            top: calc(100% + 8px);
         }
         .mh-hb-tooltip-wrap:hover .mh-hb-tooltip,
         .mh-hb-tooltip-wrap:focus-within .mh-hb-tooltip {
@@ -370,9 +383,14 @@
         .mh-modal-close:hover { background: rgba(192, 57, 43, 0.1); }
         .mh-modal-close:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
         .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
-        .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
-        .mh-auth-bar { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin: 0 0 var(--space-lg); }
-        .mh-auth-chip { font-size: var(--text-sm); color: var(--text-muted); }
+        .mh-credits { background: transparent; box-shadow: none; padding: 2px var(--space-sm) var(--space-sm); margin-bottom: var(--space-sm); font-size: var(--text-sm); color: var(--text-muted); text-align: center; line-height: 1.45; }
+        .mh-credits p { margin: 0; display: inline; }
+        .mh-credits p + p::before { content: ' · '; }
+        .mh-intro-card { margin-bottom: var(--space-md); }
+        .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 52px; }
+        .mh-intro-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: var(--space-sm); margin: 0 0 var(--space-sm); }
+        .mh-intro-preview { display: grid; gap: var(--space-sm); }
+        .mh-intro-title { font-size: var(--text-lg); font-weight: 700; color: var(--primary); margin: 0; }
         .mh-auth-overlay { position: fixed; inset: 0; background: rgba(15, 30, 45, 0.45); z-index: 80; display: flex; align-items: flex-start; justify-content: center; padding: var(--space-xl) var(--space-md); overflow-y: auto; }
         .mh-auth-modal { background: var(--bg-card); width: min(520px, 100%); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated); padding: var(--space-xl); position: relative; margin: var(--space-xl) 0; }
         .mh-auth-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
@@ -430,7 +448,9 @@
         .mh-terms-az-nav button:not(:disabled):hover { transform: scale(1.1); transition: transform 0.2s; }
         @media (min-width: 600px) {
             .mh-app { padding: var(--space-xl); }
-            .mh-hero-inner { padding: var(--space-3xl) var(--space-xl); }
+            .mh-hero-inner { padding: var(--space-md) var(--space-xl); }
+            .mh-hero-text h1 { font-size: var(--text-2xl); }
+            .mh-hero-text p { font-size: var(--text-base); }
             .mh-card-inner { padding: var(--space-xl); }
             .mh-cat-header { padding: var(--space-xl) var(--space-xl); }
             .mh-cat-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding: var(--space-xl) var(--space-xl) var(--space-2xl); }
@@ -441,9 +461,17 @@
             .mh-cat-title-en { order: 3; text-align: left; font-size: 0.85rem; }
             .mh-cat-meta { order: 2; justify-content: center; }
             .mh-modal { padding: var(--space-3xl); }
-            .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-2xl); }
+            .mh-modal.mh-intro-card { padding: var(--space-md) var(--space-lg); }
+            .mh-terms-wrap { padding: var(--space-2xl); }
+            .mh-intro-card .mh-intro-wrap { padding: 0 var(--space-md) 0 52px; }
+            .mh-intro-preview { grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
             .mh-category-cards { grid-template-columns: repeat(2, 1fr); }
             .mh-terms-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 599px) {
+            .mh-hero-inner { flex-direction: column; align-items: stretch; justify-content: flex-start; }
+            .mh-hero-text, .mh-hero-actions { flex: 0 0 auto; }
+            .mh-hero-actions { justify-content: flex-start; }
         }
         @media (min-width: 900px) {
             .mh-category-cards { grid-template-columns: repeat(3, 1fr); }
@@ -5191,58 +5219,67 @@
                 <div className="mh-app">
                     <div className="mh-hero" style={{ background: 'var(--primary)' }}>
                         <div className="mh-hero-inner">
-                            <h1 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-2xl)', fontWeight: 'bold' }}>
-                                מדריך בריאות הנפש בישראל
-                            </h1>
-                            <p style={{ margin: 0, fontSize: 'var(--text-xl)', opacity: 0.95 }}>
-                                מידע מקיף למתמודדי נפש ומשפחותיהם
-                            </p>
+                            <div className="mh-hero-text">
+                                <h1>מדריך בריאות הנפש בישראל</h1>
+                                <p>מידע מקיף למתמודדי נפש ומשפחותיהם</p>
+                            </div>
+                            <div className="mh-hero-actions">
+                                <span className="mh-hb-tooltip-wrap">
+                                    <button
+                                        type="button"
+                                        onClick={() => applyHaravotBarzelSearch('hero')}
+                                        className="mh-btn"
+                                        style={{
+                                            background: '#8b2635',
+                                            color: 'white',
+                                            border: '2px solid #6d1e2a',
+                                            fontWeight: 700,
+                                            boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
+                                        }}
+                                        aria-describedby="mh-hb-tooltip-text"
+                                        aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים"
+                                        data-tracking-name="haravot_barzel_filter"
+                                    >
+                                        <i className="fas fa-shield-halved"></i> חרבות ברזל
+                                    </button>
+                                    <span id="mh-hb-tooltip-text" className="mh-hb-tooltip" role="tooltip">
+                                        לחיצה מפעילה חיפוש לכל המענים הרלוונטיים לחרבות ברזל.<br />
+                                        הרחיבו את המקטעים בתוצאות כדי לראות את כל השירותים.
+                                    </span>
+                                </span>
+                                {!showIntro && (
+                                    <button type="button" onClick={() => setShowIntro(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="אתם לא לבד">
+                                        <i className="fas fa-heart"></i> אתם לא לבד
+                                    </button>
+                                )}
+                                <button type="button" onClick={() => setShowTerms(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="מילון מונחים">
+                                    <i className="fas fa-book"></i> מילון מונחים
+                                </button>
+                                {authUser ? (
+                                    <>
+                                        <span className="mh-auth-chip">{authUser.email}</span>
+                                        {!authUser.emailVerified && <span className="mh-auth-chip">נשלח מייל אישור</span>}
+                                        <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
+                                        {authUser.isAdmin && (
+                                            <a className="mh-btn mh-hero-btn-ghost" href="/admin" style={{ textDecoration: 'none' }} data-tracking-name="auth_admin">Analytics</a>
+                                        )}
+                                        <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={logout} data-tracking-name="auth_logout">יציאה</button>
+                                    </>
+                                ) : (
+                                    <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('login')} data-tracking-name="auth_open">כניסה / הרשמה</button>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <div className="mh-btns">
-                        <span className="mh-hb-tooltip-wrap">
-                            <button
-                                type="button"
-                                onClick={() => applyHaravotBarzelSearch('hero')}
-                                className="mh-btn"
-                                style={{
-                                    background: '#8b2635',
-                                    color: 'white',
-                                    border: '2px solid #6d1e2a',
-                                    fontSize: 'var(--text-lg)',
-                                    fontWeight: 700,
-                                    boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
-                                }}
-                                aria-describedby="mh-hb-tooltip-text"
-                                aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים"
-                                data-tracking-name="haravot_barzel_filter"
-                            >
-                                <i className="fas fa-shield-halved"></i> חרבות ברזל
-                            </button>
-                            <span id="mh-hb-tooltip-text" className="mh-hb-tooltip" role="tooltip">
-                                לחיצה מפעילה חיפוש לכל המענים הרלוונטיים לחרבות ברזל.<br />
-                                הרחיבו את המקטעים בתוצאות כדי לראות את כל השירותים.
-                            </span>
-                        </span>
-                        {!showIntro && (
-                            <button onClick={() => setShowIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="אתם לא לבד">
-                                <i className="fas fa-heart"></i> אתם לא לבד
-                            </button>
-                        )}
-                        <button onClick={() => setShowTerms(true)} className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)' }} data-tracking-name="מילון מונחים">
-                            <i className="fas fa-book"></i> מילון מונחים
-                        </button>
-                    </div>
 
-                    <div className="mh-credits" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        <p style={{ marginBottom: '10px' }}>
-                            דף זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר
-                        </p>
-                        <p style={{ margin: 0 }}>
+                    <div className="mh-credits">
+                        <p>דף זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר</p>
+                        {' '}
+                        <p>
                             להערות, תיקונים והוספות, נא ליצור קשר בוואטסאפ{' '}
-                            <a 
-                                href="https://wa.me/972544787720" 
-                                target="_blank" 
+                            <a
+                                href="https://wa.me/972544787720"
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 data-tracking-name="contact_whatsapp"
                                 data-analytics-type="whatsapp"
@@ -5256,22 +5293,6 @@
                                 054-478-7720
                             </a>
                         </p>
-                    </div>
-
-                    <div className="mh-auth-bar">
-                        {authUser ? (
-                            <>
-                                <span className="mh-auth-chip">{authUser.email}</span>
-                                {!authUser.emailVerified && <span className="mh-auth-chip">נשלח מייל אישור</span>}
-                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)', minHeight: '40px', padding: '6px 14px' }} onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
-                                {authUser.isAdmin && (
-                                    <a className="mh-btn" href="/admin" style={{ background: 'var(--primary)', color: 'white', minHeight: '40px', padding: '6px 14px', textDecoration: 'none' }} data-tracking-name="auth_admin">Analytics</a>
-                                )}
-                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--border)', color: 'var(--text)', minHeight: '40px', padding: '6px 14px' }} onClick={logout} data-tracking-name="auth_logout">יציאה</button>
-                            </>
-                        ) : (
-                            <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)', minHeight: '40px', padding: '6px 14px' }} onClick={() => openAuth('login')} data-tracking-name="auth_open">כניסה / הרשמה</button>
-                        )}
                     </div>
 
                     {showAuth && (
@@ -5407,28 +5428,28 @@
                     )}
 
                     {showIntro && (
-                        <div className="mh-modal" style={{ lineHeight: 1.8 }}>
+                        <div className="mh-modal mh-intro-card" style={{ lineHeight: 1.6 }}>
                             <button onClick={() => setShowIntro(false)} className="mh-modal-close" aria-label="סגור" title="סגירת ההודעה." data-tracking-name="intro_close">
                                 <i className="fas fa-times"></i>
                             </button>
 
                             <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
-                                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 'bold', color: 'var(--primary)', marginBottom: 'var(--space-xl)' }}>
-                                    ברוכים הבאים
-                                </p>
-                                <p style={{ marginBottom: 'var(--space-lg)' }}>
-                                    אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
-                                </p>
-                                <p style={{ marginBottom: 'var(--space-xl)', direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-                                    If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
-                                </p>
-                                {!showFullIntro && (
-                                    <>
-                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginTop: 'var(--space-sm)' }} data-tracking-name="intro_read_more">
+                                <div className="mh-intro-head">
+                                    <p className="mh-intro-title">ברוכים הבאים</p>
+                                    {!showFullIntro && (
+                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', minHeight: '40px', padding: '6px 14px', fontSize: 'var(--text-sm)' }} data-tracking-name="intro_read_more">
                                             קרא עוד | Read More
                                         </button>
-                                    </>
-                                )}
+                                    )}
+                                </div>
+                                <div className="mh-intro-preview">
+                                    <p style={{ margin: 0 }}>
+                                        אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
+                                    </p>
+                                    <p style={{ margin: 0, direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+                                        If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
+                                    </p>
+                                </div>
 
                                 {showFullIntro && (
                                     <>
