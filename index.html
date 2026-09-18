@@ -388,9 +388,23 @@
         .mh-credits p + p::before { content: ' · '; }
         .mh-intro-card { margin-bottom: var(--space-md); }
         .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 52px; }
-        .mh-intro-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: var(--space-sm); margin: 0 0 var(--space-sm); }
         .mh-intro-preview { display: grid; gap: var(--space-sm); }
-        .mh-intro-title { font-size: var(--text-lg); font-weight: 700; color: var(--primary); margin: 0; }
+        .mh-intro-title { font-size: var(--text-lg); font-weight: 700; color: var(--primary); margin: 0 0 var(--space-sm); }
+        .mh-intro-more {
+            display: inline;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-inline-start: 0.4em;
+            color: var(--primary);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .mh-intro-more:hover { opacity: 0.85; }
+        .mh-intro-more:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-auth-overlay { position: fixed; inset: 0; background: rgba(15, 30, 45, 0.45); z-index: 80; display: flex; align-items: flex-start; justify-content: center; padding: var(--space-xl) var(--space-md); overflow-y: auto; }
         .mh-auth-modal { background: var(--bg-card); width: min(520px, 100%); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated); padding: var(--space-xl); position: relative; margin: var(--space-xl) 0; }
         .mh-auth-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
@@ -5434,20 +5448,19 @@
                             </button>
 
                             <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
-                                <div className="mh-intro-head">
-                                    <p className="mh-intro-title">ברוכים הבאים</p>
-                                    {!showFullIntro && (
-                                        <button onClick={() => setShowFullIntro(true)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', minHeight: '40px', padding: '6px 14px', fontSize: 'var(--text-sm)' }} data-tracking-name="intro_read_more">
-                                            קרא עוד | Read More
-                                        </button>
-                                    )}
-                                </div>
+                                <p className="mh-intro-title">ברוכים הבאים</p>
                                 <div className="mh-intro-preview">
                                     <p style={{ margin: 0 }}>
                                         אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
+                                        {!showFullIntro && (
+                                            <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_he">קרא עוד</button>
+                                        )}
                                     </p>
                                     <p style={{ margin: 0, direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
                                         If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
+                                        {!showFullIntro && (
+                                            <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_en">Read More</button>
+                                        )}
                                     </p>
                                 </div>
 
