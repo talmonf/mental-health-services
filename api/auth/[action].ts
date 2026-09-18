@@ -13,6 +13,7 @@ import {
   normalizeEmail,
   originAllowed,
   parseJsonBody,
+  passwordPolicyError,
   rateLimit,
   setAuthCors,
   setSessionCookie,
@@ -77,7 +78,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
   const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : 'weekly';
 
   if (!email) return res.status(400).json({ error: 'Invalid email' });
-  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  const weakPassword = passwordPolicyError(password);
+  if (weakPassword) return res.status(400).json({ error: weakPassword });
   if (!country) return res.status(400).json({ error: 'Country is required' });
   if (!isQualification(body.qualification)) return res.status(400).json({ error: 'Invalid qualification' });
   if (!organization) return res.status(400).json({ error: 'Organization is required' });

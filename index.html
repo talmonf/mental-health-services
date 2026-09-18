@@ -461,6 +461,23 @@
         }
         .mh-password-toggle:hover { color: var(--text); background: rgba(0,0,0,0.06); }
         .mh-password-toggle:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-password-rules {
+            list-style: none;
+            margin: 6px 0 0;
+            padding: 0;
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .mh-password-rules li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            font-weight: 400;
+        }
+        .mh-password-rules li.met { color: var(--accent); }
+        .mh-password-rules .mh-rule-mark { width: 1em; text-align: center; flex-shrink: 0; }
         .mh-auth-consent { font-size: var(--text-sm); color: var(--text-muted); display: flex; gap: var(--space-sm); align-items: flex-start; line-height: 1.5; margin: var(--space-md) 0; }
         .mh-auth-consent input { margin-top: 4px; }
         .mh-auth-error { color: var(--danger); margin-bottom: var(--space-md); }
@@ -2743,6 +2760,20 @@
             emailPreference: 'weekly',
             consent: false
         });
+        const MH_PASSWORD_MIN = 8;
+        const MH_PASSWORD_MAX = 72;
+        const MH_PASSWORD_POLICY_HE = 'הסיסמה חייבת להכיל 8–72 תווים, אות גדולה, אות קטנה, ספרה ותו מיוחד';
+        const mhPasswordChecks = (pw) => ({
+            length: typeof pw === 'string' && pw.length >= MH_PASSWORD_MIN && pw.length <= MH_PASSWORD_MAX,
+            lower: /[a-z]/.test(pw || ''),
+            upper: /[A-Z]/.test(pw || ''),
+            digit: /[0-9]/.test(pw || ''),
+            symbol: /[^A-Za-z0-9\s]/.test(pw || '')
+        });
+        const mhPasswordPolicyError = (pw) => {
+            const c = mhPasswordChecks(pw);
+            return c.length && c.lower && c.upper && c.digit && c.symbol ? null : MH_PASSWORD_POLICY_HE;
+        };
         const mhAuthErrorHe = (data, fallback) => {
             const e = data && data.error;
             const map = {
@@ -2750,7 +2781,8 @@
                 'Invalid email': 'כתובת אימייל לא תקינה',
                 'An account with this email already exists': 'כבר קיים חשבון עם האימייל הזה',
                 'Too many attempts': 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות',
-                'Password must be at least 8 characters': 'הסיסמה חייבת להכיל לפחות 8 תווים',
+                'Password must be at least 8 characters': MH_PASSWORD_POLICY_HE,
+                'Password must be 8-72 characters and include uppercase, lowercase, a number, and a symbol': MH_PASSWORD_POLICY_HE,
                 'Consent is required': 'יש לאשר את תנאי הרישום',
                 'Country is required': 'יש למלא מדינה',
                 'Organization is required': 'יש למלא ארגון',
@@ -3681,6 +3713,11 @@
             };
             const submitRegister = async (ev) => {
                 ev.preventDefault();
+                const pwErr = mhPasswordPolicyError(reg.password);
+                if (pwErr) {
+                    setAuthError(pwErr);
+                    return;
+                }
                 setAuthBusy(true);
                 setAuthError('');
                 try {
@@ -3749,6 +3786,14 @@
                 showToast('יצאתם מהחשבון');
             };
             const setRegField = (key, value) => setReg((p) => ({ ...p, [key]: value }));
+            const regPwChecks = mhPasswordChecks(reg.password);
+            const regPwRules = [
+                { key: 'length', ok: regPwChecks.length, label: '8–72 תווים' },
+                { key: 'upper', ok: regPwChecks.upper, label: 'אות גדולה (A–Z)' },
+                { key: 'lower', ok: regPwChecks.lower, label: 'אות קטנה (a–z)' },
+                { key: 'digit', ok: regPwChecks.digit, label: 'ספרה' },
+                { key: 'symbol', ok: regPwChecks.symbol, label: 'תו מיוחד (!@#$…)' }
+            ];
             const markEntryLinkCopied = (entryId) => {
                 if (!entryId) return;
                 setCopiedEntryId(entryId);
@@ -5474,13 +5519,21 @@
                                             <input id="mh-reg-email" type="email" autoComplete="email" required value={reg.email} onChange={(e) => setRegField('email', e.target.value)} />
                                         </div>
                                         <div className="mh-auth-field">
-                                            <label htmlFor="mh-reg-password">סיסמה (לפחות 8 תווים)</label>
+                                            <label htmlFor="mh-reg-password">סיסמה</label>
                                             <div className="mh-password-wrap">
-                                                <input id="mh-reg-password" type={showRegPassword ? 'text' : 'password'} name="mh-reg-password" autoComplete="off" data-lpignore="true" data-1p-ignore="true" required minLength={8} value={reg.password} onChange={(e) => setRegField('password', e.target.value)} />
+                                                <input id="mh-reg-password" type={showRegPassword ? 'text' : 'password'} name="mh-reg-password" autoComplete="off" data-lpignore="true" data-1p-ignore="true" required minLength={MH_PASSWORD_MIN} maxLength={MH_PASSWORD_MAX} aria-describedby="mh-reg-password-rules" value={reg.password} onChange={(e) => setRegField('password', e.target.value)} />
                                                 <button type="button" className="mh-password-toggle" onClick={() => setShowRegPassword((v) => !v)} aria-label={showRegPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} title={showRegPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_reg_password">
                                                     <i className={showRegPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
                                                 </button>
                                             </div>
+                                            <ul id="mh-reg-password-rules" className="mh-password-rules">
+                                                {regPwRules.map((rule) => (
+                                                    <li key={rule.key} className={rule.ok ? 'met' : ''}>
+                                                        <span className="mh-rule-mark" aria-hidden="true">{rule.ok ? '✓' : '○'}</span>
+                                                        {rule.label}
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-reg-country">מדינה</label>

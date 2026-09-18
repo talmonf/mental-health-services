@@ -111,6 +111,24 @@ export function shouldRefreshSession(user: JwtUser): boolean {
   return ageSec >= SESSION_UPDATE_AGE_SEC;
 }
 
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 72;
+
+export const PASSWORD_POLICY_ERROR =
+  'Password must be 8-72 characters and include uppercase, lowercase, a number, and a symbol';
+
+export function passwordPolicyError(password: string): string | null {
+  if (typeof password !== 'string') return PASSWORD_POLICY_ERROR;
+  if (password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) {
+    return PASSWORD_POLICY_ERROR;
+  }
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return PASSWORD_POLICY_ERROR;
+  }
+  if (!/[^A-Za-z0-9\s]/.test(password)) return PASSWORD_POLICY_ERROR;
+  return null;
+}
+
 export async function hashPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, BCRYPT_ROUNDS);
 }
