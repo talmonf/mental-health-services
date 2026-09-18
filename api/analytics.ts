@@ -11,10 +11,12 @@
  * Migration: scripts/012_events_allow_deep_link_event_types.sql (required for deep-link event_type values)
  * Migration: scripts/014_events_allow_section_link_event_types.sql (section_link_copied / section_link_opened)
  * Migration: scripts/029_events_server_headers.sql (server_user_agent / server_referrer — optional, see below)
+ * Migration: scripts/035_users_auth_analytics_email.sql (events.user_id / sessions.user_id — from auth cookie only)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
 import { UAParser } from 'ua-parser-js';
+import { getAuthFromRequest } from '../lib/auth';
 
 const ALLOWED_ORIGINS = process.env.ANALYTICS_ALLOWED_ORIGINS
   ? process.env.ANALYTICS_ALLOWED_ORIGINS.split(',').map((o) => o.trim())
@@ -109,6 +111,28 @@ function normalizeErrorFields(e: Record<string, unknown>): { error: string | nul
  * point of the columns is measurement; losing measurement to add measurement is silly.
  */
 let serverHeaderColumnsExist: boolean | null = null;
+let userIdColumnState: { events: boolean; sessions: boolean } | null = null;
+
+async function hasUserIdColumns(client: Client): Promise<{ events: boolean; sessions: boolean }> {
+  if (userIdColumnState) return userIdColumnState;
+  try {
+    const { rows } = await client.query(
+      `SELECT
+         (SELECT COUNT(*)::int FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'user_id') AS events_n,
+         (SELECT COUNT(*)::int FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = 'sessions' AND column_name = 'user_id') AS sessions_n`
+    );
+    userIdColumnState = {
+      events: rows[0]?.events_n >= 1,
+      sessions: rows[0]?.sessions_n >= 1,
+    };
+    return userIdColumnState;
+  } catch {
+    userIdColumnState = { events: false, sessions: false };
+    return userIdColumnState;
+  }
+}
 
 async function hasServerHeaderColumns(client: Client): Promise<boolean> {
   if (serverHeaderColumnsExist !== null) return serverHeaderColumnsExist;
@@ -276,10 +300,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const serverUserAgent = ((req.headers['user-agent'] as string) || null)?.slice(0, 1000) || null;
   const serverReferrer = ((req.headers['referer'] as string) || null)?.slice(0, 1000) || null;
 
+  let signedInUserId: string | null = null;
+  try {
+    const auth = await getAuthFromRequest(req);
+    signedInUserId = auth?.id ?? null;
+  } catch {
+    signedInUserId = null;
+  }
+
   const client = new Client({ connectionString });
   try {
     await client.connect();
     const withServerHeaders = await hasServerHeaderColumns(client);
+    const userIdCols = await hasUserIdColumns(client);
 
     for (const ev of events) {
       const e = ev as Record<string, unknown>;
@@ -302,18 +335,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pageRoute = null;
         }
       }
-      await client.query(
-        `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at)
-         VALUES ($1, $2, $3, $4, $5, $5, $5, $5)
-         ON CONFLICT (session_id) DO UPDATE SET
-           user_pseudo_id = COALESCE(EXCLUDED.user_pseudo_id, sessions.user_pseudo_id),
-           country = COALESCE(EXCLUDED.country, sessions.country),
-           device_type = COALESCE(EXCLUDED.device_type, sessions.device_type),
-           first_event_at = COALESCE(sessions.first_event_at, EXCLUDED.first_event_at),
-           last_event_at = EXCLUDED.last_event_at,
-           last_seen_at = EXCLUDED.last_seen_at`,
-        [sessionId, userPseudoId, country, device, occurredAt]
-      );
+      if (userIdCols.sessions) {
+        await client.query(
+          `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at, user_id)
+           VALUES ($1, $2, $3, $4, $5, $5, $5, $5, $6)
+           ON CONFLICT (session_id) DO UPDATE SET
+             user_pseudo_id = COALESCE(EXCLUDED.user_pseudo_id, sessions.user_pseudo_id),
+             country = COALESCE(EXCLUDED.country, sessions.country),
+             device_type = COALESCE(EXCLUDED.device_type, sessions.device_type),
+             first_event_at = COALESCE(sessions.first_event_at, EXCLUDED.first_event_at),
+             last_event_at = EXCLUDED.last_event_at,
+             last_seen_at = EXCLUDED.last_seen_at,
+             user_id = COALESCE(EXCLUDED.user_id, sessions.user_id)`,
+          [sessionId, userPseudoId, country, device, occurredAt, signedInUserId]
+        );
+      } else {
+        await client.query(
+          `INSERT INTO sessions (session_id, user_pseudo_id, country, device_type, first_event_at, last_event_at, first_seen_at, last_seen_at)
+           VALUES ($1, $2, $3, $4, $5, $5, $5, $5)
+           ON CONFLICT (session_id) DO UPDATE SET
+             user_pseudo_id = COALESCE(EXCLUDED.user_pseudo_id, sessions.user_pseudo_id),
+             country = COALESCE(EXCLUDED.country, sessions.country),
+             device_type = COALESCE(EXCLUDED.device_type, sessions.device_type),
+             first_event_at = COALESCE(sessions.first_event_at, EXCLUDED.first_event_at),
+             last_event_at = EXCLUDED.last_event_at,
+             last_seen_at = EXCLUDED.last_seen_at`,
+          [sessionId, userPseudoId, country, device, occurredAt]
+        );
+      }
 
       const eventId = (e?.event_id as string) || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '');
       if (!eventId) continue;
@@ -355,14 +404,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       extra.ga_client_id = ((e?.ga_client_id as string) || null)?.slice(0, 64) || null;
 
       const insertEvent = async (type: string, loc: string | null, elType: string | null) => {
+        const extraCols = [
+          ...(withServerHeaders ? [', server_user_agent, server_referrer'] : []),
+          ...(userIdCols.events ? [', user_id'] : []),
+        ].join('');
+        const extraPlaceholders = [
+          ...(withServerHeaders ? [', $27, $28'] : []),
+          ...(userIdCols.events ? [withServerHeaders ? ', $29' : ', $27'] : []),
+        ].join('');
         await client.query(
           `INSERT INTO events (
             event_id, session_id, event_type, occurred_at, page_url, page_route, section,
             element_id, element_type, element_text_short, search_query, results_count, search_location,
             extra, entry_id, country, device_type, browser_name, os_name, language,
             referrer_domain, utm_source, utm_medium, utm_campaign,
-            error, error_details${withServerHeaders ? ',\n            server_user_agent, server_referrer' : ''}
-          ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26${withServerHeaders ? ', $27, $28' : ''})`,
+            error, error_details${extraCols}
+          ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26${extraPlaceholders})`,
           [
             eventId,
             sessionId,
@@ -391,6 +448,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             errorCol,
             errorDetailsCol,
             ...(withServerHeaders ? [serverUserAgent, serverReferrer] : []),
+            ...(userIdCols.events ? [signedInUserId] : []),
           ]
         );
       };

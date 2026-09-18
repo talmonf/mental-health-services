@@ -371,6 +371,22 @@
         .mh-modal-close:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
         .mh-terms-wrap, .mh-intro-wrap { padding: var(--space-lg); }
         .mh-credits { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
+        .mh-auth-bar { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin: 0 0 var(--space-lg); }
+        .mh-auth-chip { font-size: var(--text-sm); color: var(--text-muted); }
+        .mh-auth-overlay { position: fixed; inset: 0; background: rgba(15, 30, 45, 0.45); z-index: 80; display: flex; align-items: flex-start; justify-content: center; padding: var(--space-xl) var(--space-md); overflow-y: auto; }
+        .mh-auth-modal { background: var(--bg-card); width: min(520px, 100%); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated); padding: var(--space-xl); position: relative; margin: var(--space-xl) 0; }
+        .mh-auth-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+        .mh-auth-field { margin-bottom: var(--space-md); }
+        .mh-auth-field label { display: block; font-weight: 600; margin-bottom: 6px; font-size: var(--text-sm); }
+        .mh-auth-field input,
+        .mh-auth-field select,
+        .mh-auth-field textarea { width: 100%; min-height: var(--touch-min); padding: var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-base); box-sizing: border-box; }
+        .mh-auth-field textarea { min-height: 72px; }
+        .mh-auth-consent { font-size: var(--text-sm); color: var(--text-muted); display: flex; gap: var(--space-sm); align-items: flex-start; line-height: 1.5; margin: var(--space-md) 0; }
+        .mh-auth-consent input { margin-top: 4px; }
+        .mh-auth-error { color: var(--danger); margin-bottom: var(--space-md); }
+        .mh-auth-hint { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-md); line-height: 1.5; }
+        .mh-auth-radios { display: flex; flex-direction: column; gap: 8px; }
         .mh-category-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
         .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); position: relative; }
         .mh-category-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
@@ -2582,6 +2598,64 @@
 
         const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', hmo: 'fa-hospital', hospitalization: 'fa-hospital', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical', books_movies: 'fa-clapperboard' };
 
+        const AUTH_QUALIFICATIONS = [
+            { value: 'social_worker', label: 'עובד/ת סוציאלי/ת' },
+            { value: 'psychologist', label: 'פסיכולוג/ית' },
+            { value: 'psychiatrist', label: 'פסיכיאטר/ית' },
+            { value: 'therapist', label: 'מטפל/ת / יועץ/ת' },
+            { value: 'nurse', label: 'אח/ות' },
+            { value: 'peer_supporter', label: 'עמית/ת תומך/ת' },
+            { value: 'student', label: 'סטודנט/ית' },
+            { value: 'family_self', label: 'בן/בת משפחה או מתמודד/ת' },
+            { value: 'other', label: 'אחר' }
+        ];
+        const AUTH_FOUND_VIA = [
+            { value: 'google', label: 'גוגל' },
+            { value: 'facebook_instagram', label: 'פייסבוק / אינסטגרם' },
+            { value: 'whatsapp', label: 'וואטסאפ' },
+            { value: 'colleague', label: 'עמית/ה לעבודה' },
+            { value: 'university', label: 'לימודים / הכשרה' },
+            { value: 'organization', label: 'הארגון שבו אני עובד/ת' },
+            { value: 'media', label: 'תקשורת' },
+            { value: 'other', label: 'אחר' }
+        ];
+        const mhEmptyRegisterForm = () => ({
+            email: '',
+            password: '',
+            country: 'ישראל',
+            city: '',
+            qualification: '',
+            organization: '',
+            title: '',
+            foundVia: '',
+            foundViaOther: '',
+            emailPreference: 'none',
+            consent: false
+        });
+        const mhAuthErrorHe = (data, fallback) => {
+            const e = data && data.error;
+            const map = {
+                'Invalid email or password': 'אימייל או סיסמה שגויים',
+                'Invalid email': 'כתובת אימייל לא תקינה',
+                'An account with this email already exists': 'כבר קיים חשבון עם האימייל הזה',
+                'Too many attempts': 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות',
+                'Password must be at least 8 characters': 'הסיסמה חייבת להכיל לפחות 8 תווים',
+                'Consent is required': 'יש לאשר את תנאי הרישום',
+                'Country is required': 'יש למלא מדינה',
+                'Organization is required': 'יש למלא ארגון',
+                'Title is required': 'יש למלא תפקיד',
+                'Invalid qualification': 'יש לבחור הכשרה',
+                'Invalid foundVia': 'יש לבחור איך הגעתם לאתר',
+                'Please describe how you found the site': 'יש לפרט איך הגעתם לאתר'
+            };
+            return map[e] || fallback;
+        };
+        const mhAuthFetch = async (url, opts = {}) => {
+            const r = await fetch(url, { credentials: 'include', ...opts });
+            const data = await r.json().catch(() => ({}));
+            return { ok: r.ok, status: r.status, data };
+        };
+
         const MentalHealthIsrael = () => {
             const initialUrlState = mhReadUrlState();
             const [searchTerm, setSearchTerm] = useState(() => initialUrlState.q);
@@ -2618,6 +2692,24 @@
             const [nearbyOpen, setNearbyOpen] = useState(false);
             const [copiedSearchLink, setCopiedSearchLink] = useState(false);
             const copiedSearchTimeoutRef = useRef(null);
+            const [authUser, setAuthUser] = useState(null);
+            const [showAuth, setShowAuth] = useState(false);
+            const [authTab, setAuthTab] = useState('login');
+            const [authBusy, setAuthBusy] = useState(false);
+            const [authError, setAuthError] = useState('');
+            const [loginEmail, setLoginEmail] = useState('');
+            const [loginPassword, setLoginPassword] = useState('');
+            const [reg, setReg] = useState(() => mhEmptyRegisterForm());
+            const [profile, setProfile] = useState(null);
+
+            const pingAuthSession = async () => {
+                try {
+                    const { data } = await mhAuthFetch('/api/auth/session');
+                    setAuthUser(data.user || null);
+                } catch (_) {
+                    setAuthUser(null);
+                }
+            };
 
             // Sync URL state as search, entry target, or selected group changes.
             useEffect(() => {
@@ -2655,6 +2747,24 @@
                     window.removeEventListener('popstate', syncFromUrl);
                 };
             }, []);
+            useEffect(() => {
+                pingAuthSession();
+                const onVis = () => {
+                    if (document.visibilityState === 'visible') pingAuthSession();
+                };
+                document.addEventListener('visibilitychange', onVis);
+                const timer = window.setInterval(() => {
+                    if (document.visibilityState === 'visible') pingAuthSession();
+                }, 30 * 60 * 1000);
+                return () => {
+                    document.removeEventListener('visibilitychange', onVis);
+                    window.clearInterval(timer);
+                };
+            }, []);
+            useEffect(() => {
+                document.body.style.overflow = showAuth ? 'hidden' : '';
+                return () => { document.body.style.overflow = ''; };
+            }, [showAuth]);
             useEffect(() => {
                 handledDeepLinkRef.current = null;
             }, [requestedEntryId, requestedSectionId, requestedSubsectionId]);
@@ -3347,6 +3457,135 @@
                     toastTimeoutRef.current = null;
                 }, 2600);
             };
+            useEffect(() => {
+                try {
+                    const url = new URL(window.location.href);
+                    const confirmed = url.searchParams.get('confirmed');
+                    const unsubscribed = url.searchParams.get('unsubscribed');
+                    if (confirmed === '1') showToast('הכתובת אושרה. תודה.');
+                    else if (confirmed === 'invalid') showToast('קישור האישור אינו תקף.');
+                    if (unsubscribed === '1') showToast('הוסרתם מרשימת התפוצה.');
+                    else if (unsubscribed === 'invalid') showToast('קישור ההסרה אינו תקף.');
+                    if (confirmed || unsubscribed) {
+                        url.searchParams.delete('confirmed');
+                        url.searchParams.delete('unsubscribed');
+                        window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+                    }
+                } catch (_) {}
+            }, []);
+            const openAuth = (tab) => {
+                setAuthError('');
+                setAuthTab(tab);
+                if (tab === 'profile' && authUser) {
+                    setProfile({
+                        country: authUser.country || 'ישראל',
+                        city: authUser.city || '',
+                        qualification: authUser.qualification || '',
+                        organization: authUser.organization || '',
+                        title: authUser.title || '',
+                        emailPreference: authUser.emailPreference || 'none'
+                    });
+                }
+                setShowAuth(true);
+            };
+            const closeAuth = () => {
+                setShowAuth(false);
+                setAuthError('');
+                setAuthBusy(false);
+            };
+            const submitLogin = async (ev) => {
+                ev.preventDefault();
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'הכניסה נכשלה'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    setLoginPassword('');
+                    closeAuth();
+                    showToast('ברוכים הבאים');
+                } catch (_) {
+                    setAuthError('הכניסה נכשלה');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const submitRegister = async (ev) => {
+                ev.preventDefault();
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: reg.email,
+                            password: reg.password,
+                            country: reg.country,
+                            city: reg.city,
+                            qualification: reg.qualification,
+                            organization: reg.organization,
+                            title: reg.title,
+                            foundVia: reg.foundVia,
+                            foundViaOther: reg.foundViaOther,
+                            emailPreference: reg.emailPreference,
+                            consent: reg.consent
+                        })
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'ההרשמה נכשלה'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    setReg(mhEmptyRegisterForm());
+                    closeAuth();
+                    showToast('נרשמתם. נשלח מייל לאישור הכתובת.');
+                } catch (_) {
+                    setAuthError('ההרשמה נכשלה');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const submitProfile = async (ev) => {
+                ev.preventDefault();
+                if (!profile) return;
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/me', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profile)
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'העדכון נכשל'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    closeAuth();
+                    showToast('הפרטים עודכנו');
+                } catch (_) {
+                    setAuthError('העדכון נכשל');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const logout = async () => {
+                try {
+                    await mhAuthFetch('/api/auth/logout', { method: 'POST' });
+                } catch (_) {}
+                setAuthUser(null);
+                closeAuth();
+                showToast('יצאתם מהחשבון');
+            };
+            const setRegField = (key, value) => setReg((p) => ({ ...p, [key]: value }));
             const markEntryLinkCopied = (entryId) => {
                 if (!entryId) return;
                 setCopiedEntryId(entryId);
@@ -5018,6 +5257,154 @@
                             </a>
                         </p>
                     </div>
+
+                    <div className="mh-auth-bar">
+                        {authUser ? (
+                            <>
+                                <span className="mh-auth-chip">{authUser.email}</span>
+                                {!authUser.emailVerified && <span className="mh-auth-chip">נשלח מייל אישור</span>}
+                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)', minHeight: '40px', padding: '6px 14px' }} onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
+                                {authUser.isAdmin && (
+                                    <a className="mh-btn" href="/admin" style={{ background: 'var(--primary)', color: 'white', minHeight: '40px', padding: '6px 14px', textDecoration: 'none' }} data-tracking-name="auth_admin">Analytics</a>
+                                )}
+                                <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--border)', color: 'var(--text)', minHeight: '40px', padding: '6px 14px' }} onClick={logout} data-tracking-name="auth_logout">יציאה</button>
+                            </>
+                        ) : (
+                            <button type="button" className="mh-btn" style={{ background: 'transparent', border: '2px solid var(--primary)', color: 'var(--primary)', minHeight: '40px', padding: '6px 14px' }} onClick={() => openAuth('login')} data-tracking-name="auth_open">כניסה / הרשמה</button>
+                        )}
+                    </div>
+
+                    {showAuth && (
+                        <div className="mh-auth-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) closeAuth(); }}>
+                            <div className="mh-auth-modal" role="dialog" aria-modal="true" aria-labelledby="mh-auth-title">
+                                <button type="button" className="mh-modal-close" onClick={closeAuth} aria-label="סגור" data-tracking-name="auth_close"><i className="fas fa-times"></i></button>
+                                {authTab !== 'profile' && (
+                                    <div className="mh-auth-tabs">
+                                        <button type="button" className="mh-btn" style={{ background: authTab === 'login' ? 'var(--primary)' : 'transparent', color: authTab === 'login' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('login'); setAuthError(''); }} data-tracking-name="auth_tab_login">כניסה</button>
+                                        <button type="button" className="mh-btn" style={{ background: authTab === 'register' ? 'var(--primary)' : 'transparent', color: authTab === 'register' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('register'); setAuthError(''); }} data-tracking-name="auth_tab_register">הרשמה</button>
+                                    </div>
+                                )}
+                                <h2 id="mh-auth-title" style={{ margin: '0 0 var(--space-md)', color: 'var(--primary)' }}>
+                                    {authTab === 'login' ? 'כניסה' : authTab === 'register' ? 'הרשמה' : 'עדכון פרטים'}
+                                </h2>
+                                {authTab === 'login' && (
+                                    <form onSubmit={submitLogin}>
+                                        <p className="mh-auth-hint">המדריך זמין גם בלי חשבון. הרשמה מאפשרת לקבל עדכונים על שינויים באתר.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-login-email">אימייל</label>
+                                            <input id="mh-login-email" type="email" autoComplete="email" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-login-password">סיסמה</label>
+                                            <input id="mh-login-password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                                        </div>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_login_submit">{authBusy ? 'נכנסים…' : 'כניסה'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'register' && (
+                                    <form onSubmit={submitRegister}>
+                                        <p className="mh-auth-hint">השימוש באתר כשאתם מחוברים מקושר לחשבון לצורך הבנת שימוש באתר וליצירת קשר. החיפוש והשירותים נשארים פתוחים לכולם.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-email">אימייל</label>
+                                            <input id="mh-reg-email" type="email" autoComplete="email" required value={reg.email} onChange={(e) => setRegField('email', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-password">סיסמה (לפחות 8 תווים)</label>
+                                            <input id="mh-reg-password" type="password" autoComplete="new-password" required minLength={8} value={reg.password} onChange={(e) => setRegField('password', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-country">מדינה</label>
+                                            <input id="mh-reg-country" type="text" required value={reg.country} onChange={(e) => setRegField('country', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-city">עיר (לא חובה)</label>
+                                            <input id="mh-reg-city" type="text" value={reg.city} onChange={(e) => setRegField('city', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-qual">הכשרה / תפקיד</label>
+                                            <select id="mh-reg-qual" required value={reg.qualification} onChange={(e) => setRegField('qualification', e.target.value)}>
+                                                <option value="">בחירה</option>
+                                                {AUTH_QUALIFICATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-org">ארגון</label>
+                                            <input id="mh-reg-org" type="text" required value={reg.organization} onChange={(e) => setRegField('organization', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-title">תפקיד בארגון</label>
+                                            <input id="mh-reg-title" type="text" required value={reg.title} onChange={(e) => setRegField('title', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-found">איך הגעתם לאתר?</label>
+                                            <select id="mh-reg-found" required value={reg.foundVia} onChange={(e) => setRegField('foundVia', e.target.value)}>
+                                                <option value="">בחירה</option>
+                                                {AUTH_FOUND_VIA.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                        </div>
+                                        {reg.foundVia === 'other' && (
+                                            <div className="mh-auth-field">
+                                                <label htmlFor="mh-reg-found-other">פירוט</label>
+                                                <input id="mh-reg-found-other" type="text" required value={reg.foundViaOther} onChange={(e) => setRegField('foundViaOther', e.target.value)} />
+                                            </div>
+                                        )}
+                                        <div className="mh-auth-field">
+                                            <span style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 'var(--text-sm)' }}>עדכונים על שינויים באתר</span>
+                                            <div className="mh-auth-radios">
+                                                <label><input type="radio" name="mh-reg-pref" checked={reg.emailPreference === 'none'} onChange={() => setRegField('emailPreference', 'none')} /> בלי עדכונים</label>
+                                                <label><input type="radio" name="mh-reg-pref" checked={reg.emailPreference === 'weekly'} onChange={() => setRegField('emailPreference', 'weekly')} /> סיכום שבועי</label>
+                                                <label><input type="radio" name="mh-reg-pref" checked={reg.emailPreference === 'immediate'} onChange={() => setRegField('emailPreference', 'immediate')} /> כשזה קורה</label>
+                                            </div>
+                                        </div>
+                                        <label className="mh-auth-consent">
+                                            <input type="checkbox" checked={reg.consent} onChange={(e) => setRegField('consent', e.target.checked)} required />
+                                            <span>אני מבין/ה שהשימוש באתר כשאני מחובר/ת מקושר לחשבון זה (כולל חיפושים ולחיצות), ושאפשר לקבל עדכונים לפי הבחירה למעלה. המדריך נשאר זמין גם בלי חשבון.</span>
+                                        </label>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_register_submit">{authBusy ? 'נרשמים…' : 'הרשמה'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'profile' && profile && (
+                                    <form onSubmit={submitProfile}>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        {!authUser?.emailVerified && <p className="mh-auth-hint">עדכונים באימייל יישלחו רק אחרי אישור הכתובת.</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-country">מדינה</label>
+                                            <input id="mh-prof-country" type="text" required value={profile.country} onChange={(e) => setProfile((p) => ({ ...p, country: e.target.value }))} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-city">עיר (לא חובה)</label>
+                                            <input id="mh-prof-city" type="text" value={profile.city} onChange={(e) => setProfile((p) => ({ ...p, city: e.target.value }))} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-qual">הכשרה / תפקיד</label>
+                                            <select id="mh-prof-qual" required value={profile.qualification} onChange={(e) => setProfile((p) => ({ ...p, qualification: e.target.value }))}>
+                                                {AUTH_QUALIFICATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-org">ארגון</label>
+                                            <input id="mh-prof-org" type="text" required value={profile.organization} onChange={(e) => setProfile((p) => ({ ...p, organization: e.target.value }))} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-title">תפקיד בארגון</label>
+                                            <input id="mh-prof-title" type="text" required value={profile.title} onChange={(e) => setProfile((p) => ({ ...p, title: e.target.value }))} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <span style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 'var(--text-sm)' }}>עדכונים</span>
+                                            <div className="mh-auth-radios">
+                                                <label><input type="radio" name="mh-prof-pref" checked={profile.emailPreference === 'none'} onChange={() => setProfile((p) => ({ ...p, emailPreference: 'none' }))} /> בלי עדכונים</label>
+                                                <label><input type="radio" name="mh-prof-pref" checked={profile.emailPreference === 'weekly'} onChange={() => setProfile((p) => ({ ...p, emailPreference: 'weekly' }))} /> סיכום שבועי</label>
+                                                <label><input type="radio" name="mh-prof-pref" checked={profile.emailPreference === 'immediate'} onChange={() => setProfile((p) => ({ ...p, emailPreference: 'immediate' }))} /> כשזה קורה</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_profile_submit">{authBusy ? 'שומרים…' : 'שמירה'}</button>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {showIntro && (
                         <div className="mh-modal" style={{ lineHeight: 1.8 }}>

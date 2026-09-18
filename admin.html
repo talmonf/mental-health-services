@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics — Nefesh</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://nefesh-il.org/admin">
+  <style>
+    :root {
+      --primary: #2d5a7b;
+      --primary-dark: #1e3f5a;
+      --text: #333;
+      --muted: #5a5a5a;
+      --border: #e0e0e0;
+      --bg: #f0f2f5;
+      --card: #fff;
+    }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.5rem; color: var(--primary-dark); margin: 0 0 8px; }
+    h2 { font-size: 1.15rem; color: var(--primary); margin: 32px 0 12px; }
+    p.lede { color: var(--muted); margin: 0 0 24px; }
+    .card { background: var(--card); border-radius: 10px; padding: 16px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stat { flex: 1 1 140px; background: #eef4f8; border-radius: 8px; padding: 12px 14px; }
+    .stat b { display: block; font-size: 1.4rem; color: var(--primary-dark); }
+    .stat span { color: var(--muted); font-size: 0.85rem; }
+    label { display: block; font-weight: 600; margin: 12px 0 6px; }
+    input[type=text], textarea, select {
+      width: 100%; box-sizing: border-box; padding: 10px 12px; border: 2px solid var(--border);
+      border-radius: 8px; font: inherit;
+    }
+    textarea { min-height: 120px; }
+    button, .btn {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px;
+      border: none; border-radius: 8px; background: var(--primary); color: #fff; font: inherit; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+    }
+    button.secondary { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .err { color: #c0392b; }
+    .ok { color: #1e7a4a; }
+    .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    a.back { color: var(--primary); }
+    .gate { max-width: 480px; margin: 80px auto; background: var(--card); padding: 32px; border-radius: 10px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main id="app">Loading…</main>
+  <script>
+    const app = document.getElementById('app');
+    const state = { user: null, data: null, days: 30, error: '', publishMsg: '' };
+
+    function el(html) {
+      const d = document.createElement('div');
+      d.innerHTML = html.trim();
+      return d.firstElementChild;
+    }
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function table(headers, rows, cells) {
+      if (!rows || !rows.length) return '<p class="lede">None in this window.</p>';
+      return `<table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+        rows.map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')
+      }</tbody></table>`;
+    }
+
+    async function loadSession() {
+      try {
+        const r = await fetch('/api/auth/session', { credentials: 'include' });
+        const data = await r.json().catch(() => ({}));
+        state.user = data.user || null;
+      } catch {
+        state.user = null;
+      }
+    }
+
+    async function loadAnalytics() {
+      const r = await fetch('/api/admin/analytics?days=' + state.days, { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) {
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'Not authorized.';
+        state.data = null;
+        return;
+      }
+      if (!r.ok) {
+        state.error = 'Failed to load analytics.';
+        return;
+      }
+      state.error = '';
+      state.data = await r.json();
+    }
+
+    function renderGate(message) {
+      app.innerHTML = '';
+      app.appendChild(el(`<div class="gate">
+        <h1>Analytics</h1>
+        <p class="lede">${esc(message)}</p>
+        <p><a class="back" href="/">Back to the directory</a></p>
+      </div>`));
+    }
+
+    function kvList(rows) {
+      return table(['Name', 'Count'], rows, (r) => [esc(r.key), String(r.n)]);
+    }
+
+    function render() {
+      if (!state.user) {
+        renderGate('Sign in on the directory, then return here. This page is for operators only.');
+        return;
+      }
+      if (!state.user.isAdmin) {
+        renderGate('Not authorized.');
+        return;
+      }
+      if (state.error && !state.data) {
+        renderGate(state.error);
+        return;
+      }
+      const d = state.data || {};
+      const acc = d.accounts || {};
+      const si = d.signedIn || {};
+      const rl = d.requestLog;
+      app.innerHTML = '';
+      const wrap = el(`<div>
+        <div class="toolbar">
+          <a class="back" href="/">← Directory</a>
+          <label style="margin:0">Window
+            <select id="days">
+              <option value="7">7 days</option>
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+            </select>
+          </label>
+          <span style="color:var(--muted)">${esc(state.user.email)}</span>
+        </div>
+        <h1>Site analytics</h1>
+        <p class="lede">Aggregates only. Search terms appear when they showed up at least three times. Signed-in usage is linked to accounts; anonymous traffic stays anonymous.</p>
+        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
+        <div class="row" id="stats"></div>
+        <h2>Daily volume (first-party events)</h2>
+        <div class="card" id="volume"></div>
+        <h2>Top card / element clicks</h2>
+        <div class="card" id="clicks"></div>
+        <h2>Top searches (≥3 occurrences)</h2>
+        <div class="card" id="searches"></div>
+        <h2>Deep links</h2>
+        <div class="card" id="deeplinks"></div>
+        <h2>Accounts</h2>
+        <div class="card" id="accounts"></div>
+        <h2>Publish a site update</h2>
+        <div class="card">
+          <p class="lede">Immediate subscribers get this as it happens. Weekly subscribers get it in the Sunday digest. Nothing is sent until the address is confirmed.</p>
+          <form id="pub">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" required maxlength="200">
+            <label for="body">What changed</label>
+            <textarea id="body" name="body" required maxlength="8000"></textarea>
+            <p id="pubmsg"></p>
+            <button type="submit">Publish and queue emails</button>
+          </form>
+          <h3 style="margin-top:24px">Recent updates</h3>
+          <div id="recent"></div>
+        </div>
+      </div>`);
+      app.appendChild(wrap);
+      wrap.querySelector('#days').value = String(state.days);
+      wrap.querySelector('#days').addEventListener('change', async (e) => {
+        state.days = Number(e.target.value) || 30;
+        await loadAnalytics();
+        render();
+      });
+
+      const stats = wrap.querySelector('#stats');
+      const estimated = rl ? rl.estimated_human : null;
+      stats.innerHTML = `
+        <div class="stat"><b>${si.signed_in_events || 0}</b><span>Signed-in events</span></div>
+        <div class="stat"><b>${si.anonymous_events || 0}</b><span>Anonymous events</span></div>
+        <div class="stat"><b>${acc.total || 0}</b><span>Accounts (${acc.verified || 0} verified)</span></div>
+        ${rl ? `<div class="stat"><b>${rl.bot}</b><span>Bot HTML fetches</span></div>
+                <div class="stat"><b>${estimated}</b><span>Est. human HTML fetches</span></div>` : ''}
+      `;
+      wrap.querySelector('#volume').innerHTML = table(
+        ['Day', 'Page views', 'Searches', 'Clicks', 'Other'],
+        d.volume,
+        (r) => [esc(String(r.day).slice(0, 10)), r.page_view, r.search, r.click, r.other]
+      );
+      wrap.querySelector('#clicks').innerHTML = table(
+        ['Entry', 'Element', 'Type', 'Count'],
+        d.topClicks,
+        (r) => [esc(r.entry_id), esc(r.element_id), esc(r.element_type), r.n]
+      );
+      wrap.querySelector('#searches').innerHTML = table(
+        ['Query', 'Count'],
+        d.topSearches,
+        (r) => [esc(r.search_query), r.n]
+      );
+      wrap.querySelector('#deeplinks').innerHTML = table(
+        ['Event', 'Count'],
+        d.deepLinks,
+        (r) => [esc(r.event_type), r.n]
+      );
+      wrap.querySelector('#accounts').innerHTML = `
+        <h3>How they found the site</h3>${kvList(acc.byFoundVia)}
+        <h3>Qualification</h3>${kvList(acc.byQualification)}
+        <h3>Country</h3>${kvList(acc.byCountry)}
+        <h3>Organization</h3>${kvList(acc.byOrganization)}
+        <h3>Email preference</h3>${kvList(acc.byEmailPreference)}
+      `;
+      wrap.querySelector('#recent').innerHTML = table(
+        ['When', 'Title'],
+        d.recentUpdates,
+        (r) => [esc(r.published_at), esc(r.title)]
+      );
+
+      wrap.querySelector('#pub').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const msg = wrap.querySelector('#pubmsg');
+        const btn = wrap.querySelector('#pub button');
+        btn.disabled = true;
+        msg.textContent = 'Publishing…';
+        msg.className = '';
+        try {
+          const r = await fetch('/api/admin/updates', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: wrap.querySelector('#title').value,
+              body: wrap.querySelector('#body').value
+            })
+          });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(data.error || 'Failed');
+          msg.className = 'ok';
+          msg.textContent = `Published. Immediate queued: ${data.queued || 0}. Sent: ${data.send?.sent ?? 0}.`;
+          wrap.querySelector('#title').value = '';
+          wrap.querySelector('#body').value = '';
+          await loadAnalytics();
+          render();
+        } catch (e) {
+          msg.className = 'err';
+          msg.textContent = e.message || 'Failed';
+          btn.disabled = false;
+        }
+      });
+    }
+
+    (async () => {
+      try {
+        await loadSession();
+        if (state.user && state.user.isAdmin) await loadAnalytics();
+        render();
+      } catch (e) {
+        renderGate('Could not reach the server.');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 035_users_auth_analytics_email.sql
 [x] 034_directory_entries_youth_housing.sql
 [x] 033_directory_entries_lev_hasharon.sql
 [x] 032_directory_entries_referral.sql

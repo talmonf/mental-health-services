@@ -20,6 +20,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 
 # --- Search and answer engines (fetch live, so they reflect corrections) ---
 
