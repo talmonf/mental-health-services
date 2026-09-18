@@ -74,7 +74,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const foundViaOther = typeof body.foundViaOther === 'string' ? body.foundViaOther.trim() : '';
   const consent = body.consent === true;
-  const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : 'none';
+  const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : 'weekly';
 
   if (!email) return res.status(400).json({ error: 'Invalid email' });
   if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
