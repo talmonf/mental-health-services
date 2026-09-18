@@ -9,6 +9,12 @@ function fromAddress(): string | null {
   return process.env.UPDATES_FROM_EMAIL || process.env.LINK_CHECK_FROM_EMAIL || null;
 }
 
+export function emailSendConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY && fromAddress());
+}
+
+export type OutboxSendResult = { sent: number; failed: number; skipped: number };
+
 export async function sendResendEmail(opts: {
   to: string;
   subject: string;
@@ -214,7 +220,7 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-export async function processOutbox(client: Client, limit = 80): Promise<{ sent: number; failed: number; skipped: number }> {
+export async function processOutbox(client: Client, limit = 80): Promise<OutboxSendResult> {
   const configured = Boolean(process.env.RESEND_API_KEY && fromAddress());
   const { rows } = await client.query(
     `SELECT o.id::text, o.user_id::text, o.kind, o.payload, u.email

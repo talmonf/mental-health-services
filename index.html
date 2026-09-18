@@ -115,7 +115,39 @@
         .mh-hero-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.75); color: white; }
         .mh-hero-btn-ghost:hover { background: rgba(255,255,255,0.12); }
         .mh-hero-btn-ghost:focus { outline: 2px solid #fff; outline-offset: 2px; }
-        .mh-auth-chip { font-size: var(--text-sm); opacity: 0.95; }
+        .mh-auth-identity {
+            font-size: var(--text-sm);
+            opacity: 0.8;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .mh-verify-banner {
+            background: #fdf3e7;
+            color: #5c3d12;
+            border: 1px solid #e6c48a;
+            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-lg);
+            margin: 0 0 var(--space-md);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-sm);
+        }
+        .mh-verify-banner p { margin: 0; font-size: var(--text-sm); line-height: 1.5; flex: 1 1 220px; }
+        .mh-verify-banner button {
+            background: #c47a12;
+            color: #fff;
+            border: none;
+            min-height: 40px;
+            padding: 6px 14px;
+            font-size: var(--text-sm);
+        }
+        .mh-verify-banner button:hover { opacity: 0.92; }
+        .mh-verify-banner button:disabled { opacity: 0.6; cursor: not-allowed; }
         .mh-btns { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl); }
         .mh-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-md) var(--space-xl); border: none; border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-base); font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); box-sizing: border-box; transition: opacity 0.2s; }
         .mh-btn:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -2789,7 +2821,11 @@
                 'Title is required': 'יש למלא תפקיד',
                 'Invalid qualification': 'יש לבחור הכשרה',
                 'Invalid foundVia': 'יש לבחור איך הגעתם לאתר',
-                'Please describe how you found the site': 'יש לפרט איך הגעתם לאתר'
+                'Please describe how you found the site': 'יש לפרט איך הגעתם לאתר',
+                'Email already verified': 'הכתובת כבר אושרה',
+                'Email could not be sent': 'לא הצלחנו לשלוח מייל אישור',
+                'Failed to send confirmation email': 'לא הצלחנו לשלוח מייל אישור',
+                'Unauthorized': 'יש להתחבר מחדש'
             };
             return map[e] || fallback;
         };
@@ -2856,6 +2892,7 @@
             const [showRegPassword, setShowRegPassword] = useState(false);
             const [reg, setReg] = useState(() => mhEmptyRegisterForm());
             const [profile, setProfile] = useState(null);
+            const [resendBusy, setResendBusy] = useState(false);
             const introPrefAppliedRef = useRef(false);
 
             const persistIntroHiddenToAccount = (hidden) => {
@@ -3638,13 +3675,13 @@
                     });
                 });
             };
-            const showToast = (message) => {
+            const showToast = (message, ms = 2600) => {
                 setToastMessage(message);
                 if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
                 toastTimeoutRef.current = window.setTimeout(() => {
                     setToastMessage('');
                     toastTimeoutRef.current = null;
-                }, 2600);
+                }, ms);
             };
             useEffect(() => {
                 try {
@@ -3746,7 +3783,13 @@
                     applyAccountIntroPref(data.user);
                     setReg(mhEmptyRegisterForm());
                     closeAuth();
-                    showToast('נרשמתם. נשלח מייל לאישור הכתובת.');
+                    const sent = data.send && Number(data.send.sent) > 0;
+                    showToast(
+                        sent
+                            ? 'נרשמתם. נשלח מייל לאישור הכתובת.'
+                            : 'נרשמתם, אבל לא הצלחנו לשלוח מייל אישור — אפשר לשלוח שוב מהבאנר.',
+                        sent ? 2600 : 4500
+                    );
                 } catch (_) {
                     setAuthError('ההרשמה נכשלה');
                 } finally {
@@ -3784,6 +3827,22 @@
                 setAuthUser(null);
                 closeAuth();
                 showToast('יצאתם מהחשבון');
+            };
+            const resendConfirm = async () => {
+                if (resendBusy) return;
+                setResendBusy(true);
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/resend-confirm', { method: 'POST' });
+                    if (!ok) {
+                        showToast(mhAuthErrorHe(data, 'לא הצלחנו לשלוח מייל אישור'), 4000);
+                        return;
+                    }
+                    showToast('נשלח מייל לאישור הכתובת.');
+                } catch (_) {
+                    showToast('לא הצלחנו לשלוח מייל אישור', 4000);
+                } finally {
+                    setResendBusy(false);
+                }
             };
             const setRegField = (key, value) => setReg((p) => ({ ...p, [key]: value }));
             const regPwChecks = mhPasswordChecks(reg.password);
@@ -5437,11 +5496,10 @@
                                 </button>
                                 {authUser ? (
                                     <>
-                                        <span className="mh-auth-chip">{authUser.email}</span>
-                                        {!authUser.emailVerified && <span className="mh-auth-chip">נשלח מייל אישור</span>}
+                                        <span className="mh-auth-identity" title={authUser.email}>{authUser.email}</span>
                                         <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
                                         {authUser.isAdmin && (
-                                            <a className="mh-btn mh-hero-btn-ghost" href="/admin" style={{ textDecoration: 'none' }} data-tracking-name="auth_admin">Analytics</a>
+                                            <a className="mh-btn mh-hero-btn-ghost" href="/admin" style={{ textDecoration: 'none' }} data-tracking-name="auth_admin">אדמין</a>
                                         )}
                                         <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={logout} data-tracking-name="auth_logout">יציאה</button>
                                     </>
@@ -5451,6 +5509,15 @@
                             </div>
                         </div>
                     </div>
+
+                    {authUser && !authUser.emailVerified && (
+                        <div className="mh-verify-banner" role="status">
+                            <p>נא לאשר את כתובת האימייל ({authUser.email}) כדי לקבל עדכונים מהאתר.</p>
+                            <button type="button" className="mh-btn" onClick={resendConfirm} disabled={resendBusy} data-tracking-name="auth_resend_confirm">
+                                {resendBusy ? 'שולחים…' : 'שלחו שוב'}
+                            </button>
+                        </div>
+                    )}
 
                     <div className="mh-credits">
                         <p>דף זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר</p>
@@ -5589,7 +5656,21 @@
                                 {authTab === 'profile' && profile && (
                                     <form onSubmit={submitProfile}>
                                         {authError && <p className="mh-auth-error">{authError}</p>}
-                                        {!authUser?.emailVerified && <p className="mh-auth-hint">עדכונים באימייל יישלחו רק אחרי אישור הכתובת.</p>}
+                                        {!authUser?.emailVerified && (
+                                            <div className="mh-auth-hint">
+                                                <p style={{ margin: '0 0 8px' }}>עדכונים באימייל יישלחו רק אחרי אישור הכתובת.</p>
+                                                <button
+                                                    type="button"
+                                                    className="mh-btn"
+                                                    style={{ background: '#c47a12', color: 'white', minHeight: 40, padding: '6px 14px', fontSize: 'var(--text-sm)' }}
+                                                    onClick={resendConfirm}
+                                                    disabled={resendBusy}
+                                                    data-tracking-name="auth_resend_confirm_profile"
+                                                >
+                                                    {resendBusy ? 'שולחים…' : 'שלחו שוב מייל אישור'}
+                                                </button>
+                                            </div>
+                                        )}
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-prof-country">מדינה</label>
                                             <input id="mh-prof-country" type="text" required value={profile.country} onChange={(e) => setProfile((p) => ({ ...p, country: e.target.value }))} />

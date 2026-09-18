@@ -30,6 +30,7 @@ import {
   isFoundVia,
   isQualification,
   publicUserFromRow,
+  touchLastAccess,
   USER_PUBLIC_COLUMNS,
 } from '../../lib/users';
 
@@ -52,6 +53,7 @@ function jwtFallbackUser(jwtUser: { id: string; email: string; isAdmin: boolean 
     foundViaOther: null,
     emailPreference: 'none',
     emailVerified: false,
+    hideIntro: false,
   };
 }
 
@@ -120,10 +122,11 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     );
     const user = publicUserFromRow(inserted.rows[0]);
     await enqueueConfirmEmail(client, { id: user.id, email: user.email });
-    await processOutbox(client);
+    const send = await processOutbox(client);
+    await touchLastAccess(client, user.id);
     const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
     setSessionCookie(res, token);
-    return res.status(201).json({ user });
+    return res.status(201).json({ user, send });
   } catch (err) {
     const e = err as { code?: string };
     if (e?.code === '23505') {
@@ -172,6 +175,14 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
       row.is_admin = true;
     }
     const user = publicUserFromRow(row);
+    await touchLastAccess(client, user.id);
+    if (!user.emailVerified) {
+      const pending = await client.query(
+        `SELECT 1 FROM email_outbox WHERE user_id = $1 AND kind = 'confirm' AND sent_at IS NULL LIMIT 1`,
+        [user.id]
+      );
+      if (pending.rows.length) await processOutbox(client);
+    }
     const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
     setSessionCookie(res, token);
     return res.status(200).json({ user });
@@ -210,6 +221,7 @@ async function handleSession(req: VercelRequest, res: VercelResponse) {
       rows[0].is_admin = true;
     }
     const user = publicUserFromRow(rows[0]);
+    await touchLastAccess(client, user.id);
     if (shouldRefreshSession(jwtUser)) {
       const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
       setSessionCookie(res, token);
@@ -299,6 +311,39 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
   } catch (err) {
     console.error('me error', err);
     return res.status(500).json({ error: 'Failed' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleResendConfirm(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  const jwtUser = await getAuthFromRequest(req);
+  if (!jwtUser) return res.status(401).json({ error: 'Unauthorized' });
+  if (!rateLimit(`resend-confirm:${jwtUser.id}`, 3, 60 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many attempts' });
+  }
+  if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'Server misconfiguration' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    const { rows } = await client.query(`SELECT ${USER_PUBLIC_COLUMNS} FROM users WHERE id = $1`, [jwtUser.id]);
+    const row = rows[0];
+    if (!row) return res.status(401).json({ error: 'Unauthorized' });
+    const user = publicUserFromRow(row);
+    if (user.emailVerified) return res.status(400).json({ error: 'Email already verified' });
+    await enqueueConfirmEmail(client, { id: user.id, email: user.email });
+    const send = await processOutbox(client);
+    if (!send.sent) {
+      return res.status(503).json({ error: 'Email could not be sent', send });
+    }
+    return res.status(200).json({ send });
+  } catch (err) {
+    console.error('resend-confirm error', err);
+    return res.status(500).json({ error: 'Failed to send confirmation email' });
   } finally {
     await client.end().catch(() => {});
   }
@@ -399,6 +444,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleMe(req, res);
     case 'confirm':
       return handleConfirm(req, res);
+    case 'resend-confirm':
+      return handleResendConfirm(req, res);
     case 'unsubscribe':
       return handleUnsubscribe(req, res);
     default:

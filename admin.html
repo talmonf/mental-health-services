@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analytics — Nefesh</title>
+  <title>אדמין — מדריך נפש</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://nefesh-il.org/admin">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2d5a7b;
@@ -15,28 +16,34 @@
       --border: #e0e0e0;
       --bg: #f0f2f5;
       --card: #fff;
+      --warn: #c47a12;
+      --pv: #2d5a7b;
+      --search: #3d8b6e;
+      --click: #c47a12;
+      --other: #8a7a9a;
     }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
-    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    body { margin: 0; font-family: Heebo, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
     h1 { font-size: 1.5rem; color: var(--primary-dark); margin: 0 0 8px; }
-    h2 { font-size: 1.15rem; color: var(--primary); margin: 32px 0 12px; }
-    p.lede { color: var(--muted); margin: 0 0 24px; }
+    h2 { font-size: 1.15rem; color: var(--primary); margin: 28px 0 12px; }
+    h3 { font-size: 0.95rem; color: var(--primary-dark); margin: 16px 0 8px; }
+    p.lede { color: var(--muted); margin: 0 0 16px; }
     .card { background: var(--card); border-radius: 10px; padding: 16px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 16px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.02em; white-space: nowrap; }
     .row { display: flex; flex-wrap: wrap; gap: 12px; }
     .stat { flex: 1 1 140px; background: #eef4f8; border-radius: 8px; padding: 12px 14px; }
     .stat b { display: block; font-size: 1.4rem; color: var(--primary-dark); }
     .stat span { color: var(--muted); font-size: 0.85rem; }
-    label { display: block; font-weight: 600; margin: 12px 0 6px; }
-    input[type=text], textarea, select {
-      width: 100%; box-sizing: border-box; padding: 10px 12px; border: 2px solid var(--border);
-      border-radius: 8px; font: inherit;
+    label { display: block; font-weight: 600; margin: 0 0 6px; font-size: 0.82rem; color: var(--muted); }
+    input[type=text], input[type=date], textarea, select {
+      width: 100%; box-sizing: border-box; padding: 8px 10px; border: 2px solid var(--border);
+      border-radius: 8px; font: inherit; background: #fff;
     }
     textarea { min-height: 120px; }
     button, .btn {
-      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px;
+      display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 16px;
       border: none; border-radius: 8px; background: var(--primary); color: #fff; font: inherit; font-weight: 600;
       cursor: pointer; text-decoration: none;
     }
@@ -45,15 +52,100 @@
     .err { color: #c0392b; }
     .ok { color: #1e7a4a; }
     .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-    a.back { color: var(--primary); }
+    a.back { color: var(--primary); text-decoration: none; font-weight: 600; }
     .gate { max-width: 480px; margin: 80px auto; background: var(--card); padding: 32px; border-radius: 10px; text-align: center; }
+    .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .tabs button {
+      background: transparent; color: var(--muted); border: none; border-radius: 8px 8px 0 0;
+      min-height: 44px; font-weight: 600;
+    }
+    .tabs button.active { color: var(--primary-dark); background: #eef4f8; }
+    .filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; align-items: end; }
+    .filters .wide { grid-column: span 2; }
+    .chart { display: flex; align-items: flex-end; gap: 6px; min-height: 140px; overflow-x: auto; padding: 8px 0 0; }
+    .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 22px; }
+    .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: 120px; border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
+    .chart-seg { width: 100%; }
+    .chart-seg.pv { background: var(--pv); }
+    .chart-seg.search { background: var(--search); }
+    .chart-seg.click { background: var(--click); }
+    .chart-seg.other { background: var(--other); }
+    .chart-label { font-size: 0.65rem; color: var(--muted); writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 6px; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hbar { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.85rem; }
+    .hbar .name { flex: 0 0 38%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hbar .track { flex: 1; height: 10px; background: #eef2f5; border-radius: 6px; overflow: hidden; }
+    .hbar .fill { height: 100%; background: var(--primary); }
+    .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: left; }
+    .users-table-wrap { overflow-x: auto; }
+    .users-table-wrap table { min-width: 1100px; }
+    .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
+    .badge.warn { background: #fdf3e7; color: #8a5a12; }
+    .badge.ok { background: #e7f6ee; color: #1e7a4a; }
+    .muted { color: var(--muted); }
+    @media (max-width: 700px) {
+      .filters .wide { grid-column: span 1; }
+    }
   </style>
 </head>
 <body>
-  <main id="app">Loading…</main>
+  <main id="app">טוען…</main>
   <script>
+    const QUAL = {
+      social_worker: 'עובד/ת סוציאלי/ת',
+      psychologist: 'פסיכולוג/ית',
+      psychiatrist: 'פסיכיאטר/ית',
+      therapist: 'מטפל/ת / יועץ/ת',
+      nurse: 'אח/ות',
+      peer_supporter: 'עמית/ת תומך/ת',
+      student: 'סטודנט/ית',
+      family_self: 'בן/בת משפחה או מתמודד/ת',
+      other: 'אחר'
+    };
+    const FOUND = {
+      google: 'גוגל',
+      facebook_instagram: 'פייסבוק / אינסטגרם',
+      whatsapp: 'וואטסאפ',
+      colleague: 'עמית/ה לעבודה',
+      university: 'לימודים / הכשרה',
+      organization: 'הארגון שבו אני עובד/ת',
+      media: 'תקשורת',
+      other: 'אחר'
+    };
+    const PREF = { none: 'בלי עדכונים', weekly: 'סיכום שבועי', immediate: 'כשזה קורה' };
+    const DEVICE = { mobile: 'נייד', desktop: 'מחשב', tablet: 'טאבלט' };
+    const DEEP = {
+      search_link_copied: 'העתקת קישור חיפוש',
+      card_link_copied: 'העתקת קישור כרטיס',
+      section_link_copied: 'העתקת קישור מדור',
+      search_link_opened: 'פתיחת קישור חיפוש',
+      card_link_opened: 'פתיחת קישור כרטיס',
+      section_link_opened: 'פתיחת קישור מדור'
+    };
+
     const app = document.getElementById('app');
-    const state = { user: null, data: null, days: 30, error: '', publishMsg: '' };
+    const state = {
+      user: null,
+      tab: location.hash === '#users' ? 'users' : 'analytics',
+      analytics: null,
+      users: null,
+      accounts: null,
+      days: 30,
+      from: '',
+      to: '',
+      eventType: '',
+      device: '',
+      audience: '',
+      country: '',
+      section: '',
+      userQ: '',
+      userSort: 'created_at',
+      userDir: 'desc',
+      error: '',
+      loading: false
+    };
 
     function el(html) {
       const d = document.createElement('div');
@@ -64,11 +156,32 @@
       return String(v == null ? '' : v)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+    function fmtDate(v) {
+      if (!v) return '—';
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return esc(String(v).slice(0, 16));
+      return d.toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+    }
+    function fmtDay(v) {
+      const s = String(v || '').slice(0, 10);
+      if (!s) return '';
+      const [y, m, d] = s.split('-');
+      return `${d}.${m}`;
+    }
     function table(headers, rows, cells) {
-      if (!rows || !rows.length) return '<p class="lede">None in this window.</p>';
+      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
       return `<table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
         rows.map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')
       }</tbody></table>`;
+    }
+    function hbars(rows) {
+      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
+      const max = Math.max(...rows.map((r) => Number(r.n) || 0), 1);
+      return rows.map((r) => {
+        const n = Number(r.n) || 0;
+        const w = Math.round((n / max) * 100);
+        return `<div class="hbar"><span class="name" title="${esc(r.key)}">${esc(r.key)}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="n">${n}</span></div>`;
+      }).join('');
     }
 
     async function loadSession() {
@@ -81,149 +194,271 @@
       }
     }
 
+    function analyticsQuery() {
+      const p = new URLSearchParams();
+      if (state.from && state.to) {
+        p.set('from', state.from);
+        p.set('to', state.to);
+      } else {
+        p.set('days', String(state.days));
+      }
+      if (state.eventType) p.set('event_type', state.eventType);
+      if (state.device) p.set('device', state.device);
+      if (state.audience) p.set('audience', state.audience);
+      if (state.country) p.set('country', state.country);
+      if (state.section) p.set('section', state.section);
+      return p.toString();
+    }
+
     async function loadAnalytics() {
-      const r = await fetch('/api/admin/analytics?days=' + state.days, { credentials: 'include' });
+      const r = await fetch('/api/admin/analytics?' + analyticsQuery(), { credentials: 'include' });
       if (r.status === 401 || r.status === 403) {
-        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'Not authorized.';
-        state.data = null;
+        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.analytics = null;
         return;
       }
       if (!r.ok) {
-        state.error = 'Failed to load analytics.';
+        state.error = 'טעינת האנליטיקה נכשלה.';
         return;
       }
       state.error = '';
-      state.data = await r.json();
+      state.analytics = await r.json();
+    }
+
+    async function loadUsers() {
+      const p = new URLSearchParams();
+      if (state.userQ) p.set('q', state.userQ);
+      p.set('sort', state.userSort);
+      p.set('dir', state.userDir);
+      const r = await fetch('/api/admin/users?' + p.toString(), { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) {
+        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.users = null;
+        return;
+      }
+      if (!r.ok) {
+        state.error = 'טעינת המשתמשים נכשלה.';
+        return;
+      }
+      state.error = '';
+      const data = await r.json();
+      state.users = data.users || [];
+      state.accounts = data.accounts || null;
     }
 
     function renderGate(message) {
       app.innerHTML = '';
       app.appendChild(el(`<div class="gate">
-        <h1>Analytics</h1>
+        <h1>אדמין</h1>
         <p class="lede">${esc(message)}</p>
-        <p><a class="back" href="/">Back to the directory</a></p>
+        <p><a class="back" href="/">חזרה למדריך</a></p>
       </div>`));
     }
 
-    function kvList(rows) {
-      return table(['Name', 'Count'], rows, (r) => [esc(r.key), String(r.n)]);
+    function setTab(tab) {
+      state.tab = tab;
+      location.hash = tab === 'users' ? 'users' : 'analytics';
     }
 
-    function render() {
-      if (!state.user) {
-        renderGate('Sign in on the directory, then return here. This page is for operators only.');
-        return;
-      }
-      if (!state.user.isAdmin) {
-        renderGate('Not authorized.');
-        return;
-      }
-      if (state.error && !state.data) {
-        renderGate(state.error);
-        return;
-      }
-      const d = state.data || {};
-      const acc = d.accounts || {};
+    function barChart(rows) {
+      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
+      const max = Math.max(...rows.map((r) => Number(r.total) || ((Number(r.page_view)||0)+(Number(r.search)||0)+(Number(r.click)||0)+(Number(r.other)||0))), 1);
+      const cols = rows.map((r) => {
+        const pv = Number(r.page_view) || 0;
+        const se = Number(r.search) || 0;
+        const cl = Number(r.click) || 0;
+        const ot = Number(r.other) || 0;
+        const total = Number(r.total) || (pv + se + cl + ot);
+        const scale = 120 / max;
+        return `<div class="chart-col" title="${esc(fmtDay(r.day))}: ${total}">
+          <div class="chart-stack">
+            <div class="chart-seg pv" style="height:${pv * scale}px"></div>
+            <div class="chart-seg search" style="height:${se * scale}px"></div>
+            <div class="chart-seg click" style="height:${cl * scale}px"></div>
+            <div class="chart-seg other" style="height:${ot * scale}px"></div>
+          </div>
+          <span class="chart-label">${esc(fmtDay(r.day))}</span>
+        </div>`;
+      }).join('');
+      return `<div class="chart">${cols}</div>
+        <div class="legend">
+          <span><i style="background:var(--pv)"></i>צפיות</span>
+          <span><i style="background:var(--search)"></i>חיפושים</span>
+          <span><i style="background:var(--click)"></i>לחיצות</span>
+          <span><i style="background:var(--other)"></i>אחר</span>
+        </div>`;
+    }
+
+    function optionList(values, current, blank) {
+      return `<option value="">${esc(blank)}</option>` + (values || []).map((v) =>
+        `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(v)}</option>`
+      ).join('');
+    }
+
+    function renderAnalytics(root) {
+      const d = state.analytics || {};
+      const k = d.kpis || {};
       const si = d.signedIn || {};
       const rl = d.requestLog;
-      app.innerHTML = '';
-      const wrap = el(`<div>
-        <div class="toolbar">
-          <a class="back" href="/">← Directory</a>
-          <label style="margin:0">Window
-            <select id="days">
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-            </select>
-          </label>
-          <span style="color:var(--muted)">${esc(state.user.email)}</span>
-        </div>
-        <h1>Site analytics</h1>
-        <p class="lede">Aggregates only. Search terms appear when they showed up at least three times. Signed-in usage is linked to accounts; anonymous traffic stays anonymous.</p>
-        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
-        <div class="row" id="stats"></div>
-        <h2>Daily volume (first-party events)</h2>
-        <div class="card" id="volume"></div>
-        <h2>Top card / element clicks</h2>
-        <div class="card" id="clicks"></div>
-        <h2>Top searches (≥3 occurrences)</h2>
-        <div class="card" id="searches"></div>
-        <h2>Deep links</h2>
-        <div class="card" id="deeplinks"></div>
-        <h2>Accounts</h2>
-        <div class="card" id="accounts"></div>
-        <h2>Publish a site update</h2>
+      const opts = d.filterOptions || { countries: [], sections: [] };
+      const totalEvents = Number(k.total) || 0;
+      const signedShare = totalEvents ? Math.round((Number(si.signed_in_events) || 0) / totalEvents * 100) : 0;
+
+      root.innerHTML = `
         <div class="card">
-          <p class="lede">Immediate subscribers get this as it happens. Weekly subscribers get it in the Sunday digest. Nothing is sent until the address is confirmed.</p>
+          <form id="filters" class="filters">
+            <div>
+              <label for="days">חלון</label>
+              <select id="days">
+                <option value="7">7 ימים</option>
+                <option value="30">30 ימים</option>
+                <option value="90">90 ימים</option>
+              </select>
+            </div>
+            <div>
+              <label for="from">מתאריך</label>
+              <input id="from" type="date" value="${esc(state.from)}">
+            </div>
+            <div>
+              <label for="to">עד תאריך</label>
+              <input id="to" type="date" value="${esc(state.to)}">
+            </div>
+            <div>
+              <label for="eventType">סוג אירוע</label>
+              <select id="eventType">
+                <option value="">הכל</option>
+                <option value="page_view">צפיות</option>
+                <option value="search">חיפושים</option>
+                <option value="click">לחיצות</option>
+                <option value="deep-link">קישורים עמוקים</option>
+              </select>
+            </div>
+            <div>
+              <label for="device">מכשיר</label>
+              <select id="device">
+                <option value="">הכל</option>
+                <option value="mobile">נייד</option>
+                <option value="desktop">מחשב</option>
+                <option value="tablet">טאבלט</option>
+              </select>
+            </div>
+            <div>
+              <label for="audience">קהל</label>
+              <select id="audience">
+                <option value="">הכל</option>
+                <option value="signed-in">מחוברים</option>
+                <option value="anonymous">אנונימיים</option>
+              </select>
+            </div>
+            <div>
+              <label for="country">מדינה (אירוע)</label>
+              <select id="country">${optionList(opts.countries, state.country, 'הכל')}</select>
+            </div>
+            <div>
+              <label for="section">מדור</label>
+              <select id="section">${optionList(opts.sections, state.section, 'הכל')}</select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="submit">סינון</button>
+            </div>
+          </form>
+        </div>
+        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
+        <div class="row" id="stats">
+          <div class="stat"><b>${k.page_view || 0}</b><span>צפיות בדף</span></div>
+          <div class="stat"><b>${k.unique_sessions || 0}</b><span>סשנים ייחודיים</span></div>
+          <div class="stat"><b>${k.search || 0}</b><span>חיפושים</span></div>
+          <div class="stat"><b>${k.click || 0}</b><span>לחיצות</span></div>
+          <div class="stat"><b>${signedShare}%</b><span>מחוברים (${si.signed_in_events || 0} / ${si.anonymous_events || 0} אנונימי)</span></div>
+          ${rl ? `<div class="stat"><b>${rl.bot}</b><span>שליפות בוט</span></div>
+                  <div class="stat"><b>${rl.estimated_human}</b><span>שליפות אנושיות (הערכה)</span></div>` : ''}
+        </div>
+        <h2>נפח יומי</h2>
+        <div class="card" id="volume">${barChart(d.volume)}</div>
+        <div class="split">
+          <div>
+            <h2>מכשיר</h2>
+            <div class="card">${hbars((d.byDevice || []).map((r) => ({ key: DEVICE[r.key] || r.key, n: r.n })))}</div>
+          </div>
+          <div>
+            <h2>מדינה</h2>
+            <div class="card">${hbars(d.byCountry)}</div>
+          </div>
+          <div>
+            <h2>מדור</h2>
+            <div class="card">${hbars(d.bySection)}</div>
+          </div>
+        </div>
+        <h2>לחיצות על כרטיסים / רכיבים</h2>
+        <div class="card">${table(
+          ['כניסה', 'רכיב', 'סוג', 'כמות'],
+          d.topClicks,
+          (r) => [esc(r.entry_id), esc(r.element_id), esc(r.element_type), r.n]
+        )}</div>
+        <h2>חיפושים נפוצים (לפחות 3)</h2>
+        <div class="card">${table(
+          ['שאילתה', 'כמות'],
+          d.topSearches,
+          (r) => [esc(r.search_query), r.n]
+        )}</div>
+        <h2>קישורים עמוקים</h2>
+        <div class="card">${table(
+          ['אירוע', 'כמות'],
+          d.deepLinks,
+          (r) => [esc(DEEP[r.event_type] || r.event_type), r.n]
+        )}</div>
+        <h2>פרסום עדכון באתר</h2>
+        <div class="card">
+          <p class="lede">מנויי «כשזה קורה» מקבלים מיד. מנויי הסיכום השבועי מקבלים ביום ראשון. כלום לא נשלח לפני אישור הכתובת.</p>
           <form id="pub">
-            <label for="title">Title</label>
+            <label for="title">כותרת</label>
             <input id="title" name="title" type="text" required maxlength="200">
-            <label for="body">What changed</label>
+            <label for="body">מה השתנה</label>
             <textarea id="body" name="body" required maxlength="8000"></textarea>
             <p id="pubmsg"></p>
-            <button type="submit">Publish and queue emails</button>
+            <button type="submit">פרסום ותור למיילים</button>
           </form>
-          <h3 style="margin-top:24px">Recent updates</h3>
-          <div id="recent"></div>
+          <h3>עדכונים אחרונים</h3>
+          ${table(['מתי', 'כותרת'], d.recentUpdates, (r) => [esc(fmtDate(r.published_at)), esc(r.title)])}
         </div>
-      </div>`);
-      app.appendChild(wrap);
-      wrap.querySelector('#days').value = String(state.days);
-      wrap.querySelector('#days').addEventListener('change', async (e) => {
-        state.days = Number(e.target.value) || 30;
+      `;
+
+      root.querySelector('#days').value = String(state.days);
+      root.querySelector('#eventType').value = state.eventType;
+      root.querySelector('#device').value = state.device;
+      root.querySelector('#audience').value = state.audience;
+
+      root.querySelector('#filters').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const from = root.querySelector('#from').value;
+        const to = root.querySelector('#to').value;
+        state.from = from;
+        state.to = to;
+        if (!(from && to)) state.days = Number(root.querySelector('#days').value) || 30;
+        state.eventType = root.querySelector('#eventType').value;
+        state.device = root.querySelector('#device').value;
+        state.audience = root.querySelector('#audience').value;
+        state.country = root.querySelector('#country').value;
+        state.section = root.querySelector('#section').value;
+        await loadAnalytics();
+        render();
+      });
+      root.querySelector('#days').addEventListener('change', async () => {
+        state.days = Number(root.querySelector('#days').value) || 30;
+        state.from = '';
+        state.to = '';
         await loadAnalytics();
         render();
       });
 
-      const stats = wrap.querySelector('#stats');
-      const estimated = rl ? rl.estimated_human : null;
-      stats.innerHTML = `
-        <div class="stat"><b>${si.signed_in_events || 0}</b><span>Signed-in events</span></div>
-        <div class="stat"><b>${si.anonymous_events || 0}</b><span>Anonymous events</span></div>
-        <div class="stat"><b>${acc.total || 0}</b><span>Accounts (${acc.verified || 0} verified)</span></div>
-        ${rl ? `<div class="stat"><b>${rl.bot}</b><span>Bot HTML fetches</span></div>
-                <div class="stat"><b>${estimated}</b><span>Est. human HTML fetches</span></div>` : ''}
-      `;
-      wrap.querySelector('#volume').innerHTML = table(
-        ['Day', 'Page views', 'Searches', 'Clicks', 'Other'],
-        d.volume,
-        (r) => [esc(String(r.day).slice(0, 10)), r.page_view, r.search, r.click, r.other]
-      );
-      wrap.querySelector('#clicks').innerHTML = table(
-        ['Entry', 'Element', 'Type', 'Count'],
-        d.topClicks,
-        (r) => [esc(r.entry_id), esc(r.element_id), esc(r.element_type), r.n]
-      );
-      wrap.querySelector('#searches').innerHTML = table(
-        ['Query', 'Count'],
-        d.topSearches,
-        (r) => [esc(r.search_query), r.n]
-      );
-      wrap.querySelector('#deeplinks').innerHTML = table(
-        ['Event', 'Count'],
-        d.deepLinks,
-        (r) => [esc(r.event_type), r.n]
-      );
-      wrap.querySelector('#accounts').innerHTML = `
-        <h3>How they found the site</h3>${kvList(acc.byFoundVia)}
-        <h3>Qualification</h3>${kvList(acc.byQualification)}
-        <h3>Country</h3>${kvList(acc.byCountry)}
-        <h3>Organization</h3>${kvList(acc.byOrganization)}
-        <h3>Email preference</h3>${kvList(acc.byEmailPreference)}
-      `;
-      wrap.querySelector('#recent').innerHTML = table(
-        ['When', 'Title'],
-        d.recentUpdates,
-        (r) => [esc(r.published_at), esc(r.title)]
-      );
-
-      wrap.querySelector('#pub').addEventListener('submit', async (ev) => {
+      const pub = root.querySelector('#pub');
+      pub.addEventListener('submit', async (ev) => {
         ev.preventDefault();
-        const msg = wrap.querySelector('#pubmsg');
-        const btn = wrap.querySelector('#pub button');
+        const msg = root.querySelector('#pubmsg');
+        const btn = pub.querySelector('button');
         btn.disabled = true;
-        msg.textContent = 'Publishing…';
+        msg.textContent = 'מפרסמים…';
         msg.className = '';
         try {
           const r = await fetch('/api/admin/updates', {
@@ -231,33 +466,222 @@
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              title: wrap.querySelector('#title').value,
-              body: wrap.querySelector('#body').value
+              title: root.querySelector('#title').value,
+              body: root.querySelector('#body').value
             })
           });
           const data = await r.json().catch(() => ({}));
-          if (!r.ok) throw new Error(data.error || 'Failed');
+          if (!r.ok) throw new Error(data.error || 'נכשל');
           msg.className = 'ok';
-          msg.textContent = `Published. Immediate queued: ${data.queued || 0}. Sent: ${data.send?.sent ?? 0}.`;
-          wrap.querySelector('#title').value = '';
-          wrap.querySelector('#body').value = '';
+          msg.textContent = `פורסם. בתור מיידי: ${data.queued || 0}. נשלחו: ${data.send?.sent ?? 0}.`;
+          root.querySelector('#title').value = '';
+          root.querySelector('#body').value = '';
           await loadAnalytics();
           render();
         } catch (e) {
           msg.className = 'err';
-          msg.textContent = e.message || 'Failed';
+          msg.textContent = e.message || 'נכשל';
           btn.disabled = false;
         }
       });
     }
 
+    function csvEscape(v) {
+      const s = String(v == null ? '' : v);
+      if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    }
+
+    function downloadUsersCsv(users) {
+      const headers = ['אימייל','מדינה','עיר','הכשרה','ארגון','תפקיד','איך הגיעו','פירוט','העדפת מייל','אימות אימייל','תאריך אימות','מנהל','תאריך הרשמה','כניסה אחרונה'];
+      const lines = [headers.join(',')];
+      for (const u of users) {
+        lines.push([
+          u.email,
+          u.country,
+          u.city,
+          QUAL[u.qualification] || u.qualification,
+          u.organization,
+          u.title,
+          FOUND[u.foundVia] || u.foundVia,
+          u.foundViaOther,
+          PREF[u.emailPreference] || u.emailPreference,
+          u.emailVerified ? 'אומת' : 'לא אומת',
+          u.emailVerifiedAt ? fmtDate(u.emailVerifiedAt) : '',
+          u.isAdmin ? 'כן' : 'לא',
+          fmtDate(u.createdAt),
+          fmtDate(u.lastAccessAt)
+        ].map(csvEscape).join(','));
+      }
+      const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nefesh-users.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function renderUsers(root) {
+      const users = state.users || [];
+      const acc = state.accounts || {};
+      const unverified = Math.max(0, (acc.total || 0) - (acc.verified || 0));
+      root.innerHTML = `
+        <div class="row" style="margin-bottom:16px">
+          <div class="stat"><b>${acc.total || users.length}</b><span>חשבונות</span></div>
+          <div class="stat"><b>${acc.verified || 0}</b><span>אומתו</span></div>
+          <div class="stat"><b>${unverified}</b><span>ממתינים לאישור</span></div>
+        </div>
+        <div class="card">
+          <form id="userfilters" class="filters">
+            <div class="wide">
+              <label for="userQ">חיפוש (אימייל, ארגון, תפקיד, עיר)</label>
+              <input id="userQ" type="text" value="${esc(state.userQ)}" placeholder="חיפוש…">
+            </div>
+            <div>
+              <label for="userSort">מיון</label>
+              <select id="userSort">
+                <option value="created_at">תאריך הרשמה</option>
+                <option value="last_access_at">כניסה אחרונה</option>
+                <option value="email_verified_at">אימות אימייל</option>
+                <option value="email">אימייל</option>
+              </select>
+            </div>
+            <div>
+              <label for="userDir">כיוון</label>
+              <select id="userDir">
+                <option value="desc">יורד</option>
+                <option value="asc">עולה</option>
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="submit">סינון</button>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="button" class="secondary" id="csv">הורדת CSV</button>
+            </div>
+          </form>
+        </div>
+        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
+        <div class="card users-table-wrap">${
+          table(
+            ['אימייל','מדינה','עיר','הכשרה','ארגון','תפקיד','איך הגיעו','העדפת מייל','אימות אימייל','הרשמה','כניסה אחרונה'],
+            users,
+            (u) => [
+              `${esc(u.email)}${u.isAdmin ? ' <span class="badge">מנהל</span>' : ''}`,
+              esc(u.country),
+              esc(u.city || ''),
+              esc(QUAL[u.qualification] || u.qualification),
+              esc(u.organization),
+              esc(u.title),
+              esc((FOUND[u.foundVia] || u.foundVia) + (u.foundViaOther ? ` (${u.foundViaOther})` : '')),
+              esc(PREF[u.emailPreference] || u.emailPreference),
+              u.emailVerified
+                ? `<span class="badge ok">אומת</span>${u.emailVerifiedAt ? `<div class="muted">${esc(fmtDate(u.emailVerifiedAt))}</div>` : ''}`
+                : '<span class="badge warn">לא אומת</span>',
+              esc(fmtDate(u.createdAt)),
+              esc(fmtDate(u.lastAccessAt))
+            ]
+          )
+        }</div>
+        <div class="split">
+          <div>
+            <h2>הכשרה</h2>
+            <div class="card">${hbars((acc.byQualification || []).map((r) => ({ key: QUAL[r.key] || r.key, n: r.n })))}</div>
+          </div>
+          <div>
+            <h2>איך הגיעו</h2>
+            <div class="card">${hbars((acc.byFoundVia || []).map((r) => ({ key: FOUND[r.key] || r.key, n: r.n })))}</div>
+          </div>
+          <div>
+            <h2>מדינה</h2>
+            <div class="card">${hbars(acc.byCountry)}</div>
+          </div>
+          <div>
+            <h2>העדפת מייל</h2>
+            <div class="card">${hbars((acc.byEmailPreference || []).map((r) => ({ key: PREF[r.key] || r.key, n: r.n })))}</div>
+          </div>
+        </div>
+      `;
+      root.querySelector('#userSort').value = state.userSort;
+      root.querySelector('#userDir').value = state.userDir;
+      root.querySelector('#userfilters').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        state.userQ = root.querySelector('#userQ').value.trim();
+        state.userSort = root.querySelector('#userSort').value;
+        state.userDir = root.querySelector('#userDir').value;
+        await loadUsers();
+        render();
+      });
+      root.querySelector('#csv').addEventListener('click', () => downloadUsersCsv(users));
+    }
+
+    function render() {
+      if (!state.user) {
+        renderGate('יש להיכנס לחשבון במדריך ואז לחזור לכאן. העמוד מיועד למפעילים בלבד.');
+        return;
+      }
+      if (!state.user.isAdmin) {
+        renderGate('אין הרשאה.');
+        return;
+      }
+      if (state.error && !state.analytics && state.tab === 'analytics') {
+        renderGate(state.error);
+        return;
+      }
+      if (state.error && !state.users && state.tab === 'users') {
+        renderGate(state.error);
+        return;
+      }
+
+      app.innerHTML = '';
+      const wrap = el(`<div>
+        <div class="toolbar">
+          <a class="back" href="/">חזרה למדריך</a>
+          <span class="muted">${esc(state.user.email)}</span>
+        </div>
+        <h1>אדמין</h1>
+        <div class="tabs">
+          <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">אנליטיקה</button>
+          <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">משתמשים רשומים</button>
+        </div>
+        <div id="tabbody"></div>
+      </div>`);
+      app.appendChild(wrap);
+      wrap.querySelectorAll('.tabs button').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const tab = btn.getAttribute('data-tab');
+          setTab(tab);
+          if (tab === 'users' && !state.users) await loadUsers();
+          if (tab === 'analytics' && !state.analytics) await loadAnalytics();
+          render();
+        });
+      });
+      const body = wrap.querySelector('#tabbody');
+      if (state.tab === 'users') renderUsers(body);
+      else renderAnalytics(body);
+    }
+
+    window.addEventListener('hashchange', async () => {
+      const next = location.hash === '#users' ? 'users' : 'analytics';
+      if (next === state.tab) return;
+      state.tab = next;
+      if (next === 'users' && !state.users) await loadUsers();
+      if (next === 'analytics' && !state.analytics) await loadAnalytics();
+      render();
+    });
+
     (async () => {
       try {
         await loadSession();
-        if (state.user && state.user.isAdmin) await loadAnalytics();
+        if (state.user && state.user.isAdmin) {
+          if (state.tab === 'users') await loadUsers();
+          else await loadAnalytics();
+        }
         render();
       } catch (e) {
-        renderGate('Could not reach the server.');
+        renderGate('לא הצלחנו להגיע לשרת.');
       }
     })();
   </script>

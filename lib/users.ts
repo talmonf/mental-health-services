@@ -92,3 +92,44 @@ export async function userIsAdmin(client: Client, userId: string): Promise<boole
   const { rows } = await client.query(`SELECT is_admin FROM users WHERE id = $1`, [userId]);
   return Boolean(rows[0]?.is_admin);
 }
+
+export async function touchLastAccess(client: Client, userId: string): Promise<void> {
+  try {
+    await client.query(
+      `UPDATE users SET last_access_at = now()
+        WHERE id = $1
+          AND (last_access_at IS NULL OR last_access_at < now() - interval '5 minutes')`,
+      [userId]
+    );
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === '42703') return;
+    throw err;
+  }
+}
+
+export type AdminUser = PublicUser & {
+  createdAt: string | null;
+  lastAccessAt: string | null;
+  emailVerifiedAt: string | null;
+};
+
+export const ADMIN_USER_COLUMNS = `
+  ${USER_PUBLIC_COLUMNS},
+  created_at, last_access_at
+`;
+
+function isoOrNull(v: unknown): string | null {
+  if (v == null) return null;
+  const d = v instanceof Date ? v : new Date(String(v));
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+export function adminUserFromRow(row: Record<string, unknown>): AdminUser {
+  return {
+    ...publicUserFromRow(row),
+    createdAt: isoOrNull(row.created_at),
+    lastAccessAt: isoOrNull(row.last_access_at),
+    emailVerifiedAt: isoOrNull(row.email_verified_at),
+  };
+}
