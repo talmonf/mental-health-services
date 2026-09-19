@@ -1,5 +1,6 @@
 /**
- * One Serverless Function for /api/admin/analytics, /api/admin/users, and /api/admin/updates.
+ * One Serverless Function for /api/admin/analytics, /api/admin/users,
+ * /api/admin/updates, /api/admin/questions, and /api/admin/faq.
  * See api/auth/[action].ts for why these are not separate files.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -496,6 +497,222 @@ async function handleUpdates(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+const QUESTION_STATUSES = ['open', 'answered', 'published', 'discarded'] as const;
+type QuestionStatus = (typeof QUESTION_STATUSES)[number];
+
+function isUuid(v: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+}
+
+function isQuestionStatus(v: unknown): v is QuestionStatus {
+  return typeof v === 'string' && (QUESTION_STATUSES as readonly string[]).includes(v);
+}
+
+function questionFromRow(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    userId: String(row.user_id),
+    askerEmail: String(row.asker_email || ''),
+    question: String(row.question || ''),
+    status: String(row.status || 'open'),
+    adminNotes: row.admin_notes == null ? null : String(row.admin_notes),
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at || ''),
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at || ''),
+  };
+}
+
+function faqFromRow(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    question: String(row.question || ''),
+    answer: String(row.answer || ''),
+    sourceQuestionId: row.source_question_id == null ? null : String(row.source_question_id),
+    sortOrder: Number(row.sort_order) || 0,
+    published: Boolean(row.published),
+    publishedAt:
+      row.published_at instanceof Date ? row.published_at.toISOString() : row.published_at ? String(row.published_at) : null,
+    publishedBy: row.published_by == null ? null : String(row.published_by),
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at || ''),
+  };
+}
+
+async function handleQuestions(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET' && req.method !== 'PATCH') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (req.method === 'PATCH' && !originAllowed(req)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'Server misconfiguration' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    if (!(await requireAdmin(req, res, client))) return;
+
+    if (req.method === 'GET') {
+      const statusRaw = qstr(req.query, 'status');
+      const status = isQuestionStatus(statusRaw) ? statusRaw : '';
+      const params: unknown[] = [];
+      let where = '';
+      if (status) {
+        params.push(status);
+        where = `WHERE q.status = $1`;
+      }
+      const { rows } = await client.query(
+        `SELECT q.id::text, q.user_id::text, u.email AS asker_email, q.question, q.status,
+                q.admin_notes, q.created_at, q.updated_at
+           FROM user_questions q
+           JOIN users u ON u.id = q.user_id
+           ${where}
+          ORDER BY q.created_at DESC
+          LIMIT 200`,
+        params
+      );
+      return res.status(200).json({ questions: rows.map((row: Record<string, unknown>) => questionFromRow(row)) });
+    }
+
+    const body = parseJsonBody(req);
+    if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+    const id = typeof body.id === 'string' ? body.id.trim() : '';
+    if (!isUuid(id)) return res.status(400).json({ error: 'Invalid id' });
+    const status = isQuestionStatus(body.status) ? body.status : null;
+    const notesRaw = typeof body.adminNotes === 'string' ? body.adminNotes.trim() : null;
+    if (!status && notesRaw == null) {
+      return res.status(400).json({ error: 'status or adminNotes is required' });
+    }
+
+    const { rows } = await client.query(
+      `UPDATE user_questions
+          SET status = COALESCE($2, status),
+              admin_notes = COALESCE($3, admin_notes),
+              updated_at = now()
+        WHERE id = $1
+        RETURNING id::text, user_id::text, question, status, admin_notes, created_at, updated_at`,
+      [id, status, notesRaw]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    const asker = await client.query(`SELECT email FROM users WHERE id = $1`, [rows[0].user_id]);
+    return res.status(200).json({
+      question: questionFromRow({ ...rows[0], asker_email: asker.rows[0]?.email || '' }),
+    });
+  } catch (err) {
+    console.error('admin questions error', err);
+    return res.status(500).json({ error: 'Failed to update questions' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function handleFaq(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'PATCH') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if ((req.method === 'POST' || req.method === 'PATCH') && !originAllowed(req)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'Server misconfiguration' });
+
+  const jwtUser = await getAuthFromRequest(req);
+  if (!jwtUser) return res.status(401).json({ error: 'Unauthorized' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    if (!(await userIsAdmin(client, jwtUser.id))) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (req.method === 'GET') {
+      const { rows } = await client.query(
+        `SELECT id::text, question, answer, source_question_id::text, sort_order,
+                published, published_at, published_by::text, created_at
+           FROM faq_items
+          ORDER BY sort_order ASC, published_at ASC`
+      );
+      return res.status(200).json({ items: rows.map((row: Record<string, unknown>) => faqFromRow(row)) });
+    }
+
+    const body = parseJsonBody(req);
+    if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+
+    if (req.method === 'POST') {
+      const question = typeof body.question === 'string' ? body.question.trim() : '';
+      const answer = typeof body.answer === 'string' ? body.answer.trim() : '';
+      if (question.length < 3 || question.length > 500) {
+        return res.status(400).json({ error: 'Question must be 3-500 characters' });
+      }
+      if (answer.length < 3 || answer.length > 8000) {
+        return res.status(400).json({ error: 'Answer must be 3-8000 characters' });
+      }
+      const sourceId = typeof body.sourceQuestionId === 'string' ? body.sourceQuestionId.trim() : '';
+      if (sourceId && !isUuid(sourceId)) return res.status(400).json({ error: 'Invalid sourceQuestionId' });
+
+      const maxSort = await client.query(`SELECT coalesce(max(sort_order), 0)::int AS n FROM faq_items`);
+      const sortOrder = Number(maxSort.rows[0]?.n) + 1;
+
+      await client.query('BEGIN');
+      try {
+        const inserted = await client.query(
+          `INSERT INTO faq_items (question, answer, source_question_id, sort_order, published_by)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING id::text, question, answer, source_question_id::text, sort_order,
+                     published, published_at, published_by::text, created_at`,
+          [question, answer, sourceId || null, sortOrder, jwtUser.id]
+        );
+        if (sourceId) {
+          await client.query(
+            `UPDATE user_questions SET status = 'published', updated_at = now() WHERE id = $1`,
+            [sourceId]
+          );
+        }
+        await client.query('COMMIT');
+        return res.status(201).json({ item: faqFromRow(inserted.rows[0]) });
+      } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
+        throw err;
+      }
+    }
+
+    const id = typeof body.id === 'string' ? body.id.trim() : '';
+    if (!isUuid(id)) return res.status(400).json({ error: 'Invalid id' });
+    const question = typeof body.question === 'string' ? body.question.trim() : null;
+    const answer = typeof body.answer === 'string' ? body.answer.trim() : null;
+    const published = typeof body.published === 'boolean' ? body.published : null;
+    const sortOrder = typeof body.sortOrder === 'number' && Number.isFinite(body.sortOrder) ? Math.trunc(body.sortOrder) : null;
+    if (question != null && (question.length < 3 || question.length > 500)) {
+      return res.status(400).json({ error: 'Question must be 3-500 characters' });
+    }
+    if (answer != null && (answer.length < 3 || answer.length > 8000)) {
+      return res.status(400).json({ error: 'Answer must be 3-8000 characters' });
+    }
+    if (question == null && answer == null && published == null && sortOrder == null) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    const { rows } = await client.query(
+      `UPDATE faq_items
+          SET question = COALESCE($2, question),
+              answer = COALESCE($3, answer),
+              published = COALESCE($4, published),
+              sort_order = COALESCE($5, sort_order),
+              published_at = CASE WHEN $4 = true THEN now() ELSE published_at END,
+              updated_at = now()
+        WHERE id = $1
+        RETURNING id::text, question, answer, source_question_id::text, sort_order,
+                  published, published_at, published_by::text, created_at`,
+      [id, question, answer, published, sortOrder]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    return res.status(200).json({ item: faqFromRow(rows[0]) });
+  } catch (err) {
+    console.error('admin faq error', err);
+    return res.status(500).json({ error: 'Failed to update FAQ' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setAuthCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -507,6 +724,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleUsers(req, res);
     case 'updates':
       return handleUpdates(req, res);
+    case 'questions':
+      return handleQuestions(req, res);
+    case 'faq':
+      return handleFaq(req, res);
     default:
       return res.status(404).json({ error: 'Not found' });
   }

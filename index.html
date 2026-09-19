@@ -461,7 +461,7 @@
         }
         .mh-intro-more:hover { opacity: 0.85; }
         .mh-intro-more:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
-        .mh-auth-overlay { position: fixed; inset: 0; background: rgba(15, 30, 45, 0.45); z-index: 80; display: flex; align-items: flex-start; justify-content: center; padding: var(--space-xl) var(--space-md); overflow-y: auto; }
+        .mh-auth-overlay { position: fixed; inset: 0; background: rgba(15, 30, 45, 0.45); z-index: 90; display: flex; align-items: flex-start; justify-content: center; padding: var(--space-xl) var(--space-md); overflow-y: auto; }
         .mh-auth-modal { background: var(--bg-card); width: min(520px, 100%); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated); padding: var(--space-xl); position: relative; margin: var(--space-xl) 0; }
         .mh-auth-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
         .mh-auth-field { margin-bottom: var(--space-md); }
@@ -535,6 +535,117 @@
             flex-shrink: 0;
             accent-color: var(--primary);
         }
+        .mh-ask-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 30, 45, 0.45);
+            z-index: 80;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: var(--space-xl) var(--space-md);
+            overflow-y: auto;
+        }
+        .mh-ask-panel {
+            background: var(--bg-card);
+            width: min(560px, 100%);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated);
+            padding: var(--space-xl);
+            position: relative;
+            margin: var(--space-xl) 0;
+            display: flex;
+            flex-direction: column;
+            max-height: min(88vh, 780px);
+        }
+        .mh-ask-panel h2 {
+            margin: 0 0 var(--space-md);
+            color: var(--primary);
+            padding-left: 44px;
+        }
+        .mh-ask-greeting {
+            font-size: var(--text-sm);
+            color: var(--text);
+            line-height: 1.55;
+            margin: 0 0 var(--space-md);
+        }
+        .mh-ask-disclaimer {
+            font-size: var(--text-sm);
+            color: #5c3d12;
+            background: #fdf3e7;
+            border: 1px solid #e6c48a;
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-md);
+            margin: 0 0 var(--space-lg);
+            line-height: 1.45;
+        }
+        .mh-ask-disclaimer a { color: inherit; font-weight: 700; }
+        .mh-ask-scroll { overflow-y: auto; flex: 1 1 auto; margin-bottom: var(--space-md); }
+        .mh-ask-faq-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            overflow: hidden;
+        }
+        .mh-ask-faq-q {
+            width: 100%;
+            text-align: right;
+            background: #eef4f8;
+            border: none;
+            padding: var(--space-md);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            min-height: var(--touch-min);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-sm);
+        }
+        .mh-ask-faq-q:hover { background: #e3edf4; }
+        .mh-ask-faq-q:focus { outline: 2px solid var(--primary); outline-offset: -2px; }
+        .mh-ask-faq-a {
+            padding: var(--space-md);
+            font-size: var(--text-sm);
+            line-height: 1.55;
+            white-space: pre-wrap;
+        }
+        .mh-ask-empty { font-size: var(--text-sm); color: var(--text-muted); margin: 0 0 var(--space-md); }
+        .mh-ask-bubble {
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .mh-ask-bubble-user { background: var(--primary); color: #fff; }
+        .mh-ask-bubble-assistant { background: #eef4f8; color: var(--text); }
+        .mh-ask-composer textarea {
+            width: 100%;
+            min-height: 88px;
+            padding: var(--space-md);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: var(--text-base);
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .mh-ask-composer textarea:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-ask-send { margin-top: var(--space-sm); background: var(--primary); color: #fff; width: 100%; }
+        .mh-ask-send:disabled { opacity: 0.6; cursor: not-allowed; }
+        .mh-ask-gate {
+            background: #fdf3e7;
+            border: 1px solid #e6c48a;
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+        .mh-ask-gate p { margin: 0 0 var(--space-md); }
+        .mh-ask-gate-actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
         .mh-category-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
         .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); position: relative; }
         .mh-category-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
@@ -2825,7 +2936,10 @@
                 'Email already verified': 'הכתובת כבר אושרה',
                 'Email could not be sent': 'לא הצלחנו לשלוח מייל אישור',
                 'Failed to send confirmation email': 'לא הצלחנו לשלוח מייל אישור',
-                'Unauthorized': 'יש להתחבר מחדש'
+                'Unauthorized': 'יש להתחבר מחדש',
+                'Too many questions': 'נשלחו יותר מדי שאלות. נסו שוב מאוחר יותר',
+                'Question must be 10-2000 characters': 'השאלה צריכה להיות בין 10 ל־2000 תווים',
+                'Failed to submit question': 'שליחת השאלה נכשלה'
             };
             return map[e] || fallback;
         };
@@ -2894,6 +3008,14 @@
             const [profile, setProfile] = useState(null);
             const [resendBusy, setResendBusy] = useState(false);
             const introPrefAppliedRef = useRef(false);
+            const [showAsk, setShowAsk] = useState(false);
+            const [faqItems, setFaqItems] = useState([]);
+            const [faqBusy, setFaqBusy] = useState(false);
+            const [faqOpenId, setFaqOpenId] = useState(null);
+            const [askText, setAskText] = useState('');
+            const [askBusy, setAskBusy] = useState(false);
+            const [askError, setAskError] = useState('');
+            const [askThread, setAskThread] = useState([]);
 
             const persistIntroHiddenToAccount = (hidden) => {
                 mhAuthFetch('/api/auth/me', {
@@ -3217,7 +3339,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "18.09.2026"; 
+            const LAST_UPDATED = "19.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -3722,6 +3844,54 @@
                 setAuthBusy(false);
                 setShowLoginPassword(false);
                 setShowRegPassword(false);
+            };
+            const openAsk = () => {
+                setShowAsk(true);
+                setAskError('');
+                setFaqBusy(true);
+                mhAuthFetch('/api/qa/faq').then(({ ok, data }) => {
+                    if (ok && Array.isArray(data.items)) setFaqItems(data.items);
+                }).catch(() => {}).finally(() => setFaqBusy(false));
+            };
+            const closeAsk = () => {
+                setShowAsk(false);
+                setAskError('');
+                setAskBusy(false);
+            };
+            const submitAsk = async (ev) => {
+                ev.preventDefault();
+                if (!authUser) {
+                    setAskError('אפשרות לשאול שאלה זמינה למשתמשים רשומים בלבד.');
+                    return;
+                }
+                const q = (askText || '').trim();
+                if (q.length < 10 || q.length > 2000) {
+                    setAskError('השאלה צריכה להיות בין 10 ל־2000 תווים');
+                    return;
+                }
+                setAskBusy(true);
+                setAskError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/qa/questions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: q })
+                    });
+                    if (!ok) {
+                        setAskError(mhAuthErrorHe(data, 'שליחת השאלה נכשלה'));
+                        return;
+                    }
+                    setAskThread((t) => [
+                        ...t,
+                        { from: 'user', text: q },
+                        { from: 'assistant', text: `קיבלתי את השאלה. אחזור אליך במייל אל ${authUser.email}.` }
+                    ]);
+                    setAskText('');
+                } catch (_) {
+                    setAskError('שליחת השאלה נכשלה');
+                } finally {
+                    setAskBusy(false);
+                }
             };
             const submitLogin = async (ev) => {
                 ev.preventDefault();
@@ -5494,6 +5664,9 @@
                                 <button type="button" onClick={() => setShowTerms(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="מילון מונחים">
                                     <i className="fas fa-book"></i> מילון מונחים
                                 </button>
+                                <button type="button" onClick={openAsk} className="mh-btn mh-hero-btn-ghost" data-tracking-name="ask_open">
+                                    <i className="fas fa-comments"></i> שאלה?
+                                </button>
                                 {authUser ? (
                                     <>
                                         <span className="mh-auth-identity" title={authUser.email}>{authUser.email}</span>
@@ -5703,6 +5876,71 @@
                                         </div>
                                         <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_profile_submit">{authBusy ? 'שומרים…' : 'שמירה'}</button>
                                     </form>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {showAsk && (
+                        <div className="mh-ask-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) closeAsk(); }}>
+                            <div className="mh-ask-panel" role="dialog" aria-modal="true" aria-labelledby="mh-ask-title">
+                                <button type="button" className="mh-modal-close" onClick={closeAsk} aria-label="סגור" data-tracking-name="ask_close"><i className="fas fa-times"></i></button>
+                                <h2 id="mh-ask-title">שאלות ותשובות</h2>
+                                <p className="mh-ask-greeting">שלום. כאן אפשר לקרוא תשובות נפוצות, או לשאול שאלה. אחזור אליכם בהקדם.</p>
+                                <p className="mh-ask-disclaimer">
+                                    זה לא ייעוץ רפואי ולא תחליף לטיפול. במצב חירום או מצוקה מיידית חייגו{' '}
+                                    <a href="tel:1201" data-tracking-name="ask_eran_1201" data-analytics-type="phone">1201</a>.
+                                </p>
+                                <div className="mh-ask-scroll">
+                                    {faqBusy && <p className="mh-ask-empty">טוענים תשובות נפוצות…</p>}
+                                    {!faqBusy && faqItems.length === 0 && (
+                                        <p className="mh-ask-empty">עדיין אין שאלות נפוצות.</p>
+                                    )}
+                                    {faqItems.map((item) => (
+                                        <div key={item.id} className="mh-ask-faq-item">
+                                            <button
+                                                type="button"
+                                                className="mh-ask-faq-q"
+                                                aria-expanded={faqOpenId === item.id}
+                                                onClick={() => setFaqOpenId((id) => id === item.id ? null : item.id)}
+                                                data-tracking-name="ask_faq_toggle"
+                                            >
+                                                <span>{item.question}</span>
+                                                <i className={`fas ${faqOpenId === item.id ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true"></i>
+                                            </button>
+                                            {faqOpenId === item.id && <div className="mh-ask-faq-a">{item.answer}</div>}
+                                        </div>
+                                    ))}
+                                    {askThread.map((msg, i) => (
+                                        <div key={i} className={`mh-ask-bubble ${msg.from === 'user' ? 'mh-ask-bubble-user' : 'mh-ask-bubble-assistant'}`}>
+                                            {msg.text}
+                                        </div>
+                                    ))}
+                                </div>
+                                {askError && <p className="mh-auth-error">{askError}</p>}
+                                {authUser ? (
+                                    <form className="mh-ask-composer" onSubmit={submitAsk}>
+                                        <label htmlFor="mh-ask-text" className="visually-hidden" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>שאלה</label>
+                                        <textarea
+                                            id="mh-ask-text"
+                                            value={askText}
+                                            onChange={(e) => setAskText(e.target.value)}
+                                            maxLength={2000}
+                                            required
+                                            placeholder="כתבו כאן את השאלה…"
+                                        />
+                                        <button type="submit" className="mh-btn mh-ask-send" disabled={askBusy} data-tracking-name="ask_submit">
+                                            {askBusy ? 'שולחים…' : 'שליחה'}
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="mh-ask-gate" role="status">
+                                        <p>אפשרות לשאול שאלה זמינה למשתמשים רשומים בלבד. אפשר לקרוא את התשובות הנפוצות בלי חשבון.</p>
+                                        <div className="mh-ask-gate-actions">
+                                            <button type="button" className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} onClick={() => openAuth('login')} data-tracking-name="ask_gate_login">כניסה</button>
+                                            <button type="button" className="mh-btn" style={{ background: 'transparent', color: 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => openAuth('register')} data-tracking-name="ask_gate_register">הרשמה</button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>

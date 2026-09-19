@@ -84,7 +84,16 @@
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
     .badge.warn { background: #fdf3e7; color: #8a5a12; }
     .badge.ok { background: #e7f6ee; color: #1e7a4a; }
+    .badge.muted { background: #eef2f5; color: var(--muted); }
     .muted { color: var(--muted); }
+    .qcard { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: #fff; }
+    .qcard .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+    .qcard .qtext { white-space: pre-wrap; margin: 0 0 12px; }
+    .qcard .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .qcard .publish { background: #eef4f8; border-radius: 8px; padding: 12px; }
+    .faq-edit { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+    .faq-edit .row-end { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+    .status-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     @media (max-width: 700px) {
       .filters .wide { grid-column: span 1; }
     }
@@ -125,13 +134,30 @@
       section_link_opened: 'פתיחת קישור מדור'
     };
 
+    const QSTATUS = {
+      open: 'פתוחה',
+      answered: 'טופלה',
+      published: 'פורסמה לשאלות נפוצות',
+      discarded: 'התעלמו'
+    };
+
     const app = document.getElementById('app');
+    function hashToTab() {
+      const h = (location.hash || '').replace(/^#/, '');
+      if (h === 'users' || h === 'questions') return h;
+      return 'analytics';
+    }
     const state = {
       user: null,
-      tab: location.hash === '#users' ? 'users' : 'analytics',
+      tab: hashToTab(),
       analytics: null,
       users: null,
       accounts: null,
+      questions: null,
+      faq: null,
+      questionStatus: 'open',
+      questionMsg: '',
+      faqMsg: '',
       days: 30,
       from: '',
       to: '',
@@ -246,6 +272,40 @@
       state.accounts = data.accounts || null;
     }
 
+    async function loadQuestions() {
+      const p = new URLSearchParams();
+      if (state.questionStatus) p.set('status', state.questionStatus);
+      const r = await fetch('/api/admin/questions?' + p.toString(), { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) {
+        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.questions = null;
+        return;
+      }
+      if (!r.ok) {
+        state.error = 'טעינת השאלות נכשלה.';
+        return;
+      }
+      state.error = '';
+      const data = await r.json();
+      state.questions = data.questions || [];
+    }
+
+    async function loadFaqAdmin() {
+      const r = await fetch('/api/admin/faq', { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) {
+        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.faq = null;
+        return;
+      }
+      if (!r.ok) {
+        state.error = 'טעינת השאלות הנפוצות נכשלה.';
+        return;
+      }
+      state.error = '';
+      const data = await r.json();
+      state.faq = data.items || [];
+    }
+
     function renderGate(message) {
       app.innerHTML = '';
       app.appendChild(el(`<div class="gate">
@@ -257,7 +317,7 @@
 
     function setTab(tab) {
       state.tab = tab;
-      location.hash = tab === 'users' ? 'users' : 'analytics';
+      location.hash = tab;
     }
 
     function barChart(rows) {
@@ -617,6 +677,219 @@
       root.querySelector('#csv').addEventListener('click', () => downloadUsersCsv(users));
     }
 
+    function statusBadge(status) {
+      const label = QSTATUS[status] || status;
+      const cls = status === 'open' ? 'warn' : status === 'discarded' ? 'muted' : 'ok';
+      return `<span class="badge ${cls}">${esc(label)}</span>`;
+    }
+
+    async function patchQuestion(id, body) {
+      const r = await fetch('/api/admin/questions', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...body })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'נכשל');
+      return data;
+    }
+
+    async function saveFaq(method, body) {
+      const r = await fetch('/api/admin/faq', {
+        method,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'נכשל');
+      return data;
+    }
+
+    function renderQuestions(root) {
+      const questions = state.questions || [];
+      const faq = state.faq || [];
+      const filters = [
+        ['open', 'פתוחות'],
+        ['answered', 'טופלו'],
+        ['published', 'פורסמו'],
+        ['discarded', 'התעלמו'],
+        ['', 'הכול']
+      ].map(([v, label]) =>
+        `<button type="button" class="${state.questionStatus === v ? '' : 'secondary'}" data-status="${esc(v)}">${esc(label)}</button>`
+      ).join('');
+
+      root.innerHTML = `
+        <p class="lede">שאלות ממשתמשים רשומים. מענה במייל מחוץ לאתר, ואפשר לפרסם תשובה לשאלות הנפוצות.</p>
+        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
+        ${state.questionMsg ? `<p class="ok">${esc(state.questionMsg)}</p>` : ''}
+        <div class="status-filters">${filters}</div>
+        ${questions.length ? questions.map((q) => {
+          const mailto = `mailto:${q.askerEmail}?subject=${encodeURIComponent('תשובה לשאלה במדריך נפש')}`;
+          return `<div class="qcard" data-id="${esc(q.id)}">
+            <div class="meta">
+              ${statusBadge(q.status)}
+              <span>${esc(fmtDate(q.createdAt))}</span>
+              <a href="${esc(mailto)}">${esc(q.askerEmail)}</a>
+            </div>
+            <p class="qtext">${esc(q.question)}</p>
+            <label>הערות פנימיות</label>
+            <textarea class="notes">${esc(q.adminNotes || '')}</textarea>
+            <div class="actions">
+              <button type="button" class="secondary" data-act="notes">שמירת הערות</button>
+              ${q.status === 'open' ? '<button type="button" data-act="answered">סמן כטופל</button>' : ''}
+              ${q.status !== 'discarded' ? '<button type="button" class="secondary" data-act="discarded">התעלם</button>' : ''}
+            </div>
+            ${q.status === 'published' ? '<p class="muted">פורסמה לשאלות נפוצות.</p>' : `<form class="publish" data-publish="${esc(q.id)}">
+              <label>שאלה לשאלות נפוצות</label>
+              <input type="text" class="faq-q" value="${esc(q.question.slice(0, 500))}">
+              <label>תשובה</label>
+              <textarea class="faq-a" placeholder="התשובה שתוצג לכולם"></textarea>
+              <button type="submit">פרסם לשאלות נפוצות</button>
+            </form>`}
+          </div>`;
+        }).join('') : '<p class="lede">אין שאלות בסטטוס הזה.</p>'}
+
+        <h2>שאלות נפוצות</h2>
+        ${state.faqMsg ? `<p class="ok">${esc(state.faqMsg)}</p>` : ''}
+        <div class="card">
+          <h3>הוספה ידנית</h3>
+          <form id="faq-new">
+            <label for="faq-new-q">שאלה</label>
+            <input id="faq-new-q" type="text" required maxlength="500">
+            <label for="faq-new-a">תשובה</label>
+            <textarea id="faq-new-a" required></textarea>
+            <button type="submit">פרסום</button>
+          </form>
+        </div>
+        ${faq.length ? faq.map((item) => `<form class="faq-edit" data-faq-id="${esc(item.id)}">
+          <div class="meta" style="margin-bottom:8px">${item.published ? '<span class="badge ok">מפורסם</span>' : '<span class="badge warn">מוסתר</span>'}</div>
+          <label>שאלה</label>
+          <input type="text" class="faq-q" value="${esc(item.question)}" maxlength="500" required>
+          <label>תשובה</label>
+          <textarea class="faq-a" required>${esc(item.answer)}</textarea>
+          <div class="row-end">
+            <button type="submit">שמירה</button>
+            <button type="button" class="secondary" data-act="toggle">${item.published ? 'הסתרה' : 'פרסום מחדש'}</button>
+          </div>
+        </form>`).join('') : '<p class="lede">עדיין אין שאלות נפוצות.</p>'}
+      `;
+
+      root.querySelectorAll('.status-filters button').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          state.questionStatus = btn.getAttribute('data-status') || '';
+          state.questionMsg = '';
+          await loadQuestions();
+          render();
+        });
+      });
+
+      root.querySelectorAll('.qcard').forEach((card) => {
+        const id = card.getAttribute('data-id');
+        const notesEl = card.querySelector('.notes');
+        card.querySelectorAll('[data-act]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const act = btn.getAttribute('data-act');
+            btn.disabled = true;
+            try {
+              if (act === 'notes') await patchQuestion(id, { adminNotes: notesEl.value });
+              else await patchQuestion(id, { status: act, adminNotes: notesEl.value });
+              state.questionMsg = 'נשמר.';
+              await loadQuestions();
+              render();
+            } catch (e) {
+              state.questionMsg = '';
+              state.error = e.message || 'נכשל';
+              render();
+            }
+          });
+        });
+        const pub = card.querySelector('[data-publish]');
+        if (pub) {
+          pub.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = pub.querySelector('button[type=submit]');
+            btn.disabled = true;
+            try {
+              await saveFaq('POST', {
+                question: pub.querySelector('.faq-q').value.trim(),
+                answer: pub.querySelector('.faq-a').value.trim(),
+                sourceQuestionId: id
+              });
+              state.questionMsg = 'פורסם לשאלות נפוצות.';
+              state.faqMsg = '';
+              await loadQuestions();
+              await loadFaqAdmin();
+              render();
+            } catch (e) {
+              state.error = e.message || 'נכשל';
+              render();
+            }
+          });
+        }
+      });
+
+      const faqNew = root.querySelector('#faq-new');
+      faqNew.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const btn = faqNew.querySelector('button[type=submit]');
+        btn.disabled = true;
+        try {
+          await saveFaq('POST', {
+            question: root.querySelector('#faq-new-q').value.trim(),
+            answer: root.querySelector('#faq-new-a').value.trim()
+          });
+          state.faqMsg = 'פורסם.';
+          await loadFaqAdmin();
+          render();
+        } catch (e) {
+          state.faqMsg = '';
+          state.error = e.message || 'נכשל';
+          render();
+        }
+      });
+
+      root.querySelectorAll('.faq-edit').forEach((form) => {
+        const id = form.getAttribute('data-faq-id');
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const btn = form.querySelector('button[type=submit]');
+          btn.disabled = true;
+          try {
+            await saveFaq('PATCH', {
+              id,
+              question: form.querySelector('.faq-q').value.trim(),
+              answer: form.querySelector('.faq-a').value.trim()
+            });
+            state.faqMsg = 'נשמר.';
+            await loadFaqAdmin();
+            render();
+          } catch (e) {
+            state.faqMsg = '';
+            state.error = e.message || 'נכשל';
+            render();
+          }
+        });
+        form.querySelector('[data-act=toggle]').addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          const btn = ev.currentTarget;
+          btn.disabled = true;
+          const published = !faq.find((f) => f.id === id)?.published;
+          try {
+            await saveFaq('PATCH', { id, published });
+            state.faqMsg = published ? 'פורסם מחדש.' : 'הוסתר.';
+            await loadFaqAdmin();
+            render();
+          } catch (e) {
+            state.faqMsg = '';
+            state.error = e.message || 'נכשל';
+            render();
+          }
+        });
+      });
+    }
+
     function render() {
       if (!state.user) {
         renderGate('יש להיכנס לחשבון במדריך ואז לחזור לכאן. העמוד מיועד למפעילים בלבד.');
@@ -634,6 +907,10 @@
         renderGate(state.error);
         return;
       }
+      if (state.error && state.questions == null && state.tab === 'questions') {
+        renderGate(state.error);
+        return;
+      }
 
       app.innerHTML = '';
       const wrap = el(`<div>
@@ -645,6 +922,7 @@
         <div class="tabs">
           <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">אנליטיקה</button>
           <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">משתמשים רשומים</button>
+          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
@@ -655,20 +933,29 @@
           setTab(tab);
           if (tab === 'users' && !state.users) await loadUsers();
           if (tab === 'analytics' && !state.analytics) await loadAnalytics();
+          if (tab === 'questions') {
+            if (!state.questions) await loadQuestions();
+            if (!state.faq) await loadFaqAdmin();
+          }
           render();
         });
       });
       const body = wrap.querySelector('#tabbody');
       if (state.tab === 'users') renderUsers(body);
+      else if (state.tab === 'questions') renderQuestions(body);
       else renderAnalytics(body);
     }
 
     window.addEventListener('hashchange', async () => {
-      const next = location.hash === '#users' ? 'users' : 'analytics';
+      const next = hashToTab();
       if (next === state.tab) return;
       state.tab = next;
       if (next === 'users' && !state.users) await loadUsers();
       if (next === 'analytics' && !state.analytics) await loadAnalytics();
+      if (next === 'questions') {
+        if (!state.questions) await loadQuestions();
+        if (!state.faq) await loadFaqAdmin();
+      }
       render();
     });
 
@@ -677,7 +964,10 @@
         await loadSession();
         if (state.user && state.user.isAdmin) {
           if (state.tab === 'users') await loadUsers();
-          else await loadAnalytics();
+          else if (state.tab === 'questions') {
+            await loadQuestions();
+            await loadFaqAdmin();
+          } else await loadAnalytics();
         }
         render();
       } catch (e) {

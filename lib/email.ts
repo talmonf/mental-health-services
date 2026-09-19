@@ -1,6 +1,7 @@
 import type { Client } from 'pg';
 import { appUrl } from './db';
 import { insertToken } from './tokens';
+import { adminEmailList } from './users';
 
 const CONFIRM_TTL_MS = 48 * 60 * 60 * 1000;
 const UNSUBSCRIBE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
@@ -122,10 +123,60 @@ export async function enqueueWeeklyEmails(client: Client): Promise<number> {
   return n;
 }
 
+export async function enqueueQuestionAdminEmails(
+  client: Client,
+  opts: { questionId: string; askerEmail: string; question: string }
+): Promise<number> {
+  const { rows: admins } = await client.query(`SELECT id::text, email FROM users WHERE is_admin = true`);
+  const recipients: { id: string | null; email: string }[] = [];
+  const seen = new Set<string>();
+  for (const row of admins) {
+    const email = String(row.email || '').toLowerCase();
+    if (!email || seen.has(email)) continue;
+    seen.add(email);
+    recipients.push({ id: row.id, email });
+  }
+  for (const extra of adminEmailList()) {
+    if (seen.has(extra)) continue;
+    seen.add(extra);
+    recipients.push({ id: null, email: extra });
+  }
+  if (!recipients.length) return 0;
+
+  const adminUrl = `${appUrl()}/admin#questions`;
+  const mailto = `mailto:${opts.askerEmail}?subject=${encodeURIComponent('תשובה לשאלה במדריך נפש')}`;
+  const payloadBase = {
+    askerEmail: opts.askerEmail,
+    question: opts.question,
+    questionId: opts.questionId,
+    mailto,
+    adminUrl,
+  };
+
+  let n = 0;
+  for (const r of recipients) {
+    await client.query(
+      `INSERT INTO email_outbox (user_id, kind, payload)
+       VALUES ($1, 'question_admin', $2::jsonb)`,
+      [
+        r.id,
+        JSON.stringify({
+          ...payloadBase,
+          to: r.email,
+        }),
+      ]
+    );
+    n += 1;
+  }
+  return n;
+}
+
+type OutboxKind = 'confirm' | 'immediate' | 'weekly' | 'question_admin';
+
 type OutboxRow = {
   id: string;
   user_id: string | null;
-  kind: 'confirm' | 'immediate' | 'weekly';
+  kind: OutboxKind;
   payload: Record<string, unknown>;
   email: string | null;
 };
@@ -162,6 +213,34 @@ async function renderOutbox(
 ): Promise<{ to: string; subject: string; text: string; html: string } | null> {
   const to = (typeof row.payload.to === 'string' && row.payload.to) || row.email;
   if (!to) return null;
+
+  if (row.kind === 'question_admin') {
+    const asker = String(row.payload.askerEmail || '');
+    const question = String(row.payload.question || '');
+    const adminUrl = String(row.payload.adminUrl || `${appUrl()}/admin#questions`);
+    const mailto = String(row.payload.mailto || (asker ? `mailto:${asker}` : ''));
+    const subject = 'שאלה חדשה במדריך נפש';
+    const text = [
+      'התקבלה שאלה חדשה במדריך נפש.',
+      '',
+      `מאת: ${asker}`,
+      '',
+      question,
+      '',
+      mailto ? `מענה במייל: ${mailto}` : '',
+      `לרשימת השאלות: ${adminUrl}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const html = wrapHtml(
+      `<p>התקבלה שאלה חדשה במדריך נפש.</p>
+       <p><strong>מאת:</strong> ${escapeHtml(asker)}</p>
+       <p style="white-space:pre-wrap">${escapeHtml(question)}</p>
+       <p>${mailto ? `<a href="${escapeHtml(mailto)}">מענה במייל</a> · ` : ''}<a href="${escapeHtml(adminUrl)}">לרשימת השאלות</a></p>`
+    );
+    return { to, subject, text, html };
+  }
+
   const unsub = row.user_id ? await unsubscribeUrl(client, row.user_id) : '';
   const unsubLine = unsub
     ? `\n\nלהסרה מרשימת התפוצה: ${unsub}`

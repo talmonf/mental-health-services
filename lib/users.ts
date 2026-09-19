@@ -80,12 +80,15 @@ export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
   };
 }
 
-export function isAdminEmail(email: string): boolean {
-  const list = (process.env.ADMIN_EMAILS || '')
+export function adminEmailList(): string[] {
+  return (process.env.ADMIN_EMAILS || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  return list.includes(email.toLowerCase());
+}
+
+export function isAdminEmail(email: string): boolean {
+  return adminEmailList().includes(email.toLowerCase());
 }
 
 export async function userIsAdmin(client: Client, userId: string): Promise<boolean> {
