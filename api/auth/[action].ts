@@ -25,13 +25,15 @@ import {
   verifyPassword,
 } from '../../lib/auth';
 import { appUrl, pgClient } from '../../lib/db';
-import { enqueueConfirmEmail, processOutbox } from '../../lib/email';
+import { enqueueConfirmEmail, enqueueRegisterAdminEmails, processOutbox } from '../../lib/email';
 import { findValidToken } from '../../lib/tokens';
 import {
   isAdminEmail,
   isEmailPreference,
   isFoundVia,
   isQualification,
+  licenseNumberError,
+  parseLicenseNumber,
   publicUserFromRow,
   touchLastAccess,
   USER_PUBLIC_COLUMNS,
@@ -50,6 +52,7 @@ function jwtFallbackUser(jwtUser: { id: string; email: string; isAdmin: boolean 
     country: '',
     city: null,
     qualification: 'other',
+    licenseNumber: null,
     organization: '',
     title: '',
     foundVia: 'other',
@@ -78,6 +81,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
   const city = typeof body.city === 'string' ? body.city.trim() : '';
   const organization = typeof body.organization === 'string' ? body.organization.trim() : '';
   const title = typeof body.title === 'string' ? body.title.trim() : '';
+  const licenseNumber = parseLicenseNumber(body.licenseNumber);
   const foundViaOther = typeof body.foundViaOther === 'string' ? body.foundViaOther.trim() : '';
   const consent = body.consent === true;
   const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : 'weekly';
@@ -87,6 +91,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
   if (weakPassword) return res.status(400).json({ error: weakPassword });
   if (!country) return res.status(400).json({ error: 'Country is required' });
   if (!isQualification(body.qualification)) return res.status(400).json({ error: 'Invalid qualification' });
+  const licenseErr = licenseNumberError(body.qualification, licenseNumber);
+  if (licenseErr) return res.status(400).json({ error: licenseErr });
   if (!organization) return res.status(400).json({ error: 'Organization is required' });
   if (!title) return res.status(400).json({ error: 'Title is required' });
   if (!isFoundVia(body.foundVia)) return res.status(400).json({ error: 'Invalid foundVia' });
@@ -105,9 +111,9 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     await client.connect();
     const inserted = await client.query(
       `INSERT INTO users (
-         email, password_hash, is_admin, country, city, qualification,
+         email, password_hash, is_admin, country, city, qualification, license_number,
          organization, title, found_via, found_via_other, email_preference
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        RETURNING ${USER_PUBLIC_COLUMNS}`,
       [
         email,
@@ -116,6 +122,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
         country.slice(0, 100),
         city ? city.slice(0, 100) : null,
         body.qualification,
+        licenseNumber || null,
         organization.slice(0, 200),
         title.slice(0, 200),
         body.foundVia,
@@ -125,7 +132,24 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     );
     const user = publicUserFromRow(inserted.rows[0]);
     await enqueueConfirmEmail(client, { id: user.id, email: user.email });
-    const send = await processOutbox(client);
+    try {
+      await enqueueRegisterAdminEmails(client, {
+        email: user.email,
+        country: user.country,
+        city: user.city,
+        qualification: user.qualification,
+        licenseNumber: user.licenseNumber,
+        organization: user.organization,
+        title: user.title,
+        foundVia: user.foundVia,
+        foundViaOther: user.foundViaOther,
+        emailPreference: user.emailPreference,
+      });
+    } catch (err) {
+      console.error('register admin email failed', err);
+    }
+    const send = await processOutbox(client, 20, { userId: user.id, kind: 'confirm' });
+    await processOutbox(client);
     await touchLastAccess(client, user.id);
     const token = await signSession({ id: user.id, email: user.email, isAdmin: user.isAdmin });
     setSessionCookie(res, token);
@@ -300,6 +324,13 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
     const qualification = isQualification(body.qualification) ? body.qualification : null;
     const emailPreference = isEmailPreference(body.emailPreference) ? body.emailPreference : null;
     const hideIntro = typeof body.hideIntro === 'boolean' ? body.hideIntro : null;
+    const licenseRaw = body.licenseNumber;
+    const licenseNumber =
+      licenseRaw === null || licenseRaw === undefined
+        ? undefined
+        : typeof licenseRaw === 'string'
+          ? licenseRaw.trim()
+          : null;
 
     if (country !== null && country.length === 0) {
       return res.status(400).json({ error: 'Country is required' });
@@ -311,6 +342,19 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Title is required' });
     }
 
+    const current = await client.query(
+      `SELECT qualification, license_number FROM users WHERE id = $1`,
+      [jwtUser.id]
+    );
+    if (!current.rows[0]) return res.status(401).json({ error: 'Unauthorized' });
+    const nextQual = qualification || String(current.rows[0].qualification || '');
+    const nextLicense =
+      licenseNumber === undefined
+        ? parseLicenseNumber(current.rows[0].license_number)
+        : licenseNumber || '';
+    const licenseErr = licenseNumberError(nextQual, nextLicense);
+    if (licenseErr) return res.status(400).json({ error: licenseErr });
+
     const { rows } = await client.query(
       `UPDATE users SET
          country = COALESCE($2, country),
@@ -320,6 +364,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
          title = COALESCE($6, title),
          email_preference = COALESCE($7, email_preference),
          hide_intro = COALESCE($8::boolean, hide_intro),
+         license_number = CASE WHEN $9::text = '__omit' THEN license_number WHEN $9 = '' THEN NULL ELSE $9 END,
          updated_at = now()
        WHERE id = $1
        RETURNING ${USER_PUBLIC_COLUMNS}`,
@@ -332,6 +377,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
         title ? title.slice(0, 200) : null,
         emailPreference,
         hideIntro,
+        licenseNumber === undefined ? '__omit' : nextLicense,
       ]
     );
     if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });

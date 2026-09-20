@@ -52,6 +52,61 @@ function wrapHtml(body: string): string {
   return `<!DOCTYPE html><html lang="he" dir="rtl"><body style="font-family:Heebo,Arial,sans-serif;line-height:1.6;color:#333;max-width:640px;margin:0 auto;padding:16px">${body}<p style="font-size:0.85rem;color:#5a5a5a;margin-top:32px">מדריך נפש · <a href="https://nefesh-il.org">nefesh-il.org</a></p></body></html>`;
 }
 
+const QUAL_HE: Record<string, string> = {
+  social_worker: 'עובד/ת סוציאלי/ת',
+  psychologist: 'פסיכולוג/ית',
+  psychiatrist: 'פסיכיאטר/ית',
+  therapist: 'מטפל/ת / יועץ/ת',
+  nurse: 'אח/ות',
+  peer_supporter: 'עמית/ת תומך/ת',
+  student: 'סטודנט/ית',
+  family_self: 'בן/בת משפחה או מתמודד/ת',
+  other: 'אחר',
+};
+
+const FOUND_VIA_HE: Record<string, string> = {
+  google: 'גוגל',
+  facebook_instagram: 'פייסבוק / אינסטגרם',
+  whatsapp: 'וואטסאפ',
+  colleague: 'עמית/ה לעבודה',
+  university: 'לימודים / הכשרה',
+  organization: 'הארגון שבו אני עובד/ת',
+  media: 'תקשורת',
+  other: 'אחר',
+};
+
+const PREF_HE: Record<string, string> = {
+  none: 'בלי עדכונים',
+  weekly: 'סיכום שבועי',
+  immediate: 'כשזה קורה',
+};
+
+function dash(v: unknown): string {
+  const s = typeof v === 'string' ? v.trim() : '';
+  return s || '—';
+}
+
+function registerAdminLines(payload: Record<string, unknown>): { label: string; value: string }[] {
+  const qualification = String(payload.qualification || '');
+  const foundVia = String(payload.foundVia || '');
+  const foundViaOther = typeof payload.foundViaOther === 'string' ? payload.foundViaOther.trim() : '';
+  const pref = String(payload.emailPreference || '');
+  const lines: { label: string; value: string }[] = [
+    { label: 'אימייל', value: dash(payload.email) },
+    { label: 'מדינה', value: dash(payload.country) },
+    { label: 'עיר', value: dash(payload.city) },
+    { label: 'הכשרה', value: QUAL_HE[qualification] || dash(qualification) },
+    { label: 'מספר רישוי', value: dash(payload.licenseNumber) },
+    { label: 'ארגון', value: dash(payload.organization) },
+    { label: 'תפקיד בארגון', value: dash(payload.title) },
+    { label: 'איך הגיעו לאתר', value: FOUND_VIA_HE[foundVia] || dash(foundVia) },
+  ];
+  if (foundViaOther) lines.push({ label: 'פירוט', value: foundViaOther });
+  lines.push({ label: 'עדכונים על שינויים באתר', value: PREF_HE[pref] || dash(pref) });
+  lines.push({ label: 'הסכמה לתנאי הרישום', value: 'אושרה' });
+  return lines;
+}
+
 export async function enqueueConfirmEmail(client: Client, user: { id: string; email: string }): Promise<void> {
   const raw = await insertToken(client, user.id, 'confirm', CONFIRM_TTL_MS);
   const url = `${appUrl()}/api/auth/confirm?token=${encodeURIComponent(raw)}`;
@@ -123,10 +178,7 @@ export async function enqueueWeeklyEmails(client: Client): Promise<number> {
   return n;
 }
 
-export async function enqueueQuestionAdminEmails(
-  client: Client,
-  opts: { questionId: string; askerEmail: string; question: string }
-): Promise<number> {
+async function adminRecipients(client: Client): Promise<{ id: string | null; email: string }[]> {
   const { rows: admins } = await client.query(`SELECT id::text, email FROM users WHERE is_admin = true`);
   const recipients: { id: string | null; email: string }[] = [];
   const seen = new Set<string>();
@@ -141,6 +193,14 @@ export async function enqueueQuestionAdminEmails(
     seen.add(extra);
     recipients.push({ id: null, email: extra });
   }
+  return recipients;
+}
+
+export async function enqueueQuestionAdminEmails(
+  client: Client,
+  opts: { questionId: string; askerEmail: string; question: string }
+): Promise<number> {
+  const recipients = await adminRecipients(client);
   if (!recipients.length) return 0;
 
   const adminUrl = `${appUrl()}/admin#questions`;
@@ -158,6 +218,50 @@ export async function enqueueQuestionAdminEmails(
     await client.query(
       `INSERT INTO email_outbox (user_id, kind, payload)
        VALUES ($1, 'question_admin', $2::jsonb)`,
+      [
+        r.id,
+        JSON.stringify({
+          ...payloadBase,
+          to: r.email,
+        }),
+      ]
+    );
+    n += 1;
+  }
+  return n;
+}
+
+export type RegisterAdminDetails = {
+  email: string;
+  country: string;
+  city: string | null;
+  qualification: string;
+  licenseNumber: string | null;
+  organization: string;
+  title: string;
+  foundVia: string;
+  foundViaOther: string | null;
+  emailPreference: string;
+};
+
+export async function enqueueRegisterAdminEmails(
+  client: Client,
+  opts: RegisterAdminDetails
+): Promise<number> {
+  const recipients = await adminRecipients(client);
+  if (!recipients.length) return 0;
+
+  const adminUrl = `${appUrl()}/admin#users`;
+  const payloadBase = {
+    ...opts,
+    adminUrl,
+  };
+
+  let n = 0;
+  for (const r of recipients) {
+    await client.query(
+      `INSERT INTO email_outbox (user_id, kind, payload)
+       VALUES ($1, 'register_admin', $2::jsonb)`,
       [
         r.id,
         JSON.stringify({
@@ -310,6 +414,7 @@ type OutboxKind =
   | 'immediate'
   | 'weekly'
   | 'question_admin'
+  | 'register_admin'
   | 'care_otp'
   | 'care_grant_invite'
   | 'care_grant_accepted'
@@ -446,6 +551,27 @@ async function renderOutbox(
        <p><strong>מאת:</strong> ${escapeHtml(asker)}</p>
        <p style="white-space:pre-wrap">${escapeHtml(question)}</p>
        <p>${mailto ? `<a href="${escapeHtml(mailto)}">מענה במייל</a> · ` : ''}<a href="${escapeHtml(adminUrl)}">לרשימת השאלות</a></p>`
+    );
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'register_admin') {
+    const adminUrl = String(row.payload.adminUrl || `${appUrl()}/admin#users`);
+    const lines = registerAdminLines(row.payload);
+    const subject = 'משתמש חדש נרשם במדריך נפש';
+    const text = ['נרשם משתמש חדש במדריך נפש.', '', ...lines.map((l) => `${l.label}: ${l.value}`), '', `לרשימת המשתמשים: ${adminUrl}`].join(
+      '\n'
+    );
+    const htmlRows = lines
+      .map(
+        (l) =>
+          `<tr><th style="text-align:right;padding:4px 12px 4px 0;color:#5a5a5a;font-weight:600;vertical-align:top">${escapeHtml(l.label)}</th><td style="padding:4px 0;white-space:pre-wrap">${escapeHtml(l.value)}</td></tr>`
+      )
+      .join('');
+    const html = wrapHtml(
+      `<p>נרשם משתמש חדש במדריך נפש.</p>
+       <table style="border-collapse:collapse">${htmlRows}</table>
+       <p><a href="${escapeHtml(adminUrl)}">לרשימת המשתמשים</a></p>`
     );
     return { to, subject, text, html };
   }

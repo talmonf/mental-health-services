@@ -2880,6 +2880,9 @@
             { value: 'family_self', label: 'בן/בת משפחה או מתמודד/ת' },
             { value: 'other', label: 'אחר' }
         ];
+        const MH_LICENSE_REQUIRED = ['psychiatrist', 'nurse', 'social_worker'];
+        const MH_LICENSE_MAX = 40;
+        const mhLicenseRequired = (q) => MH_LICENSE_REQUIRED.includes(q);
         const AUTH_FOUND_VIA = [
             { value: 'google', label: 'גוגל' },
             { value: 'facebook_instagram', label: 'פייסבוק / אינסטגרם' },
@@ -2896,6 +2899,7 @@
             country: 'ישראל',
             city: '',
             qualification: '',
+            licenseNumber: '',
             organization: '',
             title: '',
             foundVia: '',
@@ -2931,6 +2935,8 @@
                 'Organization is required': 'יש למלא ארגון',
                 'Title is required': 'יש למלא תפקיד',
                 'Invalid qualification': 'יש לבחור הכשרה',
+                'License number is required': 'יש למלא מספר רישוי',
+                'License number is too long': 'מספר הרישוי ארוך מדי',
                 'Invalid foundVia': 'יש לבחור איך הגעתם לאתר',
                 'Please describe how you found the site': 'יש לפרט איך הגעתם לאתר',
                 'Email already verified': 'הכתובת כבר אושרה',
@@ -3339,7 +3345,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "19.09.2026"; 
+            const LAST_UPDATED = "20.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -3829,6 +3835,7 @@
                         country: authUser.country || 'ישראל',
                         city: authUser.city || '',
                         qualification: authUser.qualification || '',
+                        licenseNumber: authUser.licenseNumber || '',
                         organization: authUser.organization || '',
                         title: authUser.title || '',
                         emailPreference: authUser.emailPreference || 'none'
@@ -3925,6 +3932,10 @@
                     setAuthError(pwErr);
                     return;
                 }
+                if (mhLicenseRequired(reg.qualification) && !String(reg.licenseNumber || '').trim()) {
+                    setAuthError('יש למלא מספר רישוי');
+                    return;
+                }
                 setAuthBusy(true);
                 setAuthError('');
                 try {
@@ -3937,6 +3948,7 @@
                             country: reg.country,
                             city: reg.city,
                             qualification: reg.qualification,
+                            licenseNumber: reg.licenseNumber,
                             organization: reg.organization,
                             title: reg.title,
                             foundVia: reg.foundVia,
@@ -3969,6 +3981,10 @@
             const submitProfile = async (ev) => {
                 ev.preventDefault();
                 if (!profile) return;
+                if (mhLicenseRequired(profile.qualification) && !String(profile.licenseNumber || '').trim()) {
+                    setAuthError('יש למלא מספר רישוי');
+                    return;
+                }
                 setAuthBusy(true);
                 setAuthError('');
                 try {
@@ -5792,6 +5808,10 @@
                                             </select>
                                         </div>
                                         <div className="mh-auth-field">
+                                            <label htmlFor="mh-reg-license">{mhLicenseRequired(reg.qualification) ? 'מספר רישוי' : 'מספר רישוי (לא חובה)'}</label>
+                                            <input id="mh-reg-license" type="text" maxLength={MH_LICENSE_MAX} required={mhLicenseRequired(reg.qualification)} value={reg.licenseNumber} onChange={(e) => setRegField('licenseNumber', e.target.value)} autoComplete="off" />
+                                        </div>
+                                        <div className="mh-auth-field">
                                             <label htmlFor="mh-reg-org">ארגון</label>
                                             <input id="mh-reg-org" type="text" required value={reg.organization} onChange={(e) => setRegField('organization', e.target.value)} />
                                         </div>
@@ -5858,6 +5878,10 @@
                                             <select id="mh-prof-qual" required value={profile.qualification} onChange={(e) => setProfile((p) => ({ ...p, qualification: e.target.value }))}>
                                                 {AUTH_QUALIFICATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                                             </select>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-license">{mhLicenseRequired(profile.qualification) ? 'מספר רישוי' : 'מספר רישוי (לא חובה)'}</label>
+                                            <input id="mh-prof-license" type="text" maxLength={MH_LICENSE_MAX} required={mhLicenseRequired(profile.qualification)} value={profile.licenseNumber || ''} onChange={(e) => setProfile((p) => ({ ...p, licenseNumber: e.target.value }))} autoComplete="off" />
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-prof-org">ארגון</label>

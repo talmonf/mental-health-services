@@ -418,7 +418,7 @@ async function handleUsers(req: VercelRequest, res: VercelResponse) {
     let where = '';
     if (q) {
       params.push(`%${q}%`);
-      where = `WHERE (email ILIKE $1 OR organization ILIKE $1 OR title ILIKE $1 OR coalesce(city, '') ILIKE $1 OR country ILIKE $1)`;
+      where = `WHERE (email ILIKE $1 OR organization ILIKE $1 OR title ILIKE $1 OR coalesce(city, '') ILIKE $1 OR country ILIKE $1 OR coalesce(license_number, '') ILIKE $1)`;
     }
 
     let rows;

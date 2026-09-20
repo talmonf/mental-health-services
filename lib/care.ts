@@ -2,6 +2,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import type { Client } from 'pg';
 import type { JwtUser } from './auth';
 import { sessionStillValid } from './auth';
+import { hashToken } from './tokens';
 
 export const CARE_SECTIONS = [
   'timeline',
@@ -354,7 +355,6 @@ export async function resolveFileAccess(
 }
 
 export async function resolveShareAccess(client: Client, rawToken: string): Promise<CareActor | null> {
-  const { hashToken } = await import('./tokens');
   const hash = hashToken(rawToken);
   const { rows } = await client.query(
     `SELECT l.id::text, l.file_id::text, l.sections, f.owner_id::text, u.email AS owner_email

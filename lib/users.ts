@@ -25,6 +25,10 @@ export const FOUND_VIA = [
 
 export const EMAIL_PREFERENCES = ['none', 'weekly', 'immediate'] as const;
 
+export const LICENSE_REQUIRED_QUALIFICATIONS = ['psychiatrist', 'nurse', 'social_worker'] as const;
+
+export const LICENSE_NUMBER_MAX = 40;
+
 export type Qualification = (typeof QUALIFICATIONS)[number];
 export type FoundVia = (typeof FOUND_VIA)[number];
 export type EmailPreference = (typeof EMAIL_PREFERENCES)[number];
@@ -36,6 +40,7 @@ export type PublicUser = {
   country: string;
   city: string | null;
   qualification: Qualification;
+  licenseNumber: string | null;
   organization: string;
   title: string;
   foundVia: FoundVia;
@@ -46,7 +51,7 @@ export type PublicUser = {
 };
 
 export const USER_PUBLIC_COLUMNS = `
-  id, email, is_admin, country, city, qualification, organization, title,
+  id, email, is_admin, country, city, qualification, license_number, organization, title,
   found_via, found_via_other, email_preference, email_verified_at, hide_intro
 `;
 
@@ -62,6 +67,24 @@ export function isEmailPreference(v: unknown): v is EmailPreference {
   return typeof v === 'string' && (EMAIL_PREFERENCES as readonly string[]).includes(v);
 }
 
+export function qualificationRequiresLicense(qualification: string): boolean {
+  return (LICENSE_REQUIRED_QUALIFICATIONS as readonly string[]).includes(qualification);
+}
+
+export function parseLicenseNumber(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : '';
+}
+
+export function licenseNumberError(qualification: string, licenseNumber: string): string | null {
+  if (qualificationRequiresLicense(qualification) && !licenseNumber) {
+    return 'License number is required';
+  }
+  if (licenseNumber.length > LICENSE_NUMBER_MAX) {
+    return 'License number is too long';
+  }
+  return null;
+}
+
 export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
   return {
     id: String(row.id),
@@ -70,6 +93,8 @@ export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
     country: String(row.country),
     city: row.city == null || row.city === '' ? null : String(row.city),
     qualification: row.qualification as Qualification,
+    licenseNumber:
+      row.license_number == null || row.license_number === '' ? null : String(row.license_number),
     organization: String(row.organization),
     title: String(row.title),
     foundVia: row.found_via as FoundVia,

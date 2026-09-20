@@ -80,7 +80,7 @@
     .hbar .fill { height: 100%; background: var(--primary); }
     .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: left; }
     .users-table-wrap { overflow-x: auto; }
-    .users-table-wrap table { min-width: 1100px; }
+    .users-table-wrap table { min-width: 1240px; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
     .badge.warn { background: #fdf3e7; color: #8a5a12; }
     .badge.ok { background: #e7f6ee; color: #1e7a4a; }
@@ -553,7 +553,7 @@
     }
 
     function downloadUsersCsv(users) {
-      const headers = ['אימייל','מדינה','עיר','הכשרה','ארגון','תפקיד','איך הגיעו','פירוט','העדפת מייל','אימות אימייל','תאריך אימות','מנהל','תאריך הרשמה','כניסה אחרונה'];
+      const headers = ['אימייל','מדינה','עיר','הכשרה','מספר רישוי','ארגון','תפקיד','איך הגיעו','פירוט','העדפת מייל','אימות אימייל','תאריך אימות','מנהל','תאריך הרשמה','כניסה אחרונה'];
       const lines = [headers.join(',')];
       for (const u of users) {
         lines.push([
@@ -561,6 +561,7 @@
           u.country,
           u.city,
           QUAL[u.qualification] || u.qualification,
+          u.licenseNumber,
           u.organization,
           u.title,
           FOUND[u.foundVia] || u.foundVia,
@@ -594,7 +595,7 @@
         <div class="card">
           <form id="userfilters" class="filters">
             <div class="wide">
-              <label for="userQ">חיפוש (אימייל, ארגון, תפקיד, עיר)</label>
+              <label for="userQ">חיפוש (אימייל, ארגון, תפקיד, עיר, מספר רישוי)</label>
               <input id="userQ" type="text" value="${esc(state.userQ)}" placeholder="חיפוש…">
             </div>
             <div>
@@ -626,13 +627,14 @@
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         <div class="card users-table-wrap">${
           table(
-            ['אימייל','מדינה','עיר','הכשרה','ארגון','תפקיד','איך הגיעו','העדפת מייל','אימות אימייל','הרשמה','כניסה אחרונה'],
+            ['אימייל','מדינה','עיר','הכשרה','מספר רישוי','ארגון','תפקיד','איך הגיעו','העדפת מייל','אימות אימייל','הרשמה','כניסה אחרונה'],
             users,
             (u) => [
               `${esc(u.email)}${u.isAdmin ? ' <span class="badge">מנהל</span>' : ''}`,
               esc(u.country),
               esc(u.city || ''),
               esc(QUAL[u.qualification] || u.qualification),
+              esc(u.licenseNumber || ''),
               esc(u.organization),
               esc(u.title),
               esc((FOUND[u.foundVia] || u.foundVia) + (u.foundViaOther ? ` (${u.foundViaOther})` : '')),
