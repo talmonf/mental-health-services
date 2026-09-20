@@ -19,7 +19,7 @@
 --                      long-run counts of "how many searches" stay correct; only the text
 --                      goes. Aggregates are preserved in search_query_monthly first.
 --
--- Run by /api/retention on a schedule (see vercel.json crons). The functions are idempotent
+-- Run by /api/cron/retention on a schedule (see vercel.json crons). The functions are idempotent
 -- and safe to run by hand.
 
 -- ---------------------------------------------------------------- aggregate first

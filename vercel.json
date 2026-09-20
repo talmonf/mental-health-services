@@ -6,11 +6,11 @@
   "trailingSlash": false,
   "crons": [
     {
-      "path": "/api/retention",
+      "path": "/api/cron/retention",
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/email-digest",
+      "path": "/api/cron/email-digest",
       "schedule": "0 4 * * 0"
     }
   ],
@@ -25,6 +25,14 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api/retention",
+      "destination": "/api/cron/retention"
+    },
+    {
+      "source": "/api/email-digest",
+      "destination": "/api/cron/email-digest"
+    },
     {
       "source": "/s/:row(\\d+)/:slug*",
       "destination": "/s/:row"

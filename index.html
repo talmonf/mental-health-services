@@ -115,15 +115,57 @@
         .mh-hero-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.75); color: white; }
         .mh-hero-btn-ghost:hover { background: rgba(255,255,255,0.12); }
         .mh-hero-btn-ghost:focus { outline: 2px solid #fff; outline-offset: 2px; }
-        .mh-auth-identity {
-            font-size: var(--text-sm);
-            opacity: 0.8;
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            pointer-events: none;
+        .mh-hero-account-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: var(--space-sm) var(--space-lg) 0;
         }
+        .mh-account { position: relative; }
+        .mh-account > .mh-btn { min-height: 40px; padding: 6px 12px; font-size: var(--text-sm); }
+        .mh-account-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 240px;
+            max-width: min(280px, calc(100vw - 32px));
+            background: #fff;
+            color: var(--text);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated);
+            z-index: 40;
+            padding: 6px 0;
+            text-align: right;
+        }
+        .mh-account-email {
+            padding: 8px 14px 10px;
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            word-break: break-all;
+            border-bottom: 1px solid var(--border);
+            line-height: 1.4;
+        }
+        .mh-account-menu button,
+        .mh-account-menu a {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: right;
+            background: none;
+            border: none;
+            border-radius: 0;
+            padding: 10px 14px;
+            color: var(--text);
+            font: inherit;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            min-height: 40px;
+        }
+        .mh-account-menu button:hover,
+        .mh-account-menu a:hover { background: var(--bg); }
+        .mh-account-menu button:focus,
+        .mh-account-menu a:focus { outline: 2px solid var(--primary); outline-offset: -2px; }
         .mh-verify-banner {
             background: #fdf3e7;
             color: #5c3d12;
@@ -690,6 +732,7 @@
         @media (min-width: 600px) {
             .mh-app { padding: var(--space-xl); }
             .mh-hero-inner { padding: var(--space-md) var(--space-xl); }
+            .mh-hero-account-bar { padding: var(--space-sm) var(--space-xl) 0; }
             .mh-hero-text h1 { font-size: var(--text-2xl); }
             .mh-hero-text p { font-size: var(--text-base); }
             .mh-card-inner { padding: var(--space-xl); }
@@ -3002,6 +3045,8 @@
             const [copiedSearchLink, setCopiedSearchLink] = useState(false);
             const copiedSearchTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
+            const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+            const accountMenuRef = useRef(null);
             const [showAuth, setShowAuth] = useState(false);
             const [authTab, setAuthTab] = useState('login');
             const [authBusy, setAuthBusy] = useState(false);
@@ -3827,7 +3872,25 @@
                     }
                 } catch (_) {}
             }, []);
+            useEffect(() => {
+                if (!accountMenuOpen) return;
+                const onDoc = (e) => {
+                    if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+                        setAccountMenuOpen(false);
+                    }
+                };
+                const onKey = (e) => {
+                    if (e.key === 'Escape') setAccountMenuOpen(false);
+                };
+                document.addEventListener('mousedown', onDoc);
+                document.addEventListener('keydown', onKey);
+                return () => {
+                    document.removeEventListener('mousedown', onDoc);
+                    document.removeEventListener('keydown', onKey);
+                };
+            }, [accountMenuOpen]);
             const openAuth = (tab) => {
+                setAccountMenuOpen(false);
                 setAuthError('');
                 setAuthTab(tab);
                 if (tab === 'profile' && authUser) {
@@ -4011,6 +4074,7 @@
                     await mhAuthFetch('/api/auth/logout', { method: 'POST' });
                 } catch (_) {}
                 setAuthUser(null);
+                setAccountMenuOpen(false);
                 closeAuth();
                 showToast('יצאתם מהחשבון');
             };
@@ -5643,6 +5707,40 @@
             return (
                 <div className="mh-app">
                     <div className="mh-hero" style={{ background: 'var(--primary)' }}>
+                        <div className="mh-hero-account-bar">
+                            <div className="mh-account" ref={accountMenuRef}>
+                                {authUser ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className="mh-btn mh-hero-btn-ghost"
+                                            aria-expanded={accountMenuOpen}
+                                            aria-haspopup="menu"
+                                            aria-controls="mh-account-menu"
+                                            onClick={() => setAccountMenuOpen((v) => !v)}
+                                            data-tracking-name="auth_account_menu"
+                                        >
+                                            <i className="fas fa-user"></i> החשבון שלי
+                                        </button>
+                                        {accountMenuOpen && (
+                                            <div id="mh-account-menu" className="mh-account-menu" role="menu">
+                                                <div className="mh-account-email">{authUser.email}</div>
+                                                <button type="button" role="menuitem" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
+                                                <a role="menuitem" href="/care" data-tracking-name="auth_care">התיק שלי</a>
+                                                {authUser.isAdmin && (
+                                                    <a role="menuitem" href="/admin" data-tracking-name="auth_admin">אדמין</a>
+                                                )}
+                                                <button type="button" role="menuitem" onClick={logout} data-tracking-name="auth_logout">יציאה</button>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('login')} data-tracking-name="auth_open">
+                                        <i className="fas fa-user"></i> כניסה / הרשמה
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <div className="mh-hero-inner">
                             <div className="mh-hero-text">
                                 <h1>מדריך בריאות הנפש בישראל</h1>
@@ -5683,19 +5781,6 @@
                                 <button type="button" onClick={openAsk} className="mh-btn mh-hero-btn-ghost" data-tracking-name="ask_open">
                                     <i className="fas fa-comments"></i> שאלה?
                                 </button>
-                                {authUser ? (
-                                    <>
-                                        <span className="mh-auth-identity" title={authUser.email}>{authUser.email}</span>
-                                        <a className="mh-btn mh-hero-btn-ghost" href="/care" style={{ textDecoration: 'none' }} data-tracking-name="auth_care">התיק שלי</a>
-                                        <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
-                                        {authUser.isAdmin && (
-                                            <a className="mh-btn mh-hero-btn-ghost" href="/admin" style={{ textDecoration: 'none' }} data-tracking-name="auth_admin">אדמין</a>
-                                        )}
-                                        <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={logout} data-tracking-name="auth_logout">יציאה</button>
-                                    </>
-                                ) : (
-                                    <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('login')} data-tracking-name="auth_open">כניסה / הרשמה</button>
-                                )}
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 /**
  * One Serverless Function for all /api/care/* routes.
- * Hobby deployments allow 12 functions; this is the twelfth.
+ * Hobby deployments allow 12 functions; keep new endpoints in an existing [action] file.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { Client } from 'pg';
