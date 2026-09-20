@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+  <html lang="en-GB" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,10 +64,16 @@
     .tabs button.active { color: var(--primary-dark); background: #eef4f8; }
     .filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; align-items: end; }
     .filters .wide { grid-column: span 2; }
-    .filters .check { grid-column: span 2; }
-    .filters .check label { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; }
-    .filters .check input { width: auto; margin: 0; }
-    .filters select[multiple] { min-height: 88px; }
+    .filters .exclude { grid-column: span 2; }
+    .filters .exclude-pair { display: flex; gap: 8px; align-items: stretch; }
+    .filters .exclude-pair select { flex: 1; min-width: 0; }
+    .filters .check-field {
+      display: flex; align-items: center; gap: 8px; margin: 0; flex: 0 0 auto;
+      padding: 8px 10px; border: 2px solid var(--border); border-radius: 8px;
+      background: #fff; font-weight: 600; box-sizing: border-box; cursor: pointer;
+      white-space: nowrap;
+    }
+    .filters .check-field input { width: auto; margin: 0; flex: none; }
     .chart { display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; overflow-x: auto; padding: 8px 0 0; }
     .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 22px; }
     .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: 120px; border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
@@ -105,7 +111,8 @@
     details.chrome summary { cursor: pointer; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
     [dir=auto] { unicode-bidi: plaintext; }
     @media (max-width: 700px) {
-      .filters .wide, .filters .check { grid-column: span 1; }
+      .filters .wide, .filters .exclude { grid-column: span 1; }
+      .filters .exclude-pair { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -270,13 +277,49 @@
       if (!v) return '—';
       const d = new Date(v);
       if (Number.isNaN(d.getTime())) return esc(String(v).slice(0, 16));
-      return d.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yyyy}, ${hh}:${min}`;
     }
     function fmtDay(v) {
       const s = String(v || '').slice(0, 10);
       if (!s) return '';
       const [y, m, d] = s.split('-');
-      return `${d}.${m}`;
+      return `${d}/${m}`;
+    }
+    function ymdToDmy(ymd) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ''));
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
+    }
+    function dmyToYmd(dmy) {
+      const s = String(dmy || '').trim();
+      if (!s) return '';
+      const m = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(s);
+      if (!m) return null;
+      const dd = m[1].padStart(2, '0');
+      const mm = m[2].padStart(2, '0');
+      const yyyy = m[3];
+      const dt = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
+      if (Number.isNaN(dt.getTime()) || dt.toISOString().slice(0, 10) !== `${yyyy}-${mm}-${dd}`) return null;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    const regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames
+      ? new Intl.DisplayNames(['en'], { type: 'region' })
+      : null;
+    function countryName(code) {
+      const c = String(code || '').trim();
+      if (!c || c === '(unknown)') return '(unknown)';
+      if (/^[A-Za-z]{2}$/.test(c) && regionNames) {
+        try {
+          return regionNames.of(c.toUpperCase()) || c.toUpperCase();
+        } catch {
+          return c.toUpperCase();
+        }
+      }
+      return c;
     }
     function table(headers, rows, cells) {
       if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
@@ -532,11 +575,11 @@
             </div>
             <div>
               <label for="from">From</label>
-              <input id="from" type="date" value="${esc(state.from)}">
+              <input id="from" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" value="${esc(ymdToDmy(state.from))}">
             </div>
             <div>
               <label for="to">To</label>
-              <input id="to" type="date" value="${esc(state.to)}">
+              <input id="to" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" value="${esc(ymdToDmy(state.to))}">
             </div>
             <div>
               <label for="eventType">Event type</label>
@@ -545,7 +588,7 @@
                 <option value="page_view">Page views</option>
                 <option value="search">Searches</option>
                 <option value="click">Clicks</option>
-                <option value="deep-link">Deep links</option>
+                <option value="deep-link">Shared links</option>
               </select>
             </div>
             <div>
@@ -571,7 +614,9 @@
             </div>
             <div>
               <label for="country">Country</label>
-              <select id="country">${optionList(opts.countries, state.country, 'All')}</select>
+              <select id="country"><option value="">All</option>${(opts.countries || []).map((c) =>
+                `<option value="${esc(c)}"${c === state.country ? ' selected' : ''}>${esc(countryName(c))}</option>`
+              ).join('')}</select>
             </div>
             <div>
               <label for="section">Section</label>
@@ -579,12 +624,15 @@
                 `<option value="${esc(o.value)}"${o.value === state.section ? ' selected' : ''}>${esc(o.label)}</option>`
               ).join('')}</select>
             </div>
-            <div class="wide">
+            <div class="exclude">
               <label for="excludeUsers">Exclude users</label>
-              <select id="excludeUsers" multiple>${excludeOptions}</select>
-            </div>
-            <div class="check">
-              <label><input id="excludeAdmins" type="checkbox"${state.excludeAdmins ? ' checked' : ''}> Exclude admin users</label>
+              <div class="exclude-pair">
+                <select id="excludeUsers" title="Hide events from this signed-in account. The checkbox drops all admin traffic.">
+                  <option value="">None</option>
+                  ${excludeOptions}
+                </select>
+                <label class="check-field"><input id="excludeAdmins" type="checkbox"${state.excludeAdmins ? ' checked' : ''}> Exclude admin users</label>
+              </div>
             </div>
             <div>
               <label>&nbsp;</label>
@@ -592,7 +640,7 @@
             </div>
           </form>
         </div>
-        ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
+        <p class="err" id="filtererr"${state.error ? '' : ' hidden'}>${esc(state.error)}</p>
         <div class="row" id="stats">
           <div class="stat"><b>${k.page_view || 0}</b><span>Page views</span></div>
           <div class="stat"><b>${k.unique_sessions || 0}</b><span>Unique sessions</span></div>
@@ -611,7 +659,7 @@
           </div>
           <div>
             <h2>Country</h2>
-            <div class="card">${hbars(d.byCountry)}</div>
+            <div class="card">${hbars((d.byCountry || []).map((r) => ({ key: countryName(r.key), n: r.n })))}</div>
           </div>
           <div>
             <h2>Section</h2>
@@ -674,7 +722,8 @@
           d.topSearches,
           (r) => [`<span dir="auto">${esc(r.search_query)}</span>`, r.n]
         )}</div>
-        <h2>Deep links</h2>
+        <h2>Shared links</h2>
+        <p class="lede">Copies and opens of a share URL for a search, a card, or a section — the links visitors send to someone else.</p>
         <div class="card">${table(
           ['Event', 'Count'],
           d.deepLinks,
@@ -700,14 +749,38 @@
       root.querySelector('#eventType').value = state.eventType;
       root.querySelector('#device').value = state.device;
       root.querySelector('#audience').value = state.audience;
+      root.querySelector('#excludeUsers').value = (state.excludeUserIds || [])[0] || '';
 
       root.querySelector('#filters').addEventListener('submit', async (ev) => {
         ev.preventDefault();
-        const from = root.querySelector('#from').value;
-        const to = root.querySelector('#to').value;
-        state.from = from;
-        state.to = to;
-        if (!(from && to)) state.days = Number(root.querySelector('#days').value) || 30;
+        const fromRaw = root.querySelector('#from').value;
+        const toRaw = root.querySelector('#to').value;
+        const from = dmyToYmd(fromRaw);
+        const to = dmyToYmd(toRaw);
+        const filterErr = (msg) => {
+          state.error = msg;
+          const existing = root.querySelector('#filtererr');
+          if (existing) {
+            existing.hidden = !msg;
+            existing.textContent = msg || '';
+          }
+        };
+        if (fromRaw && from == null) {
+          filterErr('From date must be DD/MM/YYYY.');
+          return;
+        }
+        if (toRaw && to == null) {
+          filterErr('To date must be DD/MM/YYYY.');
+          return;
+        }
+        if ((from && !to) || (!from && to)) {
+          filterErr('Enter both From and To dates, or leave both blank.');
+          return;
+        }
+        state.error = '';
+        state.from = from || '';
+        state.to = to || '';
+        if (!(state.from && state.to)) state.days = Number(root.querySelector('#days').value) || 30;
         state.eventType = root.querySelector('#eventType').value;
         state.device = root.querySelector('#device').value;
         state.audience = root.querySelector('#audience').value;
@@ -715,7 +788,8 @@
         state.section = root.querySelector('#section').value;
         state.filterUserId = root.querySelector('#filterUserId').value;
         state.excludeAdmins = root.querySelector('#excludeAdmins').checked;
-        state.excludeUserIds = Array.from(root.querySelector('#excludeUsers').selectedOptions).map((o) => o.value);
+        const excluded = root.querySelector('#excludeUsers').value;
+        state.excludeUserIds = excluded ? [excluded] : [];
         await loadAnalytics();
         render();
       });
@@ -773,7 +847,7 @@
       for (const u of users) {
         lines.push([
           u.email,
-          u.country,
+          countryName(u.country),
           u.city,
           QUAL[u.qualification] || u.qualification,
           u.licenseNumber,
@@ -846,7 +920,7 @@
             users,
             (u) => [
               `${esc(u.email)}${u.isAdmin ? ' <span class="badge">Admin</span>' : ''}`,
-              esc(u.country),
+              esc(countryName(u.country)),
               esc(u.city || ''),
               esc(QUAL[u.qualification] || u.qualification),
               esc(u.licenseNumber || ''),
@@ -873,7 +947,7 @@
           </div>
           <div>
             <h2>Country</h2>
-            <div class="card">${hbars(acc.byCountry)}</div>
+            <div class="card">${hbars((acc.byCountry || []).map((r) => ({ key: countryName(r.key), n: r.n })))}</div>
           </div>
           <div>
             <h2>Email preference</h2>
