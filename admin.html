@@ -93,8 +93,8 @@
     .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: right; }
     a.name-link { color: var(--primary); text-decoration: none; font-weight: 600; }
     a.name-link:hover { text-decoration: underline; }
-    .updates-he { direction: rtl; text-align: right; }
-    .updates-he th, .updates-he td { text-align: right; }
+    .he-panel { direction: rtl; text-align: right; }
+    .he-panel th, .he-panel td { text-align: right; }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
@@ -177,10 +177,10 @@
       intro_nefesh_achat_8944_en: 'Nefesh Achat *8944 (intro)'
     };
     const QSTATUS = {
-      open: 'Open',
-      answered: 'Answered',
-      published: 'Published to FAQ',
-      discarded: 'Discarded'
+      open: 'פתוחה',
+      answered: 'טופלה',
+      published: 'פורסמה לשאלות נפוצות',
+      discarded: 'התעלמו'
     };
     const CATEGORY_KEYS = [
       'emergency', 'helplines', 'portals', 'rights', 'moh', 'mod', 'mh_clinics', 'hmo',
@@ -501,7 +501,7 @@
         return;
       }
       if (!r.ok) {
-        state.error = 'Failed to load questions.';
+        state.error = 'טעינת השאלות נכשלה.';
         return;
       }
       state.error = '';
@@ -517,7 +517,7 @@
         return;
       }
       if (!r.ok) {
-        state.error = 'Failed to load FAQ.';
+        state.error = 'טעינת השאלות הנפוצות נכשלה.';
         return;
       }
       state.error = '';
@@ -820,8 +820,8 @@
     function renderUpdates(root) {
       const d = state.analytics || {};
       root.innerHTML = `
-        <div class="updates-he" lang="he">
-          <h2>פרסום עדכון באתר</h2>
+        <div class="he-panel" lang="he">
+          <h2>פרסום עדכונים</h2>
           <div class="card">
             <p class="lede">מנויי «כשזה קורה» מקבלים מיד. מנויי הסיכום השבועי מקבלים ביום ראשון. כלום לא נשלח לפני אישור הכתובת.</p>
             <form id="pub">
@@ -1018,7 +1018,7 @@
         body: JSON.stringify({ id, ...body })
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'Failed');
+      if (!r.ok) throw new Error(data.error || 'נכשל');
       return data;
     }
 
@@ -1030,7 +1030,7 @@
         body: JSON.stringify(body)
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'Failed');
+      if (!r.ok) throw new Error(data.error || 'נכשל');
       return data;
     }
 
@@ -1038,22 +1038,23 @@
       const questions = state.questions || [];
       const faq = state.faq || [];
       const filters = [
-        ['open', 'Open'],
-        ['answered', 'Answered'],
-        ['published', 'Published'],
-        ['discarded', 'Discarded'],
-        ['', 'All']
+        ['open', 'פתוחות'],
+        ['answered', 'טופלו'],
+        ['published', 'פורסמו'],
+        ['discarded', 'התעלמו'],
+        ['', 'הכול']
       ].map(([v, label]) =>
         `<button type="button" class="${state.questionStatus === v ? '' : 'secondary'}" data-status="${esc(v)}">${esc(label)}</button>`
       ).join('');
 
       root.innerHTML = `
-        <p class="lede">Questions from registered users. Reply by email outside the site, or publish an answer to the FAQ.</p>
+        <div class="he-panel" lang="he">
+        <p class="lede">שאלות ממשתמשים רשומים. מענה במייל מחוץ לאתר, ואפשר לפרסם תשובה לשאלות הנפוצות.</p>
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         ${state.questionMsg ? `<p class="ok">${esc(state.questionMsg)}</p>` : ''}
         <div class="status-filters">${filters}</div>
         ${questions.length ? questions.map((q) => {
-          const mailto = `mailto:${q.askerEmail}?subject=${encodeURIComponent('Reply to your question on the Nefesh directory')}`;
+          const mailto = `mailto:${q.askerEmail}?subject=${encodeURIComponent('תשובה לשאלה במדריך נפש')}`;
           return `<div class="qcard" data-id="${esc(q.id)}">
             <div class="meta">
               ${statusBadge(q.status)}
@@ -1061,46 +1062,47 @@
               <a href="${esc(mailto)}">${esc(q.askerEmail)}</a>
             </div>
             <p class="qtext" dir="auto">${esc(q.question)}</p>
-            <label>Internal notes</label>
+            <label>הערות פנימיות</label>
             <textarea class="notes" dir="auto">${esc(q.adminNotes || '')}</textarea>
             <div class="actions">
-              <button type="button" class="secondary" data-act="notes">Save notes</button>
-              ${q.status === 'open' ? '<button type="button" data-act="answered">Mark as answered</button>' : ''}
-              ${q.status !== 'discarded' ? '<button type="button" class="secondary" data-act="discarded">Discard</button>' : ''}
+              <button type="button" class="secondary" data-act="notes">שמירת הערות</button>
+              ${q.status === 'open' ? '<button type="button" data-act="answered">סמן כטופל</button>' : ''}
+              ${q.status !== 'discarded' ? '<button type="button" class="secondary" data-act="discarded">התעלם</button>' : ''}
             </div>
-            ${q.status === 'published' ? '<p class="muted">Published to FAQ.</p>' : `<form class="publish" data-publish="${esc(q.id)}">
-              <label>FAQ question</label>
+            ${q.status === 'published' ? '<p class="muted">פורסמה לשאלות נפוצות.</p>' : `<form class="publish" data-publish="${esc(q.id)}">
+              <label>שאלה לשאלות נפוצות</label>
               <input type="text" class="faq-q" dir="auto" value="${esc(q.question.slice(0, 500))}">
-              <label>Answer</label>
-              <textarea class="faq-a" dir="auto" placeholder="The answer shown to everyone"></textarea>
-              <button type="submit">Publish to FAQ</button>
+              <label>תשובה</label>
+              <textarea class="faq-a" dir="auto" placeholder="התשובה שתוצג לכולם"></textarea>
+              <button type="submit">פרסם לשאלות נפוצות</button>
             </form>`}
           </div>`;
-        }).join('') : '<p class="lede">No questions in this status.</p>'}
+        }).join('') : '<p class="lede">אין שאלות בסטטוס הזה.</p>'}
 
-        <h2>FAQ</h2>
+        <h2>שאלות נפוצות</h2>
         ${state.faqMsg ? `<p class="ok">${esc(state.faqMsg)}</p>` : ''}
         <div class="card">
-          <h3>Add manually</h3>
+          <h3>הוספה ידנית</h3>
           <form id="faq-new">
-            <label for="faq-new-q">Question</label>
+            <label for="faq-new-q">שאלה</label>
             <input id="faq-new-q" type="text" dir="auto" required maxlength="500">
-            <label for="faq-new-a">Answer</label>
+            <label for="faq-new-a">תשובה</label>
             <textarea id="faq-new-a" dir="auto" required></textarea>
-            <button type="submit">Publish</button>
+            <button type="submit">פרסום</button>
           </form>
         </div>
         ${faq.length ? faq.map((item) => `<form class="faq-edit" data-faq-id="${esc(item.id)}">
-          <div class="meta" style="margin-bottom:8px">${item.published ? '<span class="badge ok">Published</span>' : '<span class="badge warn">Hidden</span>'}</div>
-          <label>Question</label>
+          <div class="meta" style="margin-bottom:8px">${item.published ? '<span class="badge ok">מפורסם</span>' : '<span class="badge warn">מוסתר</span>'}</div>
+          <label>שאלה</label>
           <input type="text" class="faq-q" dir="auto" value="${esc(item.question)}" maxlength="500" required>
-          <label>Answer</label>
+          <label>תשובה</label>
           <textarea class="faq-a" dir="auto" required>${esc(item.answer)}</textarea>
           <div class="row-end">
-            <button type="submit">Save</button>
-            <button type="button" class="secondary" data-act="toggle">${item.published ? 'Hide' : 'Publish again'}</button>
+            <button type="submit">שמירה</button>
+            <button type="button" class="secondary" data-act="toggle">${item.published ? 'הסתרה' : 'פרסום מחדש'}</button>
           </div>
-        </form>`).join('') : '<p class="lede">No FAQ items yet.</p>'}
+        </form>`).join('') : '<p class="lede">עדיין אין שאלות נפוצות.</p>'}
+        </div>
       `;
 
       root.querySelectorAll('.status-filters button').forEach((btn) => {
@@ -1122,12 +1124,12 @@
             try {
               if (act === 'notes') await patchQuestion(id, { adminNotes: notesEl.value });
               else await patchQuestion(id, { status: act, adminNotes: notesEl.value });
-              state.questionMsg = 'Saved.';
+              state.questionMsg = 'נשמר.';
               await loadQuestions();
               render();
             } catch (e) {
               state.questionMsg = '';
-              state.error = e.message || 'Failed';
+              state.error = e.message || 'נכשל';
               render();
             }
           });
@@ -1144,13 +1146,13 @@
                 answer: pub.querySelector('.faq-a').value.trim(),
                 sourceQuestionId: id
               });
-              state.questionMsg = 'Published to FAQ.';
+              state.questionMsg = 'פורסם לשאלות נפוצות.';
               state.faqMsg = '';
               await loadQuestions();
               await loadFaqAdmin();
               render();
             } catch (e) {
-              state.error = e.message || 'Failed';
+              state.error = e.message || 'נכשל';
               render();
             }
           });
@@ -1167,12 +1169,12 @@
             question: root.querySelector('#faq-new-q').value.trim(),
             answer: root.querySelector('#faq-new-a').value.trim()
           });
-          state.faqMsg = 'Published.';
+          state.faqMsg = 'פורסם.';
           await loadFaqAdmin();
           render();
         } catch (e) {
           state.faqMsg = '';
-          state.error = e.message || 'Failed';
+          state.error = e.message || 'נכשל';
           render();
         }
       });
@@ -1189,12 +1191,12 @@
               question: form.querySelector('.faq-q').value.trim(),
               answer: form.querySelector('.faq-a').value.trim()
             });
-            state.faqMsg = 'Saved.';
+            state.faqMsg = 'נשמר.';
             await loadFaqAdmin();
             render();
           } catch (e) {
             state.faqMsg = '';
-            state.error = e.message || 'Failed';
+            state.error = e.message || 'נכשל';
             render();
           }
         });
@@ -1205,12 +1207,12 @@
           const published = !faq.find((f) => f.id === id)?.published;
           try {
             await saveFaq('PATCH', { id, published });
-            state.faqMsg = published ? 'Published again.' : 'Hidden.';
+            state.faqMsg = published ? 'פורסם מחדש.' : 'הוסתר.';
             await loadFaqAdmin();
             render();
           } catch (e) {
             state.faqMsg = '';
-            state.error = e.message || 'Failed';
+            state.error = e.message || 'נכשל';
             render();
           }
         });
@@ -1249,8 +1251,8 @@
         <div class="tabs">
           <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">Analytics</button>
           <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">Registered users</button>
-          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">Questions</button>
-          <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">עדכון באתר</button>
+          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות נפוצות</button>
+          <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">פרסום עדכונים</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
