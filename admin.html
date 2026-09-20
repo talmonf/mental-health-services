@@ -91,7 +91,10 @@
     .hbar .track { flex: 1; height: 10px; background: #eef2f5; border-radius: 6px; overflow: hidden; }
     .hbar .fill { height: 100%; background: var(--primary); }
     .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: right; }
-    .hbar .open { flex: 0 0 auto; }
+    a.name-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+    a.name-link:hover { text-decoration: underline; }
+    .updates-he { direction: rtl; text-align: right; }
+    .updates-he th, .updates-he td { text-align: right; }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
@@ -160,6 +163,18 @@
       button: 'Button',
       div: 'Click',
       share: 'Share'
+    };
+    const CONTACT_NAMES = {
+      contact_whatsapp: 'Site authors (WhatsApp)',
+      emergency_sahar_chat: 'SAHAR chat',
+      emergency_eran_1201: 'ERAN 1201',
+      emergency_eran_1201_en: 'ERAN 1201',
+      emergency_nefesh_achat_8944: 'Nefesh Achat *8944',
+      emergency_nefesh_achat_8944_en: 'Nefesh Achat *8944',
+      intro_eran_1201: 'ERAN 1201 (intro)',
+      intro_eran_1201_en: 'ERAN 1201 (intro)',
+      intro_nefesh_achat_8944: 'Nefesh Achat *8944 (intro)',
+      intro_nefesh_achat_8944_en: 'Nefesh Achat *8944 (intro)'
     };
     const QSTATUS = {
       open: 'Open',
@@ -232,7 +247,7 @@
     const app = document.getElementById('app');
     function hashToTab() {
       const h = (location.hash || '').replace(/^#/, '');
-      if (h === 'users' || h === 'questions') return h;
+      if (h === 'users' || h === 'questions' || h === 'updates') return h;
       return 'analytics';
     }
     const state = {
@@ -321,15 +336,42 @@
       }
       return c;
     }
-    function table(headers, rows, cells) {
-      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
+    function table(headers, rows, cells, empty) {
+      if (!rows || !rows.length) return `<p class="lede">${empty || 'No data in this window.'}</p>`;
       return `<table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
         rows.map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')
       }</tbody></table>`;
     }
-    function openLink(href) {
-      if (!href) return '';
-      return `<a class="open" href="${esc(href)}" target="_blank" rel="noopener noreferrer">Open</a>`;
+    function openLink(href, label, dirAuto) {
+      if (!href) return dirAuto ? `<span dir="auto">${esc(label)}</span>` : esc(label);
+      const inner = dirAuto ? `<span dir="auto">${esc(label)}</span>` : esc(label);
+      return `<a class="name-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+    }
+    function contactName(r) {
+      const display = String(r.display_name || '').trim();
+      const text = String(r.element_text_short || '').trim();
+      const id = String(r.element_id || '').trim();
+      const type = String(r.element_type || '').trim();
+      if (display && display.toLowerCase() !== type.toLowerCase()) return display;
+      if (CONTACT_NAMES[id]) return CONTACT_NAMES[id];
+      if (text && text.toLowerCase() !== type.toLowerCase()) return text;
+      if (id && id.toLowerCase() !== type.toLowerCase()) {
+        return id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+      return actionLabel(type);
+    }
+    function hbars(rows, hrefFor) {
+      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
+      const max = Math.max(...rows.map((r) => Number(r.n) || 0), 1);
+      return rows.map((r) => {
+        const n = Number(r.n) || 0;
+        const w = Math.round((n / max) * 100);
+        const href = hrefFor ? hrefFor(r) : '';
+        const name = href
+          ? `<a class="name-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(r.key)}">${esc(r.key)}</a>`
+          : esc(r.key);
+        return `<div class="hbar"><span class="name" title="${esc(r.key)}">${name}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="n">${n}</span></div>`;
+      }).join('');
     }
     function entryHref(row) {
       const n = String(row || '').replace(/\D/g, '');
@@ -382,16 +424,6 @@
     }
     function actionLabel(type) {
       return ACTION[type] || String(type || 'click');
-    }
-    function hbars(rows, hrefFor) {
-      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
-      const max = Math.max(...rows.map((r) => Number(r.n) || 0), 1);
-      return rows.map((r) => {
-        const n = Number(r.n) || 0;
-        const w = Math.round((n / max) * 100);
-        const href = hrefFor ? hrefFor(r) : '';
-        return `<div class="hbar"><span class="name" title="${esc(r.key)}">${esc(r.key)}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="n">${n}</span>${href ? `<span class="open">${openLink(href)}</span>` : ''}</div>`;
-      }).join('');
     }
 
     async function loadSession() {
@@ -671,33 +703,30 @@
         </div>
         <h2>Directory cards</h2>
         <div class="card">${table(
-          ['Open', 'Name', 'Action', 'Count'],
+          ['Name', 'Action', 'Count'],
           d.cardClicks,
           (r) => [
-            openLink(entryHref(r.row)),
-            `<span dir="auto">${esc(r.display_name || r.element_text_short || r.entry_id)}</span>`,
+            openLink(entryHref(r.row), r.display_name || r.element_text_short || r.entry_id, true),
             esc(actionLabel(r.element_type)),
             r.n
           ]
         )}</div>
         <h2>Contact actions</h2>
         <div class="card">${table(
-          ['Open', 'Name', 'Action', 'Count'],
+          ['Name', 'Action', 'Count'],
           d.contactActions,
           (r) => [
-            openLink(entryHref(r.row)),
-            `<span dir="auto">${esc(r.display_name || r.entry_id || r.element_type)}</span>`,
+            openLink(entryHref(r.row), contactName(r), true),
             esc(actionLabel(r.element_type)),
             r.n
           ]
         )}</div>
         <h2>Section clicks</h2>
         <div class="card">${table(
-          ['Open', 'Name', 'Count'],
+          ['Name', 'Count'],
           d.sectionNavClicks,
           (r) => [
-            openLink(sectionHrefFromElementId(r.element_id)),
-            esc(sectionLabelFromElementId(r.element_id)),
+            openLink(sectionHrefFromElementId(r.element_id), sectionLabelFromElementId(r.element_id)),
             r.n
           ]
         )}</div>
@@ -729,20 +758,6 @@
           d.deepLinks,
           (r) => [esc(DEEP[r.event_type] || r.event_type), r.n]
         )}</div>
-        <h2>Publish a site update</h2>
-        <div class="card">
-          <p class="lede">“When it happens” subscribers get mail immediately. Weekly subscribers get it on Sunday. Nothing is sent before the address is confirmed.</p>
-          <form id="pub">
-            <label for="title">Title</label>
-            <input id="title" name="title" type="text" required maxlength="200">
-            <label for="body">What changed</label>
-            <textarea id="body" name="body" required maxlength="8000"></textarea>
-            <p id="pubmsg"></p>
-            <button type="submit">Publish and queue emails</button>
-          </form>
-          <h3>Recent updates</h3>
-          ${table(['When', 'Title'], d.recentUpdates, (r) => [esc(fmtDate(r.published_at)), esc(r.title)])}
-        </div>
       `;
 
       root.querySelector('#days').value = String(state.days);
@@ -800,14 +815,35 @@
         await loadAnalytics();
         render();
       });
+    }
 
+    function renderUpdates(root) {
+      const d = state.analytics || {};
+      root.innerHTML = `
+        <div class="updates-he" lang="he">
+          <h2>פרסום עדכון באתר</h2>
+          <div class="card">
+            <p class="lede">מנויי «כשזה קורה» מקבלים מיד. מנויי הסיכום השבועי מקבלים ביום ראשון. כלום לא נשלח לפני אישור הכתובת.</p>
+            <form id="pub">
+              <label for="title">כותרת</label>
+              <input id="title" name="title" type="text" dir="auto" required maxlength="200">
+              <label for="body">מה השתנה</label>
+              <textarea id="body" name="body" dir="auto" required maxlength="8000"></textarea>
+              <p id="pubmsg"></p>
+              <button type="submit">פרסום ותור למיילים</button>
+            </form>
+            <h3>עדכונים אחרונים</h3>
+            ${table(['מתי', 'כותרת'], d.recentUpdates, (r) => [esc(fmtDate(r.published_at)), `<span dir="auto">${esc(r.title)}</span>`], 'אין עדכונים.')}
+          </div>
+        </div>
+      `;
       const pub = root.querySelector('#pub');
       pub.addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const msg = root.querySelector('#pubmsg');
         const btn = pub.querySelector('button');
         btn.disabled = true;
-        msg.textContent = 'Publishing…';
+        msg.textContent = 'מפרסמים…';
         msg.className = '';
         try {
           const r = await fetch('/api/admin/updates', {
@@ -820,16 +856,16 @@
             })
           });
           const data = await r.json().catch(() => ({}));
-          if (!r.ok) throw new Error(data.error || 'Failed');
+          if (!r.ok) throw new Error(data.error || 'נכשל');
           msg.className = 'ok';
-          msg.textContent = `Published. Immediate queue: ${data.queued || 0}. Sent: ${data.send?.sent ?? 0}.`;
+          msg.textContent = `פורסם. בתור מיידי: ${data.queued || 0}. נשלחו: ${data.send?.sent ?? 0}.`;
           root.querySelector('#title').value = '';
           root.querySelector('#body').value = '';
           await loadAnalytics();
           render();
         } catch (e) {
           msg.className = 'err';
-          msg.textContent = e.message || 'Failed';
+          msg.textContent = e.message || 'נכשל';
           btn.disabled = false;
         }
       });
@@ -1190,7 +1226,7 @@
         renderGate('You do not have access.');
         return;
       }
-      if (state.error && !state.analytics && state.tab === 'analytics') {
+      if (state.error && !state.analytics && (state.tab === 'analytics' || state.tab === 'updates')) {
         renderGate(state.error);
         return;
       }
@@ -1214,6 +1250,7 @@
           <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">Analytics</button>
           <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">Registered users</button>
           <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">Questions</button>
+          <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">עדכון באתר</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
@@ -1223,7 +1260,7 @@
           const tab = btn.getAttribute('data-tab');
           setTab(tab);
           if (tab === 'users' && !state.users) await loadUsers();
-          if (tab === 'analytics' && !state.analytics) await loadAnalytics();
+          if ((tab === 'analytics' || tab === 'updates') && !state.analytics) await loadAnalytics();
           if (tab === 'questions') {
             if (!state.questions) await loadQuestions();
             if (!state.faq) await loadFaqAdmin();
@@ -1234,6 +1271,7 @@
       const body = wrap.querySelector('#tabbody');
       if (state.tab === 'users') renderUsers(body);
       else if (state.tab === 'questions') renderQuestions(body);
+      else if (state.tab === 'updates') renderUpdates(body);
       else renderAnalytics(body);
     }
 
@@ -1242,7 +1280,7 @@
       if (next === state.tab) return;
       state.tab = next;
       if (next === 'users' && !state.users) await loadUsers();
-      if (next === 'analytics' && !state.analytics) await loadAnalytics();
+      if ((next === 'analytics' || next === 'updates') && !state.analytics) await loadAnalytics();
       if (next === 'questions') {
         if (!state.questions) await loadQuestions();
         if (!state.faq) await loadFaqAdmin();

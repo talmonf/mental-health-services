@@ -293,19 +293,23 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       `WITH clicks AS (
           SELECT coalesce(entry_id, '') AS entry_id,
                  coalesce(element_type, '') AS element_type,
+                 coalesce(element_id, '') AS element_id,
+                 coalesce(max(element_text_short), '') AS element_text_short,
                  count(*)::int AS n
             FROM events
            WHERE event_type = 'click'
              AND element_type IN (${CONTACT_TYPES_SQL})
              AND ${filters.eventWhere}
-           GROUP BY 1, 2
+           GROUP BY 1, 2, 3
            ORDER BY n DESC
            LIMIT 30
         )
         SELECT c.entry_id,
                c.element_type,
+               c.element_id,
+               c.element_text_short,
                c.n,
-               coalesce(nullif(d.display_name, ''), nullif(c.entry_id, ''), c.element_type) AS display_name,
+               coalesce(nullif(d.display_name, ''), '') AS display_name,
                substring(c.entry_id from '_([0-9]+)$') AS row
           FROM clicks c
           LEFT JOIN directory_entries d ON d.entry_id = c.entry_id
