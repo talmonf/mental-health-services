@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>אדמין — מדריך נפש</title>
+  <title>Admin — Nefesh directory</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://nefesh-il.org/admin">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
     p.lede { color: var(--muted); margin: 0 0 16px; }
     .card { background: var(--card); border-radius: 10px; padding: 16px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 16px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    th, td { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
     th { color: var(--muted); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.02em; white-space: nowrap; }
     .row { display: flex; flex-wrap: wrap; gap: 12px; }
     .stat { flex: 1 1 140px; background: #eef4f8; border-radius: 8px; padding: 12px 14px; }
@@ -53,6 +53,8 @@
     .ok { color: #1e7a4a; }
     .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
     a.back { color: var(--primary); text-decoration: none; font-weight: 600; }
+    a.open { font-size: 0.8rem; font-weight: 600; white-space: nowrap; color: var(--primary); text-decoration: none; }
+    a.open:hover { text-decoration: underline; }
     .gate { max-width: 480px; margin: 80px auto; background: var(--card); padding: 32px; border-radius: 10px; text-align: center; }
     .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
     .tabs button {
@@ -62,7 +64,11 @@
     .tabs button.active { color: var(--primary-dark); background: #eef4f8; }
     .filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; align-items: end; }
     .filters .wide { grid-column: span 2; }
-    .chart { display: flex; align-items: flex-end; gap: 6px; min-height: 140px; overflow-x: auto; padding: 8px 0 0; }
+    .filters .check { grid-column: span 2; }
+    .filters .check label { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; }
+    .filters .check input { width: auto; margin: 0; }
+    .filters select[multiple] { min-height: 88px; }
+    .chart { display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; overflow-x: auto; padding: 8px 0 0; }
     .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 22px; }
     .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: 120px; border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
     .chart-seg { width: 100%; }
@@ -72,13 +78,14 @@
     .chart-seg.other { background: var(--other); }
     .chart-label { font-size: 0.65rem; color: var(--muted); writing-mode: horizontal-tb; transform: none; white-space: nowrap; }
     .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
-    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 6px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
     .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
     .hbar { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.85rem; }
     .hbar .name { flex: 0 0 38%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .hbar .track { flex: 1; height: 10px; background: #eef2f5; border-radius: 6px; overflow: hidden; }
     .hbar .fill { height: 100%; background: var(--primary); }
-    .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: left; }
+    .hbar .n { flex: 0 0 2.5rem; color: var(--muted); text-align: right; }
+    .hbar .open { flex: 0 0 auto; }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
@@ -94,52 +101,126 @@
     .faq-edit { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
     .faq-edit .row-end { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
     .status-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    details.chrome { margin-top: 4px; }
+    details.chrome summary { cursor: pointer; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+    [dir=auto] { unicode-bidi: plaintext; }
     @media (max-width: 700px) {
-      .filters .wide { grid-column: span 1; }
+      .filters .wide, .filters .check { grid-column: span 1; }
     }
   </style>
 </head>
 <body>
-  <main id="app">טוען…</main>
+  <main id="app">Loading…</main>
   <script>
     const QUAL = {
-      social_worker: 'עובד/ת סוציאלי/ת',
-      psychologist: 'פסיכולוג/ית',
-      psychiatrist: 'פסיכיאטר/ית',
-      therapist: 'מטפל/ת / יועץ/ת',
-      nurse: 'אח/ות',
-      peer_supporter: 'עמית/ת תומך/ת',
-      student: 'סטודנט/ית',
-      family_self: 'בן/בת משפחה או מתמודד/ת',
-      other: 'אחר'
+      social_worker: 'Social worker',
+      psychologist: 'Psychologist',
+      psychiatrist: 'Psychiatrist',
+      therapist: 'Therapist / counsellor',
+      nurse: 'Nurse',
+      peer_supporter: 'Peer supporter',
+      student: 'Student',
+      family_self: 'Family member or service user',
+      other: 'Other'
     };
     const FOUND = {
-      google: 'גוגל',
-      facebook_instagram: 'פייסבוק / אינסטגרם',
-      whatsapp: 'וואטסאפ',
-      colleague: 'עמית/ה לעבודה',
-      university: 'לימודים / הכשרה',
-      organization: 'הארגון שבו אני עובד/ת',
-      media: 'תקשורת',
-      other: 'אחר'
+      google: 'Google',
+      facebook_instagram: 'Facebook / Instagram',
+      whatsapp: 'WhatsApp',
+      colleague: 'Colleague',
+      university: 'Studies / training',
+      organization: 'Their organisation',
+      media: 'Media',
+      other: 'Other'
     };
-    const PREF = { none: 'בלי עדכונים', weekly: 'סיכום שבועי', immediate: 'כשזה קורה' };
-    const DEVICE = { mobile: 'נייד', desktop: 'מחשב', tablet: 'טאבלט' };
+    const PREF = { none: 'No updates', weekly: 'Weekly summary', immediate: 'When it happens' };
+    const DEVICE = { mobile: 'Mobile', desktop: 'Desktop', tablet: 'Tablet' };
     const DEEP = {
-      search_link_copied: 'העתקת קישור חיפוש',
-      card_link_copied: 'העתקת קישור כרטיס',
-      section_link_copied: 'העתקת קישור מדור',
-      search_link_opened: 'פתיחת קישור חיפוש',
-      card_link_opened: 'פתיחת קישור כרטיס',
-      section_link_opened: 'פתיחת קישור מדור'
+      search_link_copied: 'Copied search link',
+      card_link_copied: 'Copied card link',
+      section_link_copied: 'Copied section link',
+      search_link_opened: 'Opened search link',
+      card_link_opened: 'Opened card link',
+      section_link_opened: 'Opened section link'
     };
-
+    const ACTION = {
+      phone: 'Phone',
+      whatsapp: 'WhatsApp',
+      website: 'Website',
+      email: 'Email',
+      map: 'Map',
+      download: 'Download',
+      button: 'Button',
+      div: 'Click',
+      share: 'Share'
+    };
     const QSTATUS = {
-      open: 'פתוחה',
-      answered: 'טופלה',
-      published: 'פורסמה לשאלות נפוצות',
-      discarded: 'התעלמו'
+      open: 'Open',
+      answered: 'Answered',
+      published: 'Published to FAQ',
+      discarded: 'Discarded'
     };
+    const CATEGORY_KEYS = [
+      'emergency', 'helplines', 'portals', 'rights', 'moh', 'mod', 'mh_clinics', 'hmo',
+      'hospitalization', 'alternatives', 'rehabilitation', 'therapists', 'treatments',
+      'addictions', 'trauma', 'families', 'youth', 'populations', 'facebook',
+      'anxiety_apps', 'nutrition', 'local', 'books_movies', 'transport'
+    ];
+    const CATEGORY_SET = new Set(CATEGORY_KEYS);
+    const GROUP_KEYS = {
+      emergency: 'Emergency & crisis support',
+      treatment: 'Treatment & therapy',
+      rightsGov: 'Rights & government services',
+      support: 'Support & community',
+      information: 'Information & practical services'
+    };
+    const SECTION_LABELS = {
+      landing: 'Landing',
+      '(none)': '(none)',
+      category_group: 'Category group',
+      category_overview: 'Category overview',
+      search_results: 'Search results',
+      deep_link: 'Deep link',
+      link_probe: 'Link probe',
+      nearby: 'Nearby',
+      emergency: 'Emergency',
+      helplines: 'Helplines',
+      portals: 'Information portals',
+      rights: 'Rights & benefits',
+      moh: 'Ministry of Health',
+      mod: 'Ministry of Defense',
+      mh_clinics: 'Mental health clinics',
+      hmo: 'Health funds',
+      hospitalization: 'Hospitalization',
+      alternatives: 'Hospitalization alternatives',
+      rehabilitation: 'Rehabilitation',
+      therapists: 'Finding a practitioner',
+      treatments: 'Treatments',
+      treatments_psychiatry: 'Psychiatry',
+      treatments_medical: 'Medical treatments',
+      treatments_therapy: 'Therapy',
+      treatments_others: 'Other treatments',
+      addictions: 'Addictions',
+      trauma: 'Trauma',
+      families: 'Family support',
+      youth: 'Teenagers & young adults',
+      populations: 'Special populations',
+      facebook: 'Facebook groups',
+      anxiety_apps: 'Apps for anxiety attacks',
+      nutrition: 'Nutrition & mental health',
+      local: 'Local services',
+      books_movies: 'Books, movies & TED',
+      transport: 'Transportation',
+      group_emergency: 'Emergency & crisis support',
+      group_treatment: 'Treatment & therapy',
+      group_rightsGov: 'Rights & government services',
+      group_support: 'Support & community',
+      group_information: 'Information & practical services'
+    };
+    const CHROME_SECTIONS = new Set([
+      'landing', '(none)', 'link_probe', 'search_results', 'deep_link',
+      'category_overview', 'category_group', 'nearby'
+    ]);
 
     const app = document.getElementById('app');
     function hashToTab() {
@@ -166,6 +247,9 @@
       audience: '',
       country: '',
       section: '',
+      filterUserId: '',
+      excludeAdmins: true,
+      excludeUserIds: [],
       userQ: '',
       userSort: 'created_at',
       userDir: 'desc',
@@ -186,7 +270,7 @@
       if (!v) return '—';
       const d = new Date(v);
       if (Number.isNaN(d.getTime())) return esc(String(v).slice(0, 16));
-      return d.toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+      return d.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
     }
     function fmtDay(v) {
       const s = String(v || '').slice(0, 10);
@@ -195,18 +279,75 @@
       return `${d}.${m}`;
     }
     function table(headers, rows, cells) {
-      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
+      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
       return `<table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
         rows.map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')
       }</tbody></table>`;
     }
-    function hbars(rows) {
-      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
+    function openLink(href) {
+      if (!href) return '';
+      return `<a class="open" href="${esc(href)}" target="_blank" rel="noopener noreferrer">Open</a>`;
+    }
+    function entryHref(row) {
+      const n = String(row || '').replace(/\D/g, '');
+      return n ? `/?entry=${encodeURIComponent(n)}` : '';
+    }
+    function sectionLabel(key) {
+      if (SECTION_LABELS[key]) return SECTION_LABELS[key];
+      return String(key || '').replace(/_/g, ' ') || '(none)';
+    }
+    function sectionHref(key) {
+      const k = String(key || '');
+      if (!k || CHROME_SECTIONS.has(k)) return '';
+      if (k.startsWith('group_')) {
+        const id = k.slice(6);
+        return GROUP_KEYS[id] ? `/#${encodeURIComponent(id)}` : '';
+      }
+      if (CATEGORY_SET.has(k)) return `/?section=${encodeURIComponent(k)}`;
+      const us = k.lastIndexOf('_');
+      if (us > 0) {
+        const parent = k.slice(0, us);
+        const sub = k.slice(us + 1);
+        if (CATEGORY_SET.has(parent) && sub) {
+          return `/?section=${encodeURIComponent(parent)}&subsection=${encodeURIComponent(sub)}`;
+        }
+      }
+      return '';
+    }
+    function sectionHrefFromElementId(id) {
+      const raw = String(id || '');
+      if (raw.startsWith('subcategory_')) return sectionHref(raw.slice('subcategory_'.length));
+      if (raw.startsWith('subsection_')) return sectionHref(raw.slice('subsection_'.length));
+      if (raw.startsWith('category_')) {
+        const rest = raw.slice('category_'.length);
+        if (GROUP_KEYS[rest]) return `/#${encodeURIComponent(rest)}`;
+        return sectionHref(rest);
+      }
+      if (raw.startsWith('group_')) return sectionHref(raw);
+      return sectionHref(raw);
+    }
+    function sectionLabelFromElementId(id) {
+      const raw = String(id || '');
+      if (raw.startsWith('subcategory_')) return sectionLabel(raw.slice('subcategory_'.length));
+      if (raw.startsWith('subsection_')) return sectionLabel(raw.slice('subsection_'.length));
+      if (raw.startsWith('category_')) {
+        const rest = raw.slice('category_'.length);
+        return GROUP_KEYS[rest] || sectionLabel(rest);
+      }
+      if (raw.startsWith('group_')) return sectionLabel(raw);
+      return sectionLabel(raw);
+    }
+    function actionLabel(type) {
+      return ACTION[type] || String(type || 'click');
+    }
+    function hbars(rows, hrefFor) {
+      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
       const max = Math.max(...rows.map((r) => Number(r.n) || 0), 1);
       return rows.map((r) => {
         const n = Number(r.n) || 0;
         const w = Math.round((n / max) * 100);
-        return `<div class="hbar"><span class="name" title="${esc(r.key)}">${esc(r.key)}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="n">${n}</span></div>`;
+        const href = hrefFor ? hrefFor(r) : '';
+        return `<div class="hbar"><span class="name" title="${esc(r.key)}">${esc(r.key)}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="n">${n}</span>${href ? `<span class="open">${openLink(href)}</span>` : ''}</div>`;
       }).join('');
     }
 
@@ -233,18 +374,21 @@
       if (state.audience) p.set('audience', state.audience);
       if (state.country) p.set('country', state.country);
       if (state.section) p.set('section', state.section);
+      if (state.filterUserId) p.set('user_id', state.filterUserId);
+      p.set('exclude_admins', state.excludeAdmins ? '1' : '0');
+      (state.excludeUserIds || []).forEach((id) => p.append('exclude_user', id));
       return p.toString();
     }
 
     async function loadAnalytics() {
       const r = await fetch('/api/admin/analytics?' + analyticsQuery(), { credentials: 'include' });
       if (r.status === 401 || r.status === 403) {
-        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'You do not have access.';
         state.analytics = null;
         return;
       }
       if (!r.ok) {
-        state.error = 'טעינת האנליטיקה נכשלה.';
+        state.error = 'Failed to load analytics.';
         return;
       }
       state.error = '';
@@ -258,12 +402,12 @@
       p.set('dir', state.userDir);
       const r = await fetch('/api/admin/users?' + p.toString(), { credentials: 'include' });
       if (r.status === 401 || r.status === 403) {
-        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'You do not have access.';
         state.users = null;
         return;
       }
       if (!r.ok) {
-        state.error = 'טעינת המשתמשים נכשלה.';
+        state.error = 'Failed to load users.';
         return;
       }
       state.error = '';
@@ -277,12 +421,12 @@
       if (state.questionStatus) p.set('status', state.questionStatus);
       const r = await fetch('/api/admin/questions?' + p.toString(), { credentials: 'include' });
       if (r.status === 401 || r.status === 403) {
-        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'You do not have access.';
         state.questions = null;
         return;
       }
       if (!r.ok) {
-        state.error = 'טעינת השאלות נכשלה.';
+        state.error = 'Failed to load questions.';
         return;
       }
       state.error = '';
@@ -293,12 +437,12 @@
     async function loadFaqAdmin() {
       const r = await fetch('/api/admin/faq', { credentials: 'include' });
       if (r.status === 401 || r.status === 403) {
-        state.error = r.status === 401 ? 'יש להיכנס לחשבון באתר הראשי תחילה.' : 'אין הרשאה.';
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'You do not have access.';
         state.faq = null;
         return;
       }
       if (!r.ok) {
-        state.error = 'טעינת השאלות הנפוצות נכשלה.';
+        state.error = 'Failed to load FAQ.';
         return;
       }
       state.error = '';
@@ -309,9 +453,9 @@
     function renderGate(message) {
       app.innerHTML = '';
       app.appendChild(el(`<div class="gate">
-        <h1>אדמין</h1>
+        <h1>Admin</h1>
         <p class="lede">${esc(message)}</p>
-        <p><a class="back" href="/">חזרה למדריך</a></p>
+        <p><a class="back" href="/">Back to the directory</a></p>
       </div>`));
     }
 
@@ -321,7 +465,7 @@
     }
 
     function barChart(rows) {
-      if (!rows || !rows.length) return '<p class="lede">אין נתונים בחלון זה.</p>';
+      if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
       const max = Math.max(...rows.map((r) => Number(r.total) || ((Number(r.page_view)||0)+(Number(r.search)||0)+(Number(r.click)||0)+(Number(r.other)||0))), 1);
       const cols = rows.map((r) => {
         const pv = Number(r.page_view) || 0;
@@ -342,10 +486,10 @@
       }).join('');
       return `<div class="chart">${cols}</div>
         <div class="legend">
-          <span><i style="background:var(--pv)"></i>צפיות</span>
-          <span><i style="background:var(--search)"></i>חיפושים</span>
-          <span><i style="background:var(--click)"></i>לחיצות</span>
-          <span><i style="background:var(--other)"></i>אחר</span>
+          <span><i style="background:var(--pv)"></i>Page views</span>
+          <span><i style="background:var(--search)"></i>Searches</span>
+          <span><i style="background:var(--click)"></i>Clicks</span>
+          <span><i style="background:var(--other)"></i>Other</span>
         </div>`;
     }
 
@@ -360,127 +504,195 @@
       const k = d.kpis || {};
       const si = d.signedIn || {};
       const rl = d.requestLog;
-      const opts = d.filterOptions || { countries: [], sections: [] };
+      const opts = d.filterOptions || { countries: [], sections: [], users: [] };
+      const users = opts.users || [];
       const totalEvents = Number(k.total) || 0;
       const signedShare = totalEvents ? Math.round((Number(si.signed_in_events) || 0) / totalEvents * 100) : 0;
+      const userOptions = `<option value="">Everyone</option>` + users.map((u) =>
+        `<option value="${esc(u.id)}"${u.id === state.filterUserId ? ' selected' : ''}>${esc(u.email)}${u.isAdmin ? ' (admin)' : ''}</option>`
+      ).join('');
+      const excludeOptions = users.map((u) =>
+        `<option value="${esc(u.id)}"${(state.excludeUserIds || []).includes(u.id) ? ' selected' : ''}>${esc(u.email)}${u.isAdmin ? ' (admin)' : ''}</option>`
+      ).join('');
+      const sectionFilterOpts = (opts.sections || []).map((key) => ({
+        value: key,
+        label: `${sectionLabel(key)} (${key})`
+      }));
 
       root.innerHTML = `
         <div class="card">
           <form id="filters" class="filters">
             <div>
-              <label for="days">חלון</label>
+              <label for="days">Window</label>
               <select id="days">
-                <option value="7">7 ימים</option>
-                <option value="30">30 ימים</option>
-                <option value="90">90 ימים</option>
+                <option value="7">7 days</option>
+                <option value="30">30 days</option>
+                <option value="90">90 days</option>
               </select>
             </div>
             <div>
-              <label for="from">מתאריך</label>
+              <label for="from">From</label>
               <input id="from" type="date" value="${esc(state.from)}">
             </div>
             <div>
-              <label for="to">עד תאריך</label>
+              <label for="to">To</label>
               <input id="to" type="date" value="${esc(state.to)}">
             </div>
             <div>
-              <label for="eventType">סוג אירוע</label>
+              <label for="eventType">Event type</label>
               <select id="eventType">
-                <option value="">הכל</option>
-                <option value="page_view">צפיות</option>
-                <option value="search">חיפושים</option>
-                <option value="click">לחיצות</option>
-                <option value="deep-link">קישורים עמוקים</option>
+                <option value="">All</option>
+                <option value="page_view">Page views</option>
+                <option value="search">Searches</option>
+                <option value="click">Clicks</option>
+                <option value="deep-link">Deep links</option>
               </select>
             </div>
             <div>
-              <label for="device">מכשיר</label>
+              <label for="device">Device</label>
               <select id="device">
-                <option value="">הכל</option>
-                <option value="mobile">נייד</option>
-                <option value="desktop">מחשב</option>
-                <option value="tablet">טאבלט</option>
+                <option value="">All</option>
+                <option value="mobile">Mobile</option>
+                <option value="desktop">Desktop</option>
+                <option value="tablet">Tablet</option>
               </select>
             </div>
             <div>
-              <label for="audience">קהל</label>
+              <label for="audience">Audience</label>
               <select id="audience">
-                <option value="">הכל</option>
-                <option value="signed-in">מחוברים</option>
-                <option value="anonymous">אנונימיים</option>
+                <option value="">All</option>
+                <option value="signed-in">Signed in</option>
+                <option value="anonymous">Anonymous</option>
               </select>
             </div>
             <div>
-              <label for="country">מדינה (אירוע)</label>
-              <select id="country">${optionList(opts.countries, state.country, 'הכל')}</select>
+              <label for="filterUserId">Registered user</label>
+              <select id="filterUserId">${userOptions}</select>
             </div>
             <div>
-              <label for="section">מדור</label>
-              <select id="section">${optionList(opts.sections, state.section, 'הכל')}</select>
+              <label for="country">Country</label>
+              <select id="country">${optionList(opts.countries, state.country, 'All')}</select>
+            </div>
+            <div>
+              <label for="section">Section</label>
+              <select id="section"><option value="">All</option>${sectionFilterOpts.map((o) =>
+                `<option value="${esc(o.value)}"${o.value === state.section ? ' selected' : ''}>${esc(o.label)}</option>`
+              ).join('')}</select>
+            </div>
+            <div class="wide">
+              <label for="excludeUsers">Exclude users</label>
+              <select id="excludeUsers" multiple>${excludeOptions}</select>
+            </div>
+            <div class="check">
+              <label><input id="excludeAdmins" type="checkbox"${state.excludeAdmins ? ' checked' : ''}> Exclude admin users</label>
             </div>
             <div>
               <label>&nbsp;</label>
-              <button type="submit">סינון</button>
+              <button type="submit">Apply filters</button>
             </div>
           </form>
         </div>
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         <div class="row" id="stats">
-          <div class="stat"><b>${k.page_view || 0}</b><span>צפיות בדף</span></div>
-          <div class="stat"><b>${k.unique_sessions || 0}</b><span>סשנים ייחודיים</span></div>
-          <div class="stat"><b>${k.search || 0}</b><span>חיפושים</span></div>
-          <div class="stat"><b>${k.click || 0}</b><span>לחיצות</span></div>
-          <div class="stat"><b>${signedShare}%</b><span>מחוברים (${si.signed_in_events || 0} / ${si.anonymous_events || 0} אנונימי)</span></div>
-          ${rl ? `<div class="stat"><b>${rl.bot}</b><span>שליפות בוט</span></div>
-                  <div class="stat"><b>${rl.estimated_human}</b><span>שליפות אנושיות (הערכה)</span></div>` : ''}
+          <div class="stat"><b>${k.page_view || 0}</b><span>Page views</span></div>
+          <div class="stat"><b>${k.unique_sessions || 0}</b><span>Unique sessions</span></div>
+          <div class="stat"><b>${k.search || 0}</b><span>Searches</span></div>
+          <div class="stat"><b>${k.click || 0}</b><span>Clicks</span></div>
+          <div class="stat"><b>${signedShare}%</b><span>Signed in (${si.signed_in_events || 0} / ${si.anonymous_events || 0} anonymous)</span></div>
+          ${rl ? `<div class="stat"><b>${rl.bot}</b><span>Bot fetches</span></div>
+                  <div class="stat"><b>${rl.estimated_human}</b><span>Human fetches (est.)</span></div>` : ''}
         </div>
-        <h2>נפח יומי</h2>
+        <h2>Daily volume</h2>
         <div class="card" id="volume">${barChart(d.volume)}</div>
         <div class="split">
           <div>
-            <h2>מכשיר</h2>
+            <h2>Device</h2>
             <div class="card">${hbars((d.byDevice || []).map((r) => ({ key: DEVICE[r.key] || r.key, n: r.n })))}</div>
           </div>
           <div>
-            <h2>מדינה</h2>
+            <h2>Country</h2>
             <div class="card">${hbars(d.byCountry)}</div>
           </div>
           <div>
-            <h2>מדור</h2>
-            <div class="card">${hbars(d.bySection)}</div>
+            <h2>Section</h2>
+            <div class="card">${hbars(
+              (d.bySection || []).map((r) => ({ key: sectionLabel(r.key), n: r.n, sectionKey: r.key })),
+              (r) => sectionHref(r.sectionKey)
+            )}</div>
           </div>
         </div>
-        <h2>לחיצות על כרטיסים / רכיבים</h2>
+        <h2>Directory cards</h2>
         <div class="card">${table(
-          ['כניסה', 'רכיב', 'סוג', 'כמות'],
-          d.topClicks,
-          (r) => [esc(r.entry_id), esc(r.element_id), esc(r.element_type), r.n]
+          ['Open', 'Name', 'Action', 'Count'],
+          d.cardClicks,
+          (r) => [
+            openLink(entryHref(r.row)),
+            `<span dir="auto">${esc(r.display_name || r.element_text_short || r.entry_id)}</span>`,
+            esc(actionLabel(r.element_type)),
+            r.n
+          ]
         )}</div>
-        <h2>חיפושים נפוצים (לפחות 3)</h2>
+        <h2>Contact actions</h2>
         <div class="card">${table(
-          ['שאילתה', 'כמות'],
+          ['Open', 'Name', 'Action', 'Count'],
+          d.contactActions,
+          (r) => [
+            openLink(entryHref(r.row)),
+            `<span dir="auto">${esc(r.display_name || r.entry_id || r.element_type)}</span>`,
+            esc(actionLabel(r.element_type)),
+            r.n
+          ]
+        )}</div>
+        <h2>Section clicks</h2>
+        <div class="card">${table(
+          ['Open', 'Name', 'Count'],
+          d.sectionNavClicks,
+          (r) => [
+            openLink(sectionHrefFromElementId(r.element_id)),
+            esc(sectionLabelFromElementId(r.element_id)),
+            r.n
+          ]
+        )}</div>
+        <h2>UI chrome</h2>
+        <div class="card">
+          <details class="chrome">
+            <summary>Show chrome clicks (${(d.chromeClicks || []).length})</summary>
+            ${table(
+              ['Name', 'Type', 'Count'],
+              d.chromeClicks,
+              (r) => [
+                esc(r.element_text_short || r.element_id || '(none)'),
+                esc(actionLabel(r.element_type)),
+                r.n
+              ]
+            )}
+          </details>
+        </div>
+        <h2>Top searches (at least 3)</h2>
+        <div class="card">${table(
+          ['Query', 'Count'],
           d.topSearches,
-          (r) => [esc(r.search_query), r.n]
+          (r) => [`<span dir="auto">${esc(r.search_query)}</span>`, r.n]
         )}</div>
-        <h2>קישורים עמוקים</h2>
+        <h2>Deep links</h2>
         <div class="card">${table(
-          ['אירוע', 'כמות'],
+          ['Event', 'Count'],
           d.deepLinks,
           (r) => [esc(DEEP[r.event_type] || r.event_type), r.n]
         )}</div>
-        <h2>פרסום עדכון באתר</h2>
+        <h2>Publish a site update</h2>
         <div class="card">
-          <p class="lede">מנויי «כשזה קורה» מקבלים מיד. מנויי הסיכום השבועי מקבלים ביום ראשון. כלום לא נשלח לפני אישור הכתובת.</p>
+          <p class="lede">“When it happens” subscribers get mail immediately. Weekly subscribers get it on Sunday. Nothing is sent before the address is confirmed.</p>
           <form id="pub">
-            <label for="title">כותרת</label>
+            <label for="title">Title</label>
             <input id="title" name="title" type="text" required maxlength="200">
-            <label for="body">מה השתנה</label>
+            <label for="body">What changed</label>
             <textarea id="body" name="body" required maxlength="8000"></textarea>
             <p id="pubmsg"></p>
-            <button type="submit">פרסום ותור למיילים</button>
+            <button type="submit">Publish and queue emails</button>
           </form>
-          <h3>עדכונים אחרונים</h3>
-          ${table(['מתי', 'כותרת'], d.recentUpdates, (r) => [esc(fmtDate(r.published_at)), esc(r.title)])}
+          <h3>Recent updates</h3>
+          ${table(['When', 'Title'], d.recentUpdates, (r) => [esc(fmtDate(r.published_at)), esc(r.title)])}
         </div>
       `;
 
@@ -501,6 +713,9 @@
         state.audience = root.querySelector('#audience').value;
         state.country = root.querySelector('#country').value;
         state.section = root.querySelector('#section').value;
+        state.filterUserId = root.querySelector('#filterUserId').value;
+        state.excludeAdmins = root.querySelector('#excludeAdmins').checked;
+        state.excludeUserIds = Array.from(root.querySelector('#excludeUsers').selectedOptions).map((o) => o.value);
         await loadAnalytics();
         render();
       });
@@ -518,7 +733,7 @@
         const msg = root.querySelector('#pubmsg');
         const btn = pub.querySelector('button');
         btn.disabled = true;
-        msg.textContent = 'מפרסמים…';
+        msg.textContent = 'Publishing…';
         msg.className = '';
         try {
           const r = await fetch('/api/admin/updates', {
@@ -531,16 +746,16 @@
             })
           });
           const data = await r.json().catch(() => ({}));
-          if (!r.ok) throw new Error(data.error || 'נכשל');
+          if (!r.ok) throw new Error(data.error || 'Failed');
           msg.className = 'ok';
-          msg.textContent = `פורסם. בתור מיידי: ${data.queued || 0}. נשלחו: ${data.send?.sent ?? 0}.`;
+          msg.textContent = `Published. Immediate queue: ${data.queued || 0}. Sent: ${data.send?.sent ?? 0}.`;
           root.querySelector('#title').value = '';
           root.querySelector('#body').value = '';
           await loadAnalytics();
           render();
         } catch (e) {
           msg.className = 'err';
-          msg.textContent = e.message || 'נכשל';
+          msg.textContent = e.message || 'Failed';
           btn.disabled = false;
         }
       });
@@ -553,7 +768,7 @@
     }
 
     function downloadUsersCsv(users) {
-      const headers = ['אימייל','מדינה','עיר','הכשרה','מספר רישוי','ארגון','תפקיד','איך הגיעו','פירוט','העדפת מייל','אימות אימייל','תאריך אימות','מנהל','תאריך הרשמה','כניסה אחרונה'];
+      const headers = ['Email','Country','City','Qualification','License number','Organisation','Title','How they found us','Details','Email preference','Email verified','Verified at','Admin','Registered','Last access'];
       const lines = [headers.join(',')];
       for (const u of users) {
         lines.push([
@@ -567,9 +782,9 @@
           FOUND[u.foundVia] || u.foundVia,
           u.foundViaOther,
           PREF[u.emailPreference] || u.emailPreference,
-          u.emailVerified ? 'אומת' : 'לא אומת',
+          u.emailVerified ? 'Yes' : 'No',
           u.emailVerifiedAt ? fmtDate(u.emailVerifiedAt) : '',
-          u.isAdmin ? 'כן' : 'לא',
+          u.isAdmin ? 'Yes' : 'No',
           fmtDate(u.createdAt),
           fmtDate(u.lastAccessAt)
         ].map(csvEscape).join(','));
@@ -588,60 +803,60 @@
       const unverified = Math.max(0, (acc.total || 0) - (acc.verified || 0));
       root.innerHTML = `
         <div class="row" style="margin-bottom:16px">
-          <div class="stat"><b>${acc.total || users.length}</b><span>חשבונות</span></div>
-          <div class="stat"><b>${acc.verified || 0}</b><span>אומתו</span></div>
-          <div class="stat"><b>${unverified}</b><span>ממתינים לאישור</span></div>
+          <div class="stat"><b>${acc.total || users.length}</b><span>Accounts</span></div>
+          <div class="stat"><b>${acc.verified || 0}</b><span>Verified</span></div>
+          <div class="stat"><b>${unverified}</b><span>Pending confirmation</span></div>
         </div>
         <div class="card">
           <form id="userfilters" class="filters">
             <div class="wide">
-              <label for="userQ">חיפוש (אימייל, ארגון, תפקיד, עיר, מספר רישוי)</label>
-              <input id="userQ" type="text" value="${esc(state.userQ)}" placeholder="חיפוש…">
+              <label for="userQ">Search (email, organisation, title, city, license number)</label>
+              <input id="userQ" type="text" value="${esc(state.userQ)}" placeholder="Search…">
             </div>
             <div>
-              <label for="userSort">מיון</label>
+              <label for="userSort">Sort</label>
               <select id="userSort">
-                <option value="created_at">תאריך הרשמה</option>
-                <option value="last_access_at">כניסה אחרונה</option>
-                <option value="email_verified_at">אימות אימייל</option>
-                <option value="email">אימייל</option>
+                <option value="created_at">Registered</option>
+                <option value="last_access_at">Last access</option>
+                <option value="email_verified_at">Email verified</option>
+                <option value="email">Email</option>
               </select>
             </div>
             <div>
-              <label for="userDir">כיוון</label>
+              <label for="userDir">Direction</label>
               <select id="userDir">
-                <option value="desc">יורד</option>
-                <option value="asc">עולה</option>
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
               </select>
             </div>
             <div>
               <label>&nbsp;</label>
-              <button type="submit">סינון</button>
+              <button type="submit">Filter</button>
             </div>
             <div>
               <label>&nbsp;</label>
-              <button type="button" class="secondary" id="csv">הורדת CSV</button>
+              <button type="button" class="secondary" id="csv">Download CSV</button>
             </div>
           </form>
         </div>
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         <div class="card users-table-wrap">${
           table(
-            ['אימייל','מדינה','עיר','הכשרה','מספר רישוי','ארגון','תפקיד','איך הגיעו','העדפת מייל','אימות אימייל','הרשמה','כניסה אחרונה'],
+            ['Email','Country','City','Qualification','License number','Organisation','Title','How they found us','Email preference','Email verified','Registered','Last access'],
             users,
             (u) => [
-              `${esc(u.email)}${u.isAdmin ? ' <span class="badge">מנהל</span>' : ''}`,
+              `${esc(u.email)}${u.isAdmin ? ' <span class="badge">Admin</span>' : ''}`,
               esc(u.country),
               esc(u.city || ''),
               esc(QUAL[u.qualification] || u.qualification),
               esc(u.licenseNumber || ''),
-              esc(u.organization),
-              esc(u.title),
+              `<span dir="auto">${esc(u.organization)}</span>`,
+              `<span dir="auto">${esc(u.title)}</span>`,
               esc((FOUND[u.foundVia] || u.foundVia) + (u.foundViaOther ? ` (${u.foundViaOther})` : '')),
               esc(PREF[u.emailPreference] || u.emailPreference),
               u.emailVerified
-                ? `<span class="badge ok">אומת</span>${u.emailVerifiedAt ? `<div class="muted">${esc(fmtDate(u.emailVerifiedAt))}</div>` : ''}`
-                : '<span class="badge warn">לא אומת</span>',
+                ? `<span class="badge ok">Verified</span>${u.emailVerifiedAt ? `<div class="muted">${esc(fmtDate(u.emailVerifiedAt))}</div>` : ''}`
+                : '<span class="badge warn">Unverified</span>',
               esc(fmtDate(u.createdAt)),
               esc(fmtDate(u.lastAccessAt))
             ]
@@ -649,19 +864,19 @@
         }</div>
         <div class="split">
           <div>
-            <h2>הכשרה</h2>
+            <h2>Qualification</h2>
             <div class="card">${hbars((acc.byQualification || []).map((r) => ({ key: QUAL[r.key] || r.key, n: r.n })))}</div>
           </div>
           <div>
-            <h2>איך הגיעו</h2>
+            <h2>How they found us</h2>
             <div class="card">${hbars((acc.byFoundVia || []).map((r) => ({ key: FOUND[r.key] || r.key, n: r.n })))}</div>
           </div>
           <div>
-            <h2>מדינה</h2>
+            <h2>Country</h2>
             <div class="card">${hbars(acc.byCountry)}</div>
           </div>
           <div>
-            <h2>העדפת מייל</h2>
+            <h2>Email preference</h2>
             <div class="card">${hbars((acc.byEmailPreference || []).map((r) => ({ key: PREF[r.key] || r.key, n: r.n })))}</div>
           </div>
         </div>
@@ -693,7 +908,7 @@
         body: JSON.stringify({ id, ...body })
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'נכשל');
+      if (!r.ok) throw new Error(data.error || 'Failed');
       return data;
     }
 
@@ -705,7 +920,7 @@
         body: JSON.stringify(body)
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'נכשל');
+      if (!r.ok) throw new Error(data.error || 'Failed');
       return data;
     }
 
@@ -713,69 +928,69 @@
       const questions = state.questions || [];
       const faq = state.faq || [];
       const filters = [
-        ['open', 'פתוחות'],
-        ['answered', 'טופלו'],
-        ['published', 'פורסמו'],
-        ['discarded', 'התעלמו'],
-        ['', 'הכול']
+        ['open', 'Open'],
+        ['answered', 'Answered'],
+        ['published', 'Published'],
+        ['discarded', 'Discarded'],
+        ['', 'All']
       ].map(([v, label]) =>
         `<button type="button" class="${state.questionStatus === v ? '' : 'secondary'}" data-status="${esc(v)}">${esc(label)}</button>`
       ).join('');
 
       root.innerHTML = `
-        <p class="lede">שאלות ממשתמשים רשומים. מענה במייל מחוץ לאתר, ואפשר לפרסם תשובה לשאלות הנפוצות.</p>
+        <p class="lede">Questions from registered users. Reply by email outside the site, or publish an answer to the FAQ.</p>
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         ${state.questionMsg ? `<p class="ok">${esc(state.questionMsg)}</p>` : ''}
         <div class="status-filters">${filters}</div>
         ${questions.length ? questions.map((q) => {
-          const mailto = `mailto:${q.askerEmail}?subject=${encodeURIComponent('תשובה לשאלה במדריך נפש')}`;
+          const mailto = `mailto:${q.askerEmail}?subject=${encodeURIComponent('Reply to your question on the Nefesh directory')}`;
           return `<div class="qcard" data-id="${esc(q.id)}">
             <div class="meta">
               ${statusBadge(q.status)}
               <span>${esc(fmtDate(q.createdAt))}</span>
               <a href="${esc(mailto)}">${esc(q.askerEmail)}</a>
             </div>
-            <p class="qtext">${esc(q.question)}</p>
-            <label>הערות פנימיות</label>
-            <textarea class="notes">${esc(q.adminNotes || '')}</textarea>
+            <p class="qtext" dir="auto">${esc(q.question)}</p>
+            <label>Internal notes</label>
+            <textarea class="notes" dir="auto">${esc(q.adminNotes || '')}</textarea>
             <div class="actions">
-              <button type="button" class="secondary" data-act="notes">שמירת הערות</button>
-              ${q.status === 'open' ? '<button type="button" data-act="answered">סמן כטופל</button>' : ''}
-              ${q.status !== 'discarded' ? '<button type="button" class="secondary" data-act="discarded">התעלם</button>' : ''}
+              <button type="button" class="secondary" data-act="notes">Save notes</button>
+              ${q.status === 'open' ? '<button type="button" data-act="answered">Mark as answered</button>' : ''}
+              ${q.status !== 'discarded' ? '<button type="button" class="secondary" data-act="discarded">Discard</button>' : ''}
             </div>
-            ${q.status === 'published' ? '<p class="muted">פורסמה לשאלות נפוצות.</p>' : `<form class="publish" data-publish="${esc(q.id)}">
-              <label>שאלה לשאלות נפוצות</label>
-              <input type="text" class="faq-q" value="${esc(q.question.slice(0, 500))}">
-              <label>תשובה</label>
-              <textarea class="faq-a" placeholder="התשובה שתוצג לכולם"></textarea>
-              <button type="submit">פרסם לשאלות נפוצות</button>
+            ${q.status === 'published' ? '<p class="muted">Published to FAQ.</p>' : `<form class="publish" data-publish="${esc(q.id)}">
+              <label>FAQ question</label>
+              <input type="text" class="faq-q" dir="auto" value="${esc(q.question.slice(0, 500))}">
+              <label>Answer</label>
+              <textarea class="faq-a" dir="auto" placeholder="The answer shown to everyone"></textarea>
+              <button type="submit">Publish to FAQ</button>
             </form>`}
           </div>`;
-        }).join('') : '<p class="lede">אין שאלות בסטטוס הזה.</p>'}
+        }).join('') : '<p class="lede">No questions in this status.</p>'}
 
-        <h2>שאלות נפוצות</h2>
+        <h2>FAQ</h2>
         ${state.faqMsg ? `<p class="ok">${esc(state.faqMsg)}</p>` : ''}
         <div class="card">
-          <h3>הוספה ידנית</h3>
+          <h3>Add manually</h3>
           <form id="faq-new">
-            <label for="faq-new-q">שאלה</label>
-            <input id="faq-new-q" type="text" required maxlength="500">
-            <label for="faq-new-a">תשובה</label>
-            <textarea id="faq-new-a" required></textarea>
-            <button type="submit">פרסום</button>
+            <label for="faq-new-q">Question</label>
+            <input id="faq-new-q" type="text" dir="auto" required maxlength="500">
+            <label for="faq-new-a">Answer</label>
+            <textarea id="faq-new-a" dir="auto" required></textarea>
+            <button type="submit">Publish</button>
           </form>
         </div>
         ${faq.length ? faq.map((item) => `<form class="faq-edit" data-faq-id="${esc(item.id)}">
-          <div class="meta" style="margin-bottom:8px">${item.published ? '<span class="badge ok">מפורסם</span>' : '<span class="badge warn">מוסתר</span>'}</div>
-          <label>שאלה</label>
-          <input type="text" class="faq-q" value="${esc(item.question)}" maxlength="500" required>
-          <label>תשובה</label>
-          <textarea class="faq-a" required>${esc(item.answer)}</textarea>
+          <div class="meta" style="margin-bottom:8px">${item.published ? '<span class="badge ok">Published</span>' : '<span class="badge warn">Hidden</span>'}</div>
+          <label>Question</label>
+          <input type="text" class="faq-q" dir="auto" value="${esc(item.question)}" maxlength="500" required>
+          <label>Answer</label>
+          <textarea class="faq-a" dir="auto" required>${esc(item.answer)}</textarea>
           <div class="row-end">
-            <button type="submit">שמירה</button>
-            <button type="button" class="secondary" data-act="toggle">${item.published ? 'הסתרה' : 'פרסום מחדש'}</button>
+            <button type="submit">Save</button>
+            <button type="button" class="secondary" data-act="toggle">${item.published ? 'Hide' : 'Publish again'}</button>
           </div>
-        </form>`).join('') : '<p class="lede">עדיין אין שאלות נפוצות.</p>'}
+        </form>`).join('') : '<p class="lede">No FAQ items yet.</p>'}
       `;
 
       root.querySelectorAll('.status-filters button').forEach((btn) => {
@@ -797,12 +1012,12 @@
             try {
               if (act === 'notes') await patchQuestion(id, { adminNotes: notesEl.value });
               else await patchQuestion(id, { status: act, adminNotes: notesEl.value });
-              state.questionMsg = 'נשמר.';
+              state.questionMsg = 'Saved.';
               await loadQuestions();
               render();
             } catch (e) {
               state.questionMsg = '';
-              state.error = e.message || 'נכשל';
+              state.error = e.message || 'Failed';
               render();
             }
           });
@@ -819,13 +1034,13 @@
                 answer: pub.querySelector('.faq-a').value.trim(),
                 sourceQuestionId: id
               });
-              state.questionMsg = 'פורסם לשאלות נפוצות.';
+              state.questionMsg = 'Published to FAQ.';
               state.faqMsg = '';
               await loadQuestions();
               await loadFaqAdmin();
               render();
             } catch (e) {
-              state.error = e.message || 'נכשל';
+              state.error = e.message || 'Failed';
               render();
             }
           });
@@ -842,12 +1057,12 @@
             question: root.querySelector('#faq-new-q').value.trim(),
             answer: root.querySelector('#faq-new-a').value.trim()
           });
-          state.faqMsg = 'פורסם.';
+          state.faqMsg = 'Published.';
           await loadFaqAdmin();
           render();
         } catch (e) {
           state.faqMsg = '';
-          state.error = e.message || 'נכשל';
+          state.error = e.message || 'Failed';
           render();
         }
       });
@@ -864,12 +1079,12 @@
               question: form.querySelector('.faq-q').value.trim(),
               answer: form.querySelector('.faq-a').value.trim()
             });
-            state.faqMsg = 'נשמר.';
+            state.faqMsg = 'Saved.';
             await loadFaqAdmin();
             render();
           } catch (e) {
             state.faqMsg = '';
-            state.error = e.message || 'נכשל';
+            state.error = e.message || 'Failed';
             render();
           }
         });
@@ -880,12 +1095,12 @@
           const published = !faq.find((f) => f.id === id)?.published;
           try {
             await saveFaq('PATCH', { id, published });
-            state.faqMsg = published ? 'פורסם מחדש.' : 'הוסתר.';
+            state.faqMsg = published ? 'Published again.' : 'Hidden.';
             await loadFaqAdmin();
             render();
           } catch (e) {
             state.faqMsg = '';
-            state.error = e.message || 'נכשל';
+            state.error = e.message || 'Failed';
             render();
           }
         });
@@ -894,11 +1109,11 @@
 
     function render() {
       if (!state.user) {
-        renderGate('יש להיכנס לחשבון במדריך ואז לחזור לכאן. העמוד מיועד למפעילים בלבד.');
+        renderGate('Sign in on the directory first, then come back here. This page is for operators only.');
         return;
       }
       if (!state.user.isAdmin) {
-        renderGate('אין הרשאה.');
+        renderGate('You do not have access.');
         return;
       }
       if (state.error && !state.analytics && state.tab === 'analytics') {
@@ -917,14 +1132,14 @@
       app.innerHTML = '';
       const wrap = el(`<div>
         <div class="toolbar">
-          <a class="back" href="/">חזרה למדריך</a>
+          <a class="back" href="/">Back to the directory</a>
           <span class="muted">${esc(state.user.email)}</span>
         </div>
-        <h1>אדמין</h1>
+        <h1>Admin</h1>
         <div class="tabs">
-          <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">אנליטיקה</button>
-          <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">משתמשים רשומים</button>
-          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות</button>
+          <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">Analytics</button>
+          <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">Registered users</button>
+          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">Questions</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
@@ -973,7 +1188,7 @@
         }
         render();
       } catch (e) {
-        renderGate('לא הצלחנו להגיע לשרת.');
+        renderGate('Could not reach the server.');
       }
     })();
   </script>

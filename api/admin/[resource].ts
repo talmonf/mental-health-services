@@ -39,9 +39,23 @@ function qstr(query: VercelRequest['query'], key: string): string {
   return v.trim();
 }
 
+function qstrList(query: VercelRequest['query'], key: string): string[] {
+  const raw = query[key];
+  const list = raw == null ? [] : Array.isArray(raw) ? raw : [raw];
+  return list.map((v) => String(v).trim()).filter(Boolean);
+}
+
 function isYmd(v: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(v);
 }
+
+function isUuid(v: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+}
+
+const CONTACT_TYPES_SQL = `'phone', 'whatsapp', 'website', 'email', 'map', 'download'`;
+const SECTION_NAV_RE = '^(subcategory_|category_|subsection_|group_)';
+const EXCLUDE_USER_CAP = 20;
 
 type SqlFilter = {
   dateWhere: string;
@@ -56,6 +70,9 @@ type SqlFilter = {
   audience: string;
   country: string;
   section: string;
+  userId: string;
+  excludeAdmins: boolean;
+  excludeUserIds: string[];
 };
 
 function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
@@ -66,6 +83,11 @@ function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
   const audienceRaw = qstr(query, 'audience');
   const country = qstr(query, 'country').slice(0, 80);
   const section = qstr(query, 'section').slice(0, 80);
+  const userIdRaw = qstr(query, 'user_id');
+  const userId = isUuid(userIdRaw) ? userIdRaw : '';
+  const excludeAdminsRaw = qstr(query, 'exclude_admins');
+  const excludeAdmins = excludeAdminsRaw === '' ? true : excludeAdminsRaw !== '0' && excludeAdminsRaw !== 'false';
+  const excludeUserIds = [...new Set(qstrList(query, 'exclude_user').filter(isUuid))].slice(0, EXCLUDE_USER_CAP);
   const eventType = (EVENT_TYPES as readonly string[]).includes(eventTypeRaw) ? eventTypeRaw : '';
   const device = (DEVICES as readonly string[]).includes(deviceRaw) ? deviceRaw : '';
   const audience = (AUDIENCES as readonly string[]).includes(audienceRaw) ? audienceRaw : '';
@@ -123,6 +145,18 @@ function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
   if (country) add('country = ?', country);
   if (section) add('section = ?', section);
 
+  if (userId) {
+    add('user_id = ?', userId);
+  } else {
+    if (excludeAdmins) {
+      extra.push(`(user_id IS NULL OR user_id NOT IN (SELECT id FROM users WHERE is_admin))`);
+    }
+    if (excludeUserIds.length) {
+      eventParams.push(excludeUserIds);
+      extra.push(`(user_id IS NULL OR user_id <> ALL($${eventParams.length}::uuid[]))`);
+    }
+  }
+
   const eventWhere = extra.length ? `${dateWhere} AND ${extra.join(' AND ')}` : dateWhere;
 
   return {
@@ -138,6 +172,9 @@ function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
     audience,
     country,
     section,
+    userId,
+    excludeAdmins,
+    excludeUserIds,
   };
 }
 
@@ -226,15 +263,82 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       /* user_id column not present yet */
     }
 
-    const topClicks = await client.query(
-      `SELECT coalesce(entry_id, '') AS entry_id,
-              coalesce(element_id, '') AS element_id,
+    const cardClicks = await client.query(
+      `WITH clicks AS (
+          SELECT coalesce(entry_id, '') AS entry_id,
+                 coalesce(element_type, '') AS element_type,
+                 coalesce(max(element_text_short), '') AS element_text_short,
+                 count(*)::int AS n
+            FROM events
+           WHERE event_type = 'click'
+             AND nullif(entry_id, '') IS NOT NULL
+             AND ${filters.eventWhere}
+           GROUP BY 1, 2
+           ORDER BY n DESC
+           LIMIT 30
+        )
+        SELECT c.entry_id,
+               c.element_type,
+               c.element_text_short,
+               c.n,
+               coalesce(nullif(d.display_name, ''), c.entry_id) AS display_name,
+               substring(c.entry_id from '_([0-9]+)$') AS row
+          FROM clicks c
+          LEFT JOIN directory_entries d ON d.entry_id = c.entry_id
+         ORDER BY c.n DESC`,
+      filters.eventParams
+    );
+
+    const contactActions = await client.query(
+      `WITH clicks AS (
+          SELECT coalesce(entry_id, '') AS entry_id,
+                 coalesce(element_type, '') AS element_type,
+                 count(*)::int AS n
+            FROM events
+           WHERE event_type = 'click'
+             AND element_type IN (${CONTACT_TYPES_SQL})
+             AND ${filters.eventWhere}
+           GROUP BY 1, 2
+           ORDER BY n DESC
+           LIMIT 30
+        )
+        SELECT c.entry_id,
+               c.element_type,
+               c.n,
+               coalesce(nullif(d.display_name, ''), nullif(c.entry_id, ''), c.element_type) AS display_name,
+               substring(c.entry_id from '_([0-9]+)$') AS row
+          FROM clicks c
+          LEFT JOIN directory_entries d ON d.entry_id = c.entry_id
+         ORDER BY c.n DESC`,
+      filters.eventParams
+    );
+
+    const sectionNavClicks = await client.query(
+      `SELECT coalesce(element_id, '') AS element_id,
               coalesce(element_type, '') AS element_type,
               count(*)::int AS n
          FROM events
         WHERE event_type = 'click'
+          AND element_id ~ '${SECTION_NAV_RE}'
           AND ${filters.eventWhere}
-        GROUP BY 1, 2, 3
+        GROUP BY 1, 2
+        ORDER BY n DESC
+        LIMIT 20`,
+      filters.eventParams
+    );
+
+    const chromeClicks = await client.query(
+      `SELECT coalesce(element_id, '') AS element_id,
+              coalesce(element_type, '') AS element_type,
+              coalesce(max(element_text_short), '') AS element_text_short,
+              count(*)::int AS n
+         FROM events
+        WHERE event_type = 'click'
+          AND (entry_id IS NULL OR entry_id = '')
+          AND element_type NOT IN (${CONTACT_TYPES_SQL})
+          AND (element_id IS NULL OR element_id !~ '${SECTION_NAV_RE}')
+          AND ${filters.eventWhere}
+        GROUP BY 1, 2
         ORDER BY n DESC
         LIMIT 20`,
       filters.eventParams
@@ -312,6 +416,23 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       filters.dateParams
     );
 
+    let optionUsers: { id: string; email: string; isAdmin: boolean }[] = [];
+    try {
+      const users = await client.query(
+        `SELECT id::text AS id, email, is_admin AS "isAdmin"
+           FROM users
+          ORDER BY email
+          LIMIT 200`
+      );
+      optionUsers = users.rows.map((r: { id: string; email: string; isAdmin?: boolean; is_admin?: boolean }) => ({
+        id: String(r.id),
+        email: String(r.email),
+        isAdmin: Boolean(r.isAdmin ?? r.is_admin),
+      }));
+    } catch {
+      optionUsers = [];
+    }
+
     const recentUpdates = await client.query(
       `SELECT id::text, title, published_at
          FROM site_updates
@@ -329,6 +450,9 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
         audience: filters.audience,
         country: filters.country,
         section: filters.section,
+        userId: filters.userId,
+        excludeAdmins: filters.excludeAdmins,
+        excludeUserIds: filters.excludeUserIds,
       },
       kpis: {
         page_view: kpis.rows[0]?.page_view ?? 0,
@@ -339,7 +463,10 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       },
       volume: volume.rows,
       requestLog,
-      topClicks: topClicks.rows,
+      cardClicks: cardClicks.rows,
+      contactActions: contactActions.rows,
+      sectionNavClicks: sectionNavClicks.rows,
+      chromeClicks: chromeClicks.rows,
       topSearches: topSearches.rows,
       deepLinks: deepLinks.rows,
       signedIn,
@@ -349,6 +476,7 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       filterOptions: {
         countries: optionCountries.rows.map((r: { key: string }) => r.key),
         sections: optionSections.rows.map((r: { key: string }) => r.key),
+        users: optionUsers,
       },
       recentUpdates: recentUpdates.rows,
     });
@@ -499,10 +627,6 @@ async function handleUpdates(req: VercelRequest, res: VercelResponse) {
 
 const QUESTION_STATUSES = ['open', 'answered', 'published', 'discarded'] as const;
 type QuestionStatus = (typeof QUESTION_STATUSES)[number];
-
-function isUuid(v: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
-}
 
 function isQuestionStatus(v: unknown): v is QuestionStatus {
   return typeof v === 'string' && (QUESTION_STATUSES as readonly string[]).includes(v);
