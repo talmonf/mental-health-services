@@ -1,10 +1,14 @@
 # nefesh-il.org — מדריך נפש
 # A public-interest directory of mental-health services in Israel.
 #
-# Everything here is open to every crawler, including AI training and answer engines.
+# The public directory is open to every crawler, including AI training and answer engines.
 # That is a deliberate decision, not an oversight. The reasoning, in short: models are
 # asked about Israeli mental-health services whether or not this site is readable, and a
 # fabricated crisis phone number is a concrete harm. Being readable is the mitigation.
+#
+# /care and /care-share are the exception: they hold personal medical notes, not the
+# public guide. Every user-agent group below repeats those Disallow lines because a
+# named crawler record replaces the * record rather than merging with it.
 #
 # Staleness is handled rather than avoided: every page carries a visible update date and a
 # machine-readable dateModified, no phone number is ever published without its label, and
@@ -21,61 +25,131 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 # --- Search and answer engines (fetch live, so they reflect corrections) ---
 
 User-agent: Googlebot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Bingbot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Perplexity-User
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Claude-User
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Claude-SearchBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Applebot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 # --- Training crawlers (bake in a snapshot, so staleness mitigations above matter most) ---
 
 User-agent: GPTBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: CCBot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Amazonbot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: Bytespider
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 User-agent: meta-externalagent
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /care
+Disallow: /care-share
 
 # No Crawl-delay: Google ignores it, and this site is a handful of static files on a CDN.
 

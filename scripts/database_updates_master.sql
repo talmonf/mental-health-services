@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 039_care_file.sql
 [x] 038_user_questions_faq.sql
 [x] 037_users_last_access.sql
 [x] 036_users_hide_intro.sql

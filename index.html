@@ -5670,6 +5670,7 @@
                                 {authUser ? (
                                     <>
                                         <span className="mh-auth-identity" title={authUser.email}>{authUser.email}</span>
+                                        <a className="mh-btn mh-hero-btn-ghost" href="/care" style={{ textDecoration: 'none' }} data-tracking-name="auth_care">התיק שלי</a>
                                         <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
                                         {authUser.isAdmin && (
                                             <a className="mh-btn mh-hero-btn-ghost" href="/admin" style={{ textDecoration: 'none' }} data-tracking-name="auth_admin">אדמין</a>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תיק משותף — מדריך נפש</title>
+  <meta name="description" content="צפייה בתיק ששותף איתכם לזמן מוגבל.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2d5a7b;
+      --text: #333;
+      --text-muted: #5a5a5a;
+      --border: #e0e0e0;
+      --bg: #f0f2f5;
+      --card: #fff;
+      --touch-min: 44px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Heebo, sans-serif; background: var(--bg); color: var(--text); }
+    .app { max-width: 720px; margin: 0 auto; padding: 16px; }
+    header { background: var(--primary); color: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: 1.2rem; }
+    p { margin: 6px 0 0; font-size: 0.9rem; }
+    .card { background: var(--card); border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); }
+    .item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .item:last-child { border-bottom: none; }
+    .muted { color: var(--text-muted); }
+    .err { color: #c0392b; }
+    .btn { min-height: var(--touch-min); padding: 10px 16px; border: none; border-radius: 10px; background: var(--primary); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+    h2 { color: var(--primary); font-size: 1.05rem; margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get('t') || '';
+    const root = document.getElementById('root');
+    const KIND = {
+      hospital: 'אשפוז', home_hospital: 'אשפוז בית', psychiatrist: 'פסיכיאטר', therapy: 'טיפול',
+      social_work: 'עבודה סוציאלית', meeting: 'פגישה', committee: 'ועדה', phone: 'שיחת טלפון',
+      email: 'מייל', home_visit: 'ביקור בית', application: 'הגשת בקשה', other: 'אחר'
+    };
+    const HMO = { clalit: 'כללית', maccabi: 'מכבי', meuhedet: 'מאוחדת', leumit: 'לאומית', other: 'אחר' };
+    const RIGHTS_KIND = {
+      disability_mental: 'נכות נפשית', disability_general: 'נכות כללית', work_incapacity: 'אי־כושר עבודה',
+      rehab_basket: 'סל שיקום', special_services: 'שירותים מיוחדים', hostile_actions: 'קצבת פעולות איבה',
+      income_support: 'הבטחת הכנסה', housing: 'דיור', other: 'אחר'
+    };
+    const RIGHTS_STATUS = {
+      not_started: 'טרם התחיל', applied: 'הוגשה בקשה', waiting_committee: 'ממתינים לוועדה',
+      committee_held: 'היתה ועדה', approved: 'אושר', rejected: 'נדחה',
+      appeal_planned: 'מתכוונים להגיש ערעור', appeal_filed: 'הוגש ערעור', temporary: 'זמני', closed: 'סגור'
+    };
+    const COMMITTEE_BODY = { btl: 'ביטוח לאומי', disability_general: 'ועדת נכות כללית', hostile_actions: 'פעולות איבה', rehab: 'סל שיקום', special_services: 'שירותים מיוחדים', other: 'אחר' };
+    const ORG_TYPE = {
+      rehab_provider: 'ספק סל שיקום', hospital: 'בית חולים', clinic: 'מרפאה', hmo: 'קופת חולים',
+      btl: 'ביטוח לאומי', municipality: 'רשות מקומית', ngo: 'עמותה', housing: 'דיור',
+      employment: 'תעסוקה', legal: 'משפטי', hostile_actions: 'פעולות איבה', other: 'אחר'
+    };
+    const LAB_MARKER = {
+      b12: 'B12', folate: 'חומצה פולית', vitamin_d: 'ויטמין D', tsh: 'TSH', ft4: 'FT4',
+      ferritin: 'פריטין', hemoglobin: 'המוגלובין', glucose: 'גלוקוז', hba1c: 'HbA1c',
+      lithium: 'ליתיום', sodium: 'נתרן', creatinine: 'קריאטינין', alt: 'ALT', ast: 'AST',
+      prolactin: 'פרולקטין', cholesterol: 'כולסטרול', triglycerides: 'טריגליצרידים',
+      crp: 'CRP', magnesium: 'מגנזיום', zinc: 'אבץ', weight: 'משקל', bp: 'לחץ דם', other: 'אחר'
+    };
+    const LAB_FLAG = { low: 'נמוך', normal: 'תקין', high: 'גבוה' };
+    const ACTIVITY_KIND = { sport: 'ספורט', walking: 'הליכה', gym: 'חדר כושר', yoga: 'יוגה', other: 'אחר' };
+    const fmt = (iso) => {
+      if (!iso) return '';
+      const d = String(iso).slice(0, 10).split('-');
+      return d.length === 3 ? d[2] + '.' + d[1] + '.' + d[0] : iso;
+    };
+    function rightsLine(it) {
+      if (it.summary) return it.summary;
+      const kind = RIGHTS_KIND[it.kind] || it.kind;
+      const status = RIGHTS_STATUS[it.status] || it.status;
+      var mid = '';
+      if (it.percentA && it.percentB) mid = ' — ' + it.percentA + '%, עם ' + it.percentB + ' אי־כושר עבודה';
+      else if (it.percentA) mid = ' — ' + it.percentA + '%';
+      const until = it.validUntil ? ' עד ' + fmt(it.validUntil) : '';
+      return kind + mid + ', ' + status + until;
+    }
+    function medLine(it) {
+      var parts = [it.name];
+      if (it.startedOn) parts.push('מאז ' + fmt(it.startedOn));
+      if (it.dose || it.schedule) parts.push([it.dose, it.schedule].filter(Boolean).join(' '));
+      if (it.prescriber) parts.push('נרשם ע״י ' + it.prescriber);
+      if (it.efficacy) parts.push(it.efficacy);
+      return parts.join(', ');
+    }
+    function el(html) { const d = document.createElement('div'); d.innerHTML = html; return d; }
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function section(title, inner) {
+      if (!inner) return '';
+      return '<div class="card"><h2>' + esc(title) + '</h2>' + inner + '</div>';
+    }
+    async function downloadDoc(id) {
+      const r = await fetch('/api/care/share-document?t=' + encodeURIComponent(token) + '&id=' + encodeURIComponent(id));
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) { alert(data.error || 'ההורדה נכשלה'); return; }
+      const bin = atob(data.dataBase64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: data.contentType }));
+      const a = document.createElement('a');
+      a.href = url; a.download = data.filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+    (async () => {
+      if (!token) {
+        root.innerHTML = '<div class="app"><header><h1>תיק משותף</h1></header><p class="err">חסר קישור.</p></div>';
+        return;
+      }
+      const r = await fetch('/api/care/share?t=' + encodeURIComponent(token), { cache: 'no-store' });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        root.innerHTML = '<div class="app"><header><h1>תיק משותף</h1></header><p class="err">הקישור אינו תקף, פג או בוטל.</p></div>';
+        return;
+      }
+      let html = '<div class="app"><header><h1>תיק משותף</h1><p>קריאה בלבד. זה אינו תיק רפואי רשמי ואינו מיועד למצב חירום (1201 / 101).</p></header>';
+      if (data.encounters) {
+        html += section('ציר זמן', data.encounters.map(function (it) {
+          var who = [it.orgName, it.contactName].filter(Boolean).join(' · ');
+          return '<div class="item"><strong>' + esc(KIND[it.kind] || it.kind) + ' · ' + esc(fmt(it.occurredOn)) + '</strong><div>' + esc(it.title) + '</div>' + (who ? '<div class="muted">' + esc(who) + '</div>' : '') + (it.summary ? '<p class="muted">' + esc(it.summary) + '</p>' : '') + '</div>';
+        }).join('') || '<p class="muted">אין רשומות.</p>');
+      }
+      if (data.documents) {
+        html += section('מסמכים', data.documents.map(function (it) {
+          return '<div class="item"><strong>' + esc(it.originalFilename) + '</strong><div class="muted">' + esc(fmt(it.createdAt)) + '</div><button class="btn" data-doc="' + esc(it.id) + '">הורדה</button></div>';
+        }).join('') || '<p class="muted">אין מסמכים.</p>');
+      }
+      if (data.medications) {
+        html += section('תרופות', data.medications.map(function (it) {
+          return '<div class="item"><strong>' + esc(medLine(it)) + '</strong>' + (it.notes ? '<p class="muted">' + esc(it.notes) + '</p>' : '') + '</div>';
+        }).join('') || '<p class="muted">אין תרופות.</p>');
+      }
+      if (data.rights || data.committees) {
+        var rightsHtml = (data.rights || []).map(function (it) {
+          return '<div class="item"><strong>' + esc(rightsLine(it)) + '</strong>' + (it.notes ? '<p class="muted">' + esc(it.notes) + '</p>' : '') + '</div>';
+        }).join('');
+        var commHtml = (data.committees || []).map(function (it) {
+          return '<div class="item"><strong>' + esc(it.title) + ' · ' + esc(fmt(it.scheduledOn)) + '</strong><div class="muted">' + esc((COMMITTEE_BODY[it.body] || it.body) + (it.place ? ' · ' + it.place : '')) + '</div></div>';
+        }).join('');
+        html += section('מיצוי זכויות', (rightsHtml + commHtml) || '<p class="muted">אין רשומות.</p>');
+      }
+      if (data.profile) {
+        var p = data.profile;
+        var bits = [];
+        if (p.fullName) bits.push('<div><strong>' + esc(p.fullName) + '</strong></div>');
+        if (p.hmo) bits.push('<div class="muted">קופת חולים: ' + esc(HMO[p.hmo] || p.hmo) + (p.hmoMemberSince ? ' מאז ' + esc(fmt(p.hmoMemberSince)) : '') + '</div>');
+        if (p.birthOn) bits.push('<div class="muted">תאריך לידה: ' + esc(fmt(p.birthOn)) + '</div>');
+        if (p.city || p.address) bits.push('<div class="muted">' + esc([p.address, p.city].filter(Boolean).join(', ')) + '</div>');
+        if (p.phone) bits.push('<div class="muted">טלפון: ' + esc(p.phone) + '</div>');
+        if (p.emergencyName) bits.push('<div class="muted">חירום: ' + esc(p.emergencyName + (p.emergencyPhone ? ' · ' + p.emergencyPhone : '')) + '</div>');
+        var hmoHist = (data.hmoHistory || []).map(function (it) {
+          return '<div class="item">' + esc(HMO[it.hmo] || it.hmo) + (it.startedOn ? ' · מאז ' + fmt(it.startedOn) : '') + (it.endedOn ? ' עד ' + fmt(it.endedOn) : '') + '</div>';
+        }).join('');
+        html += section('פרטים אישיים', bits.join('') + hmoHist || '<p class="muted">אין פרטים.</p>');
+      }
+      if (data.family) {
+        html += section('משפחה', data.family.map(function (it) {
+          return '<div class="item"><strong>' + esc(it.name) + (it.relation ? ' · ' + esc(it.relation) : '') + '</strong><div class="muted">' + esc([it.phone, it.email].filter(Boolean).join(' · ')) + '</div></div>';
+        }).join('') || '<p class="muted">אין רשומות.</p>');
+      }
+      if (data.diagnoses) {
+        html += section('אבחנות', data.diagnoses.map(function (it) {
+          return '<div class="item"><strong>' + esc(it.name) + (it.code ? ' (' + esc(it.code) + ')' : '') + '</strong><div class="muted">' + esc((it.diagnosedOn ? fmt(it.diagnosedOn) : '') + (it.diagnosedBy ? ' · ' + it.diagnosedBy : '')) + '</div></div>';
+        }).join('') || '<p class="muted">אין אבחנות.</p>');
+      }
+      if (data.therapy) {
+        html += section('טיפול', data.therapy.map(function (it) {
+          return '<div class="item"><strong>' + esc(it.therapistName) + (it.modality ? ' · ' + esc(it.modality) : '') + '</strong><div class="muted">' + esc(it.startedOn ? 'מאז ' + fmt(it.startedOn) : '') + (it.frequency ? ' · ' + esc(it.frequency) : '') + '</div></div>';
+        }).join('') || '<p class="muted">אין רשומות.</p>');
+      }
+      if (data.activities) {
+        html += section('פעילות גופנית', data.activities.map(function (it) {
+          return '<div class="item"><strong>' + esc(it.name) + '</strong><div class="muted">' + esc((ACTIVITY_KIND[it.kind] || it.kind) + (it.frequency ? ' · ' + it.frequency : '')) + '</div></div>';
+        }).join('') || '<p class="muted">אין פעילויות.</p>');
+      }
+      if (data.intake) {
+        var labels = {
+          presentingProblem: 'סיבת הפנייה', psychiatricHistory: 'היסטוריה פסיכיאטרית', medicalHistory: 'היסטוריה רפואית',
+          substanceUse: 'שימוש בחומרים', selfHarmHistory: 'פגיעה עצמית', legalIssues: 'היבטים משפטיים',
+          supports: 'תמיכה', sleepAppetite: 'שינה ותיאבון', other: 'אחר'
+        };
+        var intakeInner = Object.keys(labels).map(function (k) {
+          if (!data.intake[k]) return '';
+          return '<div class="item"><strong>' + esc(labels[k]) + '</strong><p class="muted" style="white-space:pre-wrap">' + esc(data.intake[k]) + '</p></div>';
+        }).join('');
+        html += section('קבלה', intakeInner || '<p class="muted">אין גיליון.</p>');
+      }
+      if (data.labCurrent || data.labResults || data.labFiles) {
+        var cur = (data.labCurrent || []).map(function (it) {
+          var name = it.marker === 'other' && it.customName ? it.customName : (LAB_MARKER[it.marker] || it.marker);
+          return '<div class="item"><strong>' + esc(name) + ': ' + esc(it.value) + ' ' + esc(it.unit) + '</strong><div class="muted">' + esc((it.flag ? (LAB_FLAG[it.flag] || it.flag) + ' · ' : '') + 'נבדק ב־' + fmt(it.measuredOn)) + '</div></div>';
+        }).join('');
+        var labFiles = (data.labFiles || []).map(function (it) {
+          return '<div class="item"><strong>' + esc(it.originalFilename) + '</strong> <button class="btn" data-doc="' + esc(it.id) + '">הורדה</button></div>';
+        }).join('');
+        html += section('בדיקות דם', (cur + labFiles) || '<p class="muted">אין מדידות.</p>');
+      }
+      if (data.contacts) {
+        html += section('אנשי קשר', data.contacts.map(function (it) {
+          var bits = it.kind === 'org'
+            ? [ORG_TYPE[it.orgType] || it.orgType, it.phone, it.website]
+            : [it.role, it.orgName, it.phone, it.email];
+          return '<div class="item"><strong>' + esc(it.name) + '</strong><div class="muted">' + esc(bits.filter(Boolean).join(' · ')) + '</div></div>';
+        }).join('') || '<p class="muted">אין אנשי קשר.</p>');
+      }
+      if (data.notes) {
+        html += section('פתקים', data.notes.map(function (it) {
+          return '<div class="item"><p style="white-space:pre-wrap">' + esc(it.body) + '</p></div>';
+        }).join('') || '<p class="muted">אין פתקים.</p>');
+      }
+      html += '</div>';
+      root.innerHTML = html;
+      root.querySelectorAll('[data-doc]').forEach(function (btn) {
+        btn.addEventListener('click', function () { downloadDoc(btn.getAttribute('data-doc')); });
+      });
+    })();
+  </script>
+</body>
+</html>

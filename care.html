@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>התיק שלי — מדריך נפש</title>
+  <meta name="description" content="תיק אישי לניהול ביקורים, מסמכים ותרופות. רק אתם מחליטים מי רואה.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="canonical" href="https://nefesh-il.org/care">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2d5a7b;
+      --primary-dark: #1e3f5a;
+      --accent: #52b788;
+      --danger: #c0392b;
+      --text: #333;
+      --text-muted: #5a5a5a;
+      --border: #e0e0e0;
+      --bg: #f0f2f5;
+      --bg-card: #fff;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-card: 0 4px 6px rgba(0,0,0,0.07);
+      --touch-min: 44px;
+      --font-hebrew: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font-hebrew); background: var(--bg); color: var(--text); }
+    .app { max-width: 860px; margin: 0 auto; padding: var(--space-lg); min-height: 100vh; }
+    .hero { background: var(--primary); color: #fff; border-radius: var(--radius-lg); padding: var(--space-lg); margin-bottom: var(--space-md); display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: space-between; align-items: center; }
+    .hero h1 { margin: 0; font-size: 1.3rem; }
+    .hero p { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.95; }
+    .hero a, .hero button.linkish { color: #fff; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn { min-height: var(--touch-min); padding: 10px 16px; border: none; border-radius: var(--radius-md); background: var(--primary); color: #fff; font: inherit; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.75); color: #fff; }
+    .btn.secondary { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+    .btn.danger { background: var(--danger); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .card { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); box-shadow: var(--shadow-card); margin-bottom: var(--space-md); }
+    .err { color: var(--danger); }
+    .muted { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+    label { display: block; font-weight: 600; margin: 0 0 6px; font-size: 0.85rem; }
+    input, select, textarea { width: 100%; min-height: var(--touch-min); padding: 10px; border: 2px solid var(--border); border-radius: var(--radius-md); font: inherit; }
+    textarea { min-height: 96px; }
+    .field { margin-bottom: 12px; }
+    .chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+    .chip { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--primary); background: #fff; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+    .chip.active { background: var(--primary); color: #fff; }
+    .item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .item:last-child { border-bottom: none; }
+    .item h3 { margin: 0 0 4px; font-size: 1rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .checks { display: flex; flex-wrap: wrap; gap: 10px; }
+    .checks label { display: flex; gap: 6px; align-items: center; font-weight: 500; }
+    input[type="checkbox"] { width: auto; min-height: 22px; }
+    .item h3 { overflow-wrap: anywhere; }
+    .empty { text-align: center; padding: 24px 8px; }
+    .banner { background: #fdf3e7; color: #5c3d12; border: 1px solid #e6c48a; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 12px; }
+    .ok { color: #1e7a4a; }
+    .tiny { font-size: 0.8rem; color: var(--text-muted); }
+    .form-grid { display: grid; gap: 12px; }
+    @media (min-width: 640px) { .form-grid.two { grid-template-columns: 1fr 1fr; } }
+    .welcome-more { margin-top: 12px; }
+    .welcome-more summary { cursor: pointer; font-weight: 600; color: var(--primary); min-height: var(--touch-min); display: list-item; padding: 10px 0; }
+    .welcome-more .welcome-body { margin-top: 10px; }
+    .welcome-more h3 { font-size: 0.95rem; margin: 14px 0 6px; }
+    .welcome-more ul { margin: 0; padding-inline-start: 1.2em; }
+    .welcome-more li { margin-bottom: 6px; }
+    .danger-zone { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .danger-zone > h3 { margin: 0 0 8px; font-size: 1rem; color: var(--danger); }
+    .danger-cols { display: grid; gap: 16px; }
+    @media (min-width: 640px) { .danger-cols { grid-template-columns: 1fr 1fr; } }
+    .danger-box { background: #fdf6f5; border: 1px solid #f0cfc9; border-radius: var(--radius-md); padding: 12px; }
+    .danger-box h4 { margin: 0 0 8px; font-size: 0.95rem; }
+    .danger-box .row { margin-top: 10px; }
+    .ack { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; margin: 0 0 10px; }
+    .ack input { margin-top: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    const SECTIONS = [
+      { id: 'timeline', label: 'ציר זמן' },
+      { id: 'documents', label: 'מסמכים' },
+      { id: 'medications', label: 'תרופות' },
+      { id: 'labs', label: 'בדיקות דם' },
+      { id: 'rights', label: 'מיצוי זכויות' },
+      { id: 'profile', label: 'פרטים אישיים' },
+      { id: 'family', label: 'משפחה' },
+      { id: 'diagnoses', label: 'אבחנות' },
+      { id: 'therapy', label: 'טיפול' },
+      { id: 'activity', label: 'פעילות גופנית' },
+      { id: 'intake', label: 'קבלה' },
+      { id: 'contacts', label: 'אנשי קשר' },
+      { id: 'notes', label: 'פתקים' },
+      { id: 'sharing', label: 'שיתוף' },
+      { id: 'audit', label: 'יומן גישה' }
+    ];
+    const SHARE_SECTIONS = ['timeline','documents','medications','contacts','notes','rights','profile','family','diagnoses','therapy','activity','intake','labs'];
+    const KINDS = [
+      { id: 'hospital', label: 'אשפוז' },
+      { id: 'home_hospital', label: 'אשפוז בית' },
+      { id: 'psychiatrist', label: 'פסיכיאטר' },
+      { id: 'therapy', label: 'טיפול' },
+      { id: 'social_work', label: 'עבודה סוציאלית' },
+      { id: 'meeting', label: 'פגישה' },
+      { id: 'committee', label: 'ועדה' },
+      { id: 'phone', label: 'שיחת טלפון' },
+      { id: 'email', label: 'מייל' },
+      { id: 'home_visit', label: 'ביקור בית' },
+      { id: 'application', label: 'הגשת בקשה' },
+      { id: 'other', label: 'אחר' }
+    ];
+    const HMO_HE = { clalit: 'כללית', maccabi: 'מכבי', meuhedet: 'מאוחדת', leumit: 'לאומית', other: 'אחר' };
+    const RIGHTS_KIND_HE = {
+      disability_mental: 'נכות נפשית',
+      disability_general: 'נכות כללית',
+      work_incapacity: 'אי־כושר עבודה',
+      rehab_basket: 'סל שיקום',
+      special_services: 'שירותים מיוחדים',
+      hostile_actions: 'קצבת פעולות איבה',
+      income_support: 'הבטחת הכנסה',
+      housing: 'דיור',
+      other: 'אחר'
+    };
+    const RIGHTS_STATUS_HE = {
+      not_started: 'טרם התחיל',
+      applied: 'הוגשה בקשה',
+      waiting_committee: 'ממתינים לוועדה',
+      committee_held: 'היתה ועדה',
+      approved: 'אושר',
+      rejected: 'נדחה',
+      appeal_planned: 'מתכוונים להגיש ערעור',
+      appeal_filed: 'הוגש ערעור',
+      temporary: 'זמני',
+      closed: 'סגור'
+    };
+    const COMMITTEE_BODY_HE = {
+      btl: 'ביטוח לאומי',
+      disability_general: 'ועדת נכות כללית',
+      hostile_actions: 'פעולות איבה',
+      rehab: 'סל שיקום',
+      special_services: 'שירותים מיוחדים',
+      other: 'אחר'
+    };
+    const COMMITTEE_STATUS_HE = { upcoming: 'קרובה', held: 'התקיימה', cancelled: 'בוטלה' };
+    const MED_STATUS_HE = { current: 'נוכחית', past: 'עבר', recommended: 'מומלצת' };
+    const ACTIVITY_KIND_HE = { sport: 'ספורט', walking: 'הליכה', gym: 'חדר כושר', yoga: 'יוגה', other: 'אחר' };
+    const DX_STATUS_HE = { active: 'פעילה', historical: 'היסטורית' };
+    const ORG_TYPE_HE = {
+      rehab_provider: 'ספק סל שיקום', hospital: 'בית חולים', clinic: 'מרפאה', hmo: 'קופת חולים',
+      btl: 'ביטוח לאומי', municipality: 'רשות מקומית', ngo: 'עמותה / מלכ״ר', housing: 'דיור',
+      employment: 'תעסוקה', legal: 'משפטי', hostile_actions: 'פעולות איבה', other: 'אחר'
+    };
+    const QUALIFICATION_HE = {
+      social_work: 'עבודה סוציאלית', psychiatrist: 'פסיכיאטר', psychologist: 'פסיכולוג/ית',
+      occupational_therapist: 'ריפוי בעיסוק', nurse: 'סיעוד', rehab_coordinator: 'רכז/ת שיקום',
+      peer: 'עמית/ת', lawyer: 'עורך דין', physician: 'רופא/ה', other: 'אחר'
+    };
+    const LAB_MARKER_HE = {
+      b12: 'B12', folate: 'חומצה פולית', vitamin_d: 'ויטמין D', tsh: 'TSH', ft4: 'FT4',
+      ferritin: 'פריטין', hemoglobin: 'המוגלובין', glucose: 'גלוקוז', hba1c: 'HbA1c',
+      lithium: 'ליתיום', sodium: 'נתרן', creatinine: 'קריאטינין', alt: 'ALT', ast: 'AST',
+      prolactin: 'פרולקטין', cholesterol: 'כולסטרול', triglycerides: 'טריגליצרידים',
+      crp: 'CRP', magnesium: 'מגנזיום', zinc: 'אבץ', weight: 'משקל', bp: 'לחץ דם', other: 'אחר'
+    };
+    const LAB_FLAG_HE = { low: 'נמוך', normal: 'תקין', high: 'גבוה' };
+    const LAB_UNITS = {
+      b12: 'pg/mL', folate: 'ng/mL', vitamin_d: 'ng/mL', tsh: 'mIU/L', ft4: 'ng/dL',
+      ferritin: 'ng/mL', hemoglobin: 'g/dL', glucose: 'mg/dL', hba1c: '%', lithium: 'mEq/L',
+      sodium: 'mEq/L', creatinine: 'mg/dL', alt: 'U/L', ast: 'U/L', prolactin: 'ng/mL',
+      cholesterol: 'mg/dL', triglycerides: 'mg/dL', crp: 'mg/L', magnesium: 'mg/dL', zinc: 'µg/dL',
+      weight: 'kg', bp: 'mmHg', other: ''
+    };
+    const KIND_HE = Object.fromEntries(KINDS.map((k) => [k.id, k.label]));
+    const SECTION_HE = Object.fromEntries(SECTIONS.map((s) => [s.id, s.label]));
+    const ACTION_HE = {
+      view: 'צפייה', create: 'הוספה', update: 'עדכון', delete: 'מחיקה', download: 'הורדה',
+      grant_create: 'שיתוף', grant_accept: 'אישור גישה', grant_revoke: 'ביטול גישה',
+      link_create: 'קישור', link_revoke: 'ביטול קישור', link_view: 'צפייה בקישור',
+      export: 'ייצוא'
+    };
+
+    const errHe = (data, fallback) => {
+      const e = data && data.error;
+      const map = {
+        'Unauthorized': 'יש להתחבר מחדש',
+        'Care verification required': 'יש לאשר כניסה לתיק עם קוד במייל',
+        'Email not verified': 'יש לאשר את כתובת האימייל',
+        'Too many attempts': 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות',
+        'Invalid code': 'קוד שגוי או שפג תוקפו',
+        'Email could not be sent': 'לא הצלחנו לשלוח מייל',
+        'Forbidden': 'אין הרשאה לפעולה הזו',
+        'File type not allowed': 'סוג הקובץ לא נתמך (PDF, JPEG, PNG, WebP)',
+        'File too large': 'הקובץ גדול מ־2MB',
+        'Cannot share with yourself': 'לא ניתן לשתף עם עצמכם',
+        'Invalid grant': 'בדקו אימייל, סעיפים ומשך',
+        'Invalid duration': 'בחרו משך תקף',
+        'Expired': 'ההרשאה פגה',
+        'Care file is not available yet': 'התיק עדיין לא זמין בשרת. יש להריץ את המיגרציה.',
+        'Server misconfiguration': 'חסר מפתח הצפנה בשרת (FILE_ENCRYPTION_KEY)',
+        'Confirmation required': 'יש לאשר את המחיקה',
+        'Password is required': 'יש להזין סיסמה',
+        'Invalid password': 'סיסמה שגויה'
+      };
+      return map[e] || fallback;
+    };
+
+    const api = async (path, opts = {}) => {
+      const r = await fetch(path, { credentials: 'include', ...opts });
+      const data = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, data };
+    };
+
+    const downloadBase64 = (filename, contentType, b64) => {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: contentType }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const b64ToBytes = (b64) => {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    };
+
+    const safeZipName = (name, used) => {
+      let base = String(name || 'file').replace(/[\\/:*?"<>|]+/g, '_').replace(/^\.+/g, '_').trim() || 'file';
+      base = base.slice(0, 180);
+      let out = base;
+      let n = 2;
+      while (used.has(out.toLowerCase())) {
+        const dot = base.lastIndexOf('.');
+        out = dot > 0 ? `${base.slice(0, dot)}-${n}${base.slice(dot)}` : `${base}-${n}`;
+        n += 1;
+      }
+      used.add(out.toLowerCase());
+      return out;
+    };
+
+    const escHtml = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const htmlSection = (title, inner) => inner ? `<section><h2>${escHtml(title)}</h2>${inner}</section>` : '';
+
+    const htmlItems = (arr, lineFn) => {
+      if (!arr || !arr.length) return '';
+      return '<ul>' + arr.map((it) => `<li>${lineFn(it)}</li>`).join('') + '</ul>';
+    };
+
+    const buildExportHtml = (data) => {
+      const p = data.profile || {};
+      const profileRows = [
+        ['שם', p.fullName], ['ת״ז', p.nationalId], ['תאריך לידה', fmtDate(p.birthOn)],
+        ['מגדר', p.gender], ['מצב משפחתי', p.maritalStatus], ['ילדים', p.childrenCount],
+        ['טלפון', p.phone], ['כתובת', p.address], ['עיר', p.city],
+        ['ארץ לידה', p.countryOfBirth], ['שנת עלייה', p.aliyahYear], ['שפות', p.languages],
+        ['השכלה', p.education], ['תעסוקה', p.employment], ['צבא / לאומי', p.military],
+        ['דיור', p.housing],
+        ['קופת חולים', p.hmo ? (HMO_HE[p.hmo] || p.hmo) : ''],
+        ['חברות בקופה מאז', fmtDate(p.hmoMemberSince)], ['מרפאה', p.clinicName],
+        ['רגישויות', p.allergies],
+        ['איש קשר לחירום', [p.emergencyName, p.emergencyPhone, p.emergencyRelation].filter(Boolean).join(' · ')]
+      ].filter((row) => row[1]);
+      const profileHtml = profileRows.length
+        ? '<dl>' + profileRows.map(([k, v]) => `<dt>${escHtml(k)}</dt><dd>${escHtml(v)}</dd>`).join('') + '</dl>'
+        : '';
+      const intakeLabels = {
+        presentingProblem: 'סיבת הפנייה', psychiatricHistory: 'היסטוריה פסיכיאטרית', medicalHistory: 'היסטוריה רפואית',
+        substanceUse: 'שימוש בחומרים', selfHarmHistory: 'פגיעה עצמית', legalIssues: 'היבטים משפטיים',
+        supports: 'תמיכה', sleepAppetite: 'שינה ותיאבון', other: 'אחר'
+      };
+      const intakeHtml = data.intake
+        ? Object.keys(intakeLabels).map((k) => data.intake[k] ? `<h3>${escHtml(intakeLabels[k])}</h3><p>${escHtml(data.intake[k])}</p>` : '').join('')
+        : '';
+      const labLine = (it) => {
+        const name = it.marker === 'other' && it.customName ? it.customName : (LAB_MARKER_HE[it.marker] || it.marker);
+        return `${escHtml(name)}: ${escHtml(it.value)} ${escHtml(it.unit)}${it.flag ? ' · ' + escHtml(LAB_FLAG_HE[it.flag] || it.flag) : ''} · ${escHtml(fmtDate(it.measuredOn))}`;
+      };
+      const body = [
+        htmlSection('פרטים אישיים', profileHtml),
+        htmlSection('מעברים בין קופות', htmlItems(data.hmoHistory, (it) => `${escHtml(HMO_HE[it.hmo] || it.hmo)} · ${escHtml(fmtDate(it.startedOn))}${it.endedOn ? '–' + escHtml(fmtDate(it.endedOn)) : ''}`)),
+        htmlSection('ציר זמן', htmlItems(data.encounters, (it) => `<strong>${escHtml(KIND_HE[it.kind] || it.kind)} · ${escHtml(fmtDate(it.occurredOn))}</strong> — ${escHtml(it.title)}${[it.orgName, it.contactName].filter(Boolean).length ? '<br>' + escHtml([it.orgName, it.contactName].filter(Boolean).join(' · ')) : ''}${it.summary ? '<br>' + escHtml(it.summary) : ''}`)),
+        htmlSection('תרופות', htmlItems(data.medications, (it) => escHtml([it.name, it.startedOn ? 'מאז ' + fmtDate(it.startedOn) : '', [it.dose, it.schedule].filter(Boolean).join(' '), it.prescriber ? 'נרשם ע״י ' + it.prescriber : '', it.efficacy].filter(Boolean).join(', ')))),
+        htmlSection('ערכי בדיקות נוכחיים', htmlItems(data.labCurrent, labLine)),
+        htmlSection('היסטוריית מדידות', htmlItems(data.labResults, labLine)),
+        htmlSection('מסמכי בדיקות', htmlItems(data.labFiles, (it) => escHtml(it.originalFilename) + ' · ' + escHtml(fmtDate(it.createdAt)))),
+        htmlSection('מיצוי זכויות', htmlItems(data.rights, (it) => escHtml(rightsLine(it)) + (it.notes ? '<br>' + escHtml(it.notes) : ''))),
+        htmlSection('ועדות', htmlItems(data.committees, (it) => `${escHtml(it.title)} · ${escHtml(fmtDate(it.scheduledOn))} · ${escHtml(COMMITTEE_BODY_HE[it.body] || it.body)}`)),
+        htmlSection('אבחנות', htmlItems(data.diagnoses, (it) => `${escHtml(it.name)}${it.code ? ' (' + escHtml(it.code) + ')' : ''} · ${escHtml(DX_STATUS_HE[it.status] || it.status)} ${escHtml(fmtDate(it.diagnosedOn))}`)),
+        htmlSection('טיפול', htmlItems(data.therapy, (it) => `${escHtml(it.therapistName)}${it.modality ? ' · ' + escHtml(it.modality) : ''} · ${escHtml(fmtDate(it.startedOn))}`)),
+        htmlSection('פעילות גופנית', htmlItems(data.activities, (it) => `${escHtml(it.name)} · ${escHtml(ACTIVITY_KIND_HE[it.kind] || it.kind)}`)),
+        htmlSection('משפחה', htmlItems(data.family, (it) => `${escHtml(it.name)}${it.relation ? ' · ' + escHtml(it.relation) : ''} ${escHtml([it.phone, it.email].filter(Boolean).join(' · '))}`)),
+        htmlSection('אנשי קשר', htmlItems(data.contacts, (it) => `${escHtml(it.name)}${it.kind === 'org' ? ' · ' + escHtml(ORG_TYPE_HE[it.orgType] || '') : (it.role ? ' · ' + escHtml(it.role) : '')} ${escHtml([it.phone, it.email, it.website].filter(Boolean).join(' · '))}`)),
+        htmlSection('קבלה', intakeHtml),
+        htmlSection('פתקים', htmlItems(data.notes, (it) => escHtml(it.body))),
+        htmlSection('מסמכים', htmlItems(data.documents, (it) => escHtml(it.originalFilename) + ' · ' + escHtml(fmtDate(it.createdAt))))
+      ].join('');
+      return `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8"><title>התיק שלי — ייצוא</title>
+<style>body{font-family:Heebo,Arial,sans-serif;max-width:800px;margin:24px auto;padding:0 16px;color:#333;line-height:1.5}
+h1{color:#2d5a7b}h2{color:#2d5a7b;border-bottom:1px solid #e0e0e0;padding-bottom:4px}dt{font-weight:600}dd{margin:0 0 8px}
+.muted{color:#5a5a5a;font-size:.9rem}li{margin-bottom:10px}</style></head><body>
+<h1>התיק שלי</h1>
+<p class="muted">ייצוא מ־מדריך נפש · ${escHtml(fmtDate(data.exportedAt))} · זה אינו תיק רפואי רשמי ואינו מיועד למצב חירום (1201 / 101).</p>
+${body}
+</body></html>`;
+    };
+
+    const fmtDate = (iso) => {
+      if (!iso) return '';
+      const d = String(iso).slice(0, 10).split('-');
+      return d.length === 3 ? `${d[2]}.${d[1]}.${d[0]}` : iso;
+    };
+    const toDateInput = (iso) => iso ? String(iso).slice(0, 10) : '';
+
+    function rightsLine(it) {
+      if (it.summary) return it.summary;
+      const kind = RIGHTS_KIND_HE[it.kind] || it.kind;
+      const status = RIGHTS_STATUS_HE[it.status] || it.status;
+      let mid = '';
+      if (it.percentA && it.percentB) mid = ` — ${it.percentA}%, עם ${it.percentB} אי־כושר עבודה`;
+      else if (it.percentA) mid = ` — ${it.percentA}%`;
+      else if (it.percentB) mid = ` — ${it.percentB}`;
+      const until = it.validUntil ? ` עד ${fmtDate(it.validUntil)}` : '';
+      return `${kind}${mid}, ${status}${until}`;
+    }
+
+    function Field({ label, children }) {
+      return <div className="field"><label>{label}</label>{children}</div>;
+    }
+
+    function App() {
+      const [user, setUser] = useState(undefined);
+      const [boot, setBoot] = useState(null);
+      const [error, setError] = useState('');
+      const [tab, setTab] = useState('timeline');
+      const [fileId, setFileId] = useState(null);
+      const [role, setRole] = useState('owner');
+      const [allowed, setAllowed] = useState(SHARE_SECTIONS);
+      const [login, setLogin] = useState({ email: '', password: '' });
+      const [otp, setOtp] = useState('');
+      const [busy, setBusy] = useState(false);
+      const [items, setItems] = useState([]);
+      const [extra, setExtra] = useState([]);
+      const [files, setFiles] = useState([]);
+      const [sheet, setSheet] = useState(null);
+      const [inbox, setInbox] = useState([]);
+      const [grants, setGrants] = useState([]);
+      const [links, setLinks] = useState([]);
+      const [newLinkUrl, setNewLinkUrl] = useState('');
+      const [notice, setNotice] = useState('');
+      const [fileWipeOpen, setFileWipeOpen] = useState(false);
+      const [fileWipeAck, setFileWipeAck] = useState(false);
+      const [accountWipeOpen, setAccountWipeOpen] = useState(false);
+      const [accountWipeAck, setAccountWipeAck] = useState(false);
+      const [accountPassword, setAccountPassword] = useState('');
+      const params = new URLSearchParams(location.search);
+      const grantParam = params.get('grant');
+
+      const loadSession = async () => {
+        const { data } = await api('/api/auth/session');
+        setUser(data.user || null);
+        return data.user || null;
+      };
+
+      const loadBoot = async (resetOwn = false) => {
+        const { ok, data } = await api('/api/care/bootstrap');
+        if (!ok) { setError(errHe(data, 'טעינה נכשלה')); return data; }
+        setBoot(data);
+        setError('');
+        if (data.file && (!fileId || resetOwn)) {
+          setFileId(data.file.id);
+          setRole('owner');
+          setAllowed(data.file.sections);
+        }
+        return data;
+      };
+
+      useEffect(() => { loadSession(); }, []);
+      useEffect(() => {
+        if (user) loadBoot();
+      }, [user && user.id]);
+
+      useEffect(() => {
+        if (!boot || !boot.careReady) return;
+        api('/api/care/inbox').then(({ data }) => { if (data.items) setInbox(data.items); });
+      }, [boot && boot.careReady]);
+
+      const afterReady = async (fid, sections, nextRole) => {
+        setFileId(fid);
+        if (sections) setAllowed(sections);
+        if (nextRole) setRole(nextRole);
+        const { data } = await api('/api/care/inbox');
+        if (data.items) setInbox(data.items);
+      };
+
+      useEffect(() => {
+        if (!boot || !boot.careReady || !grantParam) return;
+        (async () => {
+          const { ok, data } = await api('/api/care/grants-accept', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: grantParam })
+          });
+          if (ok) {
+            history.replaceState({}, '', '/care');
+            const { data: inboxData } = await api('/api/care/inbox');
+            const g = (inboxData.items || []).find((x) => x.id === grantParam);
+            if (g) afterReady(g.fileId, g.sections, 'grantee');
+            else if (data.fileId) afterReady(data.fileId, null, 'grantee');
+          }
+        })();
+      }, [boot && boot.careReady, grantParam]);
+
+      const submitLogin = async (e) => {
+        e.preventDefault();
+        setBusy(true); setError('');
+        const { ok, data } = await api('/api/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(login)
+        });
+        setBusy(false);
+        if (!ok) { setError(errHe(data, 'הכניסה נכשלה')); return; }
+        setUser(data.user);
+      };
+
+      const requestOtp = async () => {
+        setBusy(true); setError('');
+        const { ok, data } = await api('/api/care/otp-request', { method: 'POST' });
+        setBusy(false);
+        if (!ok) setError(errHe(data, 'שליחת הקוד נכשלה'));
+        else setError('');
+        return ok;
+      };
+
+      const verifyOtp = async (e) => {
+        e.preventDefault();
+        setBusy(true); setError('');
+        const { ok, data } = await api('/api/care/otp-verify', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: otp })
+        });
+        setBusy(false);
+        if (!ok) { setError(errHe(data, 'הקוד שגוי')); return; }
+        await loadBoot();
+      };
+
+      const loadTab = useCallback(async () => {
+        if (!fileId || !boot || !boot.careReady) return;
+        if (tab === 'sharing' && role !== 'owner') return;
+        if (tab === 'audit' && role !== 'owner') return;
+        const map = {
+          timeline: `/api/care/encounters?fileId=${fileId}`,
+          documents: `/api/care/documents?fileId=${fileId}`,
+          medications: `/api/care/medications?fileId=${fileId}`,
+          contacts: `/api/care/contacts?fileId=${fileId}`,
+          notes: `/api/care/notes?fileId=${fileId}`,
+          family: `/api/care/family?fileId=${fileId}`,
+          diagnoses: `/api/care/diagnoses?fileId=${fileId}`,
+          therapy: `/api/care/therapy?fileId=${fileId}`,
+          activity: `/api/care/activities?fileId=${fileId}`,
+          sharing: `/api/care/grants?fileId=${fileId}`,
+          audit: `/api/care/audit?fileId=${fileId}`
+        };
+        if (tab === 'sharing') {
+          const [g, l, i] = await Promise.all([
+            api(`/api/care/grants?fileId=${fileId}`),
+            api(`/api/care/links?fileId=${fileId}`),
+            api('/api/care/inbox')
+          ]);
+          setGrants(g.data.items || []);
+          setLinks(l.data.items || []);
+          setInbox(i.data.items || []);
+          return;
+        }
+        if (tab === 'rights') {
+          const [r, c] = await Promise.all([
+            api(`/api/care/rights?fileId=${fileId}`),
+            api(`/api/care/committees?fileId=${fileId}`)
+          ]);
+          if (!r.ok) { setError(errHe(r.data, 'טעינה נכשלה')); return; }
+          setItems(r.data.items || []);
+          setExtra(c.data.items || []);
+          return;
+        }
+        if (tab === 'profile') {
+          const [p, h] = await Promise.all([
+            api(`/api/care/profile?fileId=${fileId}`),
+            api(`/api/care/hmo-history?fileId=${fileId}`)
+          ]);
+          if (!p.ok) { setError(errHe(p.data, 'טעינה נכשלה')); return; }
+          setSheet(p.data.item || null);
+          setExtra(h.data.items || []);
+          return;
+        }
+        if (tab === 'intake') {
+          const { ok, data } = await api(`/api/care/intake?fileId=${fileId}`);
+          if (!ok) { setError(errHe(data, 'טעינה נכשלה')); return; }
+          setSheet(data.item || null);
+          return;
+        }
+        if (tab === 'timeline') {
+          const [e, c] = await Promise.all([
+            api(`/api/care/encounters?fileId=${fileId}`),
+            api(`/api/care/contacts?fileId=${fileId}`)
+          ]);
+          if (!e.ok) { setError(errHe(e.data, 'טעינה נכשלה')); return; }
+          setItems(e.data.items || []);
+          setExtra(c.ok ? (c.data.items || []) : []);
+          return;
+        }
+        if (tab === 'labs') {
+          const [r, p, d] = await Promise.all([
+            api(`/api/care/lab-results?fileId=${fileId}`),
+            api(`/api/care/lab-panels?fileId=${fileId}`),
+            api(`/api/care/documents?fileId=${fileId}&kind=lab`)
+          ]);
+          if (!r.ok) { setError(errHe(r.data, 'טעינה נכשלה')); return; }
+          setItems(r.data.items || []);
+          setSheet({ current: r.data.current || [] });
+          setExtra(p.data.items || []);
+          setFiles(d.ok ? (d.data.items || []) : []);
+          return;
+        }
+        const { ok, data } = await api(map[tab]);
+        if (!ok) { setError(errHe(data, 'טעינה נכשלה')); return; }
+        setItems(data.items || []);
+      }, [fileId, tab, boot, role]);
+
+      useEffect(() => { loadTab(); }, [loadTab]);
+
+      const mutate = async (path, method, payload) => {
+        setBusy(true); setError('');
+        const opts = method === 'DELETE'
+          ? { method: 'DELETE' }
+          : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId, ...payload }) };
+        const url = method === 'DELETE'
+          ? `${path}?fileId=${encodeURIComponent(fileId)}&id=${encodeURIComponent(payload.id)}`
+          : path;
+        const { ok, data } = await api(url, opts);
+        setBusy(false);
+        if (!ok) { setError(errHe(data, 'הפעולה נכשלה')); return false; }
+        await loadTab();
+        return true;
+      };
+
+      const exportZip = async () => {
+        if (!fileId || typeof JSZip === 'undefined') {
+          setError('לא ניתן לייצא כרגע. רעננו את הדף ונסו שוב.');
+          return;
+        }
+        setBusy(true); setError('');
+        const { ok, data } = await api(`/api/care/export?fileId=${encodeURIComponent(fileId)}`);
+        if (!ok) { setBusy(false); setError(errHe(data, 'הייצוא נכשל')); return; }
+        try {
+          const zip = new JSZip();
+          zip.file('README.txt', 'ייצוא התיק האישי ממדריך נפש (nefesh-il.org).\r\nזה אינו תיק רפואי רשמי.\r\nteik.html — קריאה בעברית\r\ndata.json — גיבוי מובנה\r\ndocuments / labs — הקבצים שהועלו\r\n');
+          zip.file('teik.html', buildExportHtml(data));
+          zip.file('data.json', JSON.stringify(data, null, 2));
+          const used = new Set();
+          const addFiles = async (list, folder) => {
+            for (const doc of list || []) {
+              const dl = await api(`/api/care/document-download?fileId=${encodeURIComponent(fileId)}&id=${encodeURIComponent(doc.id)}`);
+              if (!dl.ok || !dl.data.dataBase64) continue;
+              zip.file(`${folder}/${safeZipName(dl.data.filename || doc.originalFilename, used)}`, b64ToBytes(dl.data.dataBase64));
+            }
+          };
+          await addFiles(data.documents, 'documents');
+          await addFiles(data.labFiles, 'labs');
+          const blob = await zip.generateAsync({ type: 'blob' });
+          const stamp = String(data.exportedAt || '').slice(0, 10) || 'export';
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `nefesh-care-${stamp}.zip`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          setError('הייצוא נכשל');
+        }
+        setBusy(false);
+      };
+
+      const wipeOwnFile = async () => {
+        if (!fileId || !fileWipeAck) return;
+        setBusy(true); setError(''); setNotice('');
+        const { ok, data } = await api('/api/care/file-delete', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileId, confirm: true })
+        });
+        setBusy(false);
+        if (!ok) { setError(errHe(data, 'מחיקת התיק נכשלה')); return; }
+        setItems([]); setExtra([]); setFiles([]); setGrants([]); setLinks([]); setSheet(null);
+        setFileWipeOpen(false); setFileWipeAck(false);
+        setNotice('התיק האישי נמחק. נפתח תיק ריק חדש.');
+        await loadBoot(true);
+        const inboxRes = await api('/api/care/inbox');
+        if (inboxRes.data.items) setInbox(inboxRes.data.items);
+      };
+
+      const wipeAccount = async () => {
+        if (!accountWipeAck || !accountPassword) return;
+        setBusy(true); setError('');
+        const { ok, data } = await api('/api/auth/delete-account', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: accountPassword, confirm: true })
+        });
+        setBusy(false);
+        if (!ok) { setError(errHe(data, 'מחיקת החשבון נכשלה')); return; }
+        location.href = '/';
+      };
+
+      const visibleTabs = SECTIONS.filter((s) => {
+        if (s.id === 'sharing' || s.id === 'audit') return role === 'owner';
+        return allowed.includes(s.id);
+      });
+
+      if (user === undefined) return <div className="app"><p className="muted">טוען…</p></div>;
+
+      if (!user) {
+        return (
+          <div className="app">
+            <header className="hero">
+              <div><h1>התיק שלי</h1><p>ניהול זכויות, תרופות, קבלה ושיתוף</p></div>
+              <a className="btn ghost" href="/">למדריך</a>
+            </header>
+            <div className="card">
+              <h2>כניסה</h2>
+              <p className="muted">התיק זמין למשתמשים רשומים בלבד.</p>
+              {error && <p className="err">{error}</p>}
+              <form onSubmit={submitLogin}>
+                <Field label="אימייל"><input type="email" required value={login.email} onChange={(e) => setLogin({ ...login, email: e.target.value })} /></Field>
+                <Field label="סיסמה"><input type="password" required value={login.password} onChange={(e) => setLogin({ ...login, password: e.target.value })} /></Field>
+                <button className="btn" disabled={busy} type="submit">כניסה</button>
+              </form>
+              <p className="muted">אין חשבון? <a href="/">הירשמו במדריך</a></p>
+            </div>
+          </div>
+        );
+      }
+
+      if (boot && boot.emailVerified === false) {
+        return (
+          <div className="app">
+            <header className="hero">
+              <div><h1>התיק שלי</h1></div>
+              <a className="btn ghost" href="/">למדריך</a>
+            </header>
+            <div className="banner">נא לאשר את כתובת האימייל לפני השימוש בתיק. בדקו את תיבת הדואר או שלחו שוב מדף המדריך.</div>
+          </div>
+        );
+      }
+
+      if (boot && !boot.careReady) {
+        return (
+          <div className="app">
+            <header className="hero">
+              <div><h1>התיק שלי</h1><p>שלב אימות נוסף — קוד במייל</p></div>
+              <a className="btn ghost" href="/">למדריך</a>
+            </header>
+            <div className="card">
+              {error && <p className="err">{error}</p>}
+              <p className="muted">לפני פתיחת התיק נשלח קוד חד־פעמי ל־{user.email}.</p>
+              <button className="btn secondary" type="button" disabled={busy} onClick={requestOtp}>שלחו קוד</button>
+              <form onSubmit={verifyOtp} style={{ marginTop: 16 }}>
+                <Field label="קוד בן 6 ספרות"><input inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={(e) => setOtp(e.target.value)} /></Field>
+                <button className="btn" disabled={busy} type="submit">כניסה לתיק</button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="app">
+          <header className="hero">
+            <div>
+              <h1>התיק שלי</h1>
+              <p>{role === 'owner' ? 'רק אתם מחליטים מי רואה' : `תיק ששותף איתכם · ${inbox.find((i) => i.fileId === fileId)?.ownerEmail || ''}`}</p>
+            </div>
+            <div className="actions">
+              {role === 'owner' && <button className="btn ghost" type="button" disabled={busy} onClick={exportZip}>ייצוא ZIP</button>}
+              <a className="btn ghost" href="/">למדריך</a>
+              <button className="btn ghost" type="button" onClick={async () => { await api('/api/auth/logout', { method: 'POST' }); location.href = '/'; }}>יציאה</button>
+            </div>
+          </header>
+
+          <p className="muted">זה אינו תיק רפואי רשמי ואינו מיועד למצב חירום. במצוקה: 1201 או 101.</p>
+
+          {role === 'owner' && (
+            <div className="card">
+              <p><strong>ברוכים הבאים לתיק האישי.</strong> זה מקום פרטי לניהול המידע הרפואי והשיקומי שלכם — רק אתם מחליטים מה נשמר ומי רואה.</p>
+              <details className="welcome-more">
+                <summary>מה יש בתיק ומה האפשרויות</summary>
+                <div className="welcome-body">
+                  <h3>מה אפשר לשמור</h3>
+                  <p className="muted">ציר זמן של פגישות ואירועים, מסמכים, תרופות, בדיקות דם ומדדים, מיצוי זכויות וועדות, פרטים אישיים וקופת חולים, משפחה, אבחנות, טיפול, פעילות גופנית, גיליון קבלה, אנשי קשר ופתקים.</p>
+                  <h3>שיתוף</h3>
+                  <p className="muted">אפשר להזמין משתמש רשום — לזמן מוגבל או כהרשאת משפחה — או ליצור קישור לקריאה בלי חשבון. בוחרים אילו סעיפים ייפתחו, ואפשר לבטל גישה בכל עת. ביטול לא מוחק את מה שכבר נכתב בתיק.</p>
+                  <h3>הורדה</h3>
+                  <p className="muted">כפתור «ייצוא ZIP» בראש הדף מוריד את כל התיק למחשב: דף לקריאה בעברית, קובץ JSON לגיבוי, והמסמכים שהועלו. מומלץ לשמור עותק לפני מחיקה.</p>
+                  <h3>מחיקה בכל עת</h3>
+                  <p className="muted">אפשר למחוק רק את התיק האישי (החשבון נשאר, וייפתח תיק ריק חדש) או למחוק את החשבון כולו — ואז גם התיק נמחק. אחרי מחיקה אין שחזור מהאתר.</p>
+                  <h3>רמת האבטחה</h3>
+                  <ul className="muted">
+                    <li>כניסה בסיסמה ואישור כתובת האימייל.</li>
+                    <li>קוד חד־פעמי במייל לפני פתיחת התיק (כ־30 דקות).</li>
+                    <li>מסמכים מוצפנים במסד הנתונים (AES-256-GCM).</li>
+                    <li>שיתוף לפי סעיפים, עם יומן גישה שאתם רואים.</li>
+                    <li>החיבור לאתר מוצפן (HTTPS). אין בממשק גישת מנהל לתיק.</li>
+                    <li>זו אינה הצפנה מקצה לקצה: מפתח ההצפנה נמצא בשרת כדי שתוכלו לפתוח את הקבצים. השירות אינו תחליף לתיק בקופה או בבית חולים.</li>
+                  </ul>
+                </div>
+              </details>
+              <div className="danger-zone">
+                <h3>מחיקה</h3>
+                <p className="muted">שתי פעולות נפרדות. מומלץ לייצא ZIP לפני כן.</p>
+                <div className="danger-cols">
+                  <div className="danger-box">
+                    <h4>מחיקת התיק האישי</h4>
+                    <p className="tiny">מוחק את כל הרשומות, המסמכים, השיתופים והקישורים. החשבון נשאר.</p>
+                    {!fileWipeOpen ? (
+                      <button className="btn danger" type="button" disabled={busy} onClick={() => { setFileWipeOpen(true); setAccountWipeOpen(false); }}>מחיקת התיק האישי</button>
+                    ) : (
+                      <div>
+                        <label className="ack">
+                          <input type="checkbox" checked={fileWipeAck} onChange={(e) => setFileWipeAck(e.target.checked)} />
+                          אני מבין/ה שהתיק יימחק ולא ניתן לשחזר
+                        </label>
+                        <div className="row">
+                          <button className="btn danger" type="button" disabled={busy || !fileWipeAck} onClick={wipeOwnFile}>מחיקה סופית של התיק</button>
+                          <button className="btn secondary" type="button" disabled={busy} onClick={() => { setFileWipeOpen(false); setFileWipeAck(false); }}>ביטול</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="danger-box">
+                    <h4>מחיקת החשבון</h4>
+                    <p className="tiny">מוחק את המשתמש וגם את התיק האישי. אין שחזור.</p>
+                    {!accountWipeOpen ? (
+                      <button className="btn danger" type="button" disabled={busy} onClick={() => { setAccountWipeOpen(true); setFileWipeOpen(false); }}>מחיקת החשבון</button>
+                    ) : (
+                      <div>
+                        <Field label="סיסמה לאישור">
+                          <input type="password" autoComplete="current-password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} />
+                        </Field>
+                        <label className="ack">
+                          <input type="checkbox" checked={accountWipeAck} onChange={(e) => setAccountWipeAck(e.target.checked)} />
+                          אני מבין/ה שהחשבון והתיק יימחקו ולא ניתן לשחזר
+                        </label>
+                        <div className="row">
+                          <button className="btn danger" type="button" disabled={busy || !accountWipeAck || !accountPassword} onClick={wipeAccount}>מחיקה סופית של החשבון</button>
+                          <button className="btn secondary" type="button" disabled={busy} onClick={() => { setAccountWipeOpen(false); setAccountWipeAck(false); setAccountPassword(''); }}>ביטול</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {inbox.length > 0 && (
+            <div className="card">
+              <strong>שותף איתי</strong>
+              {inbox.map((g) => (
+                <div className="item" key={g.id}>
+                  <div className="row">
+                    <span>{g.ownerEmail} · {g.status === 'pending' ? 'ממתין לאישור' : (g.kind === 'proxy' ? 'משפחה' : 'מוגבל בזמן')}</span>
+                    {g.status === 'pending' ? (
+                      <button className="btn secondary" type="button" onClick={async () => {
+                        const { ok, data } = await api('/api/care/grants-accept', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: g.id }) });
+                        if (ok) afterReady(data.fileId || g.fileId, g.sections, 'grantee');
+                      }}>אישור</button>
+                    ) : (
+                      <button className="btn secondary" type="button" onClick={() => { setFileId(g.fileId); setAllowed(g.sections); setRole('grantee'); setTab(g.sections[0] || 'timeline'); }}>פתיחה</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {boot && boot.file && role !== 'owner' && (
+                <button className="btn secondary" type="button" onClick={() => { setFileId(boot.file.id); setAllowed(boot.file.sections); setRole('owner'); }}>חזרה לתיק שלי</button>
+              )}
+            </div>
+          )}
+
+          <nav className="chips">
+            {visibleTabs.map((s) => (
+              <button key={s.id} className={'chip' + (tab === s.id ? ' active' : '')} type="button" onClick={() => setTab(s.id)}>{s.label}</button>
+            ))}
+          </nav>
+
+          {notice && <p className="ok">{notice}</p>}
+          {error && <p className="err">{error}</p>}
+
+          {tab === 'timeline' && <Timeline items={items} contacts={extra} busy={busy} onSave={(p) => mutate('/api/care/encounters', 'POST', p)} onDelete={(id) => mutate('/api/care/encounters', 'DELETE', { id })} />}
+          {tab === 'documents' && <Documents items={items} busy={busy} onUpload={async (file) => {
+            const b64 = await fileToB64(file);
+            return mutate('/api/care/documents', 'POST', { filename: file.name, dataBase64: b64 });
+          }} onDelete={(id) => mutate('/api/care/documents', 'DELETE', { id })} onDownload={async (id) => {
+            const { ok, data } = await api(`/api/care/document-download?fileId=${fileId}&id=${id}`);
+            if (ok) downloadBase64(data.filename, data.contentType, data.dataBase64);
+            else setError(errHe(data, 'ההורדה נכשלה'));
+          }} />}
+          {tab === 'medications' && <Meds items={items} busy={busy} onSave={(p) => mutate('/api/care/medications', 'POST', p)} onDelete={(id) => mutate('/api/care/medications', 'DELETE', { id })} />}
+          {tab === 'labs' && <Labs
+            items={items} current={(sheet && sheet.current) || []} panels={extra} files={files} busy={busy}
+            onSave={(p) => mutate('/api/care/lab-results', 'POST', p)}
+            onDelete={(id) => mutate('/api/care/lab-results', 'DELETE', { id })}
+            onSavePanel={(p) => mutate('/api/care/lab-panels', 'POST', p)}
+            onDeletePanel={(id) => mutate('/api/care/lab-panels', 'DELETE', { id })}
+            onUpload={async (file, labPanelId) => {
+              const b64 = await fileToB64(file);
+              return mutate('/api/care/documents', 'POST', { filename: file.name, dataBase64: b64, kind: 'lab', labPanelId: labPanelId || undefined });
+            }}
+            onDeleteFile={(id) => mutate('/api/care/documents', 'DELETE', { id })}
+            onDownload={async (id) => {
+              const { ok, data } = await api(`/api/care/document-download?fileId=${fileId}&id=${id}`);
+              if (ok) downloadBase64(data.filename, data.contentType, data.dataBase64);
+              else setError(errHe(data, 'ההורדה נכשלה'));
+            }}
+          />}
+          {tab === 'rights' && <Rights items={items} committees={extra} busy={busy} onSave={(p) => mutate('/api/care/rights', 'POST', p)} onDelete={(id) => mutate('/api/care/rights', 'DELETE', { id })} onSaveCommittee={(p) => mutate('/api/care/committees', 'POST', p)} onDeleteCommittee={(id) => mutate('/api/care/committees', 'DELETE', { id })} />}
+          {tab === 'profile' && <Profile sheet={sheet} history={extra} busy={busy} onSave={async (p) => mutate('/api/care/profile', 'PATCH', p)} onSaveHmo={(p) => mutate('/api/care/hmo-history', 'POST', p)} onDeleteHmo={(id) => mutate('/api/care/hmo-history', 'DELETE', { id })} />}
+          {tab === 'family' && <Family items={items} busy={busy} onSave={(p) => mutate('/api/care/family', 'POST', p)} onDelete={(id) => mutate('/api/care/family', 'DELETE', { id })} />}
+          {tab === 'diagnoses' && <Diagnoses items={items} busy={busy} onSave={(p) => mutate('/api/care/diagnoses', 'POST', p)} onDelete={(id) => mutate('/api/care/diagnoses', 'DELETE', { id })} />}
+          {tab === 'therapy' && <Therapy items={items} busy={busy} onSave={(p) => mutate('/api/care/therapy', 'POST', p)} onDelete={(id) => mutate('/api/care/therapy', 'DELETE', { id })} />}
+          {tab === 'activity' && <Activities items={items} busy={busy} onSave={(p) => mutate('/api/care/activities', 'POST', p)} onDelete={(id) => mutate('/api/care/activities', 'DELETE', { id })} />}
+          {tab === 'intake' && <Intake sheet={sheet} busy={busy} onSave={(p) => mutate('/api/care/intake', 'PATCH', p)} />}
+          {tab === 'contacts' && <Contacts items={items} busy={busy} onSave={(p) => mutate('/api/care/contacts', 'POST', p)} onDelete={(id) => mutate('/api/care/contacts', 'DELETE', { id })} />}
+          {tab === 'notes' && <Notes items={items} busy={busy} onSave={(p) => mutate('/api/care/notes', 'POST', p)} onDelete={(id) => mutate('/api/care/notes', 'DELETE', { id })} />}
+          {tab === 'sharing' && role === 'owner' && (
+            <Sharing
+              grants={grants} links={links} newLinkUrl={newLinkUrl} busy={busy}
+              onInvite={async (p) => { const ok = await mutate('/api/care/grants', 'POST', p); if (ok) setNewLinkUrl(''); }}
+              onRevokeGrant={(id) => mutate('/api/care/grants-revoke', 'POST', { id })}
+              onCreateLink={async (p) => {
+                const { ok, data } = await api('/api/care/links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId, ...p }) });
+                if (!ok) { setError(errHe(data, 'יצירת הקישור נכשלה')); return; }
+                setNewLinkUrl(data.url);
+                loadTab();
+              }}
+              onRevokeLink={(id) => mutate('/api/care/links-revoke', 'POST', { id })}
+            />
+          )}
+          {tab === 'audit' && role === 'owner' && <Audit items={items} />}
+        </div>
+      );
+    }
+
+    function fileToB64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const s = String(r.result || '');
+          resolve(s.includes(',') ? s.split(',')[1] : s);
+        };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    function Timeline({ items, contacts, busy, onSave, onDelete }) {
+      const empty = { kind: 'meeting', occurredOn: '', title: '', summary: '', contactId: '', orgId: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      const people = (contacts || []).filter((c) => c.kind !== 'org');
+      const orgs = (contacts || []).filter((c) => c.kind === 'org');
+      return (
+        <div className="card">
+          <p className="muted">היסטוריה: ביקורים, פגישות, ועדות, שיחות. אפשר לקשר לארגון או לאדם מאנשי הקשר.</p>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו אירוע</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave({ ...form, contactId: form.contactId || null, orgId: form.orgId || null })) { setForm(empty); setOpen(false); } }}>
+              <div className="form-grid two">
+                <Field label="סוג"><select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>{KINDS.map((k) => <option key={k.id} value={k.id}>{k.label}</option>)}</select></Field>
+                <Field label="תאריך"><input type="date" required value={form.occurredOn} onChange={(e) => setForm({ ...form, occurredOn: e.target.value })} /></Field>
+              </div>
+              <Field label="כותרת"><input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="פגישה עם רכזת, ועדת נכות…" /></Field>
+              {orgs.length > 0 && (
+                <Field label="ארגון">
+                  <select value={form.orgId} onChange={(e) => setForm({ ...form, orgId: e.target.value })}>
+                    <option value="">ללא</option>
+                    {orgs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </Field>
+              )}
+              {people.length > 0 && (
+                <Field label="איש קשר">
+                  <select value={form.contactId} onChange={(e) => setForm({ ...form, contactId: e.target.value })}>
+                    <option value="">ללא</option>
+                    {people.map((c) => <option key={c.id} value={c.id}>{c.name}{c.role ? ` · ${c.role}` : ''}</option>)}
+                  </select>
+                </Field>
+              )}
+              <Field label="הערה / סיכום"><textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          {items.length === 0 && <p className="muted">אין אירועים עדיין.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{KIND_HE[it.kind] || it.kind} · {fmtDate(it.occurredOn)}</h3>
+              <div>{it.title}</div>
+              <div className="tiny">{[it.orgName, it.contactName].filter(Boolean).join(' · ')}</div>
+              {it.summary && <p className="muted">{it.summary}</p>}
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Documents({ items, busy, onUpload, onDelete, onDownload }) {
+      return (
+        <div className="card">
+          <Field label="העלאת מסמך (PDF / תמונה, עד 2MB)">
+            <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/*" capture="environment" disabled={busy} onChange={async (e) => {
+              const f = e.target.files && e.target.files[0];
+              if (f) await onUpload(f);
+              e.target.value = '';
+            }} />
+          </Field>
+          {items.length === 0 && <p className="muted empty">אין מסמכים עדיין. אפשר לצלם סיכום שחרור או להעלות PDF.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{it.originalFilename}</h3>
+              <div className="tiny">{fmtDate(it.createdAt)} · {Math.round(it.byteSize / 1024)}KB</div>
+              <div className="row">
+                <button className="btn secondary" type="button" onClick={() => onDownload(it.id)}>הורדה</button>
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Meds({ items, busy, onSave, onDelete }) {
+      const empty = { name: '', dose: '', schedule: '', startedOn: '', endedOn: '', notes: '', status: 'current', prescriber: '', efficacy: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      const current = items.filter((i) => (i.status || (i.endedOn ? 'past' : 'current')) === 'current');
+      const recommended = items.filter((i) => i.status === 'recommended');
+      const past = items.filter((i) => (i.status || (i.endedOn ? 'past' : 'current')) === 'past');
+      const line = (it) => {
+        const parts = [it.name];
+        if (it.startedOn) parts.push('מאז ' + fmtDate(it.startedOn));
+        if (it.dose || it.schedule) parts.push([it.dose, it.schedule].filter(Boolean).join(' '));
+        if (it.prescriber) parts.push('נרשם ע״י ' + it.prescriber);
+        if (it.efficacy) parts.push(it.efficacy);
+        return parts.join(', ');
+      };
+      return (
+        <div className="card">
+          <p className="muted">נוכחיות מוצגות קודם, עם מינון, רופא והערות יעילות.</p>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו תרופה</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(empty); setOpen(false); } }}>
+              <Field label="שם"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+              <Field label="סטטוס">
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  <option value="current">נוכחית</option>
+                  <option value="past">עבר</option>
+                  <option value="recommended">מומלצת / לא התחילה</option>
+                </select>
+              </Field>
+              <div className="form-grid two">
+                <Field label="מינון"><input value={form.dose} onChange={(e) => setForm({ ...form, dose: e.target.value })} /></Field>
+                <Field label="תדירות"><input value={form.schedule} onChange={(e) => setForm({ ...form, schedule: e.target.value })} /></Field>
+                <Field label="התחלה"><input type="date" value={form.startedOn} onChange={(e) => setForm({ ...form, startedOn: e.target.value })} /></Field>
+                <Field label="סיום"><input type="date" value={form.endedOn} onChange={(e) => setForm({ ...form, endedOn: e.target.value })} /></Field>
+              </div>
+              <Field label="נרשם ע״י"><input value={form.prescriber} onChange={(e) => setForm({ ...form, prescriber: e.target.value })} placeholder="ד״ר …" /></Field>
+              <Field label="יעילות / תופעות לוואי"><textarea value={form.efficacy} onChange={(e) => setForm({ ...form, efficacy: e.target.value })} /></Field>
+              <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          <h3>נוכחיות</h3>
+          {current.length === 0 && <p className="muted">אין תרופות פעילות.</p>}
+          {current.map((it) => <MedRow key={it.id} it={it} line={line(it)} onDelete={onDelete} />)}
+          {recommended.length > 0 && <h3>מומלצות</h3>}
+          {recommended.map((it) => <MedRow key={it.id} it={it} line={line(it)} onDelete={onDelete} />)}
+          {past.length > 0 && <h3>עבר</h3>}
+          {past.map((it) => <MedRow key={it.id} it={it} line={line(it)} onDelete={onDelete} />)}
+        </div>
+      );
+    }
+    function MedRow({ it, line, onDelete }) {
+      return (
+        <div className="item">
+          <h3>{line}</h3>
+          <div className="tiny">{MED_STATUS_HE[it.status] || ''}{it.endedOn ? ` · עד ${fmtDate(it.endedOn)}` : ''}</div>
+          {it.notes && <p className="muted">{it.notes}</p>}
+          {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+        </div>
+      );
+    }
+
+    function Labs({ items, current, panels, files, busy, onSave, onDelete, onSavePanel, onDeletePanel, onUpload, onDeleteFile, onDownload }) {
+      const empty = { marker: 'b12', customName: '', value: '', unit: 'pg/mL', flag: '', measuredOn: '', notes: '', panelId: '' };
+      const [form, setForm] = useState(empty);
+      const [pform, setPform] = useState({ drawnOn: '', labName: '', notes: '' });
+      const [open, setOpen] = useState(false);
+      const [openP, setOpenP] = useState(false);
+      const setMarker = (marker) => setForm({ ...form, marker, unit: LAB_UNITS[marker] || form.unit });
+      const labelOf = (it) => it.marker === 'other' && it.customName ? it.customName : (LAB_MARKER_HE[it.marker] || it.marker);
+      return (
+        <div>
+          <div className="card">
+            <h2>ערכים נוכחיים</h2>
+            <p className="muted">B12, חומצה פולית וויטמין D חשובים למצב רוח ולאנרגיה; TSH שולל בעיה בבלוטת התריס; פריטין/המוגלובין — אנמיה; ליתיום ופרולקטין — מעקב תרופתי; סוכר, שומנים ומשקל — מטבולי.</p>
+            {(current || []).length === 0 && <p className="muted">עדיין אין מדידות.</p>}
+            {(current || []).map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{labelOf(it)}: {it.value} {it.unit}{it.flag ? ` · ${LAB_FLAG_HE[it.flag] || it.flag}` : ''}</h3>
+                <div className="tiny">נבדק ב־{fmtDate(it.measuredOn)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <h2>מדידה</h2>
+            {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו ערך</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSave({ ...form, panelId: form.panelId || null, flag: form.flag || '' })) { setForm(empty); setOpen(false); } }}>
+                <Field label="מדד"><Sel value={form.marker} onChange={setMarker} options={optPairs(LAB_MARKER_HE)} /></Field>
+                {form.marker === 'other' && <Field label="שם המדד"><input value={form.customName} onChange={(e) => setForm({ ...form, customName: e.target.value })} /></Field>}
+                <div className="form-grid two">
+                  <Field label="ערך"><input required value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={form.marker === 'bp' ? '120/80' : ''} /></Field>
+                  <Field label="יחידה"><input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} /></Field>
+                  <Field label="תאריך הבדיקה"><input type="date" required value={form.measuredOn} onChange={(e) => setForm({ ...form, measuredOn: e.target.value })} /></Field>
+                  <Field label="הערכה">
+                    <select value={form.flag} onChange={(e) => setForm({ ...form, flag: e.target.value })}>
+                      <option value="">לא צוין</option>
+                      {optPairs(LAB_FLAG_HE).map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                    </select>
+                  </Field>
+                </div>
+                {(panels || []).length > 0 && (
+                  <Field label="קישור לסט בדיקות">
+                    <select value={form.panelId} onChange={(e) => setForm({ ...form, panelId: e.target.value })}>
+                      <option value="">ללא</option>
+                      {(panels || []).map((p) => <option key={p.id} value={p.id}>{(p.labName || 'בדיקה')} · {fmtDate(p.drawnOn)}</option>)}
+                    </select>
+                  </Field>
+                )}
+                <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+              </form>
+            )}
+            {items.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{labelOf(it)}: {it.value} {it.unit}{it.flag ? ` · ${LAB_FLAG_HE[it.flag]}` : ''} · {fmtDate(it.measuredOn)}</h3>
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <h2>העלאת תוצאות בדיקה</h2>
+            {!openP ? <button className="btn" type="button" onClick={() => setOpenP(true)}>הוסיפו סט / העלאה</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSavePanel(pform)) { setPform({ drawnOn: '', labName: '', notes: '' }); setOpenP(false); } }}>
+                <div className="form-grid two">
+                  <Field label="תאריך לקיחה"><input type="date" required value={pform.drawnOn} onChange={(e) => setPform({ ...pform, drawnOn: e.target.value })} /></Field>
+                  <Field label="מעבדה / קופה"><input value={pform.labName} onChange={(e) => setPform({ ...pform, labName: e.target.value })} /></Field>
+                </div>
+                <Field label="הערות"><textarea value={pform.notes} onChange={(e) => setPform({ ...pform, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpenP(false)}>ביטול</button></div>
+              </form>
+            )}
+            <Field label="צילום / PDF של תוצאות (עד 2MB)">
+              <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/*" capture="environment" disabled={busy} onChange={async (e) => {
+                const f = e.target.files && e.target.files[0];
+                if (f) await onUpload(f, (panels && panels[0] && panels[0].id) || '');
+                e.target.value = '';
+              }} />
+            </Field>
+            {(panels || []).map((p) => (
+              <div className="item" key={p.id}>
+                <h3>{p.labName || 'בדיקות דם'} · {fmtDate(p.drawnOn)}</h3>
+                {p.notes && <p className="muted">{p.notes}</p>}
+                {p.mine && <button className="btn danger" type="button" onClick={() => onDeletePanel(p.id)}>מחיקה</button>}
+              </div>
+            ))}
+            {(files || []).map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{it.originalFilename}</h3>
+                <div className="tiny">{fmtDate(it.createdAt)} · {Math.round(it.byteSize / 1024)}KB</div>
+                <div className="row">
+                  <button className="btn secondary" type="button" onClick={() => onDownload(it.id)}>הורדה</button>
+                  {it.mine && <button className="btn danger" type="button" onClick={() => onDeleteFile(it.id)}>מחיקה</button>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Contacts({ items, busy, onSave, onDelete }) {
+      const emptyOrg = { kind: 'org', name: '', orgType: 'rehab_provider', website: '', phone: '', notes: '', referredById: '' };
+      const emptyPerson = { kind: 'person', name: '', qualification: 'social_work', role: '', orgId: '', phone: '', email: '', notes: '', referredById: '' };
+      const [form, setForm] = useState(emptyPerson);
+      const [open, setOpen] = useState(false);
+      const orgs = items.filter((c) => c.kind === 'org');
+      const people = items.filter((c) => c.kind !== 'org');
+      const referredOptions = items.filter((c) => !form.id || c.id !== form.id);
+      return (
+        <div>
+          <div className="card">
+            <h2>ארגונים</h2>
+            {!open || form.kind !== 'org' ? <button className="btn" type="button" onClick={() => { setForm(emptyOrg); setOpen(true); }}>הוסיפו ארגון</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSave({ ...form, referredById: form.referredById || null })) { setForm(emptyOrg); setOpen(false); } }}>
+                <Field label="שם הארגון"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+                <Field label="סוג"><Sel value={form.orgType} onChange={(v) => setForm({ ...form, orgType: v })} options={optPairs(ORG_TYPE_HE)} /></Field>
+                <div className="form-grid two">
+                  <Field label="אתר"><input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://…" /></Field>
+                  <Field label="טלפון"><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+                </div>
+                <Field label="הופנו אליי ע״י">
+                  <select value={form.referredById} onChange={(e) => setForm({ ...form, referredById: e.target.value })}>
+                    <option value="">לא צוין</option>
+                    {referredOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </Field>
+                <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+              </form>
+            )}
+            {orgs.length === 0 && <p className="muted">אין ארגונים.</p>}
+            {orgs.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{it.name}</h3>
+                <div className="muted">{[ORG_TYPE_HE[it.orgType] || it.orgType, it.phone, it.website].filter(Boolean).join(' · ')}</div>
+                {it.referredByName && <div className="tiny">הופנו ע״י {it.referredByName}</div>}
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <h2>אנשים</h2>
+            {!open || form.kind !== 'person' ? <button className="btn" type="button" onClick={() => { setForm(emptyPerson); setOpen(true); }}>הוסיפו אדם</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSave({ ...form, orgId: form.orgId || null, referredById: form.referredById || null })) { setForm(emptyPerson); setOpen(false); } }}>
+                <Field label="שם"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+                <div className="form-grid two">
+                  <Field label="הכשרה"><Sel value={form.qualification} onChange={(v) => setForm({ ...form, qualification: v })} options={[{ id: '', label: 'לא צוין' }, ...optPairs(QUALIFICATION_HE)]} /></Field>
+                  <Field label="תפקיד בארגון"><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="רכזת שיקום, עו״ס…" /></Field>
+                </div>
+                <Field label="ארגון (אופציונלי)">
+                  <select value={form.orgId} onChange={(e) => setForm({ ...form, orgId: e.target.value })}>
+                    <option value="">לא משויך לארגון</option>
+                    {orgs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </Field>
+                <div className="form-grid two">
+                  <Field label="טלפון"><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+                  <Field label="אימייל"><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+                </div>
+                <Field label="הופנו אליי ע״י">
+                  <select value={form.referredById} onChange={(e) => setForm({ ...form, referredById: e.target.value })}>
+                    <option value="">לא צוין</option>
+                    {referredOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </Field>
+                <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+              </form>
+            )}
+            {people.length === 0 && <p className="muted">אין אנשי קשר.</p>}
+            {people.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{it.name}{it.role ? ` · ${it.role}` : ''}</h3>
+                <div className="muted">{[QUALIFICATION_HE[it.qualification], it.orgName, it.phone, it.email].filter(Boolean).join(' · ')}</div>
+                {it.referredByName && <div className="tiny">הופנו ע״י {it.referredByName}</div>}
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Notes({ items, busy, onSave, onDelete }) {
+      const [body, setBody] = useState('');
+      return (
+        <div className="card">
+          <form onSubmit={async (e) => { e.preventDefault(); if (await onSave({ body })) setBody(''); }}>
+            <Field label="פתק אישי"><textarea required value={body} onChange={(e) => setBody(e.target.value)} /></Field>
+            <button className="btn" disabled={busy} type="submit">הוספה</button>
+          </form>
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <p style={{ whiteSpace: 'pre-wrap', margin: '0 0 8px' }}>{it.body}</p>
+              <div className="tiny">{fmtDate(it.createdAt)}</div>
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Sharing({ grants, links, newLinkUrl, busy, onInvite, onRevokeGrant, onCreateLink, onRevokeLink }) {
+      const [email, setEmail] = useState('');
+      const [kind, setKind] = useState('timed');
+      const [canWrite, setCanWrite] = useState(false);
+      const [hours, setHours] = useState(24 * 7);
+      const [secs, setSecs] = useState(SHARE_SECTIONS);
+      const [linkHours, setLinkHours] = useState(24);
+      const toggle = (id) => setSecs((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
+      return (
+        <div>
+          <div className="card">
+            <h2>הזמנת אדם רשום</h2>
+            <p className="muted">יצטרכו להיכנס עם אותו אימייל ולאשר. גישת משפחה נשארת עד שתבטלו.</p>
+            <Field label="אימייל"><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+            <Field label="סוג">
+              <select value={kind} onChange={(e) => setKind(e.target.value)}>
+                <option value="timed">מוגבל בזמן</option>
+                <option value="proxy">משפחה / ייפוי קבוע</option>
+              </select>
+            </Field>
+            {kind === 'timed' && (
+              <Field label="משך">
+                <select value={hours} onChange={(e) => setHours(Number(e.target.value))}>
+                  <option value={24}>24 שעות</option>
+                  <option value={168}>שבוע</option>
+                  <option value={720}>30 יום</option>
+                  <option value={2160}>90 יום</option>
+                </select>
+              </Field>
+            )}
+            <Field label="הרשאה">
+              <select value={canWrite ? 'write' : 'read'} onChange={(e) => setCanWrite(e.target.value === 'write')}>
+                <option value="read">קריאה בלבד</option>
+                <option value="write">הוספה ועריכה של מה שהם כותבים</option>
+              </select>
+            </Field>
+            <div className="checks">
+              {SHARE_SECTIONS.map((id) => (
+                <label key={id}><input type="checkbox" checked={secs.includes(id)} onChange={() => toggle(id)} />{SECTION_HE[id]}</label>
+              ))}
+            </div>
+            <button className="btn" disabled={busy} type="button" onClick={() => onInvite({ email, kind, canWrite, hours, sections: secs })}>שליחת הזמנה</button>
+          </div>
+
+          <div className="card">
+            <h2>מי רואה את התיק</h2>
+            {grants.length === 0 && <p className="muted">עדיין לא שיתפתם עם אף אחד.</p>}
+            {grants.map((g) => (
+              <div className="item" key={g.id}>
+                <h3>{g.granteeEmail}</h3>
+                <div className="muted">{g.kind === 'proxy' ? 'משפחה' : 'מוגבל בזמן'} · {g.canWrite ? 'כתיבה' : 'קריאה'} · {g.status}</div>
+                <div className="tiny">{(g.sections || []).map((s) => SECTION_HE[s] || s).join(' · ')}{g.expiresAt ? ` · עד ${fmtDate(g.expiresAt)}` : ''}</div>
+                {g.status !== 'revoked' && <button className="btn danger" type="button" onClick={() => onRevokeGrant(g.id)}>ביטול גישה</button>}
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <h2>קישור לרופא (בלי חשבון)</h2>
+            <p className="muted">קריאה בלבד. הקישור מוצג פעם אחת — העתיקו אותו עכשיו.</p>
+            <Field label="תוקף">
+              <select value={linkHours} onChange={(e) => setLinkHours(Number(e.target.value))}>
+                <option value={24}>24 שעות</option>
+                <option value={168}>שבוע</option>
+                <option value={720}>30 יום</option>
+              </select>
+            </Field>
+            <button className="btn" disabled={busy} type="button" onClick={() => onCreateLink({ hours: linkHours, sections: secs })}>יצירת קישור</button>
+            {newLinkUrl && (
+              <p className="ok" style={{ wordBreak: 'break-all' }}>{newLinkUrl}<br />
+                <button className="btn secondary" type="button" onClick={() => navigator.clipboard.writeText(newLinkUrl)}>העתקה</button>
+              </p>
+            )}
+            {links.map((l) => (
+              <div className="item" key={l.id}>
+                <div className="muted">{l.active ? 'פעיל' : 'לא פעיל'} · עד {fmtDate(l.expiresAt)}</div>
+                <div className="tiny">{(l.sections || []).map((s) => SECTION_HE[s] || s).join(' · ')}</div>
+                {l.active && <button className="btn danger" type="button" onClick={() => onRevokeLink(l.id)}>ביטול קישור</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Sel({ value, onChange, options }) {
+      return (
+        <select value={value} onChange={(e) => onChange(e.target.value)}>
+          {options.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+        </select>
+      );
+    }
+    function optPairs(map) {
+      return Object.keys(map).map((id) => ({ id, label: map[id] }));
+    }
+
+    function Rights({ items, committees, busy, onSave, onDelete, onSaveCommittee, onDeleteCommittee }) {
+      const emptyR = { kind: 'disability_mental', status: 'applied', percentA: '', percentB: '', validUntil: '', summary: '', notes: '' };
+      const emptyC = { title: '', body: 'btl', scheduledOn: '', scheduledTime: '', place: '', status: 'upcoming', remind: true, notes: '' };
+      const [form, setForm] = useState(emptyR);
+      const [cform, setCform] = useState(emptyC);
+      const [openR, setOpenR] = useState(false);
+      const [openC, setOpenC] = useState(false);
+      const upcoming = (committees || []).filter((c) => c.status === 'upcoming');
+      const pastC = (committees || []).filter((c) => c.status !== 'upcoming');
+      return (
+        <div>
+          <div className="card">
+            <h2>סטטוס מיצוי זכויות</h2>
+            <p className="muted">למשל: נכות נפשית — 40%, עם 100 אי־כושר עבודה, זמני עד 31.7.2027.</p>
+            {!openR ? <button className="btn" type="button" onClick={() => setOpenR(true)}>הוסיפו סטטוס</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(emptyR); setOpenR(false); } }}>
+                <Field label="סוג"><Sel value={form.kind} onChange={(v) => setForm({ ...form, kind: v })} options={optPairs(RIGHTS_KIND_HE)} /></Field>
+                <Field label="סטטוס"><Sel value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={optPairs(RIGHTS_STATUS_HE)} /></Field>
+                <div className="form-grid two">
+                  <Field label="אחוז / דרגה"><input value={form.percentA} onChange={(e) => setForm({ ...form, percentA: e.target.value })} placeholder="40" /></Field>
+                  <Field label="אי־כושר / אחוז נוסף"><input value={form.percentB} onChange={(e) => setForm({ ...form, percentB: e.target.value })} placeholder="100" /></Field>
+                </div>
+                <Field label="בתוקף עד"><input type="date" value={form.validUntil} onChange={(e) => setForm({ ...form, validUntil: e.target.value })} /></Field>
+                <Field label="שורת סטטוס (אופציונלי)"><input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="נכות נפשית — 40%, עם 100 אי־כושר, זמני עד …" /></Field>
+                <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpenR(false)}>ביטול</button></div>
+              </form>
+            )}
+            {items.length === 0 && !openR && <p className="muted">עדיין אין רשומות זכויות.</p>}
+            {items.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{rightsLine(it)}</h3>
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <h2>ועדות</h2>
+            <p className="muted">תזכורת במייל 7, 3 ו־1 ימים לפני ועדה מסומנת.</p>
+            {!openC ? <button className="btn" type="button" onClick={() => setOpenC(true)}>הוסיפו ועדה</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSaveCommittee(cform)) { setCform(emptyC); setOpenC(false); } }}>
+                <Field label="כותרת"><input required value={cform.title} onChange={(e) => setCform({ ...cform, title: e.target.value })} placeholder="ועדת נכות נפשית" /></Field>
+                <Field label="גוף"><Sel value={cform.body} onChange={(v) => setCform({ ...cform, body: v })} options={optPairs(COMMITTEE_BODY_HE)} /></Field>
+                <div className="form-grid two">
+                  <Field label="תאריך"><input type="date" required value={cform.scheduledOn} onChange={(e) => setCform({ ...cform, scheduledOn: e.target.value })} /></Field>
+                  <Field label="שעה"><input value={cform.scheduledTime} onChange={(e) => setCform({ ...cform, scheduledTime: e.target.value })} placeholder="09:00" /></Field>
+                </div>
+                <Field label="מקום"><input value={cform.place} onChange={(e) => setCform({ ...cform, place: e.target.value })} /></Field>
+                <Field label="סטטוס"><Sel value={cform.status} onChange={(v) => setCform({ ...cform, status: v })} options={optPairs(COMMITTEE_STATUS_HE)} /></Field>
+                <label className="checks" style={{ marginBottom: 12 }}><input type="checkbox" checked={cform.remind} onChange={(e) => setCform({ ...cform, remind: e.target.checked })} /> לשלוח תזכורת במייל</label>
+                <Field label="הערות"><textarea value={cform.notes} onChange={(e) => setCform({ ...cform, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpenC(false)}>ביטול</button></div>
+              </form>
+            )}
+            <h3>קרובות</h3>
+            {upcoming.length === 0 && <p className="muted">אין ועדות קרובות.</p>}
+            {upcoming.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{it.title} · {fmtDate(it.scheduledOn)}{it.scheduledTime ? ` ${it.scheduledTime}` : ''}</h3>
+                <div className="muted">{COMMITTEE_BODY_HE[it.body] || it.body}{it.place ? ` · ${it.place}` : ''}{it.remind ? ' · תזכורת פעילה' : ''}</div>
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDeleteCommittee(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+            {pastC.length > 0 && <h3>עבר</h3>}
+            {pastC.map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{it.title} · {fmtDate(it.scheduledOn)}</h3>
+                <div className="muted">{COMMITTEE_STATUS_HE[it.status] || it.status} · {COMMITTEE_BODY_HE[it.body] || it.body}</div>
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDeleteCommittee(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Profile({ sheet, history, busy, onSave, onSaveHmo, onDeleteHmo }) {
+      const empty = {
+        fullName: '', nationalId: '', birthOn: '', gender: '', maritalStatus: '', childrenCount: '',
+        phone: '', address: '', city: '', countryOfBirth: '', aliyahYear: '', languages: '',
+        education: '', employment: '', military: '', housing: '', hmo: '', hmoMemberSince: '',
+        clinicName: '', allergies: '', emergencyName: '', emergencyPhone: '', emergencyRelation: ''
+      };
+      const [form, setForm] = useState(empty);
+      const [hform, setHform] = useState({ hmo: 'clalit', startedOn: '', endedOn: '', notes: '' });
+      const [openH, setOpenH] = useState(false);
+      useEffect(() => {
+        const s = sheet || {};
+        setForm({
+          ...empty,
+          ...s,
+          birthOn: toDateInput(s.birthOn),
+          hmoMemberSince: toDateInput(s.hmoMemberSince),
+          hmo: s.hmo || ''
+        });
+      }, [sheet]);
+      const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+      return (
+        <div>
+          <div className="card">
+            <h2>פרטים אישיים</h2>
+            <form onSubmit={async (e) => { e.preventDefault(); await onSave(form); }}>
+              <div className="form-grid two">
+                <Field label="שם מלא"><input value={form.fullName} onChange={set('fullName')} /></Field>
+                <Field label="תעודת זהות"><input value={form.nationalId} onChange={set('nationalId')} /></Field>
+                <Field label="תאריך לידה"><input type="date" value={form.birthOn} onChange={set('birthOn')} /></Field>
+                <Field label="מגדר"><input value={form.gender} onChange={set('gender')} /></Field>
+                <Field label="מצב משפחתי"><input value={form.maritalStatus} onChange={set('maritalStatus')} /></Field>
+                <Field label="מספר ילדים"><input value={form.childrenCount} onChange={set('childrenCount')} /></Field>
+                <Field label="טלפון"><input value={form.phone} onChange={set('phone')} /></Field>
+                <Field label="עיר"><input value={form.city} onChange={set('city')} /></Field>
+              </div>
+              <Field label="כתובת"><input value={form.address} onChange={set('address')} /></Field>
+              <div className="form-grid two">
+                <Field label="ארץ לידה"><input value={form.countryOfBirth} onChange={set('countryOfBirth')} /></Field>
+                <Field label="שנת עלייה"><input value={form.aliyahYear} onChange={set('aliyahYear')} /></Field>
+                <Field label="שפות"><input value={form.languages} onChange={set('languages')} /></Field>
+                <Field label="דיור"><input value={form.housing} onChange={set('housing')} /></Field>
+              </div>
+              <Field label="השכלה"><input value={form.education} onChange={set('education')} /></Field>
+              <Field label="תעסוקה"><input value={form.employment} onChange={set('employment')} /></Field>
+              <Field label="שירות צבאי / לאומי"><input value={form.military} onChange={set('military')} /></Field>
+              <div className="form-grid two">
+                <Field label="קופת חולים">
+                  <select value={form.hmo} onChange={set('hmo')}>
+                    <option value="">לא צוין</option>
+                    {optPairs(HMO_HE).map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label="חברות בקופה מאז"><input type="date" value={form.hmoMemberSince} onChange={set('hmoMemberSince')} /></Field>
+              </div>
+              <Field label="מרפאה / רופא משפחה"><input value={form.clinicName} onChange={set('clinicName')} /></Field>
+              <Field label="רגישויות"><textarea value={form.allergies} onChange={set('allergies')} /></Field>
+              <div className="form-grid two">
+                <Field label="איש קשר לחירום"><input value={form.emergencyName} onChange={set('emergencyName')} /></Field>
+                <Field label="טלפון חירום"><input value={form.emergencyPhone} onChange={set('emergencyPhone')} /></Field>
+              </div>
+              <Field label="קרבה לאיש הקשר"><input value={form.emergencyRelation} onChange={set('emergencyRelation')} /></Field>
+              <button className="btn" disabled={busy} type="submit">שמירת פרטים</button>
+            </form>
+          </div>
+          <div className="card">
+            <h2>מעברים בין קופות</h2>
+            {!openH ? <button className="btn" type="button" onClick={() => setOpenH(true)}>הוסיפו מעבר</button> : (
+              <form onSubmit={async (e) => { e.preventDefault(); if (await onSaveHmo(hform)) { setHform({ hmo: 'clalit', startedOn: '', endedOn: '', notes: '' }); setOpenH(false); } }}>
+                <Field label="קופה"><Sel value={hform.hmo} onChange={(v) => setHform({ ...hform, hmo: v })} options={optPairs(HMO_HE)} /></Field>
+                <div className="form-grid two">
+                  <Field label="מתאריך"><input type="date" value={hform.startedOn} onChange={(e) => setHform({ ...hform, startedOn: e.target.value })} /></Field>
+                  <Field label="עד תאריך"><input type="date" value={hform.endedOn} onChange={(e) => setHform({ ...hform, endedOn: e.target.value })} /></Field>
+                </div>
+                <Field label="הערות"><textarea value={hform.notes} onChange={(e) => setHform({ ...hform, notes: e.target.value })} /></Field>
+                <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpenH(false)}>ביטול</button></div>
+              </form>
+            )}
+            {(history || []).length === 0 && <p className="muted">אין היסטוריית מעברים.</p>}
+            {(history || []).map((it) => (
+              <div className="item" key={it.id}>
+                <h3>{HMO_HE[it.hmo] || it.hmo}{it.startedOn ? ` · מאז ${fmtDate(it.startedOn)}` : ''}{it.endedOn ? ` עד ${fmtDate(it.endedOn)}` : ' (נוכחית)'}</h3>
+                {it.notes && <p className="muted">{it.notes}</p>}
+                {it.mine && <button className="btn danger" type="button" onClick={() => onDeleteHmo(it.id)}>מחיקה</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Family({ items, busy, onSave, onDelete }) {
+      const empty = { name: '', relation: '', phone: '', email: '', livesWith: false, involved: false, notes: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="card">
+          <h2>משפחה</h2>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו בן משפחה</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(empty); setOpen(false); } }}>
+              <div className="form-grid two">
+                <Field label="שם"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+                <Field label="קרבה"><input value={form.relation} onChange={(e) => setForm({ ...form, relation: e.target.value })} placeholder="אם, אח, בן/בת זוג…" /></Field>
+                <Field label="טלפון"><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+                <Field label="אימייל"><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+              </div>
+              <div className="checks" style={{ marginBottom: 12 }}>
+                <label><input type="checkbox" checked={form.livesWith} onChange={(e) => setForm({ ...form, livesWith: e.target.checked })} /> גרים יחד</label>
+                <label><input type="checkbox" checked={form.involved} onChange={(e) => setForm({ ...form, involved: e.target.checked })} /> מעורב בטיפול</label>
+              </div>
+              <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          {items.length === 0 && <p className="muted">אין בני משפחה ברשימה.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{it.name}{it.relation ? ` · ${it.relation}` : ''}</h3>
+              <div className="muted">{[it.phone, it.email].filter(Boolean).join(' · ')}</div>
+              <div className="tiny">{it.livesWith ? 'גרים יחד' : ''}{it.involved ? (it.livesWith ? ' · מעורב בטיפול' : 'מעורב בטיפול') : ''}</div>
+              {it.notes && <p className="muted">{it.notes}</p>}
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Diagnoses({ items, busy, onSave, onDelete }) {
+      const empty = { name: '', code: '', diagnosedOn: '', diagnosedBy: '', status: 'active', notes: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="card">
+          <h2>אבחנות</h2>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו אבחנה</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(empty); setOpen(false); } }}>
+              <Field label="אבחנה"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+              <div className="form-grid two">
+                <Field label="קוד (ICD, אופציונלי)"><input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></Field>
+                <Field label="סטטוס"><Sel value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={optPairs(DX_STATUS_HE)} /></Field>
+                <Field label="תאריך אבחון"><input type="date" value={form.diagnosedOn} onChange={(e) => setForm({ ...form, diagnosedOn: e.target.value })} /></Field>
+                <Field label="אבחן ע״י"><input value={form.diagnosedBy} onChange={(e) => setForm({ ...form, diagnosedBy: e.target.value })} /></Field>
+              </div>
+              <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          {items.length === 0 && <p className="muted">אין אבחנות.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{it.name}{it.code ? ` (${it.code})` : ''}</h3>
+              <div className="muted">{DX_STATUS_HE[it.status] || it.status}{it.diagnosedOn ? ` · ${fmtDate(it.diagnosedOn)}` : ''}{it.diagnosedBy ? ` · ${it.diagnosedBy}` : ''}</div>
+              {it.notes && <p className="muted">{it.notes}</p>}
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Therapy({ items, busy, onSave, onDelete }) {
+      const empty = { therapistName: '', modality: '', startedOn: '', endedOn: '', frequency: '', notes: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="card">
+          <h2>טיפול</h2>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו טיפול</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(empty); setOpen(false); } }}>
+              <div className="form-grid two">
+                <Field label="מטפל/ת"><input required value={form.therapistName} onChange={(e) => setForm({ ...form, therapistName: e.target.value })} /></Field>
+                <Field label="גישה / סוג"><input value={form.modality} onChange={(e) => setForm({ ...form, modality: e.target.value })} placeholder="CBT, דינמי, קבוצתי…" /></Field>
+                <Field label="התחלה"><input type="date" value={form.startedOn} onChange={(e) => setForm({ ...form, startedOn: e.target.value })} /></Field>
+                <Field label="סיום"><input type="date" value={form.endedOn} onChange={(e) => setForm({ ...form, endedOn: e.target.value })} /></Field>
+              </div>
+              <Field label="תדירות"><input value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })} placeholder="שבועי, פעם בשבועיים…" /></Field>
+              <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          {items.length === 0 && <p className="muted">אין רשומות טיפול.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{it.therapistName}{it.modality ? ` · ${it.modality}` : ''}</h3>
+              <div className="muted">{it.startedOn ? `מאז ${fmtDate(it.startedOn)}` : ''}{it.endedOn ? ` עד ${fmtDate(it.endedOn)}` : (it.startedOn ? ' (נוכחי)' : '')}{it.frequency ? ` · ${it.frequency}` : ''}</div>
+              {it.notes && <p className="muted">{it.notes}</p>}
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Activities({ items, busy, onSave, onDelete }) {
+      const empty = { kind: 'sport', name: '', frequency: '', startedOn: '', notes: '' };
+      const [form, setForm] = useState(empty);
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="card">
+          <h2>פעילות גופנית</h2>
+          {!open ? <button className="btn" type="button" onClick={() => setOpen(true)}>הוסיפו פעילות</button> : (
+            <form onSubmit={async (e) => { e.preventDefault(); if (await onSave(form)) { setForm(empty); setOpen(false); } }}>
+              <div className="form-grid two">
+                <Field label="סוג"><Sel value={form.kind} onChange={(v) => setForm({ ...form, kind: v })} options={optPairs(ACTIVITY_KIND_HE)} /></Field>
+                <Field label="שם"><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="שחייה, הליכה בפארק…" /></Field>
+                <Field label="תדירות"><input value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })} /></Field>
+                <Field label="מאז"><input type="date" value={form.startedOn} onChange={(e) => setForm({ ...form, startedOn: e.target.value })} /></Field>
+              </div>
+              <Field label="הערות"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+              <div className="row"><button className="btn" disabled={busy} type="submit">שמירה</button><button className="btn secondary" type="button" onClick={() => setOpen(false)}>ביטול</button></div>
+            </form>
+          )}
+          {items.length === 0 && <p className="muted">אין פעילויות.</p>}
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <h3>{it.name} · {ACTIVITY_KIND_HE[it.kind] || it.kind}</h3>
+              <div className="muted">{it.startedOn ? `מאז ${fmtDate(it.startedOn)}` : ''}{it.frequency ? ` · ${it.frequency}` : ''}</div>
+              {it.notes && <p className="muted">{it.notes}</p>}
+              {it.mine && <button className="btn danger" type="button" onClick={() => onDelete(it.id)}>מחיקה</button>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function Intake({ sheet, busy, onSave }) {
+      const empty = {
+        presentingProblem: '', psychiatricHistory: '', medicalHistory: '', substanceUse: '',
+        selfHarmHistory: '', legalIssues: '', supports: '', sleepAppetite: '', other: ''
+      };
+      const [form, setForm] = useState(empty);
+      useEffect(() => { setForm({ ...empty, ...(sheet || {}) }); }, [sheet]);
+      const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+      const fields = [
+        ['presentingProblem', 'סיבת הפנייה / מצב נוכחי'],
+        ['psychiatricHistory', 'היסטוריה פסיכיאטרית (אשפוזים, טיפולים)'],
+        ['medicalHistory', 'היסטוריה רפואית'],
+        ['substanceUse', 'שימוש בחומרים'],
+        ['selfHarmHistory', 'פגיעה עצמית / מחשבות אובדניות (תיעוד אישי)'],
+        ['legalIssues', 'היבטים משפטיים'],
+        ['supports', 'מקורות תמיכה'],
+        ['sleepAppetite', 'שינה ותיאבון'],
+        ['other', 'אחר']
+      ];
+      return (
+        <div className="card">
+          <h2>גיליון קבלה</h2>
+          <p className="muted">שדות מקובלים בקבלה בבריאות הנפש. זה תיעוד שלכם, לא טופס רשמי.</p>
+          <form onSubmit={async (e) => { e.preventDefault(); await onSave(form); }}>
+            {fields.map(([k, label]) => (
+              <Field key={k} label={label}><textarea value={form[k] || ''} onChange={set(k)} /></Field>
+            ))}
+            <button className="btn" disabled={busy} type="submit">שמירת גיליון</button>
+          </form>
+        </div>
+      );
+    }
+
+    function Audit({ items }) {
+      return (
+        <div className="card">
+          <h2>יומן גישה</h2>
+          <p className="muted">מי ראה או שינה משהו. אין כאן תוכן של מסמכים.</p>
+          {items.map((it) => (
+            <div className="item" key={it.id}>
+              <div>{ACTION_HE[it.action] || it.action} {it.section ? `· ${SECTION_HE[it.section] || it.section}` : ''}</div>
+              <div className="tiny">{it.actorEmail || it.actorKind} · {fmtDate(it.createdAt)}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

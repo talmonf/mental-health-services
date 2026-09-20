@@ -6,15 +6,18 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
+  clearCareStepupCookie,
   clearSessionCookie,
   clientKey,
   getAuthFromRequest,
   hashPassword,
+  invalidateSessions,
   normalizeEmail,
   originAllowed,
   parseJsonBody,
   passwordPolicyError,
   rateLimit,
+  sessionStillValid,
   setAuthCors,
   setSessionCookie,
   shouldRefreshSession,
@@ -197,7 +200,22 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
 async function handleLogout(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+  const jwtUser = await getAuthFromRequest(req);
+  if (jwtUser && process.env.DATABASE_URL) {
+    const client = pgClient();
+    try {
+      await client.connect();
+      if (await sessionStillValid(client, jwtUser)) {
+        await invalidateSessions(client, jwtUser.id);
+      }
+    } catch (err) {
+      console.error('logout invalidate error', err);
+    } finally {
+      await client.end().catch(() => {});
+    }
+  }
   clearSessionCookie(res);
+  clearCareStepupCookie(res);
   return res.status(200).json({ ok: true });
 }
 
@@ -219,6 +237,11 @@ async function handleSession(req: VercelRequest, res: VercelResponse) {
     if (!rows[0].is_admin && isAdminEmail(rows[0].email)) {
       await client.query(`UPDATE users SET is_admin = true, updated_at = now() WHERE id = $1`, [rows[0].id]);
       rows[0].is_admin = true;
+    }
+    if (!(await sessionStillValid(client, jwtUser))) {
+      clearSessionCookie(res);
+      clearCareStepupCookie(res);
+      return res.status(200).json({ user: null });
     }
     const user = publicUserFromRow(rows[0]);
     await touchLastAccess(client, user.id);
@@ -250,6 +273,11 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
   const client = pgClient();
   try {
     await client.connect();
+    if (!(await sessionStillValid(client, jwtUser))) {
+      clearSessionCookie(res);
+      clearCareStepupCookie(res);
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     if (req.method === 'GET') {
       const { rows } = await client.query(`SELECT ${USER_PUBLIC_COLUMNS} FROM users WHERE id = $1`, [jwtUser.id]);
       if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });
@@ -431,6 +459,49 @@ async function handleUnsubscribe(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+async function handleDeleteAccount(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  const jwtUser = await getAuthFromRequest(req);
+  if (!jwtUser) return res.status(401).json({ error: 'Unauthorized' });
+  if (!process.env.DATABASE_URL || !process.env.AUTH_SECRET) {
+    return res.status(500).json({ error: 'Server misconfiguration' });
+  }
+
+  if (!rateLimit(`delete-account:${jwtUser.id}`, 5, 60 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many attempts' });
+  }
+
+  const body = parseJsonBody(req);
+  if (!body || body.confirm !== true) return res.status(400).json({ error: 'Confirmation required' });
+  const password = typeof body.password === 'string' ? body.password : '';
+  if (!password) return res.status(400).json({ error: 'Password is required' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    if (!(await sessionStillValid(client, jwtUser))) {
+      clearSessionCookie(res);
+      clearCareStepupCookie(res);
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { rows } = await client.query(`SELECT password_hash FROM users WHERE id = $1`, [jwtUser.id]);
+    if (!rows[0] || !(await verifyPassword(password, rows[0].password_hash))) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+    await client.query(`DELETE FROM users WHERE id = $1`, [jwtUser.id]);
+    clearSessionCookie(res);
+    clearCareStepupCookie(res);
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('delete-account error', err);
+    return res.status(500).json({ error: 'Failed' });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const action = actionName(req);
   const skipCors = action === 'confirm' || action === 'unsubscribe';
@@ -456,6 +527,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleResendConfirm(req, res);
     case 'unsubscribe':
       return handleUnsubscribe(req, res);
+    case 'delete-account':
+      return handleDeleteAccount(req, res);
     default:
       if (!skipCors) setAuthCors(req, res);
       return res.status(404).json({ error: 'Not found' });

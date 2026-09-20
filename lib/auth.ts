@@ -14,6 +14,7 @@ import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 
 export const SESSION_MAX_AGE_SEC = 2 * 60 * 60;
 export const SESSION_UPDATE_AGE_SEC = 30 * 60;
+export const CARE_STEPUP_MAX_AGE_SEC = 30 * 60;
 const BCRYPT_ROUNDS = 12;
 
 export type JwtUser = {
@@ -29,6 +30,10 @@ function isProduction(): boolean {
 
 export function authCookieName(): string {
   return isProduction() ? '__Host-mh-auth' : 'mh-auth';
+}
+
+export function careCookieName(): string {
+  return isProduction() ? '__Host-mh-care' : 'mh-care';
 }
 
 function secretKey(): Uint8Array {
@@ -162,7 +167,7 @@ export function setAuthCors(req: VercelRequest, res: VercelResponse): void {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
@@ -209,10 +214,100 @@ export function normalizeEmail(raw: unknown): string | null {
   return email;
 }
 
+export function appendCookie(res: VercelResponse, header: string): void {
+  const prev = res.getHeader('Set-Cookie');
+  if (!prev) {
+    res.setHeader('Set-Cookie', header);
+    return;
+  }
+  const list = Array.isArray(prev) ? prev.map(String) : [String(prev)];
+  res.setHeader('Set-Cookie', [...list, header]);
+}
+
 export function setSessionCookie(res: VercelResponse, token: string): void {
-  res.setHeader('Set-Cookie', sessionCookieHeader(token));
+  appendCookie(res, sessionCookieHeader(token));
 }
 
 export function clearSessionCookie(res: VercelResponse): void {
-  res.setHeader('Set-Cookie', clearSessionCookieHeader());
+  appendCookie(res, clearSessionCookieHeader());
+}
+
+function careCookieHeader(token: string): string {
+  const parts = [
+    `${careCookieName()}=${token}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${CARE_STEPUP_MAX_AGE_SEC}`,
+  ];
+  if (isProduction()) parts.push('Secure');
+  return parts.join('; ');
+}
+
+function clearCareCookieHeader(): string {
+  const parts = [`${careCookieName()}=`, 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
+  if (isProduction()) parts.push('Secure');
+  return parts.join('; ');
+}
+
+export async function signCareStepup(userId: string): Promise<string> {
+  return new SignJWT({ purpose: 'care' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(userId)
+    .setIssuedAt()
+    .setExpirationTime(`${CARE_STEPUP_MAX_AGE_SEC}s`)
+    .sign(secretKey());
+}
+
+export async function getCareStepupFromRequest(req: VercelRequest): Promise<{ id: string } | null> {
+  const named = readCookie(req, careCookieName()) || readCookie(req, 'mh-care') || readCookie(req, '__Host-mh-care');
+  if (!named) return null;
+  try {
+    const { payload } = await jwtVerify(named, secretKey());
+    const id = typeof payload.sub === 'string' ? payload.sub : '';
+    if (!id || payload.purpose !== 'care') return null;
+    return { id };
+  } catch {
+    return null;
+  }
+}
+
+export function setCareStepupCookie(res: VercelResponse, token: string): void {
+  appendCookie(res, careCookieHeader(token));
+}
+
+export function clearCareStepupCookie(res: VercelResponse): void {
+  appendCookie(res, clearCareCookieHeader());
+}
+
+export async function sessionStillValid(
+  client: { query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> },
+  user: JwtUser
+): Promise<boolean> {
+  try {
+    const { rows } = await client.query(`SELECT session_invalid_before FROM users WHERE id = $1`, [user.id]);
+    if (!rows[0]) return false;
+    const raw = rows[0].session_invalid_before;
+    if (raw == null) return true;
+    const cut = raw instanceof Date ? raw : new Date(String(raw));
+    if (Number.isNaN(cut.getTime())) return true;
+    return user.iat >= Math.floor(cut.getTime() / 1000);
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === '42703') return true;
+    throw err;
+  }
+}
+
+export async function invalidateSessions(
+  client: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+  userId: string
+): Promise<void> {
+  try {
+    await client.query(`UPDATE users SET session_invalid_before = now(), updated_at = now() WHERE id = $1`, [userId]);
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === '42703') return;
+    throw err;
+  }
 }

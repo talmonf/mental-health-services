@@ -9,6 +9,7 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Client } from 'pg';
+import { enqueueCareCommitteeReminders, processOutbox } from '../lib/email';
 
 function normalizePgSslMode(connectionString: string): string {
   try {
@@ -42,10 +43,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const rolled = await client.query('SELECT roll_up_search_queries() AS n');
     const queries = await client.query('SELECT purge_old_search_queries() AS n');
     const logs = await client.query('SELECT purge_old_request_log() AS n');
+    const reminders = await enqueueCareCommitteeReminders(client);
+    const send = reminders ? await processOutbox(client, 50, { kind: 'care_committee_reminder' }) : { sent: 0, failed: 0, skipped: 0 };
     return res.status(200).json({
       rolled_up: rolled.rows[0]?.n ?? 0,
       search_queries_nulled: queries.rows[0]?.n ?? 0,
       request_log_deleted: logs.rows[0]?.n ?? 0,
+      committee_reminders: reminders,
+      reminder_send: send,
     });
   } catch (err) {
     console.error('retention error', err);

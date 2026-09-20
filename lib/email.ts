@@ -171,7 +171,150 @@ export async function enqueueQuestionAdminEmails(
   return n;
 }
 
-type OutboxKind = 'confirm' | 'immediate' | 'weekly' | 'question_admin';
+export async function enqueueCareOtpEmail(
+  client: Client,
+  user: { id: string; email: string },
+  code: string
+): Promise<void> {
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'care_otp', $2::jsonb)`,
+    [user.id, JSON.stringify({ to: user.email, code })]
+  );
+}
+
+export async function enqueueCareGrantInvite(
+  client: Client,
+  opts: { ownerEmail: string; granteeEmail: string; granteeUserId: string | null; acceptUrl: string; kind: string }
+): Promise<void> {
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'care_grant_invite', $2::jsonb)`,
+    [
+      opts.granteeUserId,
+      JSON.stringify({
+        to: opts.granteeEmail,
+        ownerEmail: opts.ownerEmail,
+        acceptUrl: opts.acceptUrl,
+        kind: opts.kind,
+      }),
+    ]
+  );
+}
+
+export async function enqueueCareGrantAccepted(
+  client: Client,
+  opts: { ownerUserId: string; ownerEmail: string; granteeEmail: string }
+): Promise<void> {
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'care_grant_accepted', $2::jsonb)`,
+    [
+      opts.ownerUserId,
+      JSON.stringify({ to: opts.ownerEmail, granteeEmail: opts.granteeEmail }),
+    ]
+  );
+}
+
+export async function enqueueCareGrantRevoked(
+  client: Client,
+  opts: {
+    ownerUserId: string;
+    ownerEmail: string;
+    granteeEmail: string;
+    granteeUserId: string | null;
+  }
+): Promise<void> {
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'care_grant_revoked', $2::jsonb)`,
+    [
+      opts.ownerUserId,
+      JSON.stringify({ to: opts.ownerEmail, granteeEmail: opts.granteeEmail, role: 'owner' }),
+    ]
+  );
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'care_grant_revoked', $2::jsonb)`,
+    [
+      opts.granteeUserId,
+      JSON.stringify({ to: opts.granteeEmail, ownerEmail: opts.ownerEmail, role: 'grantee' }),
+    ]
+  );
+}
+
+export async function enqueueCareCommitteeReminders(client: Client): Promise<number> {
+  let rows: {
+    id: string;
+    title: string;
+    scheduled_on: Date | string;
+    scheduled_time: string;
+    place: string;
+    user_id: string;
+    email: string;
+    days: number;
+  }[] = [];
+  try {
+    const found = await client.query(
+      `SELECT c.id::text, c.title, c.scheduled_on, c.scheduled_time, c.place,
+              u.id::text AS user_id, u.email,
+              (c.scheduled_on - CURRENT_DATE)::int AS days
+         FROM care_committees c
+         JOIN care_files f ON f.id = c.file_id
+         JOIN users u ON u.id = f.owner_id
+        WHERE c.remind = true
+          AND c.status = 'upcoming'
+          AND (c.scheduled_on - CURRENT_DATE) IN (1, 3, 7)
+          AND (c.last_reminded_on IS DISTINCT FROM CURRENT_DATE)
+          AND u.email_verified_at IS NOT NULL`
+    );
+    rows = found.rows;
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === '42P01' || code === '42703') return 0;
+    throw err;
+  }
+
+  let n = 0;
+  for (const row of rows) {
+    const when =
+      row.scheduled_on instanceof Date
+        ? row.scheduled_on.toISOString().slice(0, 10)
+        : String(row.scheduled_on).slice(0, 10);
+    const [y, m, d] = when.split('-');
+    const whenHe = d && m && y ? `${d}.${m}.${y}` : when;
+    await client.query(
+      `INSERT INTO email_outbox (user_id, kind, payload)
+       VALUES ($1, 'care_committee_reminder', $2::jsonb)`,
+      [
+        row.user_id,
+        JSON.stringify({
+          to: row.email,
+          title: row.title,
+          whenHe,
+          time: row.scheduled_time || '',
+          place: row.place || '',
+          days: row.days,
+          careUrl: `${appUrl()}/care`,
+        }),
+      ]
+    );
+    await client.query(`UPDATE care_committees SET last_reminded_on = CURRENT_DATE WHERE id = $1`, [row.id]);
+    n += 1;
+  }
+  return n;
+}
+
+type OutboxKind =
+  | 'confirm'
+  | 'immediate'
+  | 'weekly'
+  | 'question_admin'
+  | 'care_otp'
+  | 'care_grant_invite'
+  | 'care_grant_accepted'
+  | 'care_grant_revoked'
+  | 'care_committee_reminder';
 
 type OutboxRow = {
   id: string;
@@ -213,6 +356,72 @@ async function renderOutbox(
 ): Promise<{ to: string; subject: string; text: string; html: string } | null> {
   const to = (typeof row.payload.to === 'string' && row.payload.to) || row.email;
   if (!to) return null;
+
+  if (row.kind === 'care_otp') {
+    const code = String(row.payload.code || '');
+    const subject = 'קוד כניסה לתיק שלי — מדריך נפש';
+    const text = `קוד הכניסה לתיק שלכם: ${code}\n\nהקוד תקף ל־10 דקות. אם לא ביקשתם אותו, התעלמו מהודעה זו.`;
+    const html = wrapHtml(
+      `<p>קוד הכניסה לתיק שלכם:</p><p style="font-size:1.6rem;font-weight:700;letter-spacing:0.12em">${escapeHtml(code)}</p><p>הקוד תקף ל־10 דקות. אם לא ביקשתם אותו, התעלמו מהודעה זו.</p>`
+    );
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'care_grant_invite') {
+    const ownerEmail = String(row.payload.ownerEmail || '');
+    const acceptUrl = String(row.payload.acceptUrl || `${appUrl()}/care`);
+    const kind = String(row.payload.kind || 'timed');
+    const kindHe = kind === 'proxy' ? 'גישת משפחה קבועה' : 'גישה לזמן מוגבל';
+    const subject = 'שותף איתכם תיק במדריך נפש';
+    const text = `${ownerEmail} שיתף איתכם את התיק האישי (${kindHe}).\n\nכדי לראות אותו, היכנסו לחשבון עם כתובת האימייל הזו ואשרו:\n${acceptUrl}\n\nאם לא ציפיתם להודעה זו, התעלמו ממנה.`;
+    const html = wrapHtml(
+      `<p><strong>${escapeHtml(ownerEmail)}</strong> שיתף איתכם את התיק האישי (${escapeHtml(kindHe)}).</p><p>כדי לראות אותו, היכנסו לחשבון עם כתובת האימייל הזו ואשרו:</p><p><a href="${escapeHtml(acceptUrl)}">לאישור הגישה</a></p><p>אם לא ציפיתם להודעה זו, התעלמו ממנה.</p>`
+    );
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'care_grant_accepted') {
+    const granteeEmail = String(row.payload.granteeEmail || '');
+    const subject = 'מישהו אישר גישה לתיק שלכם';
+    const text = `${granteeEmail} אישר/ה את הגישה לתיק שלכם.\n\nאפשר לנהל הרשאות ב־${appUrl()}/care`;
+    const html = wrapHtml(
+      `<p><strong>${escapeHtml(granteeEmail)}</strong> אישר/ה את הגישה לתיק שלכם.</p><p><a href="${escapeHtml(appUrl() + '/care')}">לניהול הרשאות</a></p>`
+    );
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'care_grant_revoked') {
+    const role = String(row.payload.role || 'owner');
+    if (role === 'grantee') {
+      const ownerEmail = String(row.payload.ownerEmail || '');
+      const subject = 'הגישה לתיק בוטלה';
+      const text = `הגישה לתיק של ${ownerEmail} בוטלה.`;
+      const html = wrapHtml(`<p>הגישה לתיק של <strong>${escapeHtml(ownerEmail)}</strong> בוטלה.</p>`);
+      return { to, subject, text, html };
+    }
+    const granteeEmail = String(row.payload.granteeEmail || '');
+    const subject = 'ביטלתם גישה לתיק';
+    const text = `ביטלתם את הגישה של ${granteeEmail} לתיק שלכם.`;
+    const html = wrapHtml(`<p>ביטלתם את הגישה של <strong>${escapeHtml(granteeEmail)}</strong> לתיק שלכם.</p>`);
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'care_committee_reminder') {
+    const title = String(row.payload.title || 'ועדה');
+    const whenHe = String(row.payload.whenHe || '');
+    const time = String(row.payload.time || '');
+    const place = String(row.payload.place || '');
+    const days = Number(row.payload.days) || 0;
+    const careUrl = String(row.payload.careUrl || `${appUrl()}/care`);
+    const whenLine = days === 1 ? 'מחר' : `בעוד ${days} ימים`;
+    const subject = `תזכורת: ${title} ${whenLine}`;
+    const details = [whenHe, time, place].filter(Boolean).join(' · ');
+    const text = `תזכורת לוועדה בתיק שלכם:\n${title}\n${details}\n\n${careUrl}`;
+    const html = wrapHtml(
+      `<p>תזכורת לוועדה בתיק שלכם (${escapeHtml(whenLine)}):</p><p><strong>${escapeHtml(title)}</strong></p><p>${escapeHtml(details)}</p><p><a href="${escapeHtml(careUrl)}">לתיק שלי</a></p>`
+    );
+    return { to, subject, text, html };
+  }
 
   if (row.kind === 'question_admin') {
     const asker = String(row.payload.askerEmail || '');
