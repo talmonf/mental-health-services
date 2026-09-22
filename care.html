@@ -86,6 +86,9 @@
     .danger-box .row { margin-top: 10px; }
     .ack { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; margin: 0 0 10px; }
     .ack input { margin-top: 3px; }
+    .btn.ghost.is-on { background: rgba(255,255,255,0.22); }
+    .profile-block { margin: 4px 0 14px; }
+    .profile-block h3 { margin: 0 0 8px; font-size: 1rem; color: var(--primary); }
   </style>
 </head>
 <body>
@@ -273,7 +276,8 @@
       const profileRows = [
         ['שם', p.fullName], ['ת״ז', p.nationalId], ['תאריך לידה', fmtDate(p.birthOn)],
         ['מגדר', p.gender], ['מצב משפחתי', p.maritalStatus], ['ילדים', p.childrenCount],
-        ['טלפון', p.phone], ['כתובת', p.address], ['עיר', p.city],
+        ['טלפון', p.phone], ['עיר', p.city], ['רחוב', p.address],
+        ['קוד משתמש — ביטוח לאומי', p.btlUserCode], ['סיסמה — ביטוח לאומי', p.btlPassword],
         ['ארץ לידה', p.countryOfBirth], ['שנת עלייה', p.aliyahYear], ['שפות', p.languages],
         ['השכלה', p.education], ['תעסוקה', p.employment], ['צבא / לאומי', p.military],
         ['דיור', p.housing],
@@ -349,6 +353,20 @@ ${body}
       return <div className="field"><label>{label}</label>{children}</div>;
     }
 
+    function SecretInput({ value, onChange, hidden }) {
+      const filled = String(value || '').length > 0;
+      return (
+        <input
+          value={hidden && filled ? '••••••••' : (value || '')}
+          onChange={hidden ? undefined : onChange}
+          readOnly={hidden}
+          autoComplete="off"
+          spellCheck={false}
+          aria-readonly={hidden ? 'true' : undefined}
+        />
+      );
+    }
+
     function App() {
       const [user, setUser] = useState(undefined);
       const [boot, setBoot] = useState(null);
@@ -374,6 +392,16 @@ ${body}
       const [accountWipeOpen, setAccountWipeOpen] = useState(false);
       const [accountWipeAck, setAccountWipeAck] = useState(false);
       const [accountPassword, setAccountPassword] = useState('');
+      const [hidePersonal, setHidePersonal] = useState(() => {
+        try { return localStorage.getItem('mh-care-hide-personal') === '1'; } catch (e) { return false; }
+      });
+      const toggleHidePersonal = () => {
+        setHidePersonal((v) => {
+          const next = !v;
+          try { localStorage.setItem('mh-care-hide-personal', next ? '1' : '0'); } catch (e) {}
+          return next;
+        });
+      };
       const params = new URLSearchParams(location.search);
       const grantParam = params.get('grant');
 
@@ -698,6 +726,14 @@ ${body}
               <p>{role === 'owner' ? 'רק אתם מחליטים מי רואה' : `תיק ששותף איתכם · ${inbox.find((i) => i.fileId === fileId)?.ownerEmail || ''}`}</p>
             </div>
             <div className="actions">
+              <button
+                className={'btn ghost' + (hidePersonal ? ' is-on' : '')}
+                type="button"
+                aria-pressed={hidePersonal}
+                onClick={toggleHidePersonal}
+              >
+                הסתרת פרטים אישיים/כספיים
+              </button>
               {role === 'owner' && <button className="btn ghost" type="button" disabled={busy} onClick={exportZip}>ייצוא ZIP</button>}
               <a className="btn ghost" href="/">למדריך</a>
               <button className="btn ghost" type="button" onClick={async () => { await api('/api/auth/logout', { method: 'POST' }); location.href = '/'; }}>יציאה</button>
@@ -840,7 +876,7 @@ ${body}
             }}
           />}
           {tab === 'rights' && <Rights items={items} committees={extra} busy={busy} onSave={(p) => mutate('/api/care/rights', 'POST', p)} onDelete={(id) => mutate('/api/care/rights', 'DELETE', { id })} onSaveCommittee={(p) => mutate('/api/care/committees', 'POST', p)} onDeleteCommittee={(id) => mutate('/api/care/committees', 'DELETE', { id })} />}
-          {tab === 'profile' && <Profile sheet={sheet} history={extra} busy={busy} onSave={async (p) => mutate('/api/care/profile', 'PATCH', p)} onSaveHmo={(p) => mutate('/api/care/hmo-history', 'POST', p)} onDeleteHmo={(id) => mutate('/api/care/hmo-history', 'DELETE', { id })} />}
+          {tab === 'profile' && <Profile sheet={sheet} history={extra} busy={busy} hidePersonal={hidePersonal} onSave={async (p) => mutate('/api/care/profile', 'PATCH', p)} onSaveHmo={(p) => mutate('/api/care/hmo-history', 'POST', p)} onDeleteHmo={(id) => mutate('/api/care/hmo-history', 'DELETE', { id })} />}
           {tab === 'family' && <Family items={items} busy={busy} onSave={(p) => mutate('/api/care/family', 'POST', p)} onDelete={(id) => mutate('/api/care/family', 'DELETE', { id })} />}
           {tab === 'diagnoses' && <Diagnoses items={items} busy={busy} onSave={(p) => mutate('/api/care/diagnoses', 'POST', p)} onDelete={(id) => mutate('/api/care/diagnoses', 'DELETE', { id })} />}
           {tab === 'therapy' && <Therapy items={items} busy={busy} onSave={(p) => mutate('/api/care/therapy', 'POST', p)} onDelete={(id) => mutate('/api/care/therapy', 'DELETE', { id })} />}
@@ -1392,12 +1428,13 @@ ${body}
       );
     }
 
-    function Profile({ sheet, history, busy, onSave, onSaveHmo, onDeleteHmo }) {
+    function Profile({ sheet, history, busy, hidePersonal, onSave, onSaveHmo, onDeleteHmo }) {
       const empty = {
         fullName: '', nationalId: '', birthOn: '', gender: '', maritalStatus: '', childrenCount: '',
         phone: '', address: '', city: '', countryOfBirth: '', aliyahYear: '', languages: '',
         education: '', employment: '', military: '', housing: '', hmo: '', hmoMemberSince: '',
-        clinicName: '', allergies: '', emergencyName: '', emergencyPhone: '', emergencyRelation: ''
+        clinicName: '', allergies: '', emergencyName: '', emergencyPhone: '', emergencyRelation: '',
+        btlUserCode: '', btlPassword: ''
       };
       const [form, setForm] = useState(empty);
       const [hform, setHform] = useState({ hmo: 'clalit', startedOn: '', endedOn: '', notes: '' });
@@ -1420,15 +1457,23 @@ ${body}
             <form onSubmit={async (e) => { e.preventDefault(); await onSave(form); }}>
               <div className="form-grid two">
                 <Field label="שם מלא"><input value={form.fullName} onChange={set('fullName')} /></Field>
-                <Field label="תעודת זהות"><input value={form.nationalId} onChange={set('nationalId')} /></Field>
+                <Field label="תעודת זהות"><SecretInput value={form.nationalId} onChange={set('nationalId')} hidden={hidePersonal} /></Field>
                 <Field label="תאריך לידה"><input type="date" value={form.birthOn} onChange={set('birthOn')} /></Field>
                 <Field label="מגדר"><input value={form.gender} onChange={set('gender')} /></Field>
                 <Field label="מצב משפחתי"><input value={form.maritalStatus} onChange={set('maritalStatus')} /></Field>
                 <Field label="מספר ילדים"><input value={form.childrenCount} onChange={set('childrenCount')} /></Field>
-                <Field label="טלפון"><input value={form.phone} onChange={set('phone')} /></Field>
-                <Field label="עיר"><input value={form.city} onChange={set('city')} /></Field>
+                <Field label="טלפון"><SecretInput value={form.phone} onChange={set('phone')} hidden={hidePersonal} /></Field>
+                <Field label="עיר"><SecretInput value={form.city} onChange={set('city')} hidden={hidePersonal} /></Field>
+                <Field label="רחוב"><SecretInput value={form.address} onChange={set('address')} hidden={hidePersonal} /></Field>
               </div>
-              <Field label="כתובת"><input value={form.address} onChange={set('address')} /></Field>
+              <div className="profile-block">
+                <h3>ביטוח לאומי — אזור אישי</h3>
+                <p className="muted">קוד המשתמש והסיסמה נשמרים בתיק כדי שתוכלו להיכנס לאזור האישי. הם לא נכללים בקישור לקריאה בלי חשבון.</p>
+                <div className="form-grid two">
+                  <Field label="קוד משתמש"><SecretInput value={form.btlUserCode} onChange={set('btlUserCode')} hidden={hidePersonal} /></Field>
+                  <Field label="סיסמה"><SecretInput value={form.btlPassword} onChange={set('btlPassword')} hidden={hidePersonal} /></Field>
+                </div>
+              </div>
               <div className="form-grid two">
                 <Field label="ארץ לידה"><input value={form.countryOfBirth} onChange={set('countryOfBirth')} /></Field>
                 <Field label="שנת עלייה"><input value={form.aliyahYear} onChange={set('aliyahYear')} /></Field>

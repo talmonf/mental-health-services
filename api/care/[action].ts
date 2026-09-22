@@ -1374,6 +1374,8 @@ const PROFILE_TEXT: { json: string; col: string; max: number }[] = [
   { json: 'emergencyName', col: 'emergency_name', max: 200 },
   { json: 'emergencyPhone', col: 'emergency_phone', max: 80 },
   { json: 'emergencyRelation', col: 'emergency_relation', max: 80 },
+  { json: 'btlUserCode', col: 'btl_user_code', max: 80 },
+  { json: 'btlPassword', col: 'btl_password', max: 200 },
 ];
 
 function mapProfile(row: Record<string, unknown> | null) {
@@ -1402,6 +1404,8 @@ function mapProfile(row: Record<string, unknown> | null) {
       emergencyName: '',
       emergencyPhone: '',
       emergencyRelation: '',
+      btlUserCode: '',
+      btlPassword: '',
     };
   }
   return {
@@ -1428,6 +1432,8 @@ function mapProfile(row: Record<string, unknown> | null) {
     emergencyName: row.emergency_name || '',
     emergencyPhone: row.emergency_phone || '',
     emergencyRelation: row.emergency_relation || '',
+    btlUserCode: row.btl_user_code || '',
+    btlPassword: row.btl_password || '',
   };
 }
 
@@ -1855,7 +1861,12 @@ async function loadSharePayload(client: Client, actor: CareActor) {
   }
   if (canReadSection(actor, 'profile')) {
     const profile = await client.query(`SELECT * FROM care_profile WHERE file_id = $1`, [actor.fileId]);
-    out.profile = mapProfile(profile.rows[0] || null);
+    const mapped = mapProfile(profile.rows[0] || null);
+    if (actor.actorKind === 'share_link') {
+      mapped.btlUserCode = '';
+      mapped.btlPassword = '';
+    }
+    out.profile = mapped;
     const hmo = await client.query(
       `SELECT id::text, hmo, started_on, ended_on, notes FROM care_hmo_history WHERE file_id = $1 ORDER BY started_on DESC NULLS LAST`,
       [actor.fileId]
