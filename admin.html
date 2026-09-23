@@ -37,7 +37,7 @@
     .stat b { display: block; font-size: 1.4rem; color: var(--primary-dark); }
     .stat span { color: var(--muted); font-size: 0.85rem; }
     label { display: block; font-weight: 600; margin: 0 0 6px; font-size: 0.82rem; color: var(--muted); }
-    input[type=text], input[type=date], textarea, select {
+    input[type=text], input[type=date], input[type=number], textarea, select {
       width: 100%; box-sizing: border-box; padding: 8px 10px; border: 2px solid var(--border);
       border-radius: 8px; font: inherit; background: #fff;
     }
@@ -95,6 +95,13 @@
     a.name-link:hover { text-decoration: underline; }
     .he-panel { direction: rtl; text-align: right; }
     .he-panel th, .he-panel td { text-align: right; }
+    .dir-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dir-grid .full { grid-column: 1 / -1; }
+    .dir-help { color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
+    .dir-check { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; font-weight: 600; font-size: 0.85rem; }
+    .dir-check input { width: auto; }
+    .dir-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    @media (max-width: 700px) { .dir-grid { grid-template-columns: 1fr; } }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
@@ -249,11 +256,20 @@
     function hashToTab() {
       const h = (location.hash || '').replace(/^#/, '');
       if (h === 'users' || h === 'questions' || h === 'updates') return h;
+      if (h === 'directory' || h.indexOf('directory/') === 0) return 'directory';
       return 'analytics';
+    }
+    function directoryIdFromHash() {
+      const m = /^directory\/(\d+)$/.exec((location.hash || '').replace(/^#/, ''));
+      return m ? Number(m[1]) : null;
     }
     const state = {
       user: null,
       tab: hashToTab(),
+      directoryId: directoryIdFromHash(),
+      directoryCards: null,
+      directoryCard: null,
+      directoryMsg: '',
       analytics: null,
       users: null,
       accounts: null,
@@ -537,7 +553,8 @@
 
     function setTab(tab) {
       state.tab = tab;
-      location.hash = tab;
+      if (tab !== 'directory') state.directoryId = null;
+      location.hash = tab === 'directory' && state.directoryId ? `directory/${state.directoryId}` : tab;
     }
 
     function barChart(rows) {
@@ -1222,6 +1239,272 @@
       });
     }
 
+    const DIR_TEXT = [
+      ['org', 'שם הארגון', false],
+      ['svc', 'תיאור קצר', false],
+      ['target', 'למי', true],
+      ['region', 'אזור', false],
+      ['cost', 'עלות', false],
+      ['specialty', 'התמחות', true],
+      ['languages', 'שפות', false],
+      ['diseases', 'מצבים', true],
+      ['notes', 'הערות', true],
+      ['tags', 'מילות חיפוש (לא מוצגות כשדה בכרטיס)', true],
+      ['whatsapp', 'וואטסאפ', false],
+      ['whatsappLabel', 'תווית וואטסאפ', false],
+      ['email', 'דוא״ל', false],
+      ['web', 'אתר', false],
+      ['webLabel', 'תווית אתר', false],
+      ['web2', 'אתר נוסף', false],
+      ['webLabel2', 'תווית אתר נוסף', false],
+      ['add', 'קישור נוסף', false],
+      ['addLabel', 'תווית קישור נוסף', false]
+    ];
+    const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
+    const DIR_LTR = new Set(['whatsapp', 'email', 'web', 'web2', 'add']);
+
+    function dirLines(value) {
+      return String(value || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    }
+
+    async function loadDirectoryList() {
+      const r = await fetch('/api/admin/directory', { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) {
+        state.error = r.status === 401 ? 'Sign in on the main site first.' : 'You do not have access.';
+        state.directoryCards = null;
+        return;
+      }
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        state.directoryCards = [];
+        state.directoryMsg = data.error || 'טעינת הכרטיסים נכשלה.';
+        return;
+      }
+      state.error = '';
+      state.directoryCards = data.cards || [];
+    }
+
+    async function loadDirectoryCard(id) {
+      const r = await fetch(`/api/admin/directory?id=${encodeURIComponent(id)}`, { credentials: 'include' });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        state.directoryCard = null;
+        state.directoryMsg = data.error || 'הכרטיס לא נמצא.';
+        return;
+      }
+      state.directoryMsg = '';
+      state.directoryCard = data.card;
+    }
+
+    async function loadDirectory() {
+      await loadDirectoryList();
+      if (state.directoryId) await loadDirectoryCard(state.directoryId);
+    }
+
+    function renderDirectory(root) {
+      const msg = state.directoryMsg
+        ? `<p class="${state.directoryMsg === 'נשמר.' ? 'ok' : 'err'}">${esc(state.directoryMsg)}</p>`
+        : '';
+      if (state.directoryId) {
+        const card = state.directoryCard;
+        if (!card) {
+          root.appendChild(el(`<div class="card he-panel">${msg}<p><button type="button" class="secondary" data-act="back">חזרה לרשימה</button></p></div>`));
+          root.querySelector('[data-act=back]').addEventListener('click', () => {
+            state.directoryId = null;
+            state.directoryCard = null;
+            state.directoryMsg = '';
+            location.hash = 'directory';
+            render();
+          });
+          return;
+        }
+        const fields = card.publicFields || {};
+        const elig = card.eligibility || {};
+        const rec = elig.recognition || {};
+        const textInputs = DIR_TEXT.map(([name, label, area]) => {
+          const value = fields[name] == null ? '' : String(fields[name]);
+          const ltr = DIR_LTR.has(name) ? ' dir="ltr"' : '';
+          if (area) {
+            return `<div class="full"><label for="d-${name}">${esc(label)}</label><textarea id="d-${name}" name="${name}"${ltr}>${esc(value)}</textarea></div>`;
+          }
+          return `<div class="${name === 'org' || name === 'svc' ? 'full' : ''}"><label for="d-${name}">${esc(label)}</label><input id="d-${name}" name="${name}" type="text" value="${esc(value)}"${ltr}></div>`;
+        }).join('');
+        const phones = DIR_PHONES.map((suffix, index) => {
+          const num = fields[`phone${suffix}`] == null ? '' : String(fields[`phone${suffix}`]);
+          const label = fields[`phoneLabel${suffix}`] == null ? '' : String(fields[`phoneLabel${suffix}`]);
+          const show = fields[`phoneShowNumber${suffix}`] !== false;
+          return `<div>
+            <label for="d-phone${suffix}">טלפון ${index + 1}</label>
+            <input id="d-phone${suffix}" name="phone${suffix}" type="text" dir="ltr" value="${esc(num)}">
+            <label for="d-phoneLabel${suffix}">תווית</label>
+            <input id="d-phoneLabel${suffix}" name="phoneLabel${suffix}" type="text" value="${esc(label)}">
+            <label class="dir-check"><input type="checkbox" name="phoneShowNumber${suffix}"${show ? ' checked' : ''}> הצגת המספר על הכפתור</label>
+          </div>`;
+        }).join('');
+        const sex = elig.sex || 'any';
+        const locationMode = elig.location_mode || 'any';
+        const select = (name, label, current, options) => `<div><label for="d-${name}">${esc(label)}</label><select id="d-${name}" name="${name}">${options.map(([v, t]) => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></div>`;
+        const anyReq = [['any', 'ללא הגבלה'], ['required', 'נדרש']];
+        root.appendChild(el(`<div class="card he-panel">
+          ${msg}
+          <p class="dir-help">שורה ${esc(card.rowId)}. <a href="/?entry=${encodeURIComponent(card.rowId)}">צפייה בכרטיס</a></p>
+          <form id="dir-form">
+            <h2>מוצג בכרטיס</h2>
+            <div class="dir-grid">${textInputs}</div>
+            <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
+              <summary>טלפונים</summary>
+              <div class="dir-grid">${phones}</div>
+            </details>
+            <h2>התאמה — לא מוצג בכרטיס</h2>
+            <p class="dir-help">השדות כאן לא מופיעים על הכרטיס, אבל נכללים במקור הדף כדי שמנועי חיפוש וכלים דומים יוכלו לקרוא אותם. שדה ריק או «ללא הגבלה» פירושו שאין תנאי בממד הזה. תנאי שמולא הוא תנאי הכרחי, לא סיבה מספיקה בפני עצמה להתאים את השירות. הערות פנימיות נכללות גם הן במקור הדף — לא לרשום בהן הערות תפעוליות פרטיות.</p>
+            <div class="dir-grid">
+              <div><label for="d-age_min">גיל מינימום</label><input id="d-age_min" name="age_min" type="number" min="0" max="120" value="${elig.age_min == null ? '' : esc(elig.age_min)}"></div>
+              <div><label for="d-age_max">גיל מקסימום</label><input id="d-age_max" name="age_max" type="number" min="0" max="120" value="${elig.age_max == null ? '' : esc(elig.age_max)}"></div>
+              ${select('sex', 'מין', sex, [['any', 'ללא הגבלה'], ['female', 'נקבה'], ['male', 'זכר']])}
+              ${select('location_mode', 'מיקום', locationMode, [['any', 'ללא הגבלה'], ['nationwide', 'ארצי'], ['regions', 'אזורים']])}
+              <div class="full" id="d-regions-wrap"${locationMode === 'regions' ? '' : ' hidden'}><label for="d-regions">אזורים (שורה לכל אזור)</label><textarea id="d-regions" name="regions">${esc(dirLines(elig.regions && elig.regions.join ? elig.regions.join('\n') : '').join('\n'))}</textarea></div>
+              <div class="full"><label for="d-diagnoses">אבחנות (שורה לכל אבחנה)</label><textarea id="d-diagnoses" name="diagnoses">${esc((elig.diagnoses || []).join('\n'))}</textarea></div>
+              <div class="full"><label for="d-presenting_problems">קשיים או סיבות פנייה (שורה לכל פריט)</label><textarea id="d-presenting_problems" name="presenting_problems">${esc((elig.presenting_problems || []).join('\n'))}</textarea></div>
+              ${select('rec_btl', 'ביטוח לאומי', rec.btl || 'any', anyReq)}
+              ${select('rec_moh', 'משרד הבריאות', rec.moh || 'any', anyReq)}
+              ${select('rec_mod', 'משרד הביטחון', rec.mod || 'any', anyReq)}
+              ${select('rec_rehab', 'סל שיקום', rec.rehab_basket || 'any', anyReq)}
+              <div class="full"><label for="d-internal_notes">הערות פנימיות (במקור הדף, לא על הכרטיס)</label><textarea id="d-internal_notes" name="internal_notes">${esc(elig.internal_notes || '')}</textarea></div>
+            </div>
+            <div class="dir-actions">
+              <button type="submit">שמירה</button>
+              <button type="button" class="secondary" data-act="back">חזרה לרשימה</button>
+            </div>
+          </form>
+        </div>`));
+        const form = root.querySelector('#dir-form');
+        const mode = form.querySelector('[name=location_mode]');
+        const regionsWrap = form.querySelector('#d-regions-wrap');
+        mode.addEventListener('change', () => {
+          regionsWrap.hidden = mode.value !== 'regions';
+        });
+        form.querySelector('[data-act=back]').addEventListener('click', () => {
+          state.directoryId = null;
+          state.directoryCard = null;
+          state.directoryMsg = '';
+          location.hash = 'directory';
+          render();
+        });
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const btn = form.querySelector('[type=submit]');
+          btn.disabled = true;
+          const text = (name) => String(new FormData(form).get(name) || '').trim();
+          const publicFields = {};
+          DIR_TEXT.forEach(([name]) => { publicFields[name] = text(name); });
+          DIR_PHONES.forEach((suffix) => {
+            publicFields[`phone${suffix}`] = text(`phone${suffix}`);
+            publicFields[`phoneLabel${suffix}`] = text(`phoneLabel${suffix}`);
+            publicFields[`phoneShowNumber${suffix}`] = form.querySelector(`[name="phoneShowNumber${suffix}"]`).checked;
+          });
+          const age = (name) => {
+            const v = text(name);
+            return v === '' ? null : Number(v);
+          };
+          const body = {
+            id: card.id,
+            publicFields,
+            eligibility: {
+              age_min: age('age_min'),
+              age_max: age('age_max'),
+              sex: text('sex') || 'any',
+              location_mode: text('location_mode') || 'any',
+              regions: dirLines(text('regions')),
+              diagnoses: dirLines(text('diagnoses')),
+              presenting_problems: dirLines(text('presenting_problems')),
+              recognition: {
+                btl: text('rec_btl') || 'any',
+                moh: text('rec_moh') || 'any',
+                mod: text('rec_mod') || 'any',
+                rehab_basket: text('rec_rehab') || 'any'
+              },
+              internal_notes: text('internal_notes')
+            }
+          };
+          try {
+            const r = await fetch('/api/admin/directory', {
+              method: 'PATCH',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(data.error || 'שמירת הכרטיס נכשלה');
+            state.directoryCard = data.card;
+            state.directoryMsg = 'נשמר.';
+            if (state.directoryCards && data.card) {
+              const idx = state.directoryCards.findIndex((c) => c.id === data.card.id);
+              const summary = {
+                id: data.card.id,
+                rowId: data.card.rowId,
+                org: (data.card.publicFields && data.card.publicFields.org) || '',
+                svc: (data.card.publicFields && data.card.publicFields.svc) || '',
+                hasEligibility: data.card.hasEligibility,
+                publicEditedAt: data.card.publicEditedAt
+              };
+              if (idx >= 0) state.directoryCards[idx] = summary;
+            }
+            render();
+          } catch (e) {
+            state.directoryMsg = e.message || 'שמירת הכרטיס נכשלה';
+            render();
+          }
+        });
+        return;
+      }
+
+      const cards = state.directoryCards;
+      if (!cards) {
+        root.appendChild(el('<div class="card he-panel"><p>טוען…</p></div>'));
+        return;
+      }
+      const rows = cards.map((card) => {
+        const hay = `${card.rowId} ${card.org || ''} ${card.svc || ''}`.toLowerCase();
+        return `<tr data-card-row data-hay="${esc(hay)}">
+          <td>${esc(card.rowId)}</td>
+          <td>${esc(card.org)}</td>
+          <td>${esc(card.svc)}</td>
+          <td>${card.hasEligibility ? '<span class="badge">יש מידע פנימי</span>' : ''}</td>
+          <td><button type="button" data-open="${esc(card.id)}">עריכה</button></td>
+        </tr>`;
+      }).join('');
+      root.appendChild(el(`<div class="card he-panel">
+        ${msg}
+        <p class="dir-help">עריכת הטקסט שמוצג בכרטיס, ומידע התאמה שאינו מוצג על הכרטיס אך נכלל במקור הדף למנועי חיפוש.</p>
+        <label for="dir-q">חיפוש</label>
+        <input id="dir-q" type="text" placeholder="שם, תיאור או מספר שורה">
+        <div style="overflow-x:auto;margin-top:12px">
+          <table>
+            <thead><tr><th>שורה</th><th>ארגון</th><th>תיאור</th><th></th><th></th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="5">אין כרטיסים. הריצו את סקריפט 045.</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>`));
+      const q = root.querySelector('#dir-q');
+      q.addEventListener('input', () => {
+        const needle = q.value.trim().toLowerCase();
+        root.querySelectorAll('[data-card-row]').forEach((row) => {
+          const hay = row.getAttribute('data-hay') || '';
+          row.hidden = !!(needle && hay.indexOf(needle) === -1);
+        });
+      });
+      root.querySelectorAll('[data-open]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = Number(btn.getAttribute('data-open'));
+          state.directoryId = id;
+          state.directoryMsg = '';
+          location.hash = `directory/${id}`;
+          await loadDirectoryCard(id);
+          render();
+        });
+      });
+    }
+
     function render() {
       if (!state.user) {
         renderGate('Sign in on the directory first, then come back here. This page is for operators only.');
@@ -1243,6 +1526,10 @@
         renderGate(state.error);
         return;
       }
+      if (state.error && state.directoryCards == null && state.tab === 'directory') {
+        renderGate(state.error);
+        return;
+      }
 
       app.innerHTML = '';
       const wrap = el(`<div>
@@ -1256,6 +1543,7 @@
           <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">Registered users</button>
           <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות נפוצות</button>
           <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">פרסום עדכונים</button>
+          <button type="button" data-tab="directory" class="${state.tab === 'directory' ? 'active' : ''}">כרטיסי מדריך</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
@@ -1263,6 +1551,11 @@
       wrap.querySelectorAll('.tabs button').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const tab = btn.getAttribute('data-tab');
+          if (tab === 'directory') {
+            state.directoryId = null;
+            state.directoryCard = null;
+            state.directoryMsg = '';
+          }
           setTab(tab);
           if (tab === 'users' && !state.users) await loadUsers();
           if ((tab === 'analytics' || tab === 'updates') && !state.analytics) await loadAnalytics();
@@ -1270,6 +1563,7 @@
             if (!state.questions) await loadQuestions();
             if (!state.faq) await loadFaqAdmin();
           }
+          if (tab === 'directory' && !state.directoryCards) await loadDirectoryList();
           render();
         });
       });
@@ -1277,18 +1571,26 @@
       if (state.tab === 'users') renderUsers(body);
       else if (state.tab === 'questions') renderQuestions(body);
       else if (state.tab === 'updates') renderUpdates(body);
+      else if (state.tab === 'directory') renderDirectory(body);
       else renderAnalytics(body);
     }
 
     window.addEventListener('hashchange', async () => {
       const next = hashToTab();
-      if (next === state.tab) return;
+      const nextId = next === 'directory' ? directoryIdFromHash() : null;
+      if (next === state.tab && nextId === state.directoryId) return;
       state.tab = next;
+      state.directoryId = nextId;
       if (next === 'users' && !state.users) await loadUsers();
       if ((next === 'analytics' || next === 'updates') && !state.analytics) await loadAnalytics();
       if (next === 'questions') {
         if (!state.questions) await loadQuestions();
         if (!state.faq) await loadFaqAdmin();
+      }
+      if (next === 'directory') {
+        if (!state.directoryCards) await loadDirectoryList();
+        if (nextId) await loadDirectoryCard(nextId);
+        else state.directoryCard = null;
       }
       render();
     });
@@ -1301,7 +1603,8 @@
           else if (state.tab === 'questions') {
             await loadQuestions();
             await loadFaqAdmin();
-          } else await loadAnalytics();
+          } else if (state.tab === 'directory') await loadDirectory();
+          else await loadAnalytics();
         }
         render();
       } catch (e) {

@@ -5,13 +5,17 @@ alwaysApply: true
 
 # Directory entries workflow
 
-When adding or updating directory listings:
+Visible card text and hidden eligibility for an **existing** card are edited in the admin page (`כרטיסי מדריך`), including the עריכה control on the card (signed-in admins only). That text lives in `directory_card_edits`. Do not change it in `index.html` — the live directory overlays those fields, so an edit in `DATA` will not show once the row exists.
 
-1. **Edit `index.html`** — update the `DATA` object (the live UI source) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`).
-2. **Add a numbered migration** under `scripts/` (e.g. `006_...sql`) with `INSERT ... ON CONFLICT` for `directory_entries`.
+When **adding** a card:
+
+1. **Edit `index.html`** — add the service to `DATA` (structure and the initial text) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`, unless a later admin edit of visible text is newer).
+2. **Add a numbered migration** under `scripts/` with `INSERT ... ON CONFLICT` for `directory_entries`, and an `INSERT` into `directory_card_edits` (`card_key` = `` `${row}|||${svc}` `` from the new service object, `public_fields` jsonb, `eligibility` all `any` / empty, `public_edited_at` null) with `ON CONFLICT (card_key) DO NOTHING`.
 3. **Register the migration** at the top of `scripts/database_updates_master.sql` as `[ ]` (unchecked). **Never** mark it `[x]` — the user checks it off after they run the script.
 
-**Card share links** use the numeric `row` in `?entry=` (ASCII-only). Do not put Hebrew in share/deep-link URLs — percent-encoded Hebrew makes links unreadable. Legacy Hebrew `entry_id` slugs still resolve for old links; DB `entry_id` may still follow the slugify convention.
+Do not re-run `scripts/seed_directory_card_edits.js` to refresh existing cards. It rewrites the original seed. New cards get their own migration insert.
+
+**Card share links** use the numeric `row` in `?entry=` (ASCII-only). Do not put Hebrew in share/deep-link URLs — percent-encoded Hebrew makes links unreadable. The admin edit link is `/admin#directory/<id>` using the numeric `directory_card_edits.id`. Legacy Hebrew `entry_id` slugs still resolve for old links; DB `entry_id` may still follow the slugify convention.
 
 For any other published change to `index.html` (UI copy, layout, resources, etc.), update `LAST_UPDATED` the same way.
 

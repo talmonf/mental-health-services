@@ -1,11 +1,19 @@
 /**
  * One Serverless Function for /api/admin/analytics, /api/admin/users,
- * /api/admin/updates, /api/admin/questions, and /api/admin/faq.
+ * /api/admin/updates, /api/admin/questions, /api/admin/faq, and /api/admin/directory.
  * See api/auth/[action].ts for why these are not separate files.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthFromRequest, originAllowed, parseJsonBody, setAuthCors } from '../../lib/auth';
 import { pgClient } from '../../lib/db';
+import {
+  DirectoryCardError,
+  eligibilityEqual,
+  hasEligibility,
+  normalizeEligibility,
+  normalizePublicFields,
+  publicFieldsEqual,
+} from '../../lib/directory-cards';
 import { enqueueImmediateEmails, processOutbox } from '../../lib/email';
 import {
   ADMIN_USER_COLUMNS,
@@ -841,6 +849,132 @@ async function handleFaq(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+function parseCardId(raw: unknown): number | null {
+  const s = typeof raw === 'number' && Number.isFinite(raw) ? String(Math.trunc(raw)) : typeof raw === 'string' ? raw.trim() : '';
+  if (!/^\d+$/.test(s)) return null;
+  const n = Number(s);
+  if (!Number.isSafeInteger(n) || n < 1 || n > 2147483647) return null;
+  return n;
+}
+
+function isoTime(value: unknown): string | null {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
+function directoryCardDetail(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    rowId: Number(row.row_id),
+    cardKey: String(row.card_key || ''),
+    publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
+    eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
+    hasEligibility: hasEligibility(row.eligibility),
+    publicEditedAt: isoTime(row.public_edited_at),
+    updatedAt: isoTime(row.updated_at),
+  };
+}
+
+function directoryCardSummary(row: Record<string, unknown>) {
+  const fields = row.public_fields && typeof row.public_fields === 'object' ? (row.public_fields as Record<string, unknown>) : {};
+  return {
+    id: Number(row.id),
+    rowId: Number(row.row_id),
+    org: String(fields.org || ''),
+    svc: String(fields.svc || ''),
+    hasEligibility: hasEligibility(row.eligibility),
+    publicEditedAt: isoTime(row.public_edited_at),
+  };
+}
+
+async function handleDirectory(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET' && req.method !== 'PATCH') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'Server misconfiguration' });
+
+  const client = pgClient();
+  try {
+    await client.connect();
+    if (!(await requireAdmin(req, res, client))) return;
+
+    if (req.method === 'GET') {
+      const id = parseCardId(qstr(req.query, 'id'));
+      if (qstr(req.query, 'id') && id == null) return res.status(400).json({ error: 'Invalid id' });
+      if (id != null) {
+        const { rows } = await client.query(
+          `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at
+             FROM directory_card_edits
+            WHERE id = $1`,
+          [id]
+        );
+        if (!rows[0]) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
+        return res.status(200).json({ card: directoryCardDetail(rows[0]) });
+      }
+      const { rows } = await client.query(
+        `SELECT id, row_id, public_fields, eligibility, public_edited_at
+           FROM directory_card_edits
+          ORDER BY row_id, id`
+      );
+      return res.status(200).json({ cards: rows.map((row) => directoryCardSummary(row)) });
+    }
+
+    const body = parseJsonBody(req);
+    if (!body) return res.status(400).json({ error: 'Invalid JSON' });
+    const id = parseCardId(body.id);
+    if (id == null) return res.status(400).json({ error: 'Invalid id' });
+
+    let publicFields;
+    let eligibility;
+    try {
+      publicFields = normalizePublicFields(body.publicFields);
+      eligibility = normalizeEligibility(body.eligibility);
+    } catch (err) {
+      if (err instanceof DirectoryCardError) return res.status(400).json({ error: err.message });
+      throw err;
+    }
+
+    const existing = await client.query(
+      `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at
+         FROM directory_card_edits
+        WHERE id = $1`,
+      [id]
+    );
+    if (!existing.rows[0]) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
+    const current = existing.rows[0];
+    const publicChanged = !publicFieldsEqual(current.public_fields, publicFields);
+    const eligibilityChanged = !eligibilityEqual(current.eligibility, eligibility);
+    if (!publicChanged && !eligibilityChanged) {
+      return res.status(200).json({ card: directoryCardDetail(current) });
+    }
+
+    const jwtUser = await getAuthFromRequest(req);
+    const { rows } = await client.query(
+      `UPDATE directory_card_edits
+          SET public_fields = $2::jsonb,
+              eligibility = $3::jsonb,
+              public_edited_at = CASE WHEN $4::boolean THEN now() ELSE public_edited_at END,
+              updated_at = now(),
+              updated_by = $5::uuid
+        WHERE id = $1
+        RETURNING id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at`,
+      [id, JSON.stringify(publicFields), JSON.stringify(eligibility), publicChanged, jwtUser ? jwtUser.id : null]
+    );
+    return res.status(200).json({ card: directoryCardDetail(rows[0]) });
+  } catch (err) {
+    const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
+    if (code === '42P01') {
+      return res.status(500).json({ error: 'טבלת הכרטיסים עדיין לא הותקנה. הריצו את סקריפט 045.' });
+    }
+    console.error('admin directory error', err);
+    const failed = req.method === 'GET' ? 'טעינת הכרטיסים נכשלה' : 'שמירת הכרטיס נכשלה';
+    return res.status(500).json({ error: failed });
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setAuthCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -856,6 +990,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleQuestions(req, res);
     case 'faq':
       return handleFaq(req, res);
+    case 'directory':
+      return handleDirectory(req, res);
     default:
       return res.status(404).json({ error: 'Not found' });
   }

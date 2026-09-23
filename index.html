@@ -58,6 +58,7 @@
       ]
     }
     </script>
+    <script type="application/ld+json" id="mh-card-eligibility">{"@context":"https://schema.org","@type":"ItemList","name":"תנאי התאמה לשירותי המדריך","itemListElement":[]}</script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js"></script>
@@ -302,6 +303,23 @@
             color: var(--accent);
             background: rgba(82, 183, 136, 0.12);
         }
+        .mh-card-edit-row { margin: 0 0 8px; padding-left: 40px; }
+        .mh-card-edit-row-ltr { padding-left: 0; padding-right: 40px; }
+        .mh-card-edit-link {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 2px 8px;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-sm);
+            color: var(--primary);
+            background: transparent;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1.4;
+        }
+        .mh-card-edit-link:hover { background: rgba(45, 90, 123, 0.08); }
         .mh-section-copy-link {
             width: 36px;
             height: 36px;
@@ -1351,7 +1369,7 @@
                 if (!el) return;
                 if (el.matches?.('[data-probe-external-link]')) return;
                 // Share/deep-link copy buttons are handled by mhInitShareLinkTracking.
-                if (el.getAttribute('data-analytics-type') === 'share') return;
+                if (el.getAttribute('data-analytics-type') === 'share' || el.getAttribute('data-analytics-type') === 'admin-edit') return;
                 const elementId = el.getAttribute('data-analytics-id') || el.getAttribute('data-tracking-name');
                 if (!elementId) return;
                 const tagName = el.tagName ? el.tagName.toLowerCase() : 'element';
@@ -3049,6 +3067,8 @@
             const [copiedSearchLink, setCopiedSearchLink] = useState(false);
             const copiedSearchTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
+            const [cardEditMap, setCardEditMap] = useState(null);
+            const [directoryEditedOn, setDirectoryEditedOn] = useState(null);
             const [accountMenuOpen, setAccountMenuOpen] = useState(false);
             const accountMenuRef = useRef(null);
             const [showAuth, setShowAuth] = useState(false);
@@ -3317,6 +3337,33 @@
                 };
             }, []);
 
+            useEffect(() => {
+                let cancelled = false;
+                fetch('/api/directory-cards')
+                    .then((r) => (r.ok ? r.json() : null))
+                    .then((body) => {
+                        if (cancelled || !body || !Array.isArray(body.cards)) return;
+                        const map = {};
+                        let latest = null;
+                        body.cards.forEach((card) => {
+                            if (!card || !card.cardKey) return;
+                            map[card.cardKey] = card;
+                            if (!card.publicEditedAt) return;
+                            const t = Date.parse(card.publicEditedAt);
+                            if (Number.isFinite(t) && (latest == null || t > latest)) latest = t;
+                        });
+                        setCardEditMap(map);
+                        if (latest != null) {
+                            const d = new Date(latest);
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            setDirectoryEditedOn(`${dd}.${mm}.${d.getFullYear()}`);
+                        }
+                    })
+                    .catch(() => {});
+                return () => { cancelled = true; };
+            }, []);
+
             const data = useMemo(() => {
                 const bookletCategories = ['emergency', 'trauma'];
                 const out = {};
@@ -3363,8 +3410,109 @@
                     }
                     out[id] = { ...cat, services };
                 });
+                if (!cardEditMap) return out;
+                const publicKeys = new Set([
+                    'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
+                    'whatsapp', 'whatsappLabel', 'email', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
+                    'phone', 'phoneLabel', 'phoneShowNumber',
+                    'phone2', 'phoneLabel2', 'phoneShowNumber2',
+                    'phone3', 'phoneLabel3', 'phoneShowNumber3',
+                    'phone4', 'phoneLabel4', 'phoneShowNumber4',
+                    'phone5', 'phoneLabel5', 'phoneShowNumber5',
+                    'phone6', 'phoneLabel6', 'phoneShowNumber6'
+                ]);
+                const applyCardEdit = (svc) => {
+                    if (!svc) return svc;
+                    const edit = cardEditMap[`${svc.row}|||${svc.svc || ''}`];
+                    if (!edit) return svc;
+                    const next = { ...svc, cardEditOriginalOrg: svc.org };
+                    if (edit.publicFields && typeof edit.publicFields === 'object') {
+                        Object.keys(edit.publicFields).forEach((key) => {
+                            if (publicKeys.has(key)) next[key] = edit.publicFields[key];
+                        });
+                    }
+                    if (edit.eligibility && typeof edit.eligibility === 'object') next.cardEligibility = edit.eligibility;
+                    if (edit.id) next.cardEditId = edit.id;
+                    return next;
+                };
+                Object.keys(out).forEach((id) => {
+                    const cat = out[id];
+                    if (Array.isArray(cat.services)) cat.services = cat.services.map(applyCardEdit);
+                    if (cat.subsections) {
+                        Object.keys(cat.subsections).forEach((subId) => {
+                            const sub = cat.subsections[subId];
+                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit) };
+                        });
+                    }
+                });
                 return out;
-            }, []);
+            }, [cardEditMap]);
+
+            useEffect(() => {
+                const script = document.getElementById('mh-card-eligibility');
+                if (!script) return;
+                const prop = (name, value) => ({ '@type': 'PropertyValue', name, value });
+                const propertiesOf = (elig) => {
+                    if (!elig || typeof elig !== 'object') return [];
+                    const out = [];
+                    if (elig.age_min != null && elig.age_min !== '') out.push(prop('גיל מינימום', elig.age_min));
+                    if (elig.age_max != null && elig.age_max !== '') out.push(prop('גיל מקסימום', elig.age_max));
+                    if (elig.sex === 'female') out.push(prop('מין', 'נקבה'));
+                    else if (elig.sex === 'male') out.push(prop('מין', 'זכר'));
+                    if (elig.location_mode === 'nationwide') out.push(prop('מיקום', 'ארצי'));
+                    else if (elig.location_mode === 'regions' && Array.isArray(elig.regions) && elig.regions.length) {
+                        out.push(prop('אזורים', elig.regions.join(' · ')));
+                    }
+                    if (Array.isArray(elig.diagnoses) && elig.diagnoses.length) out.push(prop('אבחנות', elig.diagnoses.join(' · ')));
+                    if (Array.isArray(elig.presenting_problems) && elig.presenting_problems.length) {
+                        out.push(prop('קשיים או סיבות פנייה', elig.presenting_problems.join(' · ')));
+                    }
+                    const rec = elig.recognition || {};
+                    if (rec.btl === 'required') out.push(prop('ביטוח לאומי', 'נדרש'));
+                    if (rec.moh === 'required') out.push(prop('משרד הבריאות', 'נדרש'));
+                    if (rec.mod === 'required') out.push(prop('משרד הביטחון', 'נדרש'));
+                    if (rec.rehab_basket === 'required') out.push(prop('סל שיקום', 'נדרש'));
+                    if (typeof elig.internal_notes === 'string' && elig.internal_notes.trim()) {
+                        out.push(prop('הערות פנימיות', elig.internal_notes.trim()));
+                    }
+                    return out;
+                };
+                const seen = new Set();
+                const items = [];
+                const add = (svc) => {
+                    if (!svc || !svc.cardEligibility) return;
+                    const key = svc.cardEditId != null ? `id:${svc.cardEditId}` : `${svc.row}|||${svc.svc || ''}`;
+                    if (seen.has(key)) return;
+                    const additionalProperty = propertiesOf(svc.cardEligibility);
+                    if (!additionalProperty.length) return;
+                    seen.add(key);
+                    const item = {
+                        '@type': 'Service',
+                        name: svc.org || '',
+                        url: `https://nefesh-il.org/?entry=${encodeURIComponent(svc.row)}`
+                    };
+                    if (svc.svc) item.description = svc.svc;
+                    item.additionalProperty = additionalProperty;
+                    items.push(item);
+                };
+                Object.values(data).forEach((cat) => {
+                    (cat.services || []).forEach(add);
+                    if (cat.subsections) {
+                        Object.values(cat.subsections).forEach((sub) => (sub.services || []).forEach(add));
+                    }
+                });
+                script.textContent = JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'ItemList',
+                    name: 'תנאי התאמה לשירותי המדריך',
+                    itemListElement: items.map((item, index) => ({
+                        '@type': 'ListItem',
+                        position: index + 1,
+                        item
+                    }))
+                });
+            }, [data]);
+
             const entryTargets = useMemo(() => {
                 const targets = {};
                 Object.entries(data).forEach(([categoryId, cat]) => {
@@ -3375,6 +3523,13 @@
                         const target = { entryId, groupId, categoryId, subsectionId };
                         if (!targets[entryId]) targets[entryId] = [];
                         targets[entryId].push(target);
+                        if (svc.cardEditOriginalOrg && svc.cardEditOriginalOrg !== svc.org) {
+                            const legacyId = mhGetEntryId({ ...svc, org: svc.cardEditOriginalOrg }, categoryId);
+                            if (legacyId && legacyId !== entryId) {
+                                if (!targets[legacyId]) targets[legacyId] = [];
+                                targets[legacyId].push(target);
+                            }
+                        }
                         // Share links use the numeric row (ASCII-only). Index it so
                         // ?entry=247 resolves the same card as the legacy Hebrew slug.
                         const rowKey = (svc.row != null && svc.row !== '') ? String(svc.row) : '';
@@ -4313,7 +4468,7 @@
                     }
                 });
                 return r;
-            }, [searchTerm]);
+            }, [searchTerm, data]);
             const resolvedEntryTarget = useMemo(() => {
                 if (!requestedEntryId) return null;
                 const candidates = entryTargets[requestedEntryId] || [];
@@ -4700,6 +4855,18 @@
                                 <i className={`fas ${copiedEntryId === entryId ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
                             </button>
                         )}
+                        {authUser && authUser.isAdmin && s.cardEditId ? (
+                            <p className={`mh-card-edit-row${s.dir === 'ltr' ? ' mh-card-edit-row-ltr' : ''}`}>
+                                <a
+                                    href={`/admin#directory/${s.cardEditId}`}
+                                    className="mh-card-edit-link"
+                                    data-analytics-type="admin-edit"
+                                    data-tracking-name="card_edit"
+                                >
+                                    עריכה
+                                </a>
+                            </p>
+                        ) : null}
                         <h3 style={{
                             color: 'var(--primary)',
                             fontSize: 'var(--text-lg)',
@@ -6521,7 +6688,7 @@
                             המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי
                         </p>
                         <p style={{ margin: 0, fontSize: 'var(--text-sm)', opacity: 0.7 }}>
-                            {`עודכן: ${LAST_UPDATED}`}
+                            {`עודכן: ${directoryEditedOn || LAST_UPDATED}`}
                         </p>
                     </div>
                     <div id="mh-link-toast" className={toastMessage ? 'mh-link-toast-visible' : ''} role="status" aria-live="polite">

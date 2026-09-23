@@ -34,6 +34,10 @@
       "destination": "/api/cron/email-digest"
     },
     {
+      "source": "/api/directory-cards",
+      "destination": "/api/directory-entry-touch"
+    },
+    {
       "source": "/s/:row(\\d+)/:slug*",
       "destination": "/s/:row"
     }
