@@ -2,6 +2,7 @@
  * One Serverless Function for all /api/care/* routes.
  * Hobby deployments allow 12 functions; keep new endpoints in an existing [action] file.
  */
+import { randomUUID } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { Client } from 'pg';
 import {
@@ -58,6 +59,7 @@ import {
   type CareSection,
 } from '../../lib/care';
 import { appUrl, pgClient } from '../../lib/db';
+import { careObjectKey, deleteCiphertext, getCiphertext, putCiphertext, s3Configured } from '../../lib/s3';
 import {
   enqueueCareGrantAccepted,
   enqueueCareGrantInvite,
@@ -399,6 +401,23 @@ function docKindFrom(req: VercelRequest, body: Record<string, unknown> | null): 
   return qk === 'lab' || bk === 'lab' ? 'lab' : 'other';
 }
 
+async function storedCiphertext(row: Record<string, unknown>): Promise<Buffer | null> {
+  const key = typeof row.storage_key === 'string' ? row.storage_key.trim() : '';
+  if (key) return getCiphertext(key);
+  return asBuffer(row.ciphertext);
+}
+
+async function removeStoredObjects(keys: string[]): Promise<void> {
+  for (const key of keys) {
+    if (!key) continue;
+    try {
+      await deleteCiphertext(key);
+    } catch (err) {
+      console.error('care s3 delete failed', err);
+    }
+  }
+}
+
 async function handleDocuments(req: VercelRequest, res: VercelResponse, client: Client, jwtUser: JwtUser) {
   const body = req.method === 'GET' || req.method === 'DELETE' ? parseJsonBody(req) || {} : parseJsonBody(req);
   if (req.method !== 'GET' && req.method !== 'DELETE' && !body) return jsonError(res, 400, 'Invalid JSON');
@@ -408,7 +427,7 @@ async function handleDocuments(req: VercelRequest, res: VercelResponse, client: 
     const fileId = fileIdFrom(req, body);
     if (!id || !fileId) return jsonError(res, 400, 'id is required');
     const existing = await client.query(
-      `SELECT created_by_user_id::text, kind FROM care_documents WHERE id = $1 AND file_id = $2`,
+      `SELECT created_by_user_id::text, kind, storage_key FROM care_documents WHERE id = $1 AND file_id = $2`,
       [id, fileId]
     );
     if (!existing.rows[0]) return jsonError(res, 404, 'Not found');
@@ -417,6 +436,8 @@ async function handleDocuments(req: VercelRequest, res: VercelResponse, client: 
     if (!actor) return null;
     if (!canMutateRow(actor, existing.rows[0].created_by_user_id)) return jsonError(res, 403, 'Forbidden');
     await client.query(`DELETE FROM care_documents WHERE id = $1`, [id]);
+    const storageKey = typeof existing.rows[0].storage_key === 'string' ? existing.rows[0].storage_key : '';
+    if (storageKey) await removeStoredObjects([storageKey]);
     await writeAudit(client, actor, 'delete', delSection, id);
     return res.status(200).json({ ok: true });
   }
@@ -441,7 +462,7 @@ async function handleDocuments(req: VercelRequest, res: VercelResponse, client: 
   }
 
   if (req.method === 'POST') {
-    if (!fileEncryptionConfigured()) return jsonError(res, 500, 'Server misconfiguration');
+    if (!fileEncryptionConfigured() || !s3Configured()) return jsonError(res, 500, 'Server misconfiguration');
     if (!canAddToSection(actor, section)) return jsonError(res, 403, 'Forbidden');
     if (!rateLimit(`care-upload:${jwtUser.id}`, 30, 60 * 60 * 1000)) {
       return jsonError(res, 429, 'Too many attempts');
@@ -474,16 +495,42 @@ async function handleDocuments(req: VercelRequest, res: VercelResponse, client: 
       ]);
       if (!pan.rows[0]) return jsonError(res, 400, 'Invalid item');
     }
+    const id = randomUUID();
+    const storageKey = careObjectKey(actor.fileId, id);
     const { ciphertext, nonce } = encryptFile(buf);
-    const { rows } = await client.query(
-      `INSERT INTO care_documents
-         (file_id, created_by_user_id, encounter_id, lab_panel_id, kind, original_filename, content_type, byte_size, ciphertext, nonce)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-       RETURNING id::text, original_filename, content_type, byte_size, encounter_id::text, lab_panel_id::text,
-                 kind, created_by_user_id::text, created_at`,
-      [actor.fileId, jwtUser.id, encounterId, labPanelId, kind, filename, sniffed.contentType, buf.length, ciphertext, nonce]
-    );
-    await writeAudit(client, actor, 'create', section, rows[0].id);
+    await putCiphertext(storageKey, ciphertext);
+    let rows: Record<string, unknown>[];
+    try {
+      ({ rows } = await client.query(
+        `INSERT INTO care_documents
+           (id, file_id, created_by_user_id, encounter_id, lab_panel_id, kind, original_filename, content_type, byte_size, ciphertext, nonce, storage_key)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NULL,$10,$11)
+         RETURNING id::text, original_filename, content_type, byte_size, encounter_id::text, lab_panel_id::text,
+                   kind, created_by_user_id::text, created_at`,
+        [
+          id,
+          actor.fileId,
+          jwtUser.id,
+          encounterId,
+          labPanelId,
+          kind,
+          filename,
+          sniffed.contentType,
+          buf.length,
+          nonce,
+          storageKey,
+        ]
+      ));
+    } catch (err) {
+      try {
+        await deleteCiphertext(storageKey);
+      } catch (cleanupErr) {
+        console.error('care s3 cleanup failed', cleanupErr);
+      }
+      throw err;
+    }
+    if (!rows[0]) throw new Error('insert failed');
+    await writeAudit(client, actor, 'create', section, String(rows[0].id));
     return res.status(201).json({ item: mapDocument(rows[0], jwtUser.id, true) });
   }
 
@@ -505,12 +552,12 @@ async function handleDocumentDownload(req: VercelRequest, res: VercelResponse, c
   const actor = await requireActor(req, res, client, jwtUser, {}, section, false);
   if (!actor) return null;
   const { rows } = await client.query(
-    `SELECT original_filename, content_type, ciphertext, nonce
+    `SELECT original_filename, content_type, ciphertext, nonce, storage_key
        FROM care_documents WHERE id = $1 AND file_id = $2`,
     [id, actor.fileId]
   );
   if (!rows[0]) return jsonError(res, 404, 'Not found');
-  const ciphertext = asBuffer(rows[0].ciphertext);
+  const ciphertext = await storedCiphertext(rows[0]);
   const nonce = asBuffer(rows[0].nonce);
   if (!ciphertext || !nonce) return jsonError(res, 500, 'Failed');
   const plain = decryptFile(ciphertext, nonce);
@@ -1437,6 +1484,15 @@ function mapProfile(row: Record<string, unknown> | null) {
   };
 }
 
+function profileForActor(row: Record<string, unknown> | null, actor: CareActor) {
+  const mapped = mapProfile(row);
+  if (actor.actorKind === 'share_link') {
+    mapped.btlUserCode = '';
+    mapped.btlPassword = '';
+  }
+  return mapped;
+}
+
 async function handleProfile(req: VercelRequest, res: VercelResponse, client: Client, jwtUser: JwtUser) {
   const body = req.method === 'GET' ? {} : parseJsonBody(req);
   if (req.method !== 'GET' && !body) return jsonError(res, 400, 'Invalid JSON');
@@ -1445,12 +1501,13 @@ async function handleProfile(req: VercelRequest, res: VercelResponse, client: Cl
   const { rows } = await client.query(`SELECT * FROM care_profile WHERE file_id = $1`, [actor.fileId]);
   if (req.method === 'GET') {
     await writeAudit(client, actor, 'view', 'profile', null);
-    return res.status(200).json({ item: mapProfile(rows[0] || null) });
+    return res.status(200).json({ item: profileForActor(rows[0] || null, actor) });
   }
   if (req.method !== 'PATCH' && req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
   if (!canAddToSection(actor, 'profile') && actor.actorKind !== 'owner') return jsonError(res, 403, 'Forbidden');
   const parsed: Record<string, unknown> = {};
   for (const f of PROFILE_TEXT) {
+    if (actor.actorKind === 'share_link' && (f.col === 'btl_user_code' || f.col === 'btl_password')) continue;
     const v = optText(body!, f.json, f.max);
     if (v !== undefined) parsed[f.col] = v;
   }
@@ -1473,7 +1530,7 @@ async function handleProfile(req: VercelRequest, res: VercelResponse, client: Cl
     [actor.fileId, jwtUser.id, ...vals]
   );
   await writeAudit(client, actor, rows[0] ? 'update' : 'create', 'profile', actor.fileId);
-  return res.status(200).json({ item: mapProfile(saved[0]) });
+  return res.status(200).json({ item: profileForActor(saved[0], actor) });
 }
 
 const INTAKE_FIELDS = [
@@ -1861,12 +1918,7 @@ async function loadSharePayload(client: Client, actor: CareActor) {
   }
   if (canReadSection(actor, 'profile')) {
     const profile = await client.query(`SELECT * FROM care_profile WHERE file_id = $1`, [actor.fileId]);
-    const mapped = mapProfile(profile.rows[0] || null);
-    if (actor.actorKind === 'share_link') {
-      mapped.btlUserCode = '';
-      mapped.btlPassword = '';
-    }
-    out.profile = mapped;
+    out.profile = profileForActor(profile.rows[0] || null, actor);
     const hmo = await client.query(
       `SELECT id::text, hmo, started_on, ended_on, notes FROM care_hmo_history WHERE file_id = $1 ORDER BY started_on DESC NULLS LAST`,
       [actor.fileId]
@@ -1995,14 +2047,14 @@ async function handleShareDocument(req: VercelRequest, res: VercelResponse, clie
   const actor = await resolveShareAccess(client, token);
   if (!actor) return jsonError(res, 403, 'Forbidden');
   const { rows } = await client.query(
-    `SELECT original_filename, content_type, ciphertext, nonce, kind
+    `SELECT original_filename, content_type, ciphertext, nonce, storage_key, kind
        FROM care_documents WHERE id = $1 AND file_id = $2`,
     [id, actor.fileId]
   );
   if (!rows[0]) return jsonError(res, 404, 'Not found');
   const section: CareSection = rows[0].kind === 'lab' ? 'labs' : 'documents';
   if (!canReadSection(actor, section)) return jsonError(res, 403, 'Forbidden');
-  const ciphertext = asBuffer(rows[0].ciphertext);
+  const ciphertext = await storedCiphertext(rows[0]);
   const nonce = asBuffer(rows[0].nonce);
   if (!ciphertext || !nonce) return jsonError(res, 500, 'Failed');
   const plain = decryptFile(ciphertext, nonce);
@@ -2070,7 +2122,20 @@ async function handleDeleteFile(req: VercelRequest, res: VercelResponse, client:
   const actor = await requireActor(req, res, client, jwtUser, body, null, false);
   if (!actor) return null;
   if (actor.actorKind !== 'owner') return jsonError(res, 403, 'Forbidden');
-  await client.query(`DELETE FROM care_files WHERE id = $1 AND owner_id = $2`, [actor.fileId, jwtUser.id]);
+  const stored = await client.query(
+    `SELECT storage_key FROM care_documents WHERE file_id = $1 AND storage_key IS NOT NULL`,
+    [actor.fileId]
+  );
+  const deleted = await client.query(
+    `DELETE FROM care_files WHERE id = $1 AND owner_id = $2 RETURNING id`,
+    [actor.fileId, jwtUser.id]
+  );
+  if (deleted.rows[0]) {
+    const keys = stored.rows
+      .map((r) => (typeof r.storage_key === 'string' ? r.storage_key : ''))
+      .filter((key) => key.length > 0);
+    await removeStoredObjects(keys);
+  }
   return res.status(200).json({ ok: true });
 }
 

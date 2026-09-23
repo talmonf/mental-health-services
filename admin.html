@@ -144,6 +144,7 @@
       other: 'Other'
     };
     const PREF = { none: 'No updates', weekly: 'Weekly summary', immediate: 'When it happens' };
+    const GENDER = { male: 'Male', female: 'Female' };
     const DEVICE = { mobile: 'Mobile', desktop: 'Desktop', tablet: 'Tablet' };
     const DEEP = {
       search_link_copied: 'Copied search link',
@@ -878,13 +879,14 @@
     }
 
     function downloadUsersCsv(users) {
-      const headers = ['Email','Country','City','Qualification','License number','Organisation','Title','How they found us','Details','Email preference','Email verified','Verified at','Admin','Registered','Last access'];
+      const headers = ['Email','Country','City','Gender','Qualification','License number','Organisation','Title','How they found us','Details','Email preference','Email verified','Verified at','Admin','Registered','Last access'];
       const lines = [headers.join(',')];
       for (const u of users) {
         lines.push([
           u.email,
           countryName(u.country),
           u.city,
+          GENDER[u.gender] || '',
           QUAL[u.qualification] || u.qualification,
           u.licenseNumber,
           u.organization,
@@ -952,12 +954,13 @@
         ${state.error ? `<p class="err">${esc(state.error)}</p>` : ''}
         <div class="card users-table-wrap">${
           table(
-            ['Email','Country','City','Qualification','License number','Organisation','Title','How they found us','Email preference','Email verified','Registered','Last access'],
+            ['Email','Country','City','Gender','Qualification','License number','Organisation','Title','How they found us','Email preference','Email verified','Registered','Last access'],
             users,
             (u) => [
               `${esc(u.email)}${u.isAdmin ? ' <span class="badge">Admin</span>' : ''}`,
               esc(countryName(u.country)),
               esc(u.city || ''),
+              esc(GENDER[u.gender] || ''),
               esc(QUAL[u.qualification] || u.qualification),
               esc(u.licenseNumber || ''),
               `<span dir="auto">${esc(u.organization)}</span>`,

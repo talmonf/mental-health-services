@@ -29,7 +29,10 @@ export const LICENSE_REQUIRED_QUALIFICATIONS = ['psychiatrist', 'nurse', 'social
 
 export const LICENSE_NUMBER_MAX = 40;
 
+export const GENDERS = ['male', 'female'] as const;
+
 export type Qualification = (typeof QUALIFICATIONS)[number];
+export type Gender = (typeof GENDERS)[number];
 export type FoundVia = (typeof FOUND_VIA)[number];
 export type EmailPreference = (typeof EMAIL_PREFERENCES)[number];
 
@@ -41,6 +44,7 @@ export type PublicUser = {
   city: string | null;
   qualification: Qualification;
   licenseNumber: string | null;
+  gender: Gender | null;
   organization: string;
   title: string;
   foundVia: FoundVia;
@@ -51,9 +55,13 @@ export type PublicUser = {
 };
 
 export const USER_PUBLIC_COLUMNS = `
-  id, email, is_admin, country, city, qualification, license_number, organization, title,
+  id, email, is_admin, country, city, qualification, license_number, gender, organization, title,
   found_via, found_via_other, email_preference, email_verified_at, hide_intro
 `;
+
+export function isGender(v: unknown): v is Gender {
+  return typeof v === 'string' && (GENDERS as readonly string[]).includes(v);
+}
 
 export function isQualification(v: unknown): v is Qualification {
   return typeof v === 'string' && (QUALIFICATIONS as readonly string[]).includes(v);
@@ -95,6 +103,7 @@ export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
     qualification: row.qualification as Qualification,
     licenseNumber:
       row.license_number == null || row.license_number === '' ? null : String(row.license_number),
+    gender: isGender(row.gender) ? row.gender : null,
     organization: String(row.organization),
     title: String(row.title),
     foundVia: row.found_via as FoundVia,

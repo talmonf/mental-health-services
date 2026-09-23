@@ -31,6 +31,7 @@ import {
   isAdminEmail,
   isEmailPreference,
   isFoundVia,
+  isGender,
   isQualification,
   licenseNumberError,
   parseLicenseNumber,
@@ -53,6 +54,7 @@ function jwtFallbackUser(jwtUser: { id: string; email: string; isAdmin: boolean 
     city: null,
     qualification: 'other',
     licenseNumber: null,
+    gender: null,
     organization: '',
     title: '',
     foundVia: 'other',
@@ -331,6 +333,16 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
         : typeof licenseRaw === 'string'
           ? licenseRaw.trim()
           : null;
+    const genderRaw = body.gender;
+    const gender =
+      genderRaw === undefined
+        ? undefined
+        : genderRaw === null || genderRaw === ''
+          ? ''
+          : isGender(genderRaw)
+            ? genderRaw
+            : null;
+    if (gender === null) return res.status(400).json({ error: 'Invalid gender' });
 
     if (country !== null && country.length === 0) {
       return res.status(400).json({ error: 'Country is required' });
@@ -365,6 +377,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
          email_preference = COALESCE($7, email_preference),
          hide_intro = COALESCE($8::boolean, hide_intro),
          license_number = CASE WHEN $9::text = '__omit' THEN license_number WHEN $9 = '' THEN NULL ELSE $9 END,
+         gender = CASE WHEN $10::text = '__omit' THEN gender WHEN $10 = '' THEN NULL ELSE $10 END,
          updated_at = now()
        WHERE id = $1
        RETURNING ${USER_PUBLIC_COLUMNS}`,
@@ -378,6 +391,7 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
         emailPreference,
         hideIntro,
         licenseNumber === undefined ? '__omit' : nextLicense,
+        gender === undefined ? '__omit' : gender,
       ]
     );
     if (!rows[0]) return res.status(401).json({ error: 'Unauthorized' });

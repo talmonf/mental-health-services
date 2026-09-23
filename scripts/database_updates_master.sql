@@ -1,4 +1,6 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 043_care_documents_s3.sql
+[x] 042_users_gender.sql
 [x] 041_care_profile_btl_access.sql
 [x] 040_users_license_register_admin.sql
 [x] 039_care_file.sql

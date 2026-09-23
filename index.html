@@ -2978,6 +2978,7 @@
                 'Organization is required': 'יש למלא ארגון',
                 'Title is required': 'יש למלא תפקיד',
                 'Invalid qualification': 'יש לבחור הכשרה',
+                'Invalid gender': 'יש לבחור מגדר',
                 'License number is required': 'יש למלא מספר רישוי',
                 'License number is too long': 'מספר הרישוי ארוך מדי',
                 'Invalid foundVia': 'יש לבחור איך הגעתם לאתר',
@@ -3390,7 +3391,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "20.09.2026"; 
+            const LAST_UPDATED = "23.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -3899,6 +3900,7 @@
                         city: authUser.city || '',
                         qualification: authUser.qualification || '',
                         licenseNumber: authUser.licenseNumber || '',
+                        gender: authUser.gender || '',
                         organization: authUser.organization || '',
                         title: authUser.title || '',
                         emailPreference: authUser.emailPreference || 'none'
@@ -5957,6 +5959,14 @@
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-prof-city">עיר (לא חובה)</label>
                                             <input id="mh-prof-city" type="text" value={profile.city} onChange={(e) => setProfile((p) => ({ ...p, city: e.target.value }))} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-prof-gender">מגדר (לא חובה)</label>
+                                            <select id="mh-prof-gender" value={profile.gender || ''} onChange={(e) => setProfile((p) => ({ ...p, gender: e.target.value }))}>
+                                                <option value="">לא צוין</option>
+                                                <option value="male">זכר</option>
+                                                <option value="female">נקבה</option>
+                                            </select>
                                         </div>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-prof-qual">הכשרה / תפקיד</label>
