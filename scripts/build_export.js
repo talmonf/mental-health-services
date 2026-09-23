@@ -22,6 +22,7 @@
 const fs = require('fs');
 const path = require('path');
 const { load, phonesOf } = require('./lib/extract_data');
+const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const { validate } = require('./lib/validate_schema');
 const LD = require('./lib/jsonld');
 
@@ -40,8 +41,7 @@ function isoDate(ddmmyyyy) {
   return m ? `${m[3]}-${m[2]}-${m[1]}` : null;
 }
 
-function buildExport() {
-  const data = load();
+function buildExport(data = load()) {
 
   const holdoutPath = path.join(ROOT, 'experiments', 'holdout.json');
   const holdoutRows = new Set(
@@ -562,8 +562,10 @@ function assertMatchesSchema(payload, schema) {
 
 // ---------------------------------------------------------------- cli
 
-function main() {
-  const payload = buildExport();
+async function main() {
+  const catalog = load();
+  const cardText = await overlayDirectoryCards(catalog);
+  const payload = buildExport(catalog);
   const schema = buildSchema();
   assertExportIsSound(payload);
   assertMatchesSchema(payload, schema);
@@ -583,15 +585,14 @@ function main() {
   console.log(`  ${c.entries_withheld} entries withheld (holdout control)`);
   console.log(`  schema_version ${payload.export.schema_version}, source_last_updated ${payload.export.source_last_updated}`);
   console.log('  validates against directory.schema.json');
+  console.log(`  card text: ${cardText.source} (${cardText.applied} of ${cardText.rows} database rows applied)`);
 }
 
 if (require.main === module) {
-  try {
-    main();
-  } catch (err) {
+  main().catch((err) => {
     console.error(`\nEXPORT FAILED: ${err.message}`);
     process.exit(1);
-  }
+  });
 }
 
 module.exports = { buildExport, buildSchema, SCHEMA_VERSION };

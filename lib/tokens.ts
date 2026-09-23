@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'crypto';
 import type { Client } from 'pg';
 
-export type TokenKind = 'confirm' | 'unsubscribe' | 'care_otp';
+export type TokenKind = 'confirm' | 'unsubscribe' | 'care_otp' | 'reset';
 
 export function newRawToken(): string {
   return randomBytes(32).toString('base64url');
@@ -44,6 +44,14 @@ export async function findValidToken(
     [hash, kind]
   );
   return rows[0] || null;
+}
+
+export async function consumeUserTokens(client: Client, userId: string, kind: TokenKind): Promise<void> {
+  await client.query(
+    `UPDATE email_tokens SET consumed_at = now()
+      WHERE user_id = $1 AND kind = $2 AND consumed_at IS NULL`,
+    [userId, kind]
+  );
 }
 
 const OTP_TTL_MS = 10 * 60 * 1000;

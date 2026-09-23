@@ -280,6 +280,78 @@ export function clearCareStepupCookie(res: VercelResponse): void {
   appendCookie(res, clearCareCookieHeader());
 }
 
+export const RESET_COOKIE_MAX_AGE_SEC = 15 * 60;
+export const OAUTH_COOKIE_MAX_AGE_SEC = 10 * 60;
+
+export function resetCookieName(): string {
+  return isProduction() ? '__Host-mh-reset' : 'mh-reset';
+}
+
+export function oauthCookieName(): string {
+  return isProduction() ? '__Host-mh-oauth' : 'mh-oauth';
+}
+
+function hostCookieHeader(name: string, value: string, maxAge: number): string {
+  const parts = [`${name}=${value}`, 'Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${maxAge}`];
+  if (isProduction()) parts.push('Secure');
+  return parts.join('; ');
+}
+
+function clearHostCookieHeader(name: string): string {
+  const parts = [`${name}=`, 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
+  if (isProduction()) parts.push('Secure');
+  return parts.join('; ');
+}
+
+export function setResetCookie(res: VercelResponse, rawToken: string): void {
+  appendCookie(res, hostCookieHeader(resetCookieName(), rawToken, RESET_COOKIE_MAX_AGE_SEC));
+}
+
+export function clearResetCookie(res: VercelResponse): void {
+  appendCookie(res, clearHostCookieHeader(resetCookieName()));
+}
+
+export function readResetCookie(req: VercelRequest): string | null {
+  return readCookie(req, resetCookieName()) || readCookie(req, 'mh-reset') || readCookie(req, '__Host-mh-reset');
+}
+
+export type OAuthStatePayload = { state: string; codeVerifier: string };
+
+export async function signOAuthState(payload: OAuthStatePayload): Promise<string> {
+  return new SignJWT({ purpose: 'oauth', cv: payload.codeVerifier })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(payload.state)
+    .setIssuedAt()
+    .setExpirationTime(`${OAUTH_COOKIE_MAX_AGE_SEC}s`)
+    .sign(secretKey());
+}
+
+export async function verifyOAuthStateToken(token: string): Promise<OAuthStatePayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey());
+    const state = typeof payload.sub === 'string' ? payload.sub : '';
+    const codeVerifier = typeof payload.cv === 'string' ? payload.cv : '';
+    if (!state || !codeVerifier || payload.purpose !== 'oauth') return null;
+    return { state, codeVerifier };
+  } catch {
+    return null;
+  }
+}
+
+export function setOAuthCookie(res: VercelResponse, token: string): void {
+  appendCookie(res, hostCookieHeader(oauthCookieName(), token, OAUTH_COOKIE_MAX_AGE_SEC));
+}
+
+export function clearOAuthCookie(res: VercelResponse): void {
+  appendCookie(res, clearHostCookieHeader(oauthCookieName()));
+}
+
+export async function getOAuthStateFromRequest(req: VercelRequest): Promise<OAuthStatePayload | null> {
+  const named = readCookie(req, oauthCookieName()) || readCookie(req, 'mh-oauth') || readCookie(req, '__Host-mh-oauth');
+  if (!named) return null;
+  return verifyOAuthStateToken(named);
+}
+
 export async function sessionStillValid(
   client: { query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> },
   user: JwtUser

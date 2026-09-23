@@ -1514,6 +1514,10 @@
         renderGate('You do not have access.');
         return;
       }
+      if (state.user.passwordActionRequired || state.user.profileComplete === false) {
+        renderGate('Finish signing in on the directory (complete your profile or change your password), then return here.');
+        return;
+      }
       if (state.error && !state.analytics && (state.tab === 'analytics' || state.tab === 'updates')) {
         renderGate(state.error);
         return;

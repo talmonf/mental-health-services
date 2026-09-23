@@ -42,21 +42,28 @@ export type PublicUser = {
   isAdmin: boolean;
   country: string;
   city: string | null;
-  qualification: Qualification;
+  qualification: Qualification | '';
   licenseNumber: string | null;
   gender: Gender | null;
   organization: string;
   title: string;
-  foundVia: FoundVia;
+  foundVia: FoundVia | '';
   foundViaOther: string | null;
   emailPreference: EmailPreference;
   emailVerified: boolean;
   hideIntro: boolean;
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  profileComplete: boolean;
+  passwordActionRequired: boolean;
 };
 
 export const USER_PUBLIC_COLUMNS = `
   id, email, is_admin, country, city, qualification, license_number, gender, organization, title,
-  found_via, found_via_other, email_preference, email_verified_at, hide_intro
+  found_via, found_via_other, email_preference, email_verified_at, hide_intro,
+  (password_hash IS NOT NULL) AS has_password,
+  (google_sub IS NOT NULL) AS has_google,
+  profile_completed_at, password_changed_at
 `;
 
 export function isGender(v: unknown): v is Gender {
@@ -93,24 +100,54 @@ export function licenseNumberError(qualification: string, licenseNumber: string)
   return null;
 }
 
+export function passwordMaxAgeMonths(): number {
+  const n = Number(process.env.PASSWORD_MAX_AGE_MONTHS);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 6;
+}
+
+function asDate(v: unknown): Date | null {
+  if (v == null) return null;
+  const d = v instanceof Date ? v : new Date(String(v));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export function passwordActionRequiredFromRow(row: Record<string, unknown>): boolean {
+  if (!row.has_password) return false;
+  const changed = asDate(row.password_changed_at);
+  if (!changed) return true;
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - passwordMaxAgeMonths());
+  return changed < cutoff;
+}
+
+export function passwordChangedAfterJwt(row: Record<string, unknown>, jwtIat: number): boolean {
+  const changed = asDate(row.password_changed_at);
+  if (!changed) return false;
+  return Math.floor(changed.getTime() / 1000) > jwtIat;
+}
+
 export function publicUserFromRow(row: Record<string, unknown>): PublicUser {
   return {
     id: String(row.id),
     email: String(row.email),
     isAdmin: Boolean(row.is_admin),
-    country: String(row.country),
+    country: row.country == null ? '' : String(row.country),
     city: row.city == null || row.city === '' ? null : String(row.city),
-    qualification: row.qualification as Qualification,
+    qualification: isQualification(row.qualification) ? row.qualification : '',
     licenseNumber:
       row.license_number == null || row.license_number === '' ? null : String(row.license_number),
     gender: isGender(row.gender) ? row.gender : null,
-    organization: String(row.organization),
-    title: String(row.title),
-    foundVia: row.found_via as FoundVia,
+    organization: row.organization == null ? '' : String(row.organization),
+    title: row.title == null ? '' : String(row.title),
+    foundVia: isFoundVia(row.found_via) ? row.found_via : '',
     foundViaOther: row.found_via_other == null ? null : String(row.found_via_other),
     emailPreference: (row.email_preference as EmailPreference) || 'none',
     emailVerified: row.email_verified_at != null,
     hideIntro: Boolean(row.hide_intro),
+    hasPassword: Boolean(row.has_password),
+    hasGoogle: Boolean(row.has_google),
+    profileComplete: row.profile_completed_at != null,
+    passwordActionRequired: passwordActionRequiredFromRow(row),
   };
 }
 

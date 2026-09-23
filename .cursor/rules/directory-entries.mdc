@@ -5,12 +5,14 @@ alwaysApply: true
 
 # Directory entries workflow
 
-Visible card text and hidden eligibility for an **existing** card are edited in the admin page (`כרטיסי מדריך`), including the עריכה control on the card (signed-in admins only). That text lives in `directory_card_edits`. Do not change it in `index.html` — the live directory overlays those fields, so an edit in `DATA` will not show once the row exists.
+`directory_card_edits` is the source of truth for the words on a card (and for hidden eligibility). An admin save replaces that row's `public_fields`. The live directory and the Vercel build both publish that row in place of the copy embedded in `index.html`. A field the admin clears is empty; the old wording is not kept.
+
+Do not edit the text of an existing card in `index.html`. That file is the catalog: which cards exist, which section they sit in, and the wording used only when the database cannot be reached. Once a `directory_card_edits` row exists, a change in `DATA` does not change what visitors see.
 
 When **adding** a card:
 
-1. **Edit `index.html`** — add the service to `DATA` (structure and the initial text) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`, unless a later admin edit of visible text is newer).
-2. **Add a numbered migration** under `scripts/` with `INSERT ... ON CONFLICT` for `directory_entries`, and an `INSERT` into `directory_card_edits` (`card_key` = `` `${row}|||${svc}` `` from the new service object, `public_fields` jsonb, `eligibility` all `any` / empty, `public_edited_at` null) with `ON CONFLICT (card_key) DO NOTHING`.
+1. **Edit `index.html`** — add the service to `DATA` (where it sits, and the initial text) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`, unless a later admin edit of visible text is newer).
+2. **Add a numbered migration** under `scripts/` with `INSERT ... ON CONFLICT` for `directory_entries`, and an `INSERT` into `directory_card_edits` (`card_key` = `` `${row}|||${svc}` `` from the new service object, `public_fields` jsonb, `eligibility` all `any` / empty, `public_edited_at` null) with `ON CONFLICT (card_key) DO NOTHING`. The `public_fields` in that insert are the card's text until an admin edits it.
 3. **Register the migration** at the top of `scripts/database_updates_master.sql` as `[ ]` (unchecked). **Never** mark it `[x]` — the user checks it off after they run the script.
 
 Do not re-run `scripts/seed_directory_card_edits.js` to refresh existing cards. It rewrites the original seed. New cards get their own migration insert.

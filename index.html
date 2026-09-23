@@ -574,6 +574,28 @@
         .mh-auth-consent input { margin-top: 4px; }
         .mh-auth-error { color: var(--danger); margin-bottom: var(--space-md); }
         .mh-auth-hint { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-md); line-height: 1.5; }
+        .mh-auth-or {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            margin: 16px 0;
+            font-size: var(--text-sm);
+        }
+        .mh-auth-or::before,
+        .mh-auth-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .mh-auth-link {
+            background: transparent;
+            border: none;
+            padding: 0;
+            min-height: auto;
+            color: var(--primary);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
         .mh-auth-radios { display: flex; flex-direction: column; gap: 4px; }
         .mh-auth-radios label {
             display: flex;
@@ -2957,6 +2979,19 @@
             { value: 'media', label: 'תקשורת' },
             { value: 'other', label: 'אחר' }
         ];
+        const mhEmptyCompleteForm = () => ({
+            country: 'ישראל',
+            city: '',
+            qualification: '',
+            licenseNumber: '',
+            gender: '',
+            organization: '',
+            title: '',
+            foundVia: '',
+            foundViaOther: '',
+            emailPreference: 'weekly',
+            consent: false
+        });
         const mhEmptyRegisterForm = () => ({
             email: '',
             password: '',
@@ -3010,7 +3045,12 @@
                 'Unauthorized': 'יש להתחבר מחדש',
                 'Too many questions': 'נשלחו יותר מדי שאלות. נסו שוב מאוחר יותר',
                 'Question must be 10-2000 characters': 'השאלה צריכה להיות בין 10 ל־2000 תווים',
-                'Failed to submit question': 'שליחת השאלה נכשלה'
+                'Failed to submit question': 'שליחת השאלה נכשלה',
+                'Current password is incorrect': 'הסיסמה הנוכחית שגויה',
+                'No password on this account': 'אין סיסמה לחשבון זה',
+                'Complete your profile first': 'יש להשלים את פרטי החשבון',
+                'Reset link is invalid or expired': 'קישור האיפוס אינו תקף',
+                'Invalid password': 'סיסמה שגויה'
             };
             return map[e] || fallback;
         };
@@ -3068,6 +3108,10 @@
             const copiedSearchTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
             const [cardEditMap, setCardEditMap] = useState(null);
+            // 'loading' hides card text until directory_card_edits answers, so the copy
+            // embedded in this file is never shown and then swapped. 'fallback' is only
+            // when that request fails; 'database' means those rows replaced the copy.
+            const [directorySource, setDirectorySource] = useState('loading');
             const [directoryEditedOn, setDirectoryEditedOn] = useState(null);
             const [accountMenuOpen, setAccountMenuOpen] = useState(false);
             const accountMenuRef = useRef(null);
@@ -3081,6 +3125,16 @@
             const [showRegPassword, setShowRegPassword] = useState(false);
             const [reg, setReg] = useState(() => mhEmptyRegisterForm());
             const [profile, setProfile] = useState(null);
+            const [complete, setComplete] = useState(() => mhEmptyCompleteForm());
+            const [pwCurrent, setPwCurrent] = useState('');
+            const [pwNext, setPwNext] = useState('');
+            const [showPwCurrent, setShowPwCurrent] = useState(false);
+            const [showPwNext, setShowPwNext] = useState(false);
+            const [forgotEmail, setForgotEmail] = useState('');
+            const [forgotSent, setForgotSent] = useState(false);
+            const [resetPassword, setResetPassword] = useState('');
+            const [showResetPassword, setShowResetPassword] = useState(false);
+            const authPromptShownRef = useRef(false);
             const [resendBusy, setResendBusy] = useState(false);
             const introPrefAppliedRef = useRef(false);
             const [showAsk, setShowAsk] = useState(false);
@@ -3128,6 +3182,7 @@
                         introPrefAppliedRef.current = true;
                         applyAccountIntroPref(user);
                     }
+                    maybePromptAuth(user);
                 } catch (_) {
                     setAuthUser(null);
                     introPrefAppliedRef.current = true;
@@ -3342,7 +3397,11 @@
                 fetch('/api/directory-cards')
                     .then((r) => (r.ok ? r.json() : null))
                     .then((body) => {
-                        if (cancelled || !body || !Array.isArray(body.cards)) return;
+                        if (cancelled) return;
+                        if (!body || !Array.isArray(body.cards)) {
+                            setDirectorySource('fallback');
+                            return;
+                        }
                         const map = {};
                         let latest = null;
                         body.cards.forEach((card) => {
@@ -3353,6 +3412,7 @@
                             if (Number.isFinite(t) && (latest == null || t > latest)) latest = t;
                         });
                         setCardEditMap(map);
+                        setDirectorySource('database');
                         if (latest != null) {
                             const d = new Date(latest);
                             const dd = String(d.getDate()).padStart(2, '0');
@@ -3360,7 +3420,9 @@
                             setDirectoryEditedOn(`${dd}.${mm}.${d.getFullYear()}`);
                         }
                     })
-                    .catch(() => {});
+                    .catch(() => {
+                        if (!cancelled) setDirectorySource('fallback');
+                    });
                 return () => { cancelled = true; };
             }, []);
 
@@ -3421,16 +3483,18 @@
                     'phone5', 'phoneLabel5', 'phoneShowNumber5',
                     'phone6', 'phoneLabel6', 'phoneShowNumber6'
                 ]);
+                // A database row replaces the whole visible card. Fields the admin cleared
+                // stay empty; they are not filled back in from the copy in this file.
                 const applyCardEdit = (svc) => {
                     if (!svc) return svc;
                     const edit = cardEditMap[`${svc.row}|||${svc.svc || ''}`];
                     if (!edit) return svc;
                     const next = { ...svc, cardEditOriginalOrg: svc.org };
-                    if (edit.publicFields && typeof edit.publicFields === 'object') {
-                        Object.keys(edit.publicFields).forEach((key) => {
-                            if (publicKeys.has(key)) next[key] = edit.publicFields[key];
-                        });
-                    }
+                    const fields = edit.publicFields && typeof edit.publicFields === 'object' ? edit.publicFields : {};
+                    publicKeys.forEach((key) => {
+                        if (Object.prototype.hasOwnProperty.call(fields, key)) next[key] = fields[key];
+                        else next[key] = String(key).indexOf('phoneShowNumber') === 0 ? true : '';
+                    });
                     if (edit.eligibility && typeof edit.eligibility === 'object') next.cardEligibility = edit.eligibility;
                     if (edit.id) next.cardEditId = edit.id;
                     return next;
@@ -4024,9 +4088,17 @@
                     else if (confirmed === 'invalid') showToast('קישור האישור אינו תקף.');
                     if (unsubscribed === '1') showToast('הוסרתם מרשימת התפוצה.');
                     else if (unsubscribed === 'invalid') showToast('קישור ההסרה אינו תקף.');
-                    if (confirmed || unsubscribed) {
+                    const reset = url.searchParams.get('reset');
+                    const google = url.searchParams.get('google');
+                    if (reset === '1') openAuth('reset');
+                    else if (reset === 'invalid') showToast('קישור האיפוס אינו תקף.');
+                    if (google === '1') showToast('התחברתם עם Google.');
+                    else if (google === 'error') showToast('הכניסה עם Google נכשלה.');
+                    if (confirmed || unsubscribed || reset || google) {
                         url.searchParams.delete('confirmed');
                         url.searchParams.delete('unsubscribed');
+                        url.searchParams.delete('reset');
+                        url.searchParams.delete('google');
                         window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
                     }
                 } catch (_) {}
@@ -4063,10 +4135,34 @@
                         title: authUser.title || '',
                         emailPreference: authUser.emailPreference || 'none'
                     });
+                    setPwCurrent('');
+                    setPwNext('');
+                }
+                if (tab === 'complete') {
+                    setComplete(mhEmptyCompleteForm());
+                }
+                if (tab === 'forgot') {
+                    setForgotSent(false);
+                    setForgotEmail((v) => v || loginEmail);
                 }
                 setShowAuth(true);
                 setShowLoginPassword(false);
                 setShowRegPassword(false);
+                setShowPwCurrent(false);
+                setShowPwNext(false);
+                setShowResetPassword(false);
+            };
+            const maybePromptAuth = (user) => {
+                if (!user || authPromptShownRef.current) return;
+                if (!user.profileComplete) {
+                    authPromptShownRef.current = true;
+                    openAuth('complete');
+                    return;
+                }
+                if (user.passwordActionRequired) {
+                    authPromptShownRef.current = true;
+                    openAuth('password');
+                }
             };
             const closeAuth = () => {
                 setShowAuth(false);
@@ -4074,6 +4170,9 @@
                 setAuthBusy(false);
                 setShowLoginPassword(false);
                 setShowRegPassword(false);
+                setShowPwCurrent(false);
+                setShowPwNext(false);
+                setShowResetPassword(false);
             };
             const openAsk = () => {
                 setShowAsk(true);
@@ -4140,7 +4239,13 @@
                     setAuthUser(data.user);
                     applyAccountIntroPref(data.user);
                     setLoginPassword('');
-                    closeAuth();
+                    if (data.user && !data.user.profileComplete) {
+                        openAuth('complete');
+                    } else if (data.user && data.user.passwordActionRequired) {
+                        openAuth('password');
+                    } else {
+                        closeAuth();
+                    }
                     showToast('ברוכים הבאים');
                 } catch (_) {
                     setAuthError('הכניסה נכשלה');
@@ -4229,12 +4334,128 @@
                     setAuthBusy(false);
                 }
             };
+            const setCompleteField = (key, value) => setComplete((p) => ({ ...p, [key]: value }));
+            const goGoogle = () => {
+                window.location.href = '/api/auth/google';
+            };
+            const submitForgot = async (ev) => {
+                ev.preventDefault();
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/forgot', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: forgotEmail })
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'השליחה נכשלה'));
+                        return;
+                    }
+                    setForgotSent(true);
+                } catch (_) {
+                    setAuthError('השליחה נכשלה');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const submitReset = async (ev) => {
+                ev.preventDefault();
+                const pwErr = mhPasswordPolicyError(resetPassword);
+                if (pwErr) {
+                    setAuthError(pwErr);
+                    return;
+                }
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newPassword: resetPassword })
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'איפוס הסיסמה נכשל'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    applyAccountIntroPref(data.user);
+                    setResetPassword('');
+                    if (data.user && !data.user.profileComplete) openAuth('complete');
+                    else if (data.user && data.user.passwordActionRequired) openAuth('password');
+                    else closeAuth();
+                    showToast('הסיסמה עודכנה');
+                } catch (_) {
+                    setAuthError('איפוס הסיסמה נכשל');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const submitPassword = async (ev) => {
+                ev.preventDefault();
+                const pwErr = mhPasswordPolicyError(pwNext);
+                if (pwErr) {
+                    setAuthError(pwErr);
+                    return;
+                }
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentPassword: pwCurrent, newPassword: pwNext })
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'שינוי הסיסמה נכשל'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    setPwCurrent('');
+                    setPwNext('');
+                    closeAuth();
+                    showToast('הסיסמה עודכנה');
+                } catch (_) {
+                    setAuthError('שינוי הסיסמה נכשל');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
+            const submitComplete = async (ev) => {
+                ev.preventDefault();
+                if (mhLicenseRequired(complete.qualification) && !String(complete.licenseNumber || '').trim()) {
+                    setAuthError('יש למלא מספר רישוי');
+                    return;
+                }
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                    const { ok, data } = await mhAuthFetch('/api/auth/complete-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(complete)
+                    });
+                    if (!ok) {
+                        setAuthError(mhAuthErrorHe(data, 'השמירה נכשלה'));
+                        return;
+                    }
+                    setAuthUser(data.user);
+                    setComplete(mhEmptyCompleteForm());
+                    closeAuth();
+                    showToast('הפרטים נשמרו');
+                } catch (_) {
+                    setAuthError('השמירה נכשלה');
+                } finally {
+                    setAuthBusy(false);
+                }
+            };
             const logout = async () => {
                 try {
                     await mhAuthFetch('/api/auth/logout', { method: 'POST' });
                 } catch (_) {}
                 setAuthUser(null);
                 setAccountMenuOpen(false);
+                authPromptShownRef.current = false;
                 closeAuth();
                 showToast('יצאתם מהחשבון');
             };
@@ -4255,14 +4476,19 @@
                 }
             };
             const setRegField = (key, value) => setReg((p) => ({ ...p, [key]: value }));
-            const regPwChecks = mhPasswordChecks(reg.password);
-            const regPwRules = [
-                { key: 'length', ok: regPwChecks.length, label: '8–72 תווים' },
-                { key: 'upper', ok: regPwChecks.upper, label: 'אות גדולה (A–Z)' },
-                { key: 'lower', ok: regPwChecks.lower, label: 'אות קטנה (a–z)' },
-                { key: 'digit', ok: regPwChecks.digit, label: 'ספרה' },
-                { key: 'symbol', ok: regPwChecks.symbol, label: 'תו מיוחד (!@#$…)' }
-            ];
+            const mhPwRuleList = (pw) => {
+                const c = mhPasswordChecks(pw);
+                return [
+                    { key: 'length', ok: c.length, label: '8–72 תווים' },
+                    { key: 'upper', ok: c.upper, label: 'אות גדולה (A–Z)' },
+                    { key: 'lower', ok: c.lower, label: 'אות קטנה (a–z)' },
+                    { key: 'digit', ok: c.digit, label: 'ספרה' },
+                    { key: 'symbol', ok: c.symbol, label: 'תו מיוחד (!@#$…)' }
+                ];
+            };
+            const regPwRules = mhPwRuleList(reg.password);
+            const nextPwRules = mhPwRuleList(pwNext);
+            const resetPwRules = mhPwRuleList(resetPassword);
             const markEntryLinkCopied = (entryId) => {
                 if (!entryId) return;
                 setCopiedEntryId(entryId);
@@ -4545,7 +4771,7 @@
                     setHighlightedEntryKey(handledKey);
                 };
                 requestAnimationFrame(() => requestAnimationFrame(runScroll));
-            }, [resolvedEntryTarget, selectedCategoryGroup, expandedCats, expandedSubsections]);
+            }, [resolvedEntryTarget, selectedCategoryGroup, expandedCats, expandedSubsections, directorySource]);
             // Section deep links (?section=…&subsection=…#group): expand path and scroll to section top.
             useEffect(() => {
                 if (!requestedSectionId || requestedEntryId || searchTerm) return;
@@ -5995,19 +6221,23 @@
                         <div className="mh-auth-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) closeAuth(); }}>
                             <div className="mh-auth-modal" role="dialog" aria-modal="true" aria-labelledby="mh-auth-title">
                                 <button type="button" className="mh-modal-close" onClick={closeAuth} aria-label="סגור" data-tracking-name="auth_close"><i className="fas fa-times"></i></button>
-                                {authTab !== 'profile' && (
+                                {(authTab === 'login' || authTab === 'register' || authTab === 'forgot') && (
                                     <div className="mh-auth-tabs">
-                                        <button type="button" className="mh-btn" style={{ background: authTab === 'login' ? 'var(--primary)' : 'transparent', color: authTab === 'login' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('login'); setAuthError(''); setShowLoginPassword(false); setShowRegPassword(false); }} data-tracking-name="auth_tab_login">כניסה</button>
+                                        <button type="button" className="mh-btn" style={{ background: authTab === 'login' || authTab === 'forgot' ? 'var(--primary)' : 'transparent', color: authTab === 'login' || authTab === 'forgot' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('login'); setAuthError(''); setShowLoginPassword(false); setShowRegPassword(false); }} data-tracking-name="auth_tab_login">כניסה</button>
                                         <button type="button" className="mh-btn" style={{ background: authTab === 'register' ? 'var(--primary)' : 'transparent', color: authTab === 'register' ? 'white' : 'var(--primary)', border: '2px solid var(--primary)' }} onClick={() => { setAuthTab('register'); setAuthError(''); setShowLoginPassword(false); setShowRegPassword(false); }} data-tracking-name="auth_tab_register">הרשמה</button>
                                     </div>
                                 )}
                                 <h2 id="mh-auth-title" style={{ margin: '0 0 var(--space-md)', color: 'var(--primary)' }}>
-                                    {authTab === 'login' ? 'כניסה' : authTab === 'register' ? 'הרשמה' : 'עדכון פרטים'}
+                                    {authTab === 'login' ? 'כניסה' : authTab === 'register' ? 'הרשמה' : authTab === 'forgot' ? 'איפוס סיסמה' : authTab === 'reset' ? 'סיסמה חדשה' : authTab === 'password' ? 'שינוי סיסמה' : authTab === 'complete' ? 'השלמת פרטים' : 'עדכון פרטים'}
                                 </h2>
                                 {authTab === 'login' && (
                                     <form onSubmit={submitLogin}>
                                         <p className="mh-auth-hint">המדריך זמין גם בלי חשבון. הרשמה מאפשרת קבלת עדכונים על שינויים באתר, וניהול תיק אישי.</p>
                                         {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <button type="button" className="mh-btn" style={{ background: 'white', color: '#1f1f1f', border: '2px solid var(--border)', width: '100%' }} onClick={goGoogle} data-tracking-name="auth_google_login">
+                                            <i className="fab fa-google" aria-hidden="true"></i> המשך עם Google
+                                        </button>
+                                        <p className="mh-auth-or">או</p>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-login-email">אימייל</label>
                                             <input id="mh-login-email" type="email" autoComplete="email" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
@@ -6021,6 +6251,9 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <p style={{ margin: '0 0 var(--space-md)' }}>
+                                            <button type="button" className="mh-auth-link" onClick={() => { setAuthTab('forgot'); setAuthError(''); setForgotSent(false); setForgotEmail(loginEmail); }} data-tracking-name="auth_forgot_open">שכחתי סיסמה</button>
+                                        </p>
                                         <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_login_submit">{authBusy ? 'נכנסים…' : 'כניסה'}</button>
                                     </form>
                                 )}
@@ -6028,6 +6261,10 @@
                                     <form autoComplete="off" onSubmit={submitRegister}>
                                         <p className="mh-auth-hint">השימוש באתר כשאתם מחוברים מקושר לחשבון לצורך הבנת שימוש באתר וליצירת קשר. החיפוש והשירותים נשארים פתוחים לכולם.</p>
                                         {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <button type="button" className="mh-btn" style={{ background: 'white', color: '#1f1f1f', border: '2px solid var(--border)', width: '100%' }} onClick={goGoogle} data-tracking-name="auth_google_register">
+                                            <i className="fab fa-google" aria-hidden="true"></i> המשך עם Google
+                                        </button>
+                                        <p className="mh-auth-or">או</p>
                                         <div className="mh-auth-field">
                                             <label htmlFor="mh-reg-email">אימייל</label>
                                             <input id="mh-reg-email" type="email" autoComplete="email" required value={reg.email} onChange={(e) => setRegField('email', e.target.value)} />
@@ -6165,6 +6402,147 @@
                                             </div>
                                         </div>
                                         <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_profile_submit">{authBusy ? 'שומרים…' : 'שמירה'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'profile' && authUser?.hasPassword && (
+                                    <p style={{ margin: 'var(--space-md) 0 0' }}>
+                                        <button type="button" className="mh-auth-link" onClick={() => openAuth('password')} data-tracking-name="auth_password_open">שינוי סיסמה</button>
+                                    </p>
+                                )}
+                                {authTab === 'forgot' && (
+                                    <form onSubmit={submitForgot}>
+                                        <p className="mh-auth-hint">הזינו את כתובת האימייל. אם קיים חשבון, נשלח מייל לאיפוס הסיסמה.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        {forgotSent && <p className="mh-auth-hint">אם קיים חשבון, נשלח מייל.</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-forgot-email">אימייל</label>
+                                            <input id="mh-forgot-email" type="email" autoComplete="email" required value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} />
+                                        </div>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_forgot_submit">{authBusy ? 'שולחים…' : 'שליחת קישור'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'reset' && (
+                                    <form onSubmit={submitReset}>
+                                        <p className="mh-auth-hint">בחרו סיסמה חדשה לחשבון.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-reset-password">סיסמה חדשה</label>
+                                            <div className="mh-password-wrap">
+                                                <input id="mh-reset-password" type={showResetPassword ? 'text' : 'password'} autoComplete="new-password" required minLength={MH_PASSWORD_MIN} maxLength={MH_PASSWORD_MAX} value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} />
+                                                <button type="button" className="mh-password-toggle" onClick={() => setShowResetPassword((v) => !v)} aria-label={showResetPassword ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_reset_password">
+                                                    <i className={showResetPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                                </button>
+                                            </div>
+                                            <ul className="mh-password-rules">
+                                                {resetPwRules.map((rule) => (
+                                                    <li key={rule.key} className={rule.ok ? 'met' : ''}>
+                                                        <span className="mh-rule-mark" aria-hidden="true">{rule.ok ? '✓' : '○'}</span>
+                                                        {rule.label}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_reset_submit">{authBusy ? 'שומרים…' : 'שמירת סיסמה'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'password' && (
+                                    <form onSubmit={submitPassword}>
+                                        <p className="mh-auth-hint">יש להחליף את הסיסמה כל שישה חודשים. אפשר לסגור ולחזור למדריך, והתזכורת תופיע שוב בכניסה הבאה.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-pw-current">סיסמה נוכחית</label>
+                                            <div className="mh-password-wrap">
+                                                <input id="mh-pw-current" type={showPwCurrent ? 'text' : 'password'} autoComplete="current-password" required value={pwCurrent} onChange={(e) => setPwCurrent(e.target.value)} />
+                                                <button type="button" className="mh-password-toggle" onClick={() => setShowPwCurrent((v) => !v)} aria-label={showPwCurrent ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_pw_current">
+                                                    <i className={showPwCurrent ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-pw-next">סיסמה חדשה</label>
+                                            <div className="mh-password-wrap">
+                                                <input id="mh-pw-next" type={showPwNext ? 'text' : 'password'} autoComplete="new-password" required minLength={MH_PASSWORD_MIN} maxLength={MH_PASSWORD_MAX} value={pwNext} onChange={(e) => setPwNext(e.target.value)} />
+                                                <button type="button" className="mh-password-toggle" onClick={() => setShowPwNext((v) => !v)} aria-label={showPwNext ? 'הסתרת סיסמה' : 'הצגת סיסמה'} data-tracking-name="auth_toggle_pw_next">
+                                                    <i className={showPwNext ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                                </button>
+                                            </div>
+                                            <ul className="mh-password-rules">
+                                                {nextPwRules.map((rule) => (
+                                                    <li key={rule.key} className={rule.ok ? 'met' : ''}>
+                                                        <span className="mh-rule-mark" aria-hidden="true">{rule.ok ? '✓' : '○'}</span>
+                                                        {rule.label}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_password_submit">{authBusy ? 'שומרים…' : 'שינוי סיסמה'}</button>
+                                    </form>
+                                )}
+                                {authTab === 'complete' && (
+                                    <form onSubmit={submitComplete}>
+                                        <p className="mh-auth-hint">נשארו כמה פרטים כדי להשלים את החשבון. אפשר לסגור ולחזור למדריך, והטופס יופיע שוב עד שתשמרו.</p>
+                                        {authError && <p className="mh-auth-error">{authError}</p>}
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-country">מדינה</label>
+                                            <input id="mh-cmp-country" type="text" required value={complete.country} onChange={(e) => setCompleteField('country', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-city">עיר (לא חובה)</label>
+                                            <input id="mh-cmp-city" type="text" value={complete.city} onChange={(e) => setCompleteField('city', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-gender">מגדר (לא חובה)</label>
+                                            <select id="mh-cmp-gender" value={complete.gender || ''} onChange={(e) => setCompleteField('gender', e.target.value)}>
+                                                <option value="">לא צוין</option>
+                                                <option value="male">זכר</option>
+                                                <option value="female">נקבה</option>
+                                            </select>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-qual">הכשרה / תפקיד</label>
+                                            <select id="mh-cmp-qual" required value={complete.qualification} onChange={(e) => setCompleteField('qualification', e.target.value)}>
+                                                <option value="">בחירה</option>
+                                                {AUTH_QUALIFICATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-license">{mhLicenseRequired(complete.qualification) ? 'מספר רישוי' : 'מספר רישוי (לא חובה)'}</label>
+                                            <input id="mh-cmp-license" type="text" maxLength={MH_LICENSE_MAX} required={mhLicenseRequired(complete.qualification)} value={complete.licenseNumber} onChange={(e) => setCompleteField('licenseNumber', e.target.value)} autoComplete="off" />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-org">ארגון</label>
+                                            <input id="mh-cmp-org" type="text" required value={complete.organization} onChange={(e) => setCompleteField('organization', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-title">תפקיד בארגון</label>
+                                            <input id="mh-cmp-title" type="text" required value={complete.title} onChange={(e) => setCompleteField('title', e.target.value)} />
+                                        </div>
+                                        <div className="mh-auth-field">
+                                            <label htmlFor="mh-cmp-found">איך הגעתם לאתר?</label>
+                                            <select id="mh-cmp-found" required value={complete.foundVia} onChange={(e) => setCompleteField('foundVia', e.target.value)}>
+                                                <option value="">בחירה</option>
+                                                {AUTH_FOUND_VIA.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                        </div>
+                                        {complete.foundVia === 'other' && (
+                                            <div className="mh-auth-field">
+                                                <label htmlFor="mh-cmp-found-other">פירוט</label>
+                                                <input id="mh-cmp-found-other" type="text" required value={complete.foundViaOther} onChange={(e) => setCompleteField('foundViaOther', e.target.value)} />
+                                            </div>
+                                        )}
+                                        <div className="mh-auth-field">
+                                            <span style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 'var(--text-sm)' }}>עדכונים על שינויים באתר</span>
+                                            <div className="mh-auth-radios">
+                                                <label><input type="radio" name="mh-cmp-pref" checked={complete.emailPreference === 'weekly'} onChange={() => setCompleteField('emailPreference', 'weekly')} /> סיכום שבועי</label>
+                                                <label><input type="radio" name="mh-cmp-pref" checked={complete.emailPreference === 'immediate'} onChange={() => setCompleteField('emailPreference', 'immediate')} /> כשזה קורה</label>
+                                                <label><input type="radio" name="mh-cmp-pref" checked={complete.emailPreference === 'none'} onChange={() => setCompleteField('emailPreference', 'none')} /> בלי עדכונים</label>
+                                            </div>
+                                        </div>
+                                        <label className="mh-auth-consent">
+                                            <input type="checkbox" checked={complete.consent} onChange={(e) => setCompleteField('consent', e.target.checked)} required />
+                                            <span>אני מבין/ה שהשימוש באתר כשאני מחובר/ת מקושר לחשבון זה (כולל חיפושים ולחיצות), ושאפשר לקבל עדכונים לפי הבחירה למעלה. המדריך נשאר זמין גם בלי חשבון.</span>
+                                        </label>
+                                        <button type="submit" className="mh-btn" style={{ background: 'var(--primary)', color: 'white', width: '100%' }} disabled={authBusy} data-tracking-name="auth_complete_submit">{authBusy ? 'שומרים…' : 'שמירה'}</button>
                                     </form>
                                 )}
                             </div>
@@ -6592,7 +6970,9 @@
                         </p>
                     )}
 
-                    {searchTerm ? (
+                    {directorySource === 'loading' ? (
+                        <p className="mh-helper-text" role="status">טוען את המדריך…</p>
+                    ) : searchTerm ? (
                         Object.entries(filtered).length === 0 ? null : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">

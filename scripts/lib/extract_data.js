@@ -1,8 +1,9 @@
 // Shared extractor for the data structures embedded in index.html.
 //
-// index.html is the source of truth: a single static file whose JSX is transpiled in the
-// browser. Everything downstream (the SQL snapshot generator, the static page builder, the
-// JSON export) reads DATA from it rather than keeping a second copy.
+// index.html is the catalog: which cards exist, and which section each one sits in.
+// Visible card text is directory_card_edits. scripts/lib/overlay_directory_cards.js
+// replaces the embedded wording with that table before pages or directory.json are written.
+// The embedded wording is only what a build uses when DATABASE_URL is not set.
 //
 // Consumers: generate_directory_entries_sql.js, build_pages.js, build_export.js,
 // facet_coverage.js, propose_referral_routes.js.

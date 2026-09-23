@@ -26,6 +26,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/auth/google/callback",
+      "destination": "/api/auth/google-callback"
+    },
+    {
       "source": "/api/retention",
       "destination": "/api/cron/retention"
     },

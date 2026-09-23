@@ -1,10 +1,11 @@
 import type { Client } from 'pg';
 import { appUrl } from './db';
-import { insertToken } from './tokens';
+import { consumeUserTokens, insertToken } from './tokens';
 import { adminEmailList } from './users';
 
 const CONFIRM_TTL_MS = 48 * 60 * 60 * 1000;
 const UNSUBSCRIBE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+const RESET_TTL_MS = 60 * 60 * 1000;
 
 function fromAddress(): string | null {
   return process.env.UPDATES_FROM_EMAIL || process.env.LINK_CHECK_FROM_EMAIL || null;
@@ -118,6 +119,23 @@ export async function enqueueConfirmEmail(client: Client, user: { id: string; em
       JSON.stringify({
         to: user.email,
         confirmUrl: url,
+      }),
+    ]
+  );
+}
+
+export async function enqueueResetEmail(client: Client, user: { id: string; email: string }): Promise<void> {
+  await consumeUserTokens(client, user.id, 'reset');
+  const raw = await insertToken(client, user.id, 'reset', RESET_TTL_MS);
+  const url = `${appUrl()}/api/auth/reset?token=${encodeURIComponent(raw)}`;
+  await client.query(
+    `INSERT INTO email_outbox (user_id, kind, payload)
+     VALUES ($1, 'reset', $2::jsonb)`,
+    [
+      user.id,
+      JSON.stringify({
+        to: user.email,
+        resetUrl: url,
       }),
     ]
   );
@@ -419,7 +437,8 @@ type OutboxKind =
   | 'care_grant_invite'
   | 'care_grant_accepted'
   | 'care_grant_revoked'
-  | 'care_committee_reminder';
+  | 'care_committee_reminder'
+  | 'reset';
 
 type OutboxRow = {
   id: string;
@@ -551,6 +570,16 @@ async function renderOutbox(
        <p><strong>מאת:</strong> ${escapeHtml(asker)}</p>
        <p style="white-space:pre-wrap">${escapeHtml(question)}</p>
        <p>${mailto ? `<a href="${escapeHtml(mailto)}">מענה במייל</a> · ` : ''}<a href="${escapeHtml(adminUrl)}">לרשימת השאלות</a></p>`
+    );
+    return { to, subject, text, html };
+  }
+
+  if (row.kind === 'reset') {
+    const url = String(row.payload.resetUrl || '');
+    const subject = 'איפוס סיסמה — מדריך נפש';
+    const text = `שלום,\n\nלאיפוס הסיסמה במדריך נפש:\n${url}\n\nהקישור תקף לשעה. אם לא ביקשתם איפוס, אפשר להתעלם מהודעה זו.`;
+    const html = wrapHtml(
+      `<p>שלום,</p><p>לאיפוס הסיסמה במדריך נפש:</p><p><a href="${url}">איפוס סיסמה</a></p><p>הקישור תקף לשעה. אם לא ביקשתם איפוס, אפשר להתעלם מהודעה זו.</p>`
     );
     return { to, subject, text, html };
   }

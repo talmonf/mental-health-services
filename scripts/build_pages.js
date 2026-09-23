@@ -22,6 +22,7 @@
 const fs = require('fs');
 const path = require('path');
 const { load, phonesOf, referralLabel } = require('./lib/extract_data');
+const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const T = require('./lib/page_template');
 const LD = require('./lib/jsonld');
 
@@ -573,8 +574,7 @@ function loadHoldout() {
   return { rows: (j.rows || []).map((r) => r.row), cycle: j.cycle };
 }
 
-function build(outRoot) {
-  const data = load();
+function build(outRoot, data = load()) {
   const holdout = loadHoldout();
   const holdoutRows = new Set(holdout.rows);
 
@@ -826,7 +826,7 @@ function clean(outRoot) {
   for (const f of GENERATED_FILES) fs.rmSync(path.join(outRoot, f), { force: true });
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   const isCheck = args.includes('--check');
 
@@ -840,7 +840,9 @@ function main() {
   if (!isCheck) clean(ROOT);
 
   const t0 = Date.now();
-  const { data, written, urls, emittedPhones, withheld, holdout } = build(outRoot);
+  const catalog = load();
+  const cardText = await overlayDirectoryCards(catalog);
+  const { data, written, urls, emittedPhones, withheld, holdout } = build(outRoot, catalog);
 
   const phoneCount = assertPhonesCameFromData(data, emittedPhones);
   assertEmergencyReachable(written);
@@ -859,6 +861,7 @@ function main() {
   console.log(`  ${linkTargets} link targets, no dangling internal links`);
   console.log(`  ${ld.nodes} JSON-LD nodes across ${orgCount} organisations, all phones traced`);
   console.log(`  ${ld.freeClaims} entries claim isAccessibleForFree (only where cost says so unconditionally)`);
+  console.log(`  card text: ${cardText.source} (${cardText.applied} of ${cardText.rows} database rows applied)`);
 
   if (data.collisions.length) {
     console.log(`\n  NOTE: ${data.collisions.length} row numbers are shared by more than one entry.`);
@@ -878,12 +881,10 @@ function main() {
 }
 
 if (require.main === module) {
-  try {
-    main();
-  } catch (err) {
+  main().catch((err) => {
     console.error(`\nBUILD FAILED: ${err.message}`);
     process.exit(1);
-  }
+  });
 }
 
 module.exports = { build, parsePhoneField, entryDescription, entryTitle, termSlug, isoDate };
