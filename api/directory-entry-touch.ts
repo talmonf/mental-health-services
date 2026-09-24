@@ -67,11 +67,24 @@ async function handlePublicCards(res: VercelResponse) {
   const client = pgClient();
   try {
     await client.connect();
-    const { rows } = await client.query(
-      `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at
-         FROM directory_card_edits
-        ORDER BY row_id, id`
-    );
+    let rows: Array<Record<string, unknown>>;
+    try {
+      const result = await client.query(
+        `SELECT id, card_key, row_id, public_fields, eligibility, sites, public_edited_at
+           FROM directory_card_edits
+          ORDER BY row_id, id`
+      );
+      rows = result.rows;
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
+      if (code !== '42703') throw err;
+      const result = await client.query(
+        `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at
+           FROM directory_card_edits
+          ORDER BY row_id, id`
+      );
+      rows = result.rows;
+    }
     res.setHeader('Cache-Control', 'no-cache');
     return res.status(200).json({
       cards: rows.map((row) => ({
@@ -80,6 +93,7 @@ async function handlePublicCards(res: VercelResponse) {
         rowId: Number(row.row_id),
         publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
         eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
+        sites: Array.isArray(row.sites) ? row.sites : [],
         publicEditedAt: isoTime(row.public_edited_at),
       })),
     });

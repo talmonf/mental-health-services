@@ -1346,6 +1346,18 @@
         }
         const fields = card.publicFields || {};
         const elig = card.eligibility || {};
+        const siteRow = (site) => {
+          const s = site || {};
+          return `<div class="site-row dir-grid">
+            <div><label>שם</label><input name="site_label" type="text" value="${esc(s.label || '')}"></div>
+            <div class="full"><label>כתובת</label><input name="site_address" type="text" value="${esc(s.address || '')}"></div>
+            <div><label>טלפון</label><input name="site_phone" type="text" dir="ltr" value="${esc(s.phone || '')}"></div>
+            <div><label>דוא״ל</label><input name="site_email" type="text" dir="ltr" value="${esc(s.email || '')}"></div>
+            <div><label>קו רוחב</label><input name="site_lat" type="text" dir="ltr" value="${s.lat == null ? '' : esc(s.lat)}"></div>
+            <div><label>קו אורך</label><input name="site_lng" type="text" dir="ltr" value="${s.lng == null ? '' : esc(s.lng)}"></div>
+            <div><button type="button" class="secondary" data-act="remove-site">הסרה</button></div>
+          </div>`;
+        };
         const rec = elig.recognition || {};
         const textInputs = DIR_TEXT.map(([name, label, area]) => {
           const value = fields[name] == null ? '' : String(fields[name]);
@@ -1387,7 +1399,7 @@
               <div><label for="d-age_min">גיל מינימום</label><input id="d-age_min" name="age_min" type="number" min="0" max="120" value="${elig.age_min == null ? '' : esc(elig.age_min)}"></div>
               <div><label for="d-age_max">גיל מקסימום</label><input id="d-age_max" name="age_max" type="number" min="0" max="120" value="${elig.age_max == null ? '' : esc(elig.age_max)}"></div>
               ${select('sex', 'מין', sex, [['any', 'ללא הגבלה'], ['female', 'נקבה'], ['male', 'זכר']])}
-              ${select('location_mode', 'מיקום', locationMode, [['any', 'ללא הגבלה'], ['nationwide', 'ארצי'], ['regions', 'אזורים']])}
+              ${select('location_mode', 'מיקום', locationMode, [['any', 'ללא הגבלה'], ['nationwide', 'ארצי'], ['regions', 'אזורים'], ['sites', 'לפי מרפאות']])}
               <div class="full" id="d-regions-wrap"${locationMode === 'regions' ? '' : ' hidden'}><label for="d-regions">אזורים (שורה לכל אזור)</label><textarea id="d-regions" name="regions">${esc(dirLines(elig.regions && elig.regions.join ? elig.regions.join('\n') : '').join('\n'))}</textarea></div>
               <div class="full"><label for="d-diagnoses">אבחנות (שורה לכל אבחנה)</label><textarea id="d-diagnoses" name="diagnoses">${esc((elig.diagnoses || []).join('\n'))}</textarea></div>
               <div class="full"><label for="d-presenting_problems">קשיים או סיבות פנייה (שורה לכל פריט)</label><textarea id="d-presenting_problems" name="presenting_problems">${esc((elig.presenting_problems || []).join('\n'))}</textarea></div>
@@ -1397,6 +1409,10 @@
               ${select('rec_rehab', 'סל שיקום', rec.rehab_basket || 'any', anyReq)}
               <div class="full"><label for="d-internal_notes">הערות פנימיות (במקור הדף, לא על הכרטיס)</label><textarea id="d-internal_notes" name="internal_notes">${esc(elig.internal_notes || '')}</textarea></div>
             </div>
+            <h2>מרפאות — לא מוצג בכרטיס</h2>
+            <p class="dir-help">רשימת מקומות לכפתור המפה ולחיפוש לפי מרחק. שם המקום מוצג בבורר. קואורדינטות ריקות ימולאו בשמירה לפי הכתובת.</p>
+            <div id="d-sites">${(Array.isArray(card.sites) ? card.sites : []).map((site) => siteRow(site)).join('')}</div>
+            <p><button type="button" class="secondary" id="d-add-site">הוספת מרפאה</button></p>
             <div class="dir-actions">
               <button type="submit">שמירה</button>
               <button type="button" class="secondary" data-act="back">חזרה לרשימה</button>
@@ -1415,6 +1431,16 @@
           state.directoryMsg = '';
           location.hash = 'directory';
           render();
+        });
+        const sitesBox = form.querySelector('#d-sites');
+        form.querySelector('#d-add-site').addEventListener('click', () => {
+          sitesBox.insertAdjacentHTML('beforeend', siteRow({}));
+        });
+        sitesBox.addEventListener('click', (ev) => {
+          const btn = ev.target.closest('[data-act=remove-site]');
+          if (!btn) return;
+          const row = btn.closest('.site-row');
+          if (row) row.remove();
         });
         form.addEventListener('submit', async (ev) => {
           ev.preventDefault();
@@ -1450,7 +1476,19 @@
                 rehab_basket: text('rec_rehab') || 'any'
               },
               internal_notes: text('internal_notes')
-            }
+            },
+            sites: Array.from(form.querySelectorAll('.site-row')).map((row, index) => {
+              const val = (name) => String((row.querySelector(`[name="${name}"]`) || {}).value || '').trim();
+              return {
+                label: val('site_label'),
+                address: val('site_address'),
+                phone: val('site_phone'),
+                email: val('site_email'),
+                lat: val('site_lat'),
+                lng: val('site_lng'),
+                sort_order: index
+              };
+            }).filter((site) => site.label || site.address)
           };
           try {
             const r = await fetch('/api/admin/directory', {

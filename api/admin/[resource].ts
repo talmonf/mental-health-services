@@ -12,7 +12,9 @@ import {
   hasEligibility,
   normalizeEligibility,
   normalizePublicFields,
+  normalizeSites,
   publicFieldsEqual,
+  sitesEqual,
 } from '../../lib/directory-cards';
 import { enqueueImmediateEmails, processOutbox } from '../../lib/email';
 import {
@@ -870,6 +872,7 @@ function directoryCardDetail(row: Record<string, unknown>) {
     cardKey: String(row.card_key || ''),
     publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
     eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
+    sites: Array.isArray(row.sites) ? row.sites : [],
     hasEligibility: hasEligibility(row.eligibility),
     publicEditedAt: isoTime(row.public_edited_at),
     updatedAt: isoTime(row.updated_at),
@@ -888,6 +891,62 @@ function directoryCardSummary(row: Record<string, unknown>) {
   };
 }
 
+const DIRECTORY_CARD_COLUMNS =
+  'id, card_key, row_id, public_fields, eligibility, sites, public_edited_at, updated_at';
+
+function missingSitesColumn(err: unknown): boolean {
+  return Boolean(err && typeof err === 'object' && 'code' in err && (err as { code?: string }).code === '42703');
+}
+
+async function geocodeSiteQuery(query: string): Promise<{ lat: number; lng: number } | null> {
+  const url = new URL('https://nominatim.openstreetmap.org/search');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('limit', '1');
+  url.searchParams.set('countrycodes', 'il');
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'mental-health-services-directory/1.0 (https://nefesh-il.org; admin sites)',
+      Accept: 'application/json',
+    },
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as Array<{ lat?: string; lon?: string }>;
+  const hit = Array.isArray(data) ? data[0] : null;
+  if (!hit) return null;
+  const lat = Number(hit.lat);
+  const lng = Number(hit.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
+}
+
+async function fillMissingSiteCoordinates(raw: unknown): Promise<unknown> {
+  if (!Array.isArray(raw)) return raw;
+  const out: unknown[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      out.push(item);
+      continue;
+    }
+    const src = item as Record<string, unknown>;
+    const lat = Number(src.lat);
+    const lng = Number(src.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng) && String(src.lat ?? '').trim() !== '' && String(src.lng ?? '').trim() !== '') {
+      out.push(src);
+      continue;
+    }
+    const query = String(src.address || src.label || '').trim();
+    if (query.length < 2) {
+      out.push(src);
+      continue;
+    }
+    const hit = await geocodeSiteQuery(query);
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    out.push(hit ? { ...src, lat: hit.lat, lng: hit.lng } : src);
+  }
+  return out;
+}
+
 async function handleDirectory(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET' && req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -904,7 +963,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       if (qstr(req.query, 'id') && id == null) return res.status(400).json({ error: 'Invalid id' });
       if (id != null) {
         const { rows } = await client.query(
-          `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at
+          `SELECT ${DIRECTORY_CARD_COLUMNS}
              FROM directory_card_edits
             WHERE id = $1`,
           [id]
@@ -927,16 +986,18 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
 
     let publicFields;
     let eligibility;
+    let sites;
     try {
       publicFields = normalizePublicFields(body.publicFields);
       eligibility = normalizeEligibility(body.eligibility);
+      sites = normalizeSites(await fillMissingSiteCoordinates(body.sites));
     } catch (err) {
       if (err instanceof DirectoryCardError) return res.status(400).json({ error: err.message });
       throw err;
     }
 
     const existing = await client.query(
-      `SELECT id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at
+      `SELECT ${DIRECTORY_CARD_COLUMNS}
          FROM directory_card_edits
         WHERE id = $1`,
       [id]
@@ -945,7 +1006,8 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     const current = existing.rows[0];
     const publicChanged = !publicFieldsEqual(current.public_fields, publicFields);
     const eligibilityChanged = !eligibilityEqual(current.eligibility, eligibility);
-    if (!publicChanged && !eligibilityChanged) {
+    const sitesChanged = !sitesEqual(current.sites, sites);
+    if (!publicChanged && !eligibilityChanged && !sitesChanged) {
       return res.status(200).json({ card: directoryCardDetail(current) });
     }
 
@@ -954,18 +1016,22 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       `UPDATE directory_card_edits
           SET public_fields = $2::jsonb,
               eligibility = $3::jsonb,
-              public_edited_at = CASE WHEN $4::boolean THEN now() ELSE public_edited_at END,
+              sites = $4::jsonb,
+              public_edited_at = CASE WHEN $5::boolean THEN now() ELSE public_edited_at END,
               updated_at = now(),
-              updated_by = $5::uuid
+              updated_by = $6::uuid
         WHERE id = $1
-        RETURNING id, card_key, row_id, public_fields, eligibility, public_edited_at, updated_at`,
-      [id, JSON.stringify(publicFields), JSON.stringify(eligibility), publicChanged, jwtUser ? jwtUser.id : null]
+        RETURNING ${DIRECTORY_CARD_COLUMNS}`,
+      [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged, jwtUser ? jwtUser.id : null]
     );
     return res.status(200).json({ card: directoryCardDetail(rows[0]) });
   } catch (err) {
     const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
     if (code === '42P01') {
       return res.status(500).json({ error: 'טבלת הכרטיסים עדיין לא הותקנה. הריצו את סקריפט 045.' });
+    }
+    if (missingSitesColumn(err)) {
+      return res.status(500).json({ error: 'עמודת המקומות עדיין לא הותקנה. הריצו את סקריפט 047.' });
     }
     console.error('admin directory error', err);
     const failed = req.method === 'GET' ? 'טעינת הכרטיסים נכשלה' : 'שמירת הכרטיס נכשלה';

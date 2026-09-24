@@ -89,6 +89,7 @@ const CURATED = {
   280: { codes: ['gp_referral', 'rehab_basket_committee'], source: 'הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.' },
   281: { codes: ['mod_rehab_worker', 'nii_referral'], source: 'הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).' },
   283: { codes: ['rehab_basket_committee', 'mod_rehab_worker'], source: 'זכאי סל שיקום; נכי צה"ל (באישור עובד השיקום)' },
+  291: { codes: ['self_referral'], source: 'פרטי כל מרפאה באתר' },
 };
 
 function blob(entry) {

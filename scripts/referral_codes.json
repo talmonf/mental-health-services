@@ -1022,6 +1022,13 @@
       ],
       "source": "זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)",
       "confidence": "curated"
+    },
+    "291": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "פרטי כל מרפאה באתר",
+      "confidence": "curated"
     }
   }
 }

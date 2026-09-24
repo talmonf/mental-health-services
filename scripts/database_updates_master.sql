@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 047_directory_entries_navigate.sql
 [x] 046_auth_password_oauth.sql
 [x] 045_directory_card_edits.sql
 [x] 044_directory_entries_yated_beit_meshalech.sql

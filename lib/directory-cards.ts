@@ -62,13 +62,17 @@ const PHONE_MAX = 80;
 const PHONE_LABEL_MAX = 120;
 
 const SEX_VALUES = ['any', 'female', 'male'] as const;
-const LOCATION_VALUES = ['any', 'nationwide', 'regions'] as const;
+const LOCATION_VALUES = ['any', 'nationwide', 'regions', 'sites'] as const;
 const RECOGNITION_KEYS = ['btl', 'moh', 'mod', 'rehab_basket'] as const;
 const RECOGNITION_VALUES = ['any', 'required'] as const;
 
 const LIST_MAX_ITEMS = 40;
 const LIST_ITEM_MAX = 120;
 const NOTES_MAX = 4000;
+const SITE_LABEL_MAX = 120;
+const SITE_ADDRESS_MAX = 300;
+const SITE_PHONE_MAX = 80;
+const SITE_EMAIL_MAX = 200;
 
 export type PublicFields = Record<string, string | boolean>;
 
@@ -84,6 +88,17 @@ export type Eligibility = {
   presenting_problems: string[];
   recognition: Record<(typeof RECOGNITION_KEYS)[number], RecognitionValue>;
   internal_notes: string;
+};
+
+/** A physical site. Not an eligibility rule and not painted on the card face. */
+export type CardSite = {
+  label: string;
+  address: string;
+  lat: number;
+  lng: number;
+  phone: string;
+  email: string;
+  sort_order: number;
 };
 
 export function emptyEligibility(): Eligibility {
@@ -210,6 +225,60 @@ export function normalizeEligibility(raw: unknown): Eligibility {
   };
 }
 
+function finiteCoord(raw: unknown, label: string, min: number, max: number): number {
+  if (raw == null || String(raw).trim() === '') {
+    throw new DirectoryCardError(`${label} חסר`);
+  }
+  const n = typeof raw === 'number' ? raw : Number(String(raw).trim());
+  if (!Number.isFinite(n) || n < min || n > max) {
+    throw new DirectoryCardError(`${label} אינו קואורדינטה תקינה`);
+  }
+  return n;
+}
+
+export function normalizeSites(raw: unknown): CardSite[] {
+  let items: unknown[] = [];
+  if (Array.isArray(raw)) items = raw;
+  else if (raw == null || raw === '') items = [];
+  else throw new DirectoryCardError('רשימת המקומות אינה רשימה');
+  if (items.length > LIST_MAX_ITEMS) throw new DirectoryCardError('רשימת המקומות ארוכה מדי');
+  const out: CardSite[] = [];
+  items.forEach((item, index) => {
+    const src = asObject(item);
+    const label = textField(src.label);
+    const address = textField(src.address);
+    const phone = textField(src.phone);
+    const email = textField(src.email);
+    if (!label) throw new DirectoryCardError('לכל מקום צריך שם');
+    if (label.length > SITE_LABEL_MAX || address.length > SITE_ADDRESS_MAX) {
+      throw new DirectoryCardError('שם המקום או הכתובת ארוכים מדי');
+    }
+    if (phone.length > SITE_PHONE_MAX) throw new DirectoryCardError('טלפון של מקום ארוך מדי');
+    if (email.length > SITE_EMAIL_MAX) throw new DirectoryCardError('דוא״ל של מקום ארוך מדי');
+    if (email && !/^[^\s@]+@[^\s@]+$/.test(email)) throw new DirectoryCardError('דוא״ל של מקום אינו תקין');
+    const sortRaw = src.sort_order;
+    const sort =
+      sortRaw == null || sortRaw === ''
+        ? index
+        : typeof sortRaw === 'number'
+          ? sortRaw
+          : Number(String(sortRaw).trim());
+    if (!Number.isInteger(sort) || sort < 0 || sort > 999) {
+      throw new DirectoryCardError('סדר המקום אינו תקין');
+    }
+    out.push({
+      label,
+      address,
+      lat: finiteCoord(src.lat, 'קו רוחב', -90, 90),
+      lng: finiteCoord(src.lng, 'קו אורך', -180, 180),
+      phone,
+      email,
+      sort_order: sort,
+    });
+  });
+  return out;
+}
+
 export function hasEligibility(raw: unknown): boolean {
   try {
     const e = normalizeEligibility(raw);
@@ -243,4 +312,8 @@ export function publicFieldsEqual(a: unknown, b: unknown): boolean {
 
 export function eligibilityEqual(a: unknown, b: unknown): boolean {
   return stable(normalizeEligibility(a)) === stable(normalizeEligibility(b));
+}
+
+export function sitesEqual(a: unknown, b: unknown): boolean {
+  return stable(normalizeSites(a)) === stable(normalizeSites(b));
 }

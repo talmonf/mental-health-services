@@ -844,7 +844,60 @@
         .mh-ted-list li { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); }
         .mh-ted-list a { color: var(--primary); font-weight: 700; text-decoration: none; }
         .mh-ted-list a:hover { text-decoration: underline; }
-        .mh-map-btn { background: #1a73e8 !important; }
+        .mh-map-btn { background: #1a73e8 !important; color: #fff; border: none; }
+        .mh-map-picker { position: relative; display: inline-flex; }
+        .mh-map-panel {
+            position: absolute;
+            z-index: 20;
+            bottom: calc(100% + 6px);
+            inset-inline-start: 0;
+            width: min(320px, 80vw);
+            max-height: 280px;
+            overflow: auto;
+            background: var(--bg-card, #fff);
+            color: var(--text, #1a1a1a);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated, 0 8px 24px rgba(0,0,0,.15));
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .mh-map-filter, .mh-map-city {
+            width: 100%;
+            min-height: 40px;
+            font: inherit;
+            font-size: var(--text-sm);
+            box-sizing: border-box;
+        }
+        .mh-map-filter { padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm, 6px); }
+        .mh-map-city {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            text-align: start;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 4px;
+        }
+        .mh-map-panel a {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 4px 8px;
+            min-height: 0;
+            min-width: 0;
+            padding: 8px;
+            border-radius: var(--radius-sm, 6px);
+            color: var(--text, #1a1a1a);
+            font-weight: 500;
+            text-decoration: none;
+            background: transparent !important;
+        }
+        .mh-map-panel a:hover { background: rgba(45, 90, 123, 0.08) !important; }
+        .mh-map-km, .mh-map-phone { color: var(--text-muted); font-size: var(--text-sm); }
+        .mh-map-empty { margin: 0; padding: 8px; color: var(--text-muted); font-size: var(--text-sm); }
         .mh-nearby-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); }
         .mh-nearby-bar-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); }
         .mh-nearby-bar-label { font-weight: 600; color: var(--primary); white-space: nowrap; font-size: var(--text-sm); }
@@ -911,7 +964,7 @@
         </div>
     </noscript>
     <!-- REFERRAL_CODES_START -->
-<script type="application/json" id="mh-referral-codes">{"rows":{"1":{"codes":["unknown"],"source":"","confidence":"none"},"2":{"codes":["unknown"],"source":"","confidence":"none"},"3":{"codes":["unknown"],"source":"","confidence":"none"},"4":{"codes":["self_referral"],"source":"ייעוץ והכנה בחינם לוועדה הרפואית","confidence":"curated"},"5":{"codes":["rehab_basket_committee"],"source":"חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000)","confidence":"curated"},"6":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"7":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"8":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"9":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"10":{"codes":["self_referral"],"source":"זמין 24/7 לחיילים, מילואים וכוחות הביטחון","confidence":"curated"},"11":{"codes":["self_referral"],"source":"ניתן לפנות באופן אנונימי","confidence":"curated"},"12":{"codes":["unknown"],"source":"","confidence":"none"},"13":{"codes":["unknown"],"source":"","confidence":"none"},"16":{"codes":["unknown"],"source":"","confidence":"none"},"18":{"codes":["unknown"],"source":"","confidence":"none"},"19":{"codes":["unknown"],"source":"","confidence":"none"},"21":{"codes":["unknown"],"source":"","confidence":"none"},"24":{"codes":["unknown"],"source":"","confidence":"none"},"28":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"29":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"31":{"codes":["unknown"],"source":"","confidence":"none"},"32":{"codes":["unknown"],"source":"","confidence":"none"},"33":{"codes":["unknown"],"source":"","confidence":"none"},"34":{"codes":["unknown"],"source":"","confidence":"none"},"35":{"codes":["unknown"],"source":"","confidence":"none"},"36":{"codes":["unknown"],"source":"","confidence":"none"},"37":{"codes":["unknown"],"source":"","confidence":"none"},"38":{"codes":["unknown"],"source":"","confidence":"curated"},"39":{"codes":["self_referral"],"source":"בית בטוח לטיפול מיידי — חלופת אשפוז","confidence":"curated"},"40":{"codes":["hmo_form17"],"source":"cost: לאומית ומאוחדת","confidence":"curated"},"41":{"codes":["self_referral"],"source":"שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.","confidence":"curated"},"42":{"codes":["mod_rehab_worker"],"source":"ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום.","confidence":"curated"},"43":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת ולאומית","confidence":"curated"},"44":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"45":{"codes":["self_referral"],"source":"שירות פרטי","confidence":"curated"},"46":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת (בירושלים)","confidence":"curated"},"47":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"48":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: מכבי, מאוחדת ולאומית","confidence":"curated"},"49":{"codes":["unknown"],"source":"","confidence":"none"},"50":{"codes":["unknown"],"source":"","confidence":"none"},"51":{"codes":["unknown"],"source":"","confidence":"none"},"52":{"codes":["unknown"],"source":"","confidence":"none"},"53":{"codes":["unknown"],"source":"","confidence":"curated"},"56":{"codes":["unknown"],"source":"","confidence":"none"},"57":{"codes":["unknown"],"source":"","confidence":"none"},"59":{"codes":["unknown"],"source":"","confidence":"none"},"60":{"codes":["unknown"],"source":"","confidence":"none"},"61":{"codes":["unknown"],"source":"","confidence":"none"},"62":{"codes":["unknown"],"source":"","confidence":"curated"},"63":{"codes":["self_referral"],"source":"התערבות רגשית ממוקדת וללא עלות","confidence":"curated"},"64":{"codes":["unknown"],"source":"","confidence":"none"},"65":{"codes":["unknown"],"source":"","confidence":"none"},"66":{"codes":["unknown"],"source":"","confidence":"none"},"67":{"codes":["unknown"],"source":"","confidence":"none"},"68":{"codes":["unknown"],"source":"","confidence":"none"},"69":{"codes":["unknown"],"source":"","confidence":"none"},"70":{"codes":["unknown"],"source":"","confidence":"none"},"71":{"codes":["unknown"],"source":"","confidence":"none"},"72":{"codes":["unknown"],"source":"","confidence":"none"},"73":{"codes":["unknown"],"source":"","confidence":"none"},"74":{"codes":["unknown"],"source":"","confidence":"none"},"76":{"codes":["unknown"],"source":"","confidence":"none"},"78":{"codes":["unknown"],"source":"","confidence":"curated"},"79":{"codes":["unknown"],"source":"","confidence":"none"},"80":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"81":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"82":{"codes":["unknown"],"source":"","confidence":"none"},"83":{"codes":["unknown"],"source":"","confidence":"none"},"84":{"codes":["unknown"],"source":"","confidence":"none"},"85":{"codes":["unknown"],"source":"","confidence":"none"},"87":{"codes":["unknown"],"source":"","confidence":"none"},"88":{"codes":["unknown"],"source":"","confidence":"none"},"89":{"codes":["unknown"],"source":"","confidence":"none"},"90":{"codes":["unknown"],"source":"","confidence":"none"},"94":{"codes":["unknown"],"source":"","confidence":"none"},"95":{"codes":["unknown"],"source":"","confidence":"none"},"96":{"codes":["unknown"],"source":"","confidence":"none"},"102":{"codes":["unknown"],"source":"","confidence":"none"},"104":{"codes":["unknown"],"source":"","confidence":"none"},"105":{"codes":["unknown"],"source":"","confidence":"none"},"106":{"codes":["unknown"],"source":"","confidence":"none"},"107":{"codes":["unknown"],"source":"","confidence":"none"},"108":{"codes":["unknown"],"source":"","confidence":"none"},"109":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל.","confidence":"curated"},"201":{"codes":["self_referral"],"source":"קווי המענה הארציים 1202/1203","confidence":"curated"},"202":{"codes":["unknown"],"source":"","confidence":"none"},"203":{"codes":["unknown"],"source":"","confidence":"none"},"204":{"codes":["unknown"],"source":"","confidence":"none"},"205":{"codes":["unknown"],"source":"","confidence":"none"},"206":{"codes":["unknown"],"source":"","confidence":"none"},"210":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"211":{"codes":["unknown"],"source":"להתקבל לתוכנית חייבת הכרה/אבחון טראומה.","confidence":"curated"},"212":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"213":{"codes":["unknown"],"source":"","confidence":"none"},"214":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"215":{"codes":["unknown"],"source":"","confidence":"none"},"216":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"217":{"codes":["unknown"],"source":"","confidence":"none"},"218":{"codes":["mod_rehab_worker"],"source":"במימון משרד הביטחון","confidence":"curated"},"219":{"codes":["unknown"],"source":"","confidence":"none"},"220":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"221":{"codes":["gp_referral"],"source":"מרפאת כללית","confidence":"curated"},"222":{"codes":["unknown"],"source":"","confidence":"none"},"223":{"codes":["unknown"],"source":"","confidence":"none"},"224":{"codes":["mod_rehab_worker"],"source":"החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.","confidence":"curated"},"225":{"codes":["unknown"],"source":"","confidence":"none"},"226":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"228":{"codes":["unknown"],"source":"","confidence":"none"},"229":{"codes":["unknown"],"source":"","confidence":"none"},"230":{"codes":["unknown"],"source":"","confidence":"none"},"231":{"codes":["unknown"],"source":"","confidence":"none"},"232":{"codes":["unknown"],"source":"","confidence":"none"},"233":{"codes":["unknown"],"source":"","confidence":"none"},"234":{"codes":["unknown"],"source":"","confidence":"none"},"235":{"codes":["unknown"],"source":"","confidence":"none"},"237":{"codes":["unknown"],"source":"","confidence":"none"},"238":{"codes":["unknown"],"source":"","confidence":"none"},"239":{"codes":["unknown"],"source":"","confidence":"none"},"243":{"codes":["unknown"],"source":"","confidence":"none"},"244":{"codes":["self_referral"],"source":"אתר עם שאלון התאמה לספקי שירות","confidence":"curated"},"247":{"codes":["self_referral"],"source":"הכוונה ראשונית ללא עלות וללא התחייבות","confidence":"curated"},"248":{"codes":["unknown"],"source":"","confidence":"none"},"249":{"codes":["unknown"],"source":"","confidence":"none"},"250":{"codes":["unknown"],"source":"","confidence":"none"},"251":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"252":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"253":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"254":{"codes":["self_referral"],"source":"קו חם מאויש 24/7 כולל סופי שבוע","confidence":"curated"},"257":{"codes":["unknown"],"source":"","confidence":"none"},"263":{"codes":["unknown"],"source":"","confidence":"none"},"264":{"codes":["unknown"],"source":"","confidence":"none"},"268":{"codes":["psychiatrist_referral"],"source":"נדרשת אבחנה של פסיכיאטר.","confidence":"curated"},"269":{"codes":["unknown"],"source":"","confidence":"none"},"270":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרש מרשם פסיכיאטר ואישור הקופה.","confidence":"curated"},"271":{"codes":["psychiatrist_referral"],"source":"נדרשת הערכה פסיכיאטרית.","confidence":"curated"},"272":{"codes":["unknown"],"source":"","confidence":"none"},"273":{"codes":["psychiatrist_referral"],"source":"הפניה מפסיכיאטר או נוירולוג.","confidence":"curated"},"274":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית","confidence":"keyword"},"275":{"codes":["unknown"],"source":"","confidence":"none"},"278":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"279":{"codes":["hmo_form17","psychiatrist_referral","mod_rehab_worker"],"source":"חינם דרך קופות החולים (טופס 17) או משרד הביטחון; הפניה מפסיכיאטר.","confidence":"curated"},"280":{"codes":["gp_referral","rehab_basket_committee"],"source":"הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.","confidence":"curated"},"281":{"codes":["mod_rehab_worker","nii_referral"],"source":"הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).","confidence":"curated"},"282":{"codes":["unknown"],"source":"","confidence":"none"},"283":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)","confidence":"curated"}}}</script>
+<script type="application/json" id="mh-referral-codes">{"rows":{"1":{"codes":["unknown"],"source":"","confidence":"none"},"2":{"codes":["unknown"],"source":"","confidence":"none"},"3":{"codes":["unknown"],"source":"","confidence":"none"},"4":{"codes":["self_referral"],"source":"ייעוץ והכנה בחינם לוועדה הרפואית","confidence":"curated"},"5":{"codes":["rehab_basket_committee"],"source":"חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000)","confidence":"curated"},"6":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"7":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"8":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"9":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"10":{"codes":["self_referral"],"source":"זמין 24/7 לחיילים, מילואים וכוחות הביטחון","confidence":"curated"},"11":{"codes":["self_referral"],"source":"ניתן לפנות באופן אנונימי","confidence":"curated"},"12":{"codes":["unknown"],"source":"","confidence":"none"},"13":{"codes":["unknown"],"source":"","confidence":"none"},"16":{"codes":["unknown"],"source":"","confidence":"none"},"18":{"codes":["unknown"],"source":"","confidence":"none"},"19":{"codes":["unknown"],"source":"","confidence":"none"},"21":{"codes":["unknown"],"source":"","confidence":"none"},"24":{"codes":["unknown"],"source":"","confidence":"none"},"28":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"29":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"31":{"codes":["unknown"],"source":"","confidence":"none"},"32":{"codes":["unknown"],"source":"","confidence":"none"},"33":{"codes":["unknown"],"source":"","confidence":"none"},"34":{"codes":["unknown"],"source":"","confidence":"none"},"35":{"codes":["unknown"],"source":"","confidence":"none"},"36":{"codes":["unknown"],"source":"","confidence":"none"},"37":{"codes":["unknown"],"source":"","confidence":"none"},"38":{"codes":["unknown"],"source":"","confidence":"curated"},"39":{"codes":["self_referral"],"source":"בית בטוח לטיפול מיידי — חלופת אשפוז","confidence":"curated"},"40":{"codes":["hmo_form17"],"source":"cost: לאומית ומאוחדת","confidence":"curated"},"41":{"codes":["self_referral"],"source":"שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.","confidence":"curated"},"42":{"codes":["mod_rehab_worker"],"source":"ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום.","confidence":"curated"},"43":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת ולאומית","confidence":"curated"},"44":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"45":{"codes":["self_referral"],"source":"שירות פרטי","confidence":"curated"},"46":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת (בירושלים)","confidence":"curated"},"47":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"48":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: מכבי, מאוחדת ולאומית","confidence":"curated"},"49":{"codes":["unknown"],"source":"","confidence":"none"},"50":{"codes":["unknown"],"source":"","confidence":"none"},"51":{"codes":["unknown"],"source":"","confidence":"none"},"52":{"codes":["unknown"],"source":"","confidence":"none"},"53":{"codes":["unknown"],"source":"","confidence":"curated"},"56":{"codes":["unknown"],"source":"","confidence":"none"},"57":{"codes":["unknown"],"source":"","confidence":"none"},"59":{"codes":["unknown"],"source":"","confidence":"none"},"60":{"codes":["unknown"],"source":"","confidence":"none"},"61":{"codes":["unknown"],"source":"","confidence":"none"},"62":{"codes":["unknown"],"source":"","confidence":"curated"},"63":{"codes":["self_referral"],"source":"התערבות רגשית ממוקדת וללא עלות","confidence":"curated"},"64":{"codes":["unknown"],"source":"","confidence":"none"},"65":{"codes":["unknown"],"source":"","confidence":"none"},"66":{"codes":["unknown"],"source":"","confidence":"none"},"67":{"codes":["unknown"],"source":"","confidence":"none"},"68":{"codes":["unknown"],"source":"","confidence":"none"},"69":{"codes":["unknown"],"source":"","confidence":"none"},"70":{"codes":["unknown"],"source":"","confidence":"none"},"71":{"codes":["unknown"],"source":"","confidence":"none"},"72":{"codes":["unknown"],"source":"","confidence":"none"},"73":{"codes":["unknown"],"source":"","confidence":"none"},"74":{"codes":["unknown"],"source":"","confidence":"none"},"76":{"codes":["unknown"],"source":"","confidence":"none"},"78":{"codes":["unknown"],"source":"","confidence":"curated"},"79":{"codes":["unknown"],"source":"","confidence":"none"},"80":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"81":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"82":{"codes":["unknown"],"source":"","confidence":"none"},"83":{"codes":["unknown"],"source":"","confidence":"none"},"84":{"codes":["unknown"],"source":"","confidence":"none"},"85":{"codes":["unknown"],"source":"","confidence":"none"},"87":{"codes":["unknown"],"source":"","confidence":"none"},"88":{"codes":["unknown"],"source":"","confidence":"none"},"89":{"codes":["unknown"],"source":"","confidence":"none"},"90":{"codes":["unknown"],"source":"","confidence":"none"},"94":{"codes":["unknown"],"source":"","confidence":"none"},"95":{"codes":["unknown"],"source":"","confidence":"none"},"96":{"codes":["unknown"],"source":"","confidence":"none"},"102":{"codes":["unknown"],"source":"","confidence":"none"},"104":{"codes":["unknown"],"source":"","confidence":"none"},"105":{"codes":["unknown"],"source":"","confidence":"none"},"106":{"codes":["unknown"],"source":"","confidence":"none"},"107":{"codes":["unknown"],"source":"","confidence":"none"},"108":{"codes":["unknown"],"source":"","confidence":"none"},"109":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל.","confidence":"curated"},"201":{"codes":["self_referral"],"source":"קווי המענה הארציים 1202/1203","confidence":"curated"},"202":{"codes":["unknown"],"source":"","confidence":"none"},"203":{"codes":["unknown"],"source":"","confidence":"none"},"204":{"codes":["unknown"],"source":"","confidence":"none"},"205":{"codes":["unknown"],"source":"","confidence":"none"},"206":{"codes":["unknown"],"source":"","confidence":"none"},"210":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"211":{"codes":["unknown"],"source":"להתקבל לתוכנית חייבת הכרה/אבחון טראומה.","confidence":"curated"},"212":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"213":{"codes":["unknown"],"source":"","confidence":"none"},"214":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"215":{"codes":["unknown"],"source":"","confidence":"none"},"216":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"217":{"codes":["unknown"],"source":"","confidence":"none"},"218":{"codes":["mod_rehab_worker"],"source":"במימון משרד הביטחון","confidence":"curated"},"219":{"codes":["unknown"],"source":"","confidence":"none"},"220":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"221":{"codes":["gp_referral"],"source":"מרפאת כללית","confidence":"curated"},"222":{"codes":["unknown"],"source":"","confidence":"none"},"223":{"codes":["unknown"],"source":"","confidence":"none"},"224":{"codes":["mod_rehab_worker"],"source":"החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.","confidence":"curated"},"225":{"codes":["unknown"],"source":"","confidence":"none"},"226":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"228":{"codes":["unknown"],"source":"","confidence":"none"},"229":{"codes":["unknown"],"source":"","confidence":"none"},"230":{"codes":["unknown"],"source":"","confidence":"none"},"231":{"codes":["unknown"],"source":"","confidence":"none"},"232":{"codes":["unknown"],"source":"","confidence":"none"},"233":{"codes":["unknown"],"source":"","confidence":"none"},"234":{"codes":["unknown"],"source":"","confidence":"none"},"235":{"codes":["unknown"],"source":"","confidence":"none"},"237":{"codes":["unknown"],"source":"","confidence":"none"},"238":{"codes":["unknown"],"source":"","confidence":"none"},"239":{"codes":["unknown"],"source":"","confidence":"none"},"243":{"codes":["unknown"],"source":"","confidence":"none"},"244":{"codes":["self_referral"],"source":"אתר עם שאלון התאמה לספקי שירות","confidence":"curated"},"247":{"codes":["self_referral"],"source":"הכוונה ראשונית ללא עלות וללא התחייבות","confidence":"curated"},"248":{"codes":["unknown"],"source":"","confidence":"none"},"249":{"codes":["unknown"],"source":"","confidence":"none"},"250":{"codes":["unknown"],"source":"","confidence":"none"},"251":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"252":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"253":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"254":{"codes":["self_referral"],"source":"קו חם מאויש 24/7 כולל סופי שבוע","confidence":"curated"},"257":{"codes":["unknown"],"source":"","confidence":"none"},"263":{"codes":["unknown"],"source":"","confidence":"none"},"264":{"codes":["unknown"],"source":"","confidence":"none"},"268":{"codes":["psychiatrist_referral"],"source":"נדרשת אבחנה של פסיכיאטר.","confidence":"curated"},"269":{"codes":["unknown"],"source":"","confidence":"none"},"270":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרש מרשם פסיכיאטר ואישור הקופה.","confidence":"curated"},"271":{"codes":["psychiatrist_referral"],"source":"נדרשת הערכה פסיכיאטרית.","confidence":"curated"},"272":{"codes":["unknown"],"source":"","confidence":"none"},"273":{"codes":["psychiatrist_referral"],"source":"הפניה מפסיכיאטר או נוירולוג.","confidence":"curated"},"274":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית","confidence":"keyword"},"275":{"codes":["unknown"],"source":"","confidence":"none"},"278":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"279":{"codes":["hmo_form17","psychiatrist_referral","mod_rehab_worker"],"source":"חינם דרך קופות החולים (טופס 17) או משרד הביטחון; הפניה מפסיכיאטר.","confidence":"curated"},"280":{"codes":["gp_referral","rehab_basket_committee"],"source":"הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.","confidence":"curated"},"281":{"codes":["mod_rehab_worker","nii_referral"],"source":"הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).","confidence":"curated"},"282":{"codes":["unknown"],"source":"","confidence":"none"},"283":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)","confidence":"curated"},"291":{"codes":["self_referral"],"source":"פרטי כל מרפאה באתר","confidence":"curated"}}}</script>
 <!-- REFERRAL_CODES_END -->
 
     <script type="text/babel">
@@ -1113,6 +1166,16 @@
             285: [{ label: "תל אביב", address: "נחום גולדמן 5, תל אביב", lat: 32.05922, lng: 34.75991 }, { label: "ירושלים", address: "מדרגות הביקור 2, עין כרם, ירושלים", lat: 31.767637, lng: 35.163903 }, { label: "מדבר", address: "צומת ציפורים, כביש 40, דרומית לשדה בוקר", lat: 30.83561, lng: 34.739881 }],
             286: [{ label: "באר שבע", address: "משה דיין 1, באר שבע", lat: 31.2649, lng: 34.77254 }],
             287: [{ label: "עומר", address: "מרגנית 31, עומר", lat: 31.27529, lng: 34.84821 }, { label: "קריית חיים", address: "הגדוד העברי 58, קריית חיים", lat: 32.82436, lng: 35.06858 }],
+            291: [
+                { label: "הוד השרון", address: "המרכז לבריאות הנפש שלוותה, עליית הנוער, הוד השרון", lat: 32.15486, lng: 34.898352, phone: "09-7478050", email: "kerenyuz@clalit.org.il" },
+                { label: "באר יעקב", address: "מרפאת המרכז הרפואי מרחבים, באר יעקב", lat: 31.935925, lng: 34.829972 },
+                { label: "ירושלים", address: "המרפאה הקהילתית לבריאות הנפש, קריית יובל, ירושלים", lat: 31.76436, lng: 35.175045, phone: "02-6435378", email: "yovel.y@moh.gov.il" },
+                { label: "פתח תקווה", address: "המרכז לבריאות הנפש גהה, הלסינקי 1, פתח תקווה", lat: 32.089107, lng: 34.864914, phone: "03-9258258", email: "a.clinic@clalit.org.il" },
+                { label: "חיפה", address: "המרכז הרפואי בני ציון, חיפה", lat: 32.806072, lng: 34.992414, phone: "04-8359661", email: "adi.kuntz@b-zion.org.il" },
+                { label: "בת ים", address: "הדספייס, רוטשילד 29, בת ים", lat: 32.027094, lng: 34.746965, phone: "03-9136555", email: "info@headspace.org.il" },
+                { label: "השרון", address: "מרפאת מרכז רפואי לב השרון, פרדס חנה-כרכור", lat: 32.474996, lng: 34.975139, phone: "09-8981242", email: "Michalh@lev-hasharon.co.il" },
+                { label: "עכו", address: "מרפאת חוץ, מרכז רפואי לבריאות הנפש מזור, עכו", lat: 32.928173, lng: 35.075638, phone: "04-9954778", email: "rozanna@mazor.health.gov.il" }
+            ],
         };
         const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
         const MH_REFERRAL_LABELS_HE = {
@@ -1678,6 +1741,7 @@
          {"row": 78, "org": "המרכז הירושלמי לבריאות הנפש (כפר שאול-איתנים)", "svc": "המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.", "phone": "", "web": "http://www.psjer.org.il/", "target": "", "region": "ירושלים, בית שמש, מעלה אדומים, מבשרת ציון, יישובי פרוזדור ירושלים", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 65, "org": "מכון למרחב\n(מרכז טיפולי רב תחומי)", "svc": "מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.", "phone": "02-5954571", "web": "https://www.lamerchav.org.il/", "target": "", "region": "מרפאות בירושלים, בית שמש, ביתר עילית, רחובות\n", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""},
+         {"row": 291, "org": "נויגייט (NAVIGATE)", "svc": "תוכנית טיפול קהילתית מוקדמת לצעירים אחרי אפיזודה פסיכוטית ראשונה", "phone": "", "web": "https://www.navigateisrael.com/", "target": "צעירים שחווים אפיזודה או משבר פסיכוטי ראשון", "region": "מרפאות ברחבי הארץ", "cost": "", "specialty": "התערבות מוקדמת בפסיכוזה", "notes": "אמבולטורית ורב-צוותית (פסיכיאטר, פסיכותרפיה, שיקום תעסוקה והשכלה, ליווי משפחתי), לפי מודל NAVIGATE. פרטי כל מרפאה באתר. מרפאת בת ים פועלת בהדספייס (כרטיס נפרד).", "languages": "", "diseases": "", "add": ""},
          {"row": 90, "org": "ME-MENTAL EXPERTS", "svc": "מרכזים לטיפול רגשי", "phone": "*5806", "whatsapp": "+972723362227", "web": "https://mexp.co.il/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "iconOnly": true},
          {"row": 279, "org": "בית רעים (האגודה לבריאות הציבור)", "svc": "טיפול יום פסיכיאטרי — חלופת אשפוז למבוגרים במצבי משבר", "phone": "09-8851290", "iconOnly": true, "web": "https://www.aguda.co.il/services/%d7%91%d7%99%d7%aa-%d7%a8%d7%a2%d7%99%d7%9d-%d7%a0%d7%aa%d7%a0%d7%99%d7%94/", "target": "מגיל 18", "region": "", "cost": "חינם דרך קופות החולים (טופס 17) או משרד הביטחון; גם פרטי", "specialty": "", "notes": "א'-ה' 08:00–14:00. הפניה מפסיכיאטר. בפיקוח משרד הבריאות. מקבל פניות מכל הארץ.", "languages": "", "diseases": "", "add": ""},
          {"row": 280, "org": "מרפאת הנגב (האגודה לבריאות הציבור)", "svc": "טיפול נפשי מרפאתי — הערכה פסיכיאטרית, טיפול תרופתי ופסיכותרפיה", "phone": "08-9982640", "iconOnly": true, "web": "https://www.aguda.co.il/services/%d7%9e%d7%a8%d7%a4%d7%90%d7%aa-%d7%90%d7%95%d7%a4%d7%a7%d7%99%d7%9d/", "target": "מגיל 18, מבוטחי כל הקופות (רפורמת בריאות הנפש)", "region": "", "cost": "", "specialty": "", "notes": "הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.", "languages": "", "diseases": "", "add": ""}
@@ -1845,6 +1909,7 @@
          {"row": 66, "org": "מרכז יה״ל- ייעוץ והכוונה למשפחות", "svc": "ייעוץ והכוונה למשפחות בתחום בריאות הנפש · 18:00 - 22:00", "phone": "03-9559596", "iconOnly": true, "web": "https://eychut.org.il/%d7%9e%d7%a8%d7%9b%d7%96-%d7%99%d7%94%d7%b4%d7%9c-%d7%99%d7%99%d7%a2%d7%95%d7%a5-%d7%95%d7%94%d7%9b%d7%95%d7%95%d7%a0%d7%94-%d7%9c%d7%9e%d7%a9%d7%a4%d7%97%d7%95%d7%aa-2/", "target": "", "region": "ערים שונות", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/Yahel.Families"},
          {"row": 68, "org": "בלב ובנפש (עזר מציון)\n", "svc": "סיוע למשפחות של מתמודדי נפש", "phone": "", "web": "https://www.ami.org.il/services", "target": "", "region": "ערים שונות", "cost": "", "specialty": "", "notes": "מרכז לליווי מתמודדים במימוש הזכויות ובתהליך השיקום", "languages": "", "diseases": "", "add": ""},
          {"row": 69, "org": "דיאלוג פתוח בישראל (דפי)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"},
+         {"row": 291, "org": "נויגייט (NAVIGATE)", "svc": "תוכנית טיפול קהילתית מוקדמת לצעירים אחרי אפיזודה פסיכוטית ראשונה", "phone": "", "web": "https://www.navigateisrael.com/", "target": "צעירים שחווים אפיזודה או משבר פסיכוטי ראשון", "region": "מרפאות ברחבי הארץ", "cost": "", "specialty": "התערבות מוקדמת בפסיכוזה", "notes": "אמבולטורית ורב-צוותית (פסיכיאטר, פסיכותרפיה, שיקום תעסוקה והשכלה, ליווי משפחתי), לפי מודל NAVIGATE. פרטי כל מרפאה באתר. מרפאת בת ים פועלת בהדספייס (כרטיס נפרד).", "languages": "", "diseases": "", "add": ""},
          {"row": 96, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים לכם, סבסוד טיפולים, חוסן משפחתי. שינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה שמה בלב ליבה את החוסן המשפחתי ומסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים. מאז הקמתה מובילה העמותה, טיפין טיפין, לשינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.", "languages": "", "diseases": "", "add": ""},
          {"row": 207, "org": "משפחות בריאות הנפש", "svc": "עמותת בני ובנות משפחה של מתמודדי/ות נפש בישראל. מטרת העמותה היא לפעול למען המתמודדים ולמען משפחותיהם למימוש ולהרחבת זכויות, לטיפול מיטבי, להכלה ולשיקום בקהילה ולהסברה בקרב מקבלי החלטות, בקרב הממסד ובקרב הציבור.", "phone": "058-7540054", "whatsapp": "972587540054", "email": "mbhnoffice@gmail.com", "web": "https://www.mishpachot.org/", "add": "https://www.facebook.com/mishpachot", "target": "בני ובנות משפחה של מתמודדי/ות נפש", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "כולל תוכנית \"משפחות מלוות משפחות\", ייצוג במוסדות, כנסים, ספריית הקלטות ופרסומים, וקידום חקיקה.", "languages": "", "diseases": ""},
          {"row": 208, "org": "ענת רוסמן", "svc": "מנחה ומלווה משפחות למתמודדי נפש", "phone": "", "web": "https://www.facebook.com/profile.php?id=100090438409582", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -1857,6 +1922,7 @@
         "youth": {"icon": "👶", "title": "נוער וצעירים", "titleEn": "Teenagers & Young Adults", "desc": "שירותים לגילאי 10-35", "services": [
          {"row": 45, "org": "שרן רפואה עד הבית", "svc": "הקול שבפנים – טיפול ביתי לצעירים במצבי משבר נפשי", "phone": "", "web": "https://sharanmedical.co.il/voiceover/", "target": "", "region": "", "cost": "שירות פרטי", "specialty": "", "notes": "שירות למשפחות וצעירים (12-35) החווים הסתגרות ונסיגה תפקודית. ", "languages": "", "diseases": "", "add": ""},
          {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""},
+         {"row": 291, "org": "נויגייט (NAVIGATE)", "svc": "תוכנית טיפול קהילתית מוקדמת לצעירים אחרי אפיזודה פסיכוטית ראשונה", "phone": "", "web": "https://www.navigateisrael.com/", "target": "צעירים שחווים אפיזודה או משבר פסיכוטי ראשון", "region": "מרפאות ברחבי הארץ", "cost": "", "specialty": "התערבות מוקדמת בפסיכוזה", "notes": "אמבולטורית ורב-צוותית (פסיכיאטר, פסיכותרפיה, שיקום תעסוקה והשכלה, ליווי משפחתי), לפי מודל NAVIGATE. פרטי כל מרפאה באתר. מרפאת בת ים פועלת בהדספייס (כרטיס נפרד).", "languages": "", "diseases": "", "add": ""},
          {"row": 64, "org": "נוער הקואליציה\n(קואליציית הארגונים הדתיים למען בריאות הנפש)", "svc": "קבוצה חברתית לנערים ונערות מתמודדי ומתמודדות נפש דתיים ודתלשים", "phone": "", "web": "https://www.instagram.com/noarhakoalitzya/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 72, "org": "זה בנפשי", "svc": "תמיכה בילדים ונוער המטופלים במרכזי בריאות הנפש", "phone": "051-2301343", "web": "https://www.zebenafshi.com/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 102, "org": "Kav L'Noar (Merchav L'Noar)", "svc": "Therapy clinic for teenagers & young adults (11-27) and parents; specializes in Anglo olim; Halachik framework; therapy for individuals, couples and families", "phone": "02-622-3039", "phoneLabel": "Jerusalem clinic", "phone2": "02-543-6846", "phoneLabel2": "Beit Shemesh clinic", "web": "https://www.kavlnoar.org/jerusalem-clinic", "target": "", "region": "Jerusalem, Beit Shemesh", "cost": "Mostly covered by the health fund, with a small co-payment", "languages": "English, Hebrew, Yiddish, Spanish, Swiss-German", "diseases": "Anxiety, Depression, OCD, Grief, Trauma, etc.", "add": "https://www.kavlnoar.org/beit-shemesh-clinic", "dir": "ltr"},
@@ -3496,6 +3562,7 @@
                         else next[key] = String(key).indexOf('phoneShowNumber') === 0 ? true : '';
                     });
                     if (edit.eligibility && typeof edit.eligibility === 'object') next.cardEligibility = edit.eligibility;
+                    if (Array.isArray(edit.sites) && edit.sites.length) next.cardSites = edit.sites;
                     if (edit.id) next.cardEditId = edit.id;
                     return next;
                 };
@@ -3524,6 +3591,7 @@
                     if (elig.sex === 'female') out.push(prop('מין', 'נקבה'));
                     else if (elig.sex === 'male') out.push(prop('מין', 'זכר'));
                     if (elig.location_mode === 'nationwide') out.push(prop('מיקום', 'ארצי'));
+                    else if (elig.location_mode === 'sites') out.push(prop('מיקום', 'לפי מרפאות'));
                     else if (elig.location_mode === 'regions' && Array.isArray(elig.regions) && elig.regions.length) {
                         out.push(prop('אזורים', elig.regions.join(' · ')));
                     }
@@ -3613,7 +3681,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "23.09.2026"; 
+            const LAST_UPDATED = "24.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -5031,6 +5099,8 @@
             };
 
             const Card = ({ s, categoryKey, subsectionId, distanceLabel }) => {
+                const [mapOpen, setMapOpen] = useState(false);
+                const [mapFilter, setMapFilter] = useState('');
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
                 const entryTargetKey = `${mhGetCategoryGroupForCategory(categoryKey) || ''}:${categoryKey}:${subsectionId || ''}:${entryId || ''}`;
                 const isTargeted = entryId && highlightedEntryKey === entryTargetKey;
@@ -5042,6 +5112,20 @@
                 const hbSearchActive = searchTerm === HARAVOT_BARZEL_SEARCH;
                 const showHbLaunchBanner = isHbBooklet && hbSearchActive && haravotBarzelLaunchedFrom != null;
                 const showHbLaunchCta = isHbBooklet && !showHbLaunchBanner;
+                const locs = (Array.isArray(s.cardSites) && s.cardSites.length) ? s.cardSites : mhGetLocationsForRow(s.row);
+                const rankedLocs = locs.map((loc, locIdx) => ({
+                    loc,
+                    locIdx,
+                    km: nearbyOrigin ? mhHaversineKm(nearbyOrigin.lat, nearbyOrigin.lng, Number(loc.lat), Number(loc.lng)) : null
+                })).sort((a, b) => {
+                    if (a.km == null || b.km == null) return a.locIdx - b.locIdx;
+                    return a.km - b.km;
+                });
+                const mapNeedle = mapFilter.trim();
+                const visibleLocs = mapNeedle
+                    ? rankedLocs.filter(({ loc }) => `${loc.label || ''} ${loc.address || ''}`.includes(mapNeedle))
+                    : rankedLocs;
+                const nearestKm = rankedLocs.length && rankedLocs[0].km != null ? rankedLocs[0].km : null;
                 return (
                 <div
                     className={`mh-card ${isTargeted ? 'mh-card-targeted' : ''}`}
@@ -5138,15 +5222,15 @@
                                 </details>
                             );
                         })()}
-                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || mhGetLocationsForRow(s.row).length) && (
+                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
                                 {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
-                                {mhGetLocationsForRow(s.row).length === 1 && mhGetLocationsForRow(s.row)[0].address && (
-                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {mhGetLocationsForRow(s.row)[0].address}</div>
+                                {locs.length === 1 && locs[0].address && (
+                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {locs[0].address}</div>
                                 )}
-                                {mhGetLocationsForRow(s.row).length > 1 && (
-                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Sites:' : 'סניפים:'}</strong> {mhGetLocationsForRow(s.row).map(l => l.label).join(' · ')}</div>
+                                {locs.length > 1 && (
+                                    <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Sites:' : 'סניפים:'}</strong> {locs.map(l => l.label).join(' · ')}</div>
                                 )}
                                 {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {s.cost}</div>}
                                 {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
@@ -5178,21 +5262,74 @@
                                     </a>
                                 );
                             })()}
-                            {mhGetLocationsForRow(s.row).map((loc, locIdx) => (
+                            {locs.length === 1 && (
                                 <a
-                                    key={`${s.row}_map_${locIdx}`}
-                                    href={mhGoogleMapsUrl(loc)}
+                                    href={mhGoogleMapsUrl(locs[0])}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mh-map-btn"
                                     data-skip-external-link-check="true"
-                                    data-tracking-name={`${s.trackingName || s.org}_map${mhGetLocationsForRow(s.row).length > 1 ? `_${locIdx + 1}` : ''}`}
+                                    data-tracking-name={`${s.trackingName || s.org}_map`}
                                     data-analytics-type="map"
-                                    title={loc.address || loc.label}
+                                    title={locs[0].address || locs[0].label}
                                 >
-                                    <i className="fas fa-map-marker-alt"></i> {mhGetLocationsForRow(s.row).length === 1 ? (s.dir === 'ltr' ? 'Map' : 'מפה') : `${s.dir === 'ltr' ? 'Map' : 'מפה'} · ${loc.label}`}
+                                    <i className="fas fa-map-marker-alt"></i> {s.dir === 'ltr' ? 'Map' : 'מפה'}
                                 </a>
-                            ))}
+                            )}
+                            {locs.length > 1 && (
+                                <div className="mh-map-picker">
+                                    <button
+                                        type="button"
+                                        className="mh-map-btn"
+                                        aria-expanded={mapOpen}
+                                        aria-haspopup="listbox"
+                                        onClick={() => setMapOpen((open) => !open)}
+                                        data-tracking-name={`${s.trackingName || s.org}_map`}
+                                        data-analytics-type="map"
+                                    >
+                                        <i className="fas fa-map-marker-alt"></i> {s.dir === 'ltr' ? 'Map' : 'מפה'}
+                                    </button>
+                                    {mapOpen && (
+                                        <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a site' : 'בחירת מרפאה'}>
+                                            {locs.length > 6 && (
+                                                <input
+                                                    type="text"
+                                                    className="mh-map-filter"
+                                                    value={mapFilter}
+                                                    onChange={(e) => setMapFilter(e.target.value)}
+                                                    placeholder={s.dir === 'ltr' ? 'Filter sites' : 'סינון מרפאות'}
+                                                />
+                                            )}
+                                            {authUser && authUser.city && !nearbyOrigin && (
+                                                <button
+                                                    type="button"
+                                                    className="mh-map-city"
+                                                    onClick={() => runNearbyGeocode(authUser.city)}
+                                                >
+                                                    {s.dir === 'ltr' ? `Sort by your city (${authUser.city})` : `מיון לפי העיר בחשבון (${authUser.city})`}
+                                                </button>
+                                            )}
+                                            {visibleLocs.map(({ loc, locIdx, km }) => (
+                                                <a
+                                                    key={`${s.row}_map_${locIdx}`}
+                                                    href={mhGoogleMapsUrl(loc)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    role="option"
+                                                    data-skip-external-link-check="true"
+                                                    data-tracking-name={`${s.trackingName || s.org}_map_${locIdx + 1}`}
+                                                    data-analytics-type="map"
+                                                >
+                                                    <span>{loc.label}{km != null && nearestKm != null && km === nearestKm ? (s.dir === 'ltr' ? ' · nearest' : ' · הקרוב') : ''}</span>
+                                                    {km != null && <span className="mh-map-km">{mhFormatKm(km)} ק״מ</span>}
+                                                    {loc.phone ? <span className="mh-map-phone">{loc.phone}</span> : null}
+                                                </a>
+                                            ))}
+                                            {!visibleLocs.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching site' : 'אין מרפאה תואמת'}</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -5239,7 +5376,8 @@
                 Object.entries(data).forEach(([catId, cat]) => {
                     getCatServices(cat).forEach((s) => {
                         const row = Number(s.row);
-                        if (!row || !ENTRY_LOCATIONS[row] || map.has(row)) return;
+                        const hasSites = (Array.isArray(s.cardSites) && s.cardSites.length) || ENTRY_LOCATIONS[row];
+                        if (!row || !hasSites || map.has(row)) return;
                         map.set(row, { s, categoryKey: catId });
                     });
                 });
@@ -5249,7 +5387,10 @@
                 if (!nearbyOrigin) return [];
                 const out = [];
                 uniqueLocatedServices.forEach(({ s, categoryKey }, row) => {
-                    const nearest = mhNearestLocation(mhGetLocationsForRow(row), nearbyOrigin);
+                    const nearest = mhNearestLocation(
+                        (Array.isArray(s.cardSites) && s.cardSites.length) ? s.cardSites : mhGetLocationsForRow(row),
+                        nearbyOrigin
+                    );
                     if (!nearest || nearest.km > nearbyRadiusKm) return;
                     out.push({ s, categoryKey, nearest });
                 });
