@@ -119,6 +119,17 @@
     .status-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     details.chrome { margin-top: 4px; }
     details.chrome summary { cursor: pointer; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+    details.kz-about { margin-bottom: 16px; }
+    details.kz-about summary { cursor: pointer; font-weight: 600; color: var(--primary-dark); }
+    .kz-about p { margin: 8px 0; }
+    .kz-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+    .kz-pre {
+      white-space: pre-wrap; max-height: 420px; overflow: auto; background: #f7f9fb;
+      border-radius: 8px; padding: 12px; font-size: 0.85rem; margin: 8px 0 0;
+    }
+    .kz-hit { display: block; width: 100%; text-align: inherit; background: transparent; color: inherit; border: none; padding: 8px 0; cursor: pointer; font: inherit; }
+    .kz-hit:hover b { text-decoration: underline; }
+    .kz-meta { font-size: 0.8rem; color: var(--muted); word-break: break-all; margin: 8px 0; }
     [dir=auto] { unicode-bidi: plaintext; }
     @media (max-width: 700px) {
       .filters .wide, .filters .exclude { grid-column: span 1; }
@@ -255,7 +266,7 @@
     const app = document.getElementById('app');
     function hashToTab() {
       const h = (location.hash || '').replace(/^#/, '');
-      if (h === 'users' || h === 'questions' || h === 'updates') return h;
+      if (h === 'users' || h === 'questions' || h === 'updates' || h === 'kolzchut') return h;
       if (h === 'directory' || h.indexOf('directory/') === 0) return 'directory';
       return 'analytics';
     }
@@ -270,6 +281,21 @@
       directoryCards: null,
       directoryCard: null,
       directoryMsg: '',
+      kz: {
+        action: 'search',
+        q: 'סל שיקום',
+        title: '',
+        section: '0',
+        format: 'text',
+        prefix: 'נכות',
+        category: 'נכות',
+        limit: '10',
+        offset: '0',
+        continueToken: '',
+        loading: false,
+        error: '',
+        result: null
+      },
       analytics: null,
       users: null,
       accounts: null,
@@ -1505,6 +1531,401 @@
       });
     }
 
+    const KZ_FIELDS = {
+      search: ['q', 'limit', 'offset'],
+      suggest: ['q', 'limit'],
+      article: ['title', 'format'],
+      sections: ['title'],
+      section: ['title', 'section', 'format'],
+      categories: ['prefix', 'limit'],
+      category: ['category', 'limit'],
+      info: ['title']
+    };
+    const KZ_HINT = {
+      search: 'Full-text search across articles. Hebrew matches better than English. A click on a title lists that page’s sections.',
+      suggest: 'OpenSearch title suggestions. Shorter and less precise than full-text search. A click lists sections.',
+      article: 'The whole page. Plain text is what a model keeps after HTML is stripped. Wikitext keeps the markup, including tables.',
+      sections: 'Headings only. This is the chunk list a retrieval step would choose from. A click reads that section as plain text.',
+      section: 'One section by the index from the section list. Index 0 is the text before the first heading.',
+      categories: 'Category names, optionally filtered by a Hebrew prefix. A click lists pages in that category.',
+      category: 'Pages and subcategories. A page click lists sections. A subcategory click lists its members.',
+      info: 'Last edit, length, and categories. No article body. Useful for seeing how fresh and how classified a page is.'
+    };
+
+    function kzShow(name) {
+      return (KZ_FIELDS[state.kz.action] || []).indexOf(name) !== -1;
+    }
+    function kzReadForm(root) {
+      const kz = state.kz;
+      const val = (id) => {
+        const node = root.querySelector(id);
+        return node ? node.value : '';
+      };
+      kz.action = val('#kz-action') || kz.action;
+      kz.q = val('#kz-q');
+      kz.title = val('#kz-title');
+      kz.section = val('#kz-section');
+      kz.format = val('#kz-format') || 'text';
+      kz.prefix = val('#kz-prefix');
+      kz.category = val('#kz-category');
+      kz.limit = val('#kz-limit') || '10';
+      kz.offset = val('#kz-offset') || '0';
+    }
+    function kzResultHtml(result) {
+      if (!result) return '';
+      const head = `<p class="kz-meta">${esc(result.ms)} ms · ${esc(result.requestUrl)}</p>`;
+      let body = '';
+      if (result.action === 'search') {
+        const rows = result.results || [];
+        body = `<p class="lede">${esc(result.total)} hits. Showing ${esc(rows.length)} from offset ${esc(result.offset)}.</p>` +
+          rows.map((hit) => `<button type="button" class="kz-hit" data-kz-title="${esc(hit.title)}">
+            <b>${esc(hit.title)}</b>
+            <span class="muted"> · ${esc(hit.wordcount)} words</span>
+            <div class="muted">${esc(hit.snippet)}</div>
+          </button>`).join('') +
+          (result.hasMore ? `<p><button type="button" class="secondary" data-kz-more="offset" data-kz-value="${esc(result.nextOffset)}">Next page</button></p>` : '');
+      } else if (result.action === 'suggest') {
+        body = (result.results || []).map((hit) => `<button type="button" class="kz-hit" data-kz-title="${esc(hit.title)}">
+          <b>${esc(hit.title)}</b>
+          <div class="muted">${esc(hit.description)}</div>
+        </button>`).join('') || '<p class="lede">No suggestions.</p>';
+      } else if (result.action === 'article' || result.action === 'section') {
+        body = `<p><a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">Open on כל זכות</a>
+          ${result.truncated ? ' · <span class="err">Truncated at 20,000 characters</span>' : ''}</p>
+          <pre class="kz-pre" dir="auto">${esc(result.content)}</pre>`;
+      } else if (result.action === 'sections') {
+        const rows = result.sections || [];
+        body = `<p class="lede">${esc(rows.length)} sections on <a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">${esc(result.title)}</a>. Index 0 is the lead, before the first heading, and is not in this list.</p>` +
+          `<p><button type="button" class="secondary" data-kz-section="0">Read lead (index 0)</button></p>` +
+          rows.map((section) => `<button type="button" class="kz-hit" data-kz-section="${esc(section.index)}" style="padding-right:${(Number(section.level) || 1) * 12}px">
+            <b>${esc(section.number)} ${esc(section.heading)}</b>
+            <span class="muted"> · index ${esc(section.index)}</span>
+          </button>`).join('');
+      } else if (result.action === 'categories') {
+        body = (result.categories || []).map((cat) => `<button type="button" class="kz-hit" data-kz-category="${esc(cat.name)}"><b>${esc(cat.name)}</b></button>`).join('') ||
+          '<p class="lede">No categories.</p>';
+        if (result.continueToken) {
+          body += `<p><button type="button" class="secondary" data-kz-more="continue" data-kz-value="${esc(result.continueToken)}">Next page</button></p>`;
+        }
+      } else if (result.action === 'category') {
+        body = `<p class="lede">${esc(result.category)}</p>` +
+          (result.members || []).map((member) => {
+            const sub = member.ns === 14;
+            const label = String(member.title || '').replace(/^קטגוריה:/, '');
+            return sub
+              ? `<button type="button" class="kz-hit" data-kz-category="${esc(label)}"><b>${esc(member.title)}</b> <span class="muted">subcategory</span></button>`
+              : `<button type="button" class="kz-hit" data-kz-title="${esc(member.title)}"><b>${esc(member.title)}</b></button>`;
+          }).join('');
+        if (result.continueToken) {
+          body += `<p><button type="button" class="secondary" data-kz-more="continue" data-kz-value="${esc(result.continueToken)}">Next page</button></p>`;
+        }
+      } else if (result.action === 'info') {
+        const cats = result.categories || [];
+        body = `<p><a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">${esc(result.title)}</a></p>
+          <p class="lede">Touched ${esc(result.touched)} · length ${esc(result.length)} · revision ${esc(result.lastrevid)}</p>
+          <div>${cats.map((name) => `<button type="button" class="secondary" data-kz-category="${esc(name)}" style="margin:0 0 8px 8px">${esc(name)}</button>`).join('') || '<span class="muted">No categories</span>'}</div>`;
+      }
+      return head + body + `<details class="chrome"><summary>Response JSON</summary><pre class="kz-pre">${esc(JSON.stringify(result, null, 2))}</pre></details>`;
+    }
+    function kzStrip(html) {
+      return String(html || '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#0?39;/gi, "'")
+        .replace(/\s+\n/g, '\n')
+        .replace(/[ \t]{2,}/g, ' ')
+        .trim();
+    }
+    function kzArticleUrl(title) {
+      return 'https://www.kolzchut.org.il/he/' + encodeURIComponent(String(title || '').replace(/ /g, '_'));
+    }
+    function kzCap(text) {
+      const value = String(text || '');
+      if (value.length <= 20000) return { content: value, truncated: false };
+      return { content: value.slice(0, 20000), truncated: true };
+    }
+    async function kzWiki(action, query) {
+      const params = new URLSearchParams();
+      params.set('format', 'json');
+      params.set('origin', '*');
+      const limit = String(Math.max(1, Math.min(20, Number(query.limit) || 10)));
+      if (action === 'search') {
+        params.set('action', 'query');
+        params.set('list', 'search');
+        params.set('srsearch', query.q);
+        params.set('srlimit', limit);
+        params.set('sroffset', String(Math.max(0, Number(query.offset) || 0)));
+        params.set('srprop', 'snippet|size|wordcount|timestamp');
+      } else if (action === 'suggest') {
+        params.set('action', 'opensearch');
+        params.set('search', query.q);
+        params.set('limit', limit);
+        params.set('namespace', '0');
+      } else if (action === 'article' || action === 'section') {
+        params.set('action', 'parse');
+        params.set('page', query.title);
+        params.set('prop', query.format === 'wikitext' ? 'wikitext' : 'text');
+        params.set('disablelimitreport', 'true');
+        params.set('disableeditsection', 'true');
+        if (action === 'section') params.set('section', query.section);
+      } else if (action === 'sections') {
+        params.set('action', 'parse');
+        params.set('page', query.title);
+        params.set('prop', 'sections');
+      } else if (action === 'categories') {
+        params.set('action', 'query');
+        params.set('list', 'allcategories');
+        params.set('aclimit', limit);
+        if (query.prefix) params.set('acprefix', query.prefix);
+        if (query.continueToken) params.set('accontinue', query.continueToken);
+      } else if (action === 'category') {
+        let name = query.category || '';
+        if (name.indexOf('Category:') === 0) name = 'קטגוריה:' + name.slice('Category:'.length);
+        else if (name.indexOf('קטגוריה:') !== 0) name = 'קטגוריה:' + name;
+        params.set('action', 'query');
+        params.set('list', 'categorymembers');
+        params.set('cmtitle', name);
+        params.set('cmlimit', limit);
+        params.set('cmtype', 'page|subcat');
+        if (query.continueToken) params.set('cmcontinue', query.continueToken);
+      } else if (action === 'info') {
+        params.set('action', 'query');
+        params.set('titles', query.title);
+        params.set('prop', 'info|categories');
+        params.set('inprop', 'url');
+        params.set('cllimit', '50');
+      } else {
+        throw new Error('Unknown action');
+      }
+      const url = 'https://www.kolzchut.org.il/w/he/api.php?' + params.toString();
+      const started = Date.now();
+      const response = await fetch(url);
+      const ms = Date.now() - started;
+      if (!response.ok) throw new Error('Kol Zchut returned HTTP ' + response.status);
+      const data = await response.json();
+      if (data && data.error) throw new Error(data.error.info || data.error.code || 'Kol Zchut API error');
+      if (action === 'search') {
+        const hits = (data.query && data.query.search) || [];
+        const total = (data.query && data.query.searchinfo && data.query.searchinfo.totalhits) || 0;
+        const offset = Number(query.offset) || 0;
+        return {
+          action, requestUrl: url, ms, total, offset,
+          hasMore: total > offset + hits.length,
+          nextOffset: total > offset + hits.length ? offset + hits.length : null,
+          results: hits.map((hit) => ({
+            title: hit.title, pageid: hit.pageid, snippet: kzStrip(hit.snippet),
+            wordcount: hit.wordcount, size: hit.size, timestamp: hit.timestamp, url: kzArticleUrl(hit.title)
+          }))
+        };
+      }
+      if (action === 'suggest') {
+        const titles = data[1] || [];
+        const descriptions = data[2] || [];
+        const links = data[3] || [];
+        return {
+          action, requestUrl: url, ms,
+          results: titles.map((title, i) => ({ title, description: kzStrip(descriptions[i] || ''), url: links[i] || kzArticleUrl(title) }))
+        };
+      }
+      if (action === 'article' || action === 'section') {
+        const raw = query.format === 'wikitext' ? (data.parse.wikitext && data.parse.wikitext['*']) : kzStrip(data.parse.text && data.parse.text['*']);
+        const body = kzCap(raw);
+        return {
+          action, requestUrl: url, ms, title: data.parse.title, pageid: data.parse.pageid,
+          url: kzArticleUrl(data.parse.title), format: query.format, section: action === 'section' ? query.section : null, ...body
+        };
+      }
+      if (action === 'sections') {
+        const rows = (data.parse && data.parse.sections) || [];
+        return {
+          action, requestUrl: url, ms, title: data.parse.title, pageid: data.parse.pageid, url: kzArticleUrl(data.parse.title),
+          sections: rows.map((section) => ({ index: section.index, heading: kzStrip(section.line), number: section.number, level: section.level }))
+        };
+      }
+      if (action === 'categories') {
+        const rows = (data.query && data.query.allcategories) || [];
+        return {
+          action, requestUrl: url, ms,
+          continueToken: (data.continue && data.continue.accontinue) || null,
+          categories: rows.map((row) => ({ name: row['*'] || '' }))
+        };
+      }
+      if (action === 'category') {
+        const rows = (data.query && data.query.categorymembers) || [];
+        return {
+          action, requestUrl: url, ms, category: params.get('cmtitle'),
+          continueToken: (data.continue && data.continue.cmcontinue) || null,
+          members: rows.map((row) => ({ pageid: row.pageid, ns: row.ns, title: row.title, url: kzArticleUrl(row.title) }))
+        };
+      }
+      const pages = (data.query && data.query.pages) || {};
+      const page = Object.values(pages)[0];
+      if (!page || page.missing != null) throw new Error('Page not found');
+      return {
+        action, requestUrl: url, ms, title: page.title, pageid: page.pageid, url: kzArticleUrl(page.title),
+        touched: page.touched, lastrevid: page.lastrevid, length: page.length,
+        categories: (page.categories || []).map((cat) => String(cat.title || '').replace(/^קטגוריה:/, ''))
+      };
+    }
+    async function kzRun() {
+      const kz = state.kz;
+      kz.loading = true;
+      kz.error = '';
+      render();
+      const query = {
+        q: kz.q, title: kz.title, section: kz.section, format: kz.format,
+        prefix: kz.prefix, category: kz.category, limit: kz.limit, offset: kz.offset,
+        continueToken: kz.continueToken
+      };
+      if ((kz.action === 'search' || kz.action === 'suggest') && !String(kz.q || '').trim()) {
+        kz.loading = false;
+        kz.error = 'Enter a search query';
+        render();
+        return;
+      }
+      if ((kz.action === 'article' || kz.action === 'sections' || kz.action === 'section' || kz.action === 'info') && !String(kz.title || '').trim()) {
+        kz.loading = false;
+        kz.error = 'Enter a page title';
+        render();
+        return;
+      }
+      if (kz.action === 'category' && !String(kz.category || '').trim()) {
+        kz.loading = false;
+        kz.error = 'Enter a category name';
+        render();
+        return;
+      }
+      if (kz.action === 'section' && !/^\d+$/.test(String(kz.section || '').trim())) {
+        kz.loading = false;
+        kz.error = 'Section index must be a number';
+        render();
+        return;
+      }
+      try {
+        kz.result = await kzWiki(kz.action, query);
+      } catch (error) {
+        kz.result = null;
+        kz.error = error && error.message ? error.message : 'Could not reach Kol Zchut.';
+      }
+      kz.loading = false;
+      render();
+    }
+    function renderKolzchut(root) {
+      const kz = state.kz;
+      const field = (name, html) => `<div data-kz-field="${name}"${kzShow(name) ? '' : ' hidden'}>${html}</div>`;
+      root.appendChild(el(`<div class="he-panel">
+        <h2>כל זכות</h2>
+        <details class="card kz-about" open>
+          <summary>What this calls</summary>
+          <div class="kz-about">
+            <p>Each Run button calls כל זכות’s public MediaWiki API from your browser (<code>https://www.kolzchut.org.il/w/he/api.php</code>). No API key. <code>/w/api.php</code> returns 404. A server-side call is often rejected by their firewall, so this tab does not proxy it. The third-party MCP <code>@skills-il/kolzchut-mcp</code> wraps the same kind of calls for a local agent. It is not published by כל זכות. Their GitHub org is mostly wiki extensions, plus an internal Elasticsearch chatbot that this tab does not reach.</p>
+            <p>Plain text drops HTML. Tables and infoboxes often disappear there, which is the gap between a page written for people and text a model would ground on. Wikitext keeps that markup. Content is CC BY-SA 3.0; each result links back to the source page. Nothing is saved.</p>
+            <p>Search, suggestions, the full article, one section, category browse, and page info are the read actions. Click through from a hit to sections, then to a section, and compare plain text with the live page.</p>
+          </div>
+        </details>
+        <form id="kz-form" class="card">
+          <label for="kz-action">Action</label>
+          <select id="kz-action">
+            <option value="search"${kz.action === 'search' ? ' selected' : ''}>Search articles</option>
+            <option value="suggest"${kz.action === 'suggest' ? ' selected' : ''}>Title suggestions</option>
+            <option value="article"${kz.action === 'article' ? ' selected' : ''}>Full article</option>
+            <option value="sections"${kz.action === 'sections' ? ' selected' : ''}>Section headings</option>
+            <option value="section"${kz.action === 'section' ? ' selected' : ''}>One section</option>
+            <option value="categories"${kz.action === 'categories' ? ' selected' : ''}>Browse categories</option>
+            <option value="category"${kz.action === 'category' ? ' selected' : ''}>Pages in a category</option>
+            <option value="info"${kz.action === 'info' ? ' selected' : ''}>Page info</option>
+          </select>
+          <p class="dir-help">${esc(KZ_HINT[kz.action] || '')}</p>
+          <div class="filters">
+            ${field('q', `<label for="kz-q">Query</label><input id="kz-q" type="text" dir="auto" value="${esc(kz.q)}">`)}
+            ${field('title', `<label for="kz-title">Page title</label><input id="kz-title" type="text" dir="auto" value="${esc(kz.title)}">`)}
+            ${field('section', `<label for="kz-section">Section index</label><input id="kz-section" type="number" min="0" value="${esc(kz.section)}">`)}
+            ${field('format', `<label for="kz-format">Format</label><select id="kz-format"><option value="text"${kz.format === 'text' ? ' selected' : ''}>Plain text</option><option value="wikitext"${kz.format === 'wikitext' ? ' selected' : ''}>Wikitext</option></select>`)}
+            ${field('prefix', `<label for="kz-prefix">Category prefix</label><input id="kz-prefix" type="text" dir="auto" value="${esc(kz.prefix)}">`)}
+            ${field('category', `<label for="kz-category">Category</label><input id="kz-category" type="text" dir="auto" value="${esc(kz.category)}">`)}
+            ${field('limit', `<label for="kz-limit">Limit (max 20)</label><input id="kz-limit" type="number" min="1" max="20" value="${esc(kz.limit)}">`)}
+            ${field('offset', `<label for="kz-offset">Offset</label><input id="kz-offset" type="number" min="0" value="${esc(kz.offset)}">`)}
+          </div>
+          ${kz.action === 'search' || kz.action === 'suggest' ? `<div class="kz-actions">
+            <button type="button" class="secondary" data-kz-preset="סל שיקום">סל שיקום</button>
+            <button type="button" class="secondary" data-kz-preset="קביעת נכות">קביעת נכות</button>
+            <button type="button" class="secondary" data-kz-preset="גמלת סיעוד">גמלת סיעוד</button>
+          </div>` : ''}
+          <div class="dir-actions">
+            <button type="submit"${kz.loading ? ' disabled' : ''}>${kz.loading ? 'Running…' : 'Run'}</button>
+          </div>
+          ${kz.error ? `<p class="err">${esc(kz.error)}</p>` : ''}
+        </form>
+        <div class="card" id="kz-out">${kz.result ? kzResultHtml(kz.result) : '<p class="lede">Run a query to see what the API returns.</p>'}</div>
+      </div>`));
+      const form = root.querySelector('#kz-form');
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        kzReadForm(root);
+        state.kz.continueToken = '';
+        kzRun();
+      });
+      root.querySelector('#kz-action').addEventListener('change', () => {
+        kzReadForm(root);
+        state.kz.continueToken = '';
+        state.kz.result = null;
+        state.kz.error = '';
+        render();
+      });
+      root.querySelectorAll('[data-kz-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          kzReadForm(root);
+          state.kz.q = btn.getAttribute('data-kz-preset');
+          state.kz.offset = '0';
+          state.kz.continueToken = '';
+          kzRun();
+        });
+      });
+      root.querySelectorAll('[data-kz-title]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          kzReadForm(root);
+          state.kz.title = btn.getAttribute('data-kz-title');
+          state.kz.action = 'sections';
+          state.kz.continueToken = '';
+          kzRun();
+        });
+      });
+      root.querySelectorAll('[data-kz-section]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          kzReadForm(root);
+          state.kz.section = btn.getAttribute('data-kz-section');
+          state.kz.action = 'section';
+          state.kz.format = 'text';
+          kzRun();
+        });
+      });
+      root.querySelectorAll('[data-kz-category]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          kzReadForm(root);
+          state.kz.category = btn.getAttribute('data-kz-category');
+          state.kz.action = 'category';
+          state.kz.continueToken = '';
+          kzRun();
+        });
+      });
+      root.querySelectorAll('[data-kz-more]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          kzReadForm(root);
+          const kind = btn.getAttribute('data-kz-more');
+          const value = btn.getAttribute('data-kz-value') || '';
+          if (kind === 'offset') state.kz.offset = value;
+          else state.kz.continueToken = value;
+          kzRun();
+        });
+      });
+    }
+
     function render() {
       if (!state.user) {
         renderGate('Sign in on the directory first, then come back here. This page is for operators only.');
@@ -1548,6 +1969,7 @@
           <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות נפוצות</button>
           <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">פרסום עדכונים</button>
           <button type="button" data-tab="directory" class="${state.tab === 'directory' ? 'active' : ''}">כרטיסי מדריך</button>
+          <button type="button" data-tab="kolzchut" class="${state.tab === 'kolzchut' ? 'active' : ''}">כל זכות</button>
         </div>
         <div id="tabbody"></div>
       </div>`);
@@ -1576,6 +1998,7 @@
       else if (state.tab === 'questions') renderQuestions(body);
       else if (state.tab === 'updates') renderUpdates(body);
       else if (state.tab === 'directory') renderDirectory(body);
+      else if (state.tab === 'kolzchut') renderKolzchut(body);
       else renderAnalytics(body);
     }
 
