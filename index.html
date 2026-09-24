@@ -851,18 +851,19 @@
             z-index: 20;
             bottom: calc(100% + 6px);
             inset-inline-start: 0;
-            width: min(320px, 80vw);
-            max-height: 280px;
-            overflow: auto;
+            width: min(360px, 86vw);
+            max-height: min(360px, 70vh);
+            overflow: hidden;
             background: var(--bg-card, #fff);
             color: var(--text, #1a1a1a);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-elevated, 0 8px 24px rgba(0,0,0,.15));
             padding: 8px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
         .mh-map-filter, .mh-map-city {
             width: 100%;
@@ -870,6 +871,7 @@
             font: inherit;
             font-size: var(--text-sm);
             box-sizing: border-box;
+            flex: 0 0 auto;
         }
         .mh-map-filter { padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm, 6px); }
         .mh-map-city {
@@ -881,23 +883,81 @@
             text-decoration: underline;
             padding: 4px;
         }
-        .mh-map-panel a {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            gap: 4px 8px;
+        .mh-map-list {
+            overflow: auto;
             min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .mh-card-actions .mh-map-panel a {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            flex: 0 0 auto;
+            gap: 2px;
+            min-height: auto;
             min-width: 0;
-            padding: 8px;
+            width: 100%;
+            margin: 0;
+            padding: 8px 10px;
             border-radius: var(--radius-sm, 6px);
             color: var(--text, #1a1a1a);
-            font-weight: 500;
+            font-weight: 600;
+            font-size: var(--text-sm);
+            line-height: 1.35;
             text-decoration: none;
-            background: transparent !important;
+            text-align: start;
+            background: transparent;
+            box-sizing: border-box;
         }
-        .mh-map-panel a:hover { background: rgba(45, 90, 123, 0.08) !important; }
-        .mh-map-km, .mh-map-phone { color: var(--text-muted); font-size: var(--text-sm); }
+        .mh-card-actions .mh-map-panel a:hover { background: rgba(45, 90, 123, 0.08); }
+        .mh-map-option-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+        }
+        .mh-map-option-label { min-width: 0; }
+        .mh-map-option-detail {
+            display: block;
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.35;
+        }
+        .mh-map-km, .mh-map-phone { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
         .mh-map-empty { margin: 0; padding: 8px; color: var(--text-muted); font-size: var(--text-sm); }
+        .mh-card-actions .mh-map-backdrop { display: none; }
+        @media (max-width: 640px) {
+            .mh-card-actions .mh-map-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 30;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                min-width: 0;
+                border: 0;
+                border-radius: 0;
+                background: rgba(0, 0, 0, 0.2);
+                color: transparent;
+            }
+            .mh-card-actions .mh-map-panel {
+                position: fixed;
+                z-index: 31;
+                inset-inline: 12px;
+                width: auto;
+                bottom: max(12px, env(safe-area-inset-bottom));
+                max-height: min(70vh, 420px);
+            }
+            .mh-map-filter { font-size: 16px; }
+        }
         .mh-nearby-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); }
         .mh-nearby-bar-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); }
         .mh-nearby-bar-label { font-weight: 600; color: var(--primary); white-space: nowrap; font-size: var(--text-sm); }
@@ -1207,7 +1267,15 @@
             } catch { return {}; }
         })();
         const mhReferralRecord = (row) => MH_REFERRAL_CODES[String(row)] || null;
-        const mhGoogleMapsUrl = (loc) => `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+        const mhGoogleMapsUrl = (loc) => {
+            const lat = Number(loc && loc.lat);
+            const lng = Number(loc && loc.lng);
+            const name = String((loc && (loc.address || loc.label)) || '').trim();
+            const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+            if (hasCoords && name) return `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng} (${name})`)}`;
+            if (hasCoords) return `https://www.google.com/maps?q=${lat},${lng}`;
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+        };
         const mhHaversineKm = (lat1, lng1, lat2, lng2) => {
             const toRad = (d) => d * Math.PI / 180;
             const dLat = toRad(lat2 - lat1);
@@ -5290,6 +5358,14 @@
                                         <i className="fas fa-map-marker-alt"></i> {s.dir === 'ltr' ? 'Map' : 'מפה'}
                                     </button>
                                     {mapOpen && (
+                                        <button
+                                            type="button"
+                                            className="mh-map-backdrop"
+                                            aria-label={s.dir === 'ltr' ? 'Close site list' : 'סגירת רשימת המרפאות'}
+                                            onClick={() => setMapOpen(false)}
+                                        />
+                                    )}
+                                    {mapOpen && (
                                         <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a site' : 'בחירת מרפאה'}>
                                             {locs.length > 6 && (
                                                 <input
@@ -5309,23 +5385,35 @@
                                                     {s.dir === 'ltr' ? `Sort by your city (${authUser.city})` : `מיון לפי העיר בחשבון (${authUser.city})`}
                                                 </button>
                                             )}
-                                            {visibleLocs.map(({ loc, locIdx, km }) => (
-                                                <a
-                                                    key={`${s.row}_map_${locIdx}`}
-                                                    href={mhGoogleMapsUrl(loc)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    role="option"
-                                                    data-skip-external-link-check="true"
-                                                    data-tracking-name={`${s.trackingName || s.org}_map_${locIdx + 1}`}
-                                                    data-analytics-type="map"
-                                                >
-                                                    <span>{loc.label}{km != null && nearestKm != null && km === nearestKm ? (s.dir === 'ltr' ? ' · nearest' : ' · הקרוב') : ''}</span>
-                                                    {km != null && <span className="mh-map-km">{mhFormatKm(km)} ק״מ</span>}
-                                                    {loc.phone ? <span className="mh-map-phone">{loc.phone}</span> : null}
-                                                </a>
-                                            ))}
-                                            {!visibleLocs.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching site' : 'אין מרפאה תואמת'}</p>}
+                                            <div className="mh-map-list">
+                                                {visibleLocs.map(({ loc, locIdx, km }) => {
+                                                    const detail = loc.address && loc.address !== loc.label ? loc.address : '';
+                                                    const nearestMark = km != null && nearestKm != null && km === nearestKm
+                                                        ? (s.dir === 'ltr' ? ' · nearest' : ' · הקרוב')
+                                                        : '';
+                                                    return (
+                                                        <a
+                                                            key={`${s.row}_map_${locIdx}`}
+                                                            href={mhGoogleMapsUrl(loc)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            role="option"
+                                                            data-skip-external-link-check="true"
+                                                            data-tracking-name={`${s.trackingName || s.org}_map_${locIdx + 1}`}
+                                                            data-analytics-type="map"
+                                                            title={detail || loc.label}
+                                                        >
+                                                            <span className="mh-map-option-row">
+                                                                <span className="mh-map-option-label">{loc.label}{nearestMark}</span>
+                                                                {km != null && <span className="mh-map-km">{mhFormatKm(km)} ק״מ</span>}
+                                                                {loc.phone ? <span className="mh-map-phone">{loc.phone}</span> : null}
+                                                            </span>
+                                                            {detail ? <span className="mh-map-option-detail">{detail}</span> : null}
+                                                        </a>
+                                                    );
+                                                })}
+                                                {!visibleLocs.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching site' : 'אין מרפאה תואמת'}</p>}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

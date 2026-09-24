@@ -119,6 +119,15 @@
     .status-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     details.chrome { margin-top: 4px; }
     details.chrome summary { cursor: pointer; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+    .kz-panel { direction: ltr; text-align: left; }
+    .kz-panel h2[dir=auto] { margin-top: 0; }
+    .kz-guide h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .kz-steps { margin: 8px 0 0; padding-inline-start: 1.25rem; }
+    .kz-steps li { margin: 6px 0; }
+    .kz-guide details { margin-top: 12px; }
+    .kz-guide details summary { cursor: pointer; font-weight: 600; color: var(--primary-dark); }
+    .kz-guide details:not([open]) > :not(summary) { display: none; }
+    .kz-panel .filters .wide { grid-column: 1 / -1; }
     details.kz-about { margin-bottom: 16px; }
     details.kz-about summary { cursor: pointer; font-weight: 600; color: var(--primary-dark); }
     .kz-about p { margin: 8px 0; }
@@ -283,7 +292,7 @@
       directoryMsg: '',
       kz: {
         action: 'search',
-        q: 'סל שיקום',
+        q: '',
         title: '',
         section: '0',
         format: 'text',
@@ -1580,14 +1589,14 @@
       info: ['title']
     };
     const KZ_HINT = {
-      search: 'Full-text search across articles. Hebrew matches better than English. A click on a title lists that page’s sections.',
-      suggest: 'OpenSearch title suggestions. Shorter and less precise than full-text search. A click lists sections.',
-      article: 'The whole page. Plain text is what a model keeps after HTML is stripped. Wikitext keeps the markup, including tables.',
-      sections: 'Headings only. This is the chunk list a retrieval step would choose from. A click reads that section as plain text.',
-      section: 'One section by the index from the section list. Index 0 is the text before the first heading.',
-      categories: 'Category names, optionally filtered by a Hebrew prefix. A click lists pages in that category.',
-      category: 'Pages and subcategories. A page click lists sections. A subcategory click lists its members.',
-      info: 'Last edit, length, and categories. No article body. Useful for seeing how fresh and how classified a page is.'
+      search: 'Type words, usually in Hebrew, then press Show results. You get a list of matching articles. Click a title to see that article’s sections. Hebrew finds more than English.',
+      suggest: 'Type the start of an article name. You get title ideas, which is shorter than a full search. Click a title to see its sections.',
+      article: 'Type the exact article title, as it appears on כל זכות. Plain text is the words only, so tables often disappear. Wikitext keeps the original markup, including tables.',
+      sections: 'Type the exact article title. Show results lists the headings. Click a heading to read that part. “Read the introduction” is the text before the first heading.',
+      section: 'Type the exact article title and a section number from the headings list. 0 is the introduction, before the first heading.',
+      categories: 'Leave the box empty to list category names, or type the start of a name to narrow the list. Click a name to see the pages in that category.',
+      category: 'Type the category name without the word קטגוריה. Click a page to see its sections. Click a subcategory to open it.',
+      info: 'Type the exact article title. You see when it was last edited, how long it is, and which categories it is in. The article text is not included.'
     };
 
     function kzShow(name) {
@@ -1611,59 +1620,64 @@
     }
     function kzResultHtml(result) {
       if (!result) return '';
-      const head = `<p class="kz-meta">${esc(result.ms)} ms · ${esc(result.requestUrl)}</p>`;
       let body = '';
       if (result.action === 'search') {
         const rows = result.results || [];
-        body = `<p class="lede">${esc(result.total)} hits. Showing ${esc(rows.length)} from offset ${esc(result.offset)}.</p>` +
+        body = `<p class="lede">${esc(result.total)} matching articles. Showing ${esc(rows.length)}, after skipping ${esc(result.offset)}. Click a title to see its sections.</p>` +
+          `<div dir="rtl" lang="he">` +
           rows.map((hit) => `<button type="button" class="kz-hit" data-kz-title="${esc(hit.title)}">
-            <b>${esc(hit.title)}</b>
-            <span class="muted"> · ${esc(hit.wordcount)} words</span>
-            <div class="muted">${esc(hit.snippet)}</div>
+            <b dir="auto">${esc(hit.title)}</b>
+            <span class="muted" dir="ltr"> · ${esc(hit.wordcount)} words</span>
+            <div class="muted" dir="auto">${esc(hit.snippet)}</div>
           </button>`).join('') +
+          `</div>` +
           (result.hasMore ? `<p><button type="button" class="secondary" data-kz-more="offset" data-kz-value="${esc(result.nextOffset)}">Next page</button></p>` : '');
       } else if (result.action === 'suggest') {
-        body = (result.results || []).map((hit) => `<button type="button" class="kz-hit" data-kz-title="${esc(hit.title)}">
-          <b>${esc(hit.title)}</b>
-          <div class="muted">${esc(hit.description)}</div>
-        </button>`).join('') || '<p class="lede">No suggestions.</p>';
+        const rows = result.results || [];
+        body = rows.length ? `<p class="lede">Click a title to see its sections.</p><div dir="rtl" lang="he">` + rows.map((hit) => `<button type="button" class="kz-hit" data-kz-title="${esc(hit.title)}">
+          <b dir="auto">${esc(hit.title)}</b>
+          <div class="muted" dir="auto">${esc(hit.description)}</div>
+        </button>`).join('') + `</div>` : '<p class="lede">No title suggestions.</p>';
       } else if (result.action === 'article' || result.action === 'section') {
         body = `<p><a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">Open on כל זכות</a>
-          ${result.truncated ? ' · <span class="err">Truncated at 20,000 characters</span>' : ''}</p>
+          ${result.truncated ? ' · <span class="err">Showing the first 20,000 characters</span>' : ''}</p>
           <pre class="kz-pre" dir="auto">${esc(result.content)}</pre>`;
       } else if (result.action === 'sections') {
         const rows = result.sections || [];
-        body = `<p class="lede">${esc(rows.length)} sections on <a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">${esc(result.title)}</a>. Index 0 is the lead, before the first heading, and is not in this list.</p>` +
-          `<p><button type="button" class="secondary" data-kz-section="0">Read lead (index 0)</button></p>` +
+        body = `<p class="lede">${esc(rows.length)} sections in <a class="open" href="${esc(result.url)}" target="_blank" rel="noopener"><span dir="auto">${esc(result.title)}</span></a>. The introduction, before the first heading, is not in this list.</p>` +
+          `<p><button type="button" class="secondary" data-kz-section="0">Read the introduction</button></p>` +
+          `<div dir="rtl" lang="he">` +
           rows.map((section) => `<button type="button" class="kz-hit" data-kz-section="${esc(section.index)}" style="padding-right:${(Number(section.level) || 1) * 12}px">
-            <b>${esc(section.number)} ${esc(section.heading)}</b>
-            <span class="muted"> · index ${esc(section.index)}</span>
-          </button>`).join('');
+            <b dir="auto">${esc(section.number)} ${esc(section.heading)}</b>
+            <span class="muted" dir="ltr"> · section ${esc(section.index)}</span>
+          </button>`).join('') +
+          `</div>`;
       } else if (result.action === 'categories') {
-        body = (result.categories || []).map((cat) => `<button type="button" class="kz-hit" data-kz-category="${esc(cat.name)}"><b>${esc(cat.name)}</b></button>`).join('') ||
-          '<p class="lede">No categories.</p>';
+        const rows = result.categories || [];
+        body = rows.length ? `<p class="lede">Click a category to list its pages.</p><div dir="rtl" lang="he">` + rows.map((cat) => `<button type="button" class="kz-hit" data-kz-category="${esc(cat.name)}"><b dir="auto">${esc(cat.name)}</b></button>`).join('') + `</div>` :
+          '<p class="lede">No categories match.</p>';
         if (result.continueToken) {
           body += `<p><button type="button" class="secondary" data-kz-more="continue" data-kz-value="${esc(result.continueToken)}">Next page</button></p>`;
         }
       } else if (result.action === 'category') {
-        body = `<p class="lede">${esc(result.category)}</p>` +
+        body = `<p class="lede" dir="auto">${esc(result.category)}</p><div dir="rtl" lang="he">` +
           (result.members || []).map((member) => {
             const sub = member.ns === 14;
             const label = String(member.title || '').replace(/^קטגוריה:/, '');
             return sub
-              ? `<button type="button" class="kz-hit" data-kz-category="${esc(label)}"><b>${esc(member.title)}</b> <span class="muted">subcategory</span></button>`
-              : `<button type="button" class="kz-hit" data-kz-title="${esc(member.title)}"><b>${esc(member.title)}</b></button>`;
-          }).join('');
+              ? `<button type="button" class="kz-hit" data-kz-category="${esc(label)}"><b dir="auto">${esc(member.title)}</b> <span class="muted" dir="ltr">subcategory</span></button>`
+              : `<button type="button" class="kz-hit" data-kz-title="${esc(member.title)}"><b dir="auto">${esc(member.title)}</b></button>`;
+          }).join('') + `</div>`;
         if (result.continueToken) {
           body += `<p><button type="button" class="secondary" data-kz-more="continue" data-kz-value="${esc(result.continueToken)}">Next page</button></p>`;
         }
       } else if (result.action === 'info') {
         const cats = result.categories || [];
-        body = `<p><a class="open" href="${esc(result.url)}" target="_blank" rel="noopener">${esc(result.title)}</a></p>
-          <p class="lede">Touched ${esc(result.touched)} · length ${esc(result.length)} · revision ${esc(result.lastrevid)}</p>
+        body = `<p><a class="open" href="${esc(result.url)}" target="_blank" rel="noopener"><span dir="auto">${esc(result.title)}</span></a></p>
+          <p class="lede">Last edited ${esc(result.touched)} · ${esc(result.length)} characters · revision ${esc(result.lastrevid)}</p>
           <div>${cats.map((name) => `<button type="button" class="secondary" data-kz-category="${esc(name)}" style="margin:0 0 8px 8px">${esc(name)}</button>`).join('') || '<span class="muted">No categories</span>'}</div>`;
       }
-      return head + body + `<details class="chrome"><summary>Response JSON</summary><pre class="kz-pre">${esc(JSON.stringify(result, null, 2))}</pre></details>`;
+      return body + `<details class="chrome"><summary>Technical details</summary><p class="kz-meta">${esc(result.ms)} ms · ${esc(result.requestUrl)}</p><pre class="kz-pre">${esc(JSON.stringify(result, null, 2))}</pre></details>`;
     }
     function kzStrip(html) {
       return String(html || '')
@@ -1823,25 +1837,25 @@
       };
       if ((kz.action === 'search' || kz.action === 'suggest') && !String(kz.q || '').trim()) {
         kz.loading = false;
-        kz.error = 'Enter a search query';
+        kz.error = 'Type the words to search for.';
         render();
         return;
       }
       if ((kz.action === 'article' || kz.action === 'sections' || kz.action === 'section' || kz.action === 'info') && !String(kz.title || '').trim()) {
         kz.loading = false;
-        kz.error = 'Enter a page title';
+        kz.error = 'Type the exact article title.';
         render();
         return;
       }
       if (kz.action === 'category' && !String(kz.category || '').trim()) {
         kz.loading = false;
-        kz.error = 'Enter a category name';
+        kz.error = 'Type the category name.';
         render();
         return;
       }
       if (kz.action === 'section' && !/^\d+$/.test(String(kz.section || '').trim())) {
         kz.loading = false;
-        kz.error = 'Section index must be a number';
+        kz.error = 'The section number must be a whole number, starting at 0.';
         render();
         return;
       }
@@ -1856,51 +1870,59 @@
     }
     function renderKolzchut(root) {
       const kz = state.kz;
-      const field = (name, html) => `<div data-kz-field="${name}"${kzShow(name) ? '' : ' hidden'}>${html}</div>`;
-      root.appendChild(el(`<div class="he-panel">
-        <h2>כל זכות</h2>
-        <details class="card kz-about" open>
-          <summary>What this calls</summary>
-          <div class="kz-about">
-            <p>Each Run button calls כל זכות’s public MediaWiki API from your browser (<code>https://www.kolzchut.org.il/w/he/api.php</code>). No API key. <code>/w/api.php</code> returns 404. A server-side call is often rejected by their firewall, so this tab does not proxy it. The third-party MCP <code>@skills-il/kolzchut-mcp</code> wraps the same kind of calls for a local agent. It is not published by כל זכות. Their GitHub org is mostly wiki extensions, plus an internal Elasticsearch chatbot that this tab does not reach.</p>
-            <p>Plain text drops HTML. Tables and infoboxes often disappear there, which is the gap between a page written for people and text a model would ground on. Wikitext keeps that markup. Content is CC BY-SA 3.0; each result links back to the source page. Nothing is saved.</p>
-            <p>Search, suggestions, the full article, one section, category browse, and page info are the read actions. Click through from a hit to sections, then to a section, and compare plain text with the live page.</p>
-          </div>
-        </details>
+      const field = (name, html, wide) => `<div data-kz-field="${name}"${wide ? ' class="wide"' : ''}${kzShow(name) ? '' : ' hidden'}>${html}</div>`;
+      root.appendChild(el(`<div class="kz-panel">
+        <h2 dir="auto">כל זכות</h2>
+        <div class="card kz-guide">
+          <h3>How to use this</h3>
+          <p>Look up articles on <a class="open" href="https://www.kolzchut.org.il/" target="_blank" rel="noopener">כל זכות</a>. This does not change the directory, and nothing you look up is saved here.</p>
+          <ol class="kz-steps">
+            <li>Choose what you want to do.</li>
+            <li>Fill in the boxes that appear. For a search, you can press an example instead — that runs immediately.</li>
+            <li>Press <b>Show results</b>.</li>
+            <li>Click an article title to see its sections, then click a section to read it.</li>
+            <li>Press <b>Open on כל זכות</b> when you want the original page.</li>
+          </ol>
+          <details>
+            <summary>Advanced</summary>
+            <p>This tab uses the public API of <a class="open" href="https://www.kolzchut.org.il/" target="_blank" rel="noopener">כל זכות</a>. Each lookup is sent from your browser to <code>https://www.kolzchut.org.il/w/he/api.php</code>. No API key is required. A request from this site’s server is often blocked, so the call is made in the browser instead. Article text is CC BY-SA 3.0, and each result links back to the source page. Nothing is saved here.</p>
+          </details>
+        </div>
         <form id="kz-form" class="card">
-          <label for="kz-action">Action</label>
+          <label for="kz-action">What do you want to do?</label>
           <select id="kz-action">
-            <option value="search"${kz.action === 'search' ? ' selected' : ''}>Search articles</option>
-            <option value="suggest"${kz.action === 'suggest' ? ' selected' : ''}>Title suggestions</option>
-            <option value="article"${kz.action === 'article' ? ' selected' : ''}>Full article</option>
-            <option value="sections"${kz.action === 'sections' ? ' selected' : ''}>Section headings</option>
-            <option value="section"${kz.action === 'section' ? ' selected' : ''}>One section</option>
-            <option value="categories"${kz.action === 'categories' ? ' selected' : ''}>Browse categories</option>
-            <option value="category"${kz.action === 'category' ? ' selected' : ''}>Pages in a category</option>
-            <option value="info"${kz.action === 'info' ? ' selected' : ''}>Page info</option>
+            <option value="search"${kz.action === 'search' ? ' selected' : ''}>Search for articles</option>
+            <option value="suggest"${kz.action === 'suggest' ? ' selected' : ''}>Suggest article titles</option>
+            <option value="article"${kz.action === 'article' ? ' selected' : ''}>Read a whole article</option>
+            <option value="sections"${kz.action === 'sections' ? ' selected' : ''}>List an article’s sections</option>
+            <option value="section"${kz.action === 'section' ? ' selected' : ''}>Read one section</option>
+            <option value="categories"${kz.action === 'categories' ? ' selected' : ''}>List categories</option>
+            <option value="category"${kz.action === 'category' ? ' selected' : ''}>List pages in a category</option>
+            <option value="info"${kz.action === 'info' ? ' selected' : ''}>See when a page was last edited</option>
           </select>
           <p class="dir-help">${esc(KZ_HINT[kz.action] || '')}</p>
           <div class="filters">
-            ${field('q', `<label for="kz-q">Query</label><input id="kz-q" type="text" dir="auto" value="${esc(kz.q)}">`)}
-            ${field('title', `<label for="kz-title">Page title</label><input id="kz-title" type="text" dir="auto" value="${esc(kz.title)}">`)}
-            ${field('section', `<label for="kz-section">Section index</label><input id="kz-section" type="number" min="0" value="${esc(kz.section)}">`)}
-            ${field('format', `<label for="kz-format">Format</label><select id="kz-format"><option value="text"${kz.format === 'text' ? ' selected' : ''}>Plain text</option><option value="wikitext"${kz.format === 'wikitext' ? ' selected' : ''}>Wikitext</option></select>`)}
-            ${field('prefix', `<label for="kz-prefix">Category prefix</label><input id="kz-prefix" type="text" dir="auto" value="${esc(kz.prefix)}">`)}
-            ${field('category', `<label for="kz-category">Category</label><input id="kz-category" type="text" dir="auto" value="${esc(kz.category)}">`)}
-            ${field('limit', `<label for="kz-limit">Limit (max 20)</label><input id="kz-limit" type="number" min="1" max="20" value="${esc(kz.limit)}">`)}
-            ${field('offset', `<label for="kz-offset">Offset</label><input id="kz-offset" type="number" min="0" value="${esc(kz.offset)}">`)}
+            ${field('q', `<label for="kz-q">Words to search for</label><input id="kz-q" type="text" dir="auto" value="${esc(kz.q)}">`, true)}
+            ${field('title', `<label for="kz-title">Exact article title</label><input id="kz-title" type="text" dir="auto" value="${esc(kz.title)}">`, true)}
+            ${field('section', `<label for="kz-section">Section number</label><input id="kz-section" type="number" min="0" value="${esc(kz.section)}">`)}
+            ${field('format', `<label for="kz-format">Text format</label><select id="kz-format"><option value="text"${kz.format === 'text' ? ' selected' : ''}>Plain text (words only)</option><option value="wikitext"${kz.format === 'wikitext' ? ' selected' : ''}>Wikitext (keeps tables)</option></select>`)}
+            ${field('prefix', `<label for="kz-prefix">Category name starts with</label><input id="kz-prefix" type="text" dir="auto" value="${esc(kz.prefix)}" placeholder="Optional">`, true)}
+            ${field('category', `<label for="kz-category">Category name</label><input id="kz-category" type="text" dir="auto" value="${esc(kz.category)}">`, true)}
+            ${field('limit', `<label for="kz-limit">How many results (up to 20)</label><input id="kz-limit" type="number" min="1" max="20" value="${esc(kz.limit)}">`)}
+            ${field('offset', `<label for="kz-offset">Skip this many results</label><input id="kz-offset" type="number" min="0" value="${esc(kz.offset)}">`)}
           </div>
-          ${kz.action === 'search' || kz.action === 'suggest' ? `<div class="kz-actions">
+          ${kz.action === 'search' || kz.action === 'suggest' ? `<p class="dir-help">Or press an example. It fills the search and runs it.</p>
+          <div class="kz-actions">
             <button type="button" class="secondary" data-kz-preset="סל שיקום">סל שיקום</button>
             <button type="button" class="secondary" data-kz-preset="קביעת נכות">קביעת נכות</button>
             <button type="button" class="secondary" data-kz-preset="גמלת סיעוד">גמלת סיעוד</button>
           </div>` : ''}
           <div class="dir-actions">
-            <button type="submit"${kz.loading ? ' disabled' : ''}>${kz.loading ? 'Running…' : 'Run'}</button>
+            <button type="submit"${kz.loading ? ' disabled' : ''}>${kz.loading ? 'Loading…' : 'Show results'}</button>
           </div>
           ${kz.error ? `<p class="err">${esc(kz.error)}</p>` : ''}
         </form>
-        <div class="card" id="kz-out">${kz.result ? kzResultHtml(kz.result) : '<p class="lede">Run a query to see what the API returns.</p>'}</div>
+        <div class="card" id="kz-out">${kz.result ? kzResultHtml(kz.result) : '<p class="lede">Results will show here after you press Show results.</p>'}</div>
       </div>`));
       const form = root.querySelector('#kz-form');
       form.addEventListener('submit', (event) => {
