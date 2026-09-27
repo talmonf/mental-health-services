@@ -1037,6 +1037,21 @@
         };
         // Known top-level group ids (must stay in sync with CATEGORY_GROUPS below).
         const MH_CATEGORY_GROUP_IDS = new Set(['emergency', 'treatment', 'rightsGov', 'support', 'information']);
+        // Each group is its own page at /<slug>. scripts/build_pages.js reads this map to write
+        // those pages, so a slug changed here moves the page.
+        const MH_GROUP_SLUGS = {
+            emergency: 'emergency',
+            treatment: 'treatment',
+            rightsGov: 'rights',
+            support: 'support',
+            information: 'information'
+        };
+        const mhGroupFromPath = (pathname) => {
+            const slug = String(pathname || '').replace(/^\/+|\/+$/g, '').split('/')[0];
+            return Object.keys(MH_GROUP_SLUGS).find((g) => MH_GROUP_SLUGS[g] === slug) || '';
+        };
+        const mhGroupPath = (group) => (group && MH_GROUP_SLUGS[group] ? `/${MH_GROUP_SLUGS[group]}` : '/');
+        const MH_SITE_TITLE = 'מדריך בריאות הנפש בישראל';
 
         const mhGenerateId = () => {
             if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -1310,12 +1325,14 @@
             const found = Object.entries(CATEGORY_GROUPS).find(([, group]) => group.subcategories.includes(categoryId));
             return found ? found[0] : null;
         };
-        // Group deep links stay on /#<group> so existing WhatsApp pastes keep working.
-        // /g/<group> is the crawlable twin; rewriting the hash to /g/ would unload the app.
+        // The group lives in the path (/treatment). Old /#<group> links from WhatsApp pastes are
+        // still read, and the URL sync below moves them onto the path without a reload.
+        // /g/<group> is the crawlable twin and is never rewritten to: that would unload the app.
         const mhReadUrlState = () => {
             try {
                 const url = new URL(window.location.href);
-                const rawGroup = (url.hash || '').replace(/^#/, '').trim();
+                const hashGroup = (url.hash || '').replace(/^#/, '').trim();
+                const rawGroup = mhGroupFromPath(url.pathname) || hashGroup;
                 const rawPage = (url.searchParams.get('page') || '').trim();
                 return {
                     q: (url.searchParams.get('q') || '').trim(),
@@ -1329,9 +1346,10 @@
                 return { q: '', entry: '', section: '', subsection: '', page: '', group: '' };
             }
         };
-        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group }) => {
+        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group }, { push = false } = {}) => {
             try {
                 const url = new URL(window.location.href);
+                const fromPath = url.pathname;
                 if (q) url.searchParams.set('q', q);
                 else url.searchParams.delete('q');
                 if (entry) url.searchParams.set('entry', entry);
@@ -1342,8 +1360,11 @@
                 else url.searchParams.delete('subsection');
                 if (page) url.searchParams.set('page', page);
                 else url.searchParams.delete('page');
-                url.hash = group ? `#${group}` : '';
-                window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+                url.pathname = mhGroupPath(group);
+                url.hash = '';
+                const next = `${url.pathname}${url.search}`;
+                if (push && url.pathname !== fromPath) window.history.pushState(null, '', next);
+                else window.history.replaceState(null, '', next);
             } catch (_) {}
         };
 
@@ -1602,17 +1623,18 @@
                 let section = '';
                 let subsection = '';
                 let group = '';
+                let pathGroup = '';
                 try {
                     const params = new URLSearchParams(window.location.search || '');
                     q = (params.get('q') || '').trim();
                     entry = (params.get('entry') || '').trim();
                     section = (params.get('section') || '').trim();
                     subsection = (params.get('subsection') || '').trim();
-                    // Hash group ids (#emergency, #treatment, …) stay on this SPA.
-                    // They are never rewritten to /g/<group>: that would unload the app.
-                    // /g/<group> is the crawler page; /#<group> is the interactive view.
+                    // A legacy /#<group> link is a shared section link. A group page (/treatment)
+                    // is an ordinary page view of that page, recorded below.
                     const rawGroup = (window.location.hash || '').replace(/^#/, '').trim();
                     group = MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : '';
+                    pathGroup = mhGroupFromPath(window.location.pathname);
                 } catch (_) {}
                 const base = {
                     element_id: 'landing',
@@ -1666,7 +1688,7 @@
                 }
                 mhTrackEvent('page_view', {
                     ...base,
-                    section: 'landing'
+                    section: pathGroup ? `group_${pathGroup}` : 'landing'
                 });
             } catch (_) {
                 mhTrackEvent('page_view', { section: 'landing', element_id: 'landing' });
@@ -3228,6 +3250,7 @@
             const [selectedLetter, setSelectedLetter] = useState(null);
             const [haravotBarzelLaunchedFrom, setHaravotBarzelLaunchedFrom] = useState(null);
             const handledDeepLinkRef = useRef(null);
+            const pushGroupNavRef = useRef(false);
             const highlightTimeoutRef = useRef(null);
             const toastTimeoutRef = useRef(null);
             const copiedEntryTimeoutRef = useRef(null);
@@ -3324,7 +3347,11 @@
             };
 
             // Sync URL state as search, entry target, or selected group changes.
+            // Only a group change the visitor asked for adds a history entry; a group resolved
+            // from a deep link replaces the URL, so browser back does not bounce between them.
             useEffect(() => {
+                const push = pushGroupNavRef.current;
+                pushGroupNavRef.current = false;
                 mhReplaceUrlState({
                     q: searchTerm.trim(),
                     entry: requestedEntryId,
@@ -3332,8 +3359,12 @@
                     subsection: requestedSubsectionId,
                     page: resourcePage,
                     group: selectedCategoryGroup
-                });
+                }, { push });
             }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup]);
+            useEffect(() => {
+                const group = selectedCategoryGroup && CATEGORY_GROUPS[selectedCategoryGroup];
+                document.title = group ? `${group.title} | ${MH_SITE_TITLE}` : MH_SITE_TITLE;
+            }, [selectedCategoryGroup]);
             // Send the first-party session id to GA4 once, so the two systems can be joined later.
             useEffect(() => {
                 if (typeof gtag !== 'function') return;
@@ -3749,7 +3780,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "24.09.2026"; 
+            const LAST_UPDATED = "27.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -4193,6 +4224,18 @@
                 }
             };
 
+            // Moving between the home page and a group page. Deep-link targets are cleared, or
+            // their effects would pull the view straight back to the linked group.
+            const goToGroup = (groupId) => {
+                pushGroupNavRef.current = true;
+                setSelectedCategoryGroup(groupId || null);
+                setRequestedSectionId(null);
+                setRequestedSubsectionId(null);
+                setRequestedEntryId(null);
+                setResourcePage(null);
+                handledDeepLinkRef.current = null;
+                window.scrollTo({ top: 0 });
+            };
             const toggleCat = (id) => setExpandedCats(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
             const toggleSubsection = (categoryId, subId) => {
                 const key = `${categoryId}_${subId}`;
@@ -4676,6 +4719,7 @@
             const buildSearchLink = (query) => {
                 const trimmed = String(query || '').trim();
                 const url = new URL(window.location.href);
+                url.pathname = '/';
                 url.search = '';
                 url.hash = '';
                 if (trimmed) url.searchParams.set('q', trimmed);
@@ -4684,13 +4728,13 @@
             const buildEntryLink = ({ entryId, categoryId, row }) => {
                 const groupId = mhGetCategoryGroupForCategory(categoryId);
                 const url = new URL(window.location.href);
+                url.pathname = mhGroupPath(groupId);
                 url.search = '';
                 url.hash = '';
                 // Prefer numeric row so share URLs stay ASCII-clear (no Hebrew / percent-encoding).
                 const shareEntry = (row != null && row !== '') ? String(row) : entryId;
                 url.searchParams.set('entry', shareEntry);
                 url.searchParams.set('section', categoryId);
-                if (groupId) url.hash = `#${groupId}`;
                 return url.toString();
             };
             const buildSectionLink = ({ categoryId = null, subsectionId = null, groupId = null } = {}) => {
@@ -4698,12 +4742,11 @@
                 url.search = '';
                 url.hash = '';
                 if (categoryId) {
-                    const resolvedGroup = groupId || mhGetCategoryGroupForCategory(categoryId);
+                    url.pathname = mhGroupPath(groupId || mhGetCategoryGroupForCategory(categoryId));
                     url.searchParams.set('section', categoryId);
                     if (subsectionId) url.searchParams.set('subsection', subsectionId);
-                    if (resolvedGroup) url.hash = `#${resolvedGroup}`;
-                } else if (groupId) {
-                    url.hash = `#${groupId}`;
+                } else {
+                    url.pathname = mhGroupPath(groupId);
                 }
                 return url.toString();
             };
@@ -5434,10 +5477,10 @@
                         data-analytics-id={`category_${groupId}`}
                         data-analytics-section="category_overview"
                         data-section-anchor={`group_card_${groupId}`}
-                        onClick={() => setSelectedCategoryGroup(groupId)}
-                        role="button"
+                        onClick={() => goToGroup(groupId)}
+                        role="link"
                         tabIndex={0}
-                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedCategoryGroup(groupId)}
+                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && goToGroup(groupId)}
                         aria-label={`${group.title} - ${group.titleEn}. ${count} שירותים. לחצו לצפייה`}
                     >
                         <SectionCopyButton groupId={groupId} label={group.title} variant="group" />
@@ -7059,7 +7102,6 @@
                                         setRequestedSubsectionId(null);
                                         handledDeepLinkRef.current = null;
                                     }
-                                    if (v) setSelectedCategoryGroup(null);
                                 }}
                                 onBlur={(e) => {
                                     if (mhBlurIsShareAction(e.relatedTarget)) return;
@@ -7248,15 +7290,12 @@
                         </div>
                     ) : selectedCategoryGroup ? (
                         <div data-section-anchor={`group_${selectedCategoryGroup}`}>
-                            <button onClick={() => {
-                                setSelectedCategoryGroup(null);
-                                setRequestedSectionId(null);
-                                setRequestedSubsectionId(null);
-                                setRequestedEntryId(null);
-                                setResourcePage(null);
-                            }} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
+                            <button onClick={() => goToGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
+                            <h2 style={{ margin: '0 0 var(--space-lg)', color: 'var(--primary-dark)', fontSize: 'var(--text-xl)' }}>
+                                {CATEGORY_GROUPS[selectedCategoryGroup].title}
+                            </h2>
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
                                 const cat = filtered[id];
                                 return (

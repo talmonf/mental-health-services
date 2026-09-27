@@ -32,7 +32,10 @@ import { identifyBot } from './lib/bots';
 export const config = {
   runtime: 'nodejs',
   /** HTML routes only. Static assets and /api must not match, or logging would log itself. */
-  matcher: ['/', '/directory', '/terms', '/s/:path*', '/c/:path*', '/g/:path*', '/term/:path*'],
+  matcher: [
+    '/', '/emergency', '/treatment', '/rights', '/support', '/information',
+    '/directory', '/terms', '/s/:path*', '/c/:path*', '/g/:path*', '/term/:path*',
+  ],
 };
 
 const HUMAN_SAMPLE = (() => {

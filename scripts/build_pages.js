@@ -16,6 +16,9 @@
  *   /g/<group>          one per top-level group
  *   /term/<slug>        one per glossary term, /terms index
  *   /directory          hub linking everything, so nothing is more than two hops from the root
+ *   /emergency, /treatment, /rights, /support, /information
+ *                       the app itself (a copy of index.html) with that group's own title,
+ *                       description and canonical; slugs come from MH_GROUP_SLUGS
  *   /sitemap.xml
  */
 
@@ -27,7 +30,7 @@ const T = require('./lib/page_template');
 const LD = require('./lib/jsonld');
 
 const ROOT = path.join(__dirname, '..');
-const GENERATED_DIRS = ['s', 'c', 'g', 'term', 'terms', 'directory'];
+const GENERATED_DIRS = ['s', 'c', 'g', 'term', 'terms', 'directory', 'emergency', 'treatment', 'rights', 'support', 'information'];
 const GENERATED_FILES = ['sitemap.xml'];
 
 // ---------------------------------------------------------------- phone parsing
@@ -548,6 +551,47 @@ ${groups}
   });
 }
 
+// ---------------------------------------------------------------- group pages of the app
+
+/**
+ * The app reads the group from the path, so every group page is the same index.html. Only
+ * the head differs: without its own title and canonical, a search engine folds all five
+ * into the home page. Each substitution must match exactly once, so an edit to the head of
+ * index.html fails the build instead of silently shipping the home page's metadata.
+ */
+function renderGroupAppPage(ctx, groupId, slug) {
+  const { html, CATEGORY_GROUPS, published } = ctx;
+  const group = CATEGORY_GROUPS[groupId];
+  const url = `${T.SITE}/${slug}`;
+  const siteTitle = 'מדריך בריאות הנפש בישראל';
+  const title = `${group.title} | ${siteTitle}`;
+  const n = published.filter((e) => e.categories.some((c) => group.subcategories.includes(c))).length;
+  const description = truncate(`${group.title}: ${group.desc}. ${n} שירותים ב${siteTitle}.`, 155);
+
+  const subs = [
+    [/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`],
+    [/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(description)}">`],
+    [/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${url}">`],
+    [/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${url}">`],
+    [/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${esc(title)}">`],
+    [/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${esc(description)}">`],
+    [/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${esc(title)}">`],
+    [/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${esc(description)}">`],
+    [
+      /"@id": "https:\/\/nefesh-il\.org\/#webpage",(\s*)"url": "[^"]*",(\s*)"name": "[^"]*"/,
+      `"@id": "${url}#webpage",$1"url": "${url}",$2"name": ${JSON.stringify(title)}`,
+    ],
+  ];
+
+  let out = html;
+  for (const [re, replacement] of subs) {
+    const count = (out.match(new RegExp(re.source, 'g')) || []).length;
+    if (count !== 1) throw new Error(`Group page /${slug}: expected one match for ${re} in index.html, found ${count}`);
+    out = out.replace(re, replacement);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- sitemap
 
 function renderSitemap(urls, lastmod) {
@@ -623,6 +667,14 @@ function build(outRoot, data = load()) {
 
   writePage(outRoot, '/directory', renderDirectoryHub(ctx), written);
   urls.push({ path: '/directory', priority: '0.9' });
+
+  for (const groupId of Object.keys(data.CATEGORY_GROUPS)) {
+    const slug = (data.MH_GROUP_SLUGS || {})[groupId];
+    if (!slug) throw new Error(`MH_GROUP_SLUGS in index.html has no slug for group ${groupId}`);
+    if (!GENERATED_DIRS.includes(slug)) throw new Error(`Group slug ${slug} is missing from GENERATED_DIRS, so --clean would leave it behind`);
+    writePage(outRoot, `/${slug}`, renderGroupAppPage(ctx, groupId, slug), written);
+    urls.push({ path: `/${slug}`, priority: '0.9' });
+  }
   urls.unshift({ path: '/', priority: '1.0' });
 
   const lastmod = isoDate(data.LAST_UPDATED) || new Date().toISOString().slice(0, 10);

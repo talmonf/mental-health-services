@@ -13,6 +13,11 @@ node_modules/
 /term/
 /terms/
 /directory/
+/emergency/
+/treatment/
+/rights/
+/support/
+/information/
 /sitemap.xml
 /directory.json
 /directory.schema.json
