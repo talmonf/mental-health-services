@@ -400,14 +400,17 @@
         .mh-search-field { position: relative; }
         .mh-search-input { width: 100%; min-height: var(--touch-min); padding: var(--space-md) 44px var(--space-md) var(--space-lg); font-size: var(--text-base); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; }
         .mh-search-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
-        .mh-search-input-with-share { padding-left: 44px; }
-        .mh-search-copy-link {
+        .mh-search-input-with-clear { padding-left: 48px; }
+        .mh-search-input-with-share { padding-left: 88px; }
+        .mh-search-input::-ms-clear { display: none; }
+        .mh-search-copy-link,
+        .mh-search-clear {
             position: absolute;
-            left: 4px;
+            left: 44px;
             top: 50%;
             transform: translateY(-50%);
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             border: none;
             border-radius: var(--radius-sm);
@@ -421,19 +424,25 @@
             opacity: 0.75;
             transition: color 0.15s, background 0.15s, opacity 0.15s;
         }
+        .mh-search-clear { left: 4px; font-size: 1.1rem; }
         .mh-search-copy-link:hover,
-        .mh-search-copy-link:focus {
+        .mh-search-copy-link:focus,
+        .mh-search-clear:hover,
+        .mh-search-clear:focus {
             opacity: 1;
             color: var(--primary);
             background: rgba(45, 90, 123, 0.1);
         }
-        .mh-search-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-search-copy-link:focus,
+        .mh-search-clear:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-search-copy-link.mh-search-copy-link-copied {
             opacity: 1;
             color: var(--accent);
             background: rgba(82, 183, 136, 0.12);
         }
         .mh-search-empty { margin: var(--space-md) 0 0; font-size: var(--text-sm); }
+        .mh-search-scope { margin: var(--space-sm) 0 0; font-size: var(--text-sm); }
+        .mh-search-scope-all { background: none; border: none; padding: 4px 2px; min-height: 32px; font: inherit; font-weight: 600; color: var(--primary); text-decoration: underline; cursor: pointer; }
         .mh-nearby-toggle {
             display: inline-flex;
             align-items: center;
@@ -465,6 +474,12 @@
         .mh-section-link:hover { color: var(--primary-dark, #1e4460); }
         .mh-cat-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); }
         .mh-emergency { background: var(--danger-bg); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
+        .mh-emergency-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+        .mh-emergency-toggle { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; column-gap: var(--space-md); row-gap: 2px; flex-wrap: wrap; background: none; border: none; color: inherit; font: inherit; padding: 0; cursor: pointer; text-align: start; min-height: var(--touch-min); }
+        .mh-emergency-toggle:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+        .mh-emergency-toggle-label { font-size: var(--text-sm); opacity: 0.9; text-decoration: underline; }
+        .mh-emergency-quick { flex-shrink: 0; white-space: nowrap; color: white; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm); min-height: var(--touch-min); padding: 6px 14px; border-radius: var(--radius-md); background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); }
+        .mh-emergency-collapsed { padding-top: var(--space-md); padding-bottom: var(--space-md); }
         .mh-emergency-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
         .mh-emergency-call:hover { background: rgba(255,255,255,0.3) !important; }
         .mh-footer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; }
@@ -779,6 +794,7 @@
             .mh-cat-header { padding: var(--space-xl) var(--space-xl); }
             .mh-cat-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding: var(--space-xl) var(--space-xl) var(--space-2xl); }
             .mh-emergency { padding: var(--space-2xl); }
+            .mh-emergency.mh-emergency-collapsed { padding: var(--space-md) var(--space-2xl); }
             .mh-emergency-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
             .mh-cat-title { flex-direction: row; align-items: center; grid-template-columns: 1fr auto 1fr; display: grid; }
             .mh-cat-title-he { order: 1; text-align: right; padding-left: var(--space-sm); }
@@ -3261,6 +3277,9 @@
             const [nearbyStatus, setNearbyStatus] = useState('');
             const [nearbyBusy, setNearbyBusy] = useState(false);
             const [nearbyOpen, setNearbyOpen] = useState(false);
+            // On a group page the crisis block starts folded to a header with ער"ן; the home page always shows it in full.
+            const [emergencyOpen, setEmergencyOpen] = useState(false);
+            const emergencyCollapsed = !!selectedCategoryGroup && !emergencyOpen;
             const [copiedSearchLink, setCopiedSearchLink] = useState(false);
             const copiedSearchTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
@@ -4234,7 +4253,12 @@
                 setRequestedEntryId(null);
                 setResourcePage(null);
                 handledDeepLinkRef.current = null;
-                window.scrollTo({ top: 0 });
+                // On a phone the header and welcome box fill the first screen, so landing at the
+                // top would look as if the tap did nothing.
+                const target = groupId ? '.mh-emergency' : (searchTerm ? '.mh-search-wrap' : '.mh-category-cards');
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    document.querySelector(target)?.scrollIntoView({ block: 'start' });
+                }));
             };
             const toggleCat = (id) => setExpandedCats(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
             const toggleSubsection = (categoryId, subId) => {
@@ -4719,7 +4743,7 @@
             const buildSearchLink = (query) => {
                 const trimmed = String(query || '').trim();
                 const url = new URL(window.location.href);
-                url.pathname = '/';
+                url.pathname = mhGroupPath(selectedCategoryGroup);
                 url.search = '';
                 url.hash = '';
                 if (trimmed) url.searchParams.set('q', trimmed);
@@ -4853,11 +4877,14 @@
                 });
             };
 
+            // On a group page the search covers only that group's categories; the home page covers everything.
             const filtered = useMemo(() => {
                 if (!searchTerm) return data;
                 const t = searchTerm.toLowerCase();
+                const scope = selectedCategoryGroup ? CATEGORY_GROUPS[selectedCategoryGroup]?.subcategories : null;
                 const r = {};
                 Object.entries(data).forEach(([id, cat]) => {
+                    if (scope && !scope.includes(id)) return;
                     if (Array.isArray(cat.services)) {
                         const m = cat.services.filter(s => mhServiceSearchText(s).includes(t));
                         if (m.length) r[id] = { ...cat, services: m };
@@ -4873,7 +4900,7 @@
                     }
                 });
                 return r;
-            }, [searchTerm, data]);
+            }, [searchTerm, data, selectedCategoryGroup]);
             const resolvedEntryTarget = useMemo(() => {
                 if (!requestedEntryId) return null;
                 const candidates = entryTargets[requestedEntryId] || [];
@@ -7029,10 +7056,37 @@
                             </div>
                         </div>
                     )}
-                    <div className="mh-emergency">
-                        <h2 style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-xl)' }}>
-                            <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
-                        </h2>
+                    <div className={`mh-emergency${emergencyCollapsed ? ' mh-emergency-collapsed' : ''}`}>
+                        {selectedCategoryGroup ? (
+                            <div className="mh-emergency-head">
+                                <button
+                                    type="button"
+                                    className="mh-emergency-toggle"
+                                    onClick={() => setEmergencyOpen(open => !open)}
+                                    aria-expanded={!emergencyCollapsed}
+                                    aria-controls="mh-emergency-body"
+                                    data-tracking-name={emergencyCollapsed ? 'emergency_expand' : 'emergency_collapse'}
+                                >
+                                    <h2 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>
+                                        <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
+                                    </h2>
+                                    <span className="mh-emergency-toggle-label">
+                                        {emergencyCollapsed ? 'הצגת כל הקווים ▼' : 'הסתרה ▲'}
+                                    </span>
+                                </button>
+                                {emergencyCollapsed && (
+                                    <a href="tel:1201" className="mh-emergency-call mh-emergency-quick" data-tracking-name="emergency_eran_1201_collapsed" data-analytics-type="phone">
+                                        <i className="fas fa-phone"></i> ער"ן 1201
+                                    </a>
+                                )}
+                            </div>
+                        ) : (
+                            <h2 style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-xl)' }}>
+                                <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
+                            </h2>
+                        )}
+                        {!emergencyCollapsed && (
+                        <div id="mh-emergency-body" style={selectedCategoryGroup ? { marginTop: 'var(--space-md)' } : undefined}>
                         <p style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-sm)', opacity: 0.95 }}>
                             קווי חירום וקווי תמיכה. השירותים המפורטים זמינים בישראל. מחוץ לישראל יש לפנות לשירותי החירום והתמיכה המקומיים.
                         </p>
@@ -7083,6 +7137,8 @@
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
                             </div>
                         </div>
+                        </div>
+                        )}
                     </div>
 
                     <div className="mh-search-wrap">
@@ -7090,7 +7146,9 @@
                             <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-lg)', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '1.1rem' }}></i>
                             <input
                                 type="text"
-                                placeholder="חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)"
+                                placeholder={selectedCategoryGroup
+                                    ? `חיפוש ב${CATEGORY_GROUPS[selectedCategoryGroup].title}`
+                                    : 'חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)'}
                                 value={searchTerm}
                                 onChange={(e) => {
                                     const v = e.target.value;
@@ -7108,9 +7166,26 @@
                                     const resultsCount = Object.values(filtered).reduce((sum, cat) => sum + getCatServiceCount(cat), 0);
                                     window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });
                                 }}
-                                className={`mh-search-input${searchTerm.trim() ? ' mh-search-input-with-share' : ''}`}
+                                className={`mh-search-input${searchTerm.trim() ? ' mh-search-input-with-share' : searchTerm ? ' mh-search-input-with-clear' : ''}`}
                                 aria-label="חיפוש שירותים"
                             />
+                            {searchTerm ? (
+                                <button
+                                    type="button"
+                                    className="mh-search-clear"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={(e) => {
+                                        setSearchTerm('');
+                                        setHaravotBarzelLaunchedFrom(null);
+                                        e.currentTarget.parentElement.querySelector('.mh-search-input')?.focus();
+                                    }}
+                                    title="ניקוי החיפוש"
+                                    aria-label="ניקוי החיפוש"
+                                    data-tracking-name="search_clear"
+                                >
+                                    <i className="fas fa-times" aria-hidden="true"></i>
+                                </button>
+                            ) : null}
                             {searchTerm.trim() ? (
                                 <button
                                     type="button"
@@ -7138,7 +7213,19 @@
                             ) : null}
                         </div>
                         {searchTerm && Object.entries(filtered).length === 0 && (
-                            <p className="mh-helper-text mh-search-empty">לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.</p>
+                            <p className="mh-helper-text mh-search-empty">
+                                {selectedCategoryGroup
+                                    ? `לא נמצאו שירותים התואמים לחיפוש ב${CATEGORY_GROUPS[selectedCategoryGroup].title}.`
+                                    : 'לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.'}
+                            </p>
+                        )}
+                        {searchTerm.trim() && selectedCategoryGroup && (
+                            <p className="mh-helper-text mh-search-scope">
+                                מחפשים רק ב{CATEGORY_GROUPS[selectedCategoryGroup].title}.{' '}
+                                <button type="button" className="mh-search-scope-all" onClick={() => goToGroup(null)} data-tracking-name="search_whole_directory">
+                                    חיפוש בכל המדריך
+                                </button>
+                            </p>
                         )}
                         <button
                             type="button"
