@@ -90,6 +90,7 @@ const CURATED = {
   281: { codes: ['mod_rehab_worker', 'nii_referral'], source: 'הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).' },
   283: { codes: ['rehab_basket_committee', 'mod_rehab_worker'], source: 'זכאי סל שיקום; נכי צה"ל (באישור עובד השיקום)' },
   291: { codes: ['self_referral'], source: 'פרטי כל מרפאה באתר' },
+  293: { codes: ['hmo_form17'], source: 'טופס 17 — כללית ומאוחדת' },
 };
 
 function blob(entry) {

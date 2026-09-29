@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 048_directory_entries_merhavim_open_wards.sql
 [x] 047_directory_entries_navigate.sql
 [x] 046_auth_password_oauth.sql
 [x] 045_directory_card_edits.sql

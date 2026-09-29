@@ -1023,11 +1023,32 @@
       "source": "זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)",
       "confidence": "curated"
     },
+    "290": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "none"
+    },
     "291": {
       "codes": [
         "self_referral"
       ],
       "source": "פרטי כל מרפאה באתר",
+      "confidence": "curated"
+    },
+    "292": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "none"
+    },
+    "293": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "טופס 17 — כללית ומאוחדת",
       "confidence": "curated"
     }
   }
