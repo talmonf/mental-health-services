@@ -18,7 +18,9 @@
  *   /directory          hub linking everything, so nothing is more than two hops from the root
  *   /emergency, /treatment, /rights, /support, /information
  *                       the app itself (a copy of index.html) with that group's own title,
- *                       description and canonical; slugs come from MH_GROUP_SLUGS
+ *                       description and canonical, plus a static article — h1, intro and the
+ *                       services — so the text is in the HTML source without JavaScript.
+ *                       Slugs come from MH_GROUP_SLUGS. The intro text lives on CATEGORY_GROUPS.
  *   /sitemap.xml
  */
 
@@ -553,11 +555,107 @@ ${groups}
 
 // ---------------------------------------------------------------- group pages of the app
 
+function wordCount(text) {
+  return String(text || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
+function entryMetaLine(entry) {
+  const r = entry.raw;
+  const bits = [];
+  if (r.target && String(r.target).trim()) bits.push(`מיועד ל: ${String(r.target).trim()}`);
+  if (r.region && String(r.region).trim()) bits.push(String(r.region).trim());
+  if (r.cost && String(r.cost).trim()) bits.push(`עלות: ${String(r.cost).trim()}`);
+  if (r.specialty && String(r.specialty).trim()) bits.push(String(r.specialty).trim());
+  const phones = phonesOf(r).map((p) => (p.label ? `${p.label}: ${p.number}` : p.number));
+  if (phones.length) bits.push(phones.join(' · '));
+  if (r.email) bits.push(r.email);
+  return bits.join(' · ').replace(/\s+/g, ' ').trim();
+}
+
+function renderStaticEntry(entry) {
+  const org = entry.org.replace(/\s+/g, ' ').trim();
+  const svc = entry.svc.replace(/\s+/g, ' ').trim();
+  const notes = String(entry.raw.notes || '').replace(/\s+/g, ' ').trim();
+  const ltr = entry.raw.dir === 'ltr' ? ' lang="en" dir="ltr"' : '';
+  const meta = entryMetaLine(entry);
+  return `<li><a href="${esc(entry.path)}"${ltr}>${esc(org)}</a><span class="svc"${ltr}>${esc(svc)}</span>${
+    notes ? `<p class="notes"${ltr}>${esc(notes)}</p>` : ''
+  }${meta ? `<span class="svc">${esc(meta)}</span>` : ''}</li>`;
+}
+
+function renderStaticServiceList(entries) {
+  if (!entries.length) return '';
+  return `<ul class="entry-list">${entries.map(renderStaticEntry).join('')}</ul>`;
+}
+
+/** One category inside a group page: its heading, then every service as HTML, not as a script. */
+function renderStaticCategory(ctx, categoryId) {
+  const { DATA, published } = ctx;
+  const cat = DATA[categoryId];
+  const parts = [];
+  if (cat.desc) parts.push(`<p class="svc">${esc(cat.desc)}</p>`);
+  if (cat.intro) parts.push(`<div class="notes">${paragraphs(cat.intro)}</div>`);
+  if (cat.sectionLinks && cat.sectionLinks.length) {
+    const links = cat.sectionLinks
+      .map((link) => {
+        const href = DATA[link.target] ? `/c/${link.target}` : '';
+        return href ? `<li><a href="${esc(href)}">${esc(link.label)}</a></li>` : `<li>${esc(link.label)}</li>`;
+      })
+      .join('');
+    parts.push(`<ul>${links}</ul>`);
+  }
+
+  if (cat.subsections) {
+    for (const [sid, sub] of Object.entries(cat.subsections)) {
+      const members = published.filter((e) => e.subsections.includes(`${categoryId}/${sid}`));
+      parts.push(
+        `<h3><a href="/c/${esc(categoryId)}/${esc(sid)}">${esc(sub.title)}</a> <span class="count">(${members.length})</span></h3>${renderStaticServiceList(members)}`
+      );
+    }
+  } else if (!cat.resourceHub) {
+    const members = published.filter((e) => e.categories.includes(categoryId));
+    parts.push(renderStaticServiceList(members));
+  }
+
+  if (cat.resourceHub) {
+    parts.push(mediaListHtml(ctx.FILMS || []).replace('<h2>', '<h3>').replace('</h2>', '</h3>'));
+  }
+
+  return `<section>
+<h2><a href="/c/${esc(categoryId)}">${esc(cat.title)}</a></h2>
+${parts.join('\n')}
+</section>`;
+}
+
 /**
- * The app reads the group from the path, so every group page is the same index.html. Only
- * the head differs: without its own title and canonical, a search engine folds all five
- * into the home page. Each substitution must match exactly once, so an edit to the head of
- * index.html fails the build instead of silently shipping the home page's metadata.
+ * The readable page: its own h1, a 150–300 word intro, then every service in the group.
+ * Sits in the HTML source. index.html hides it once JavaScript adds class mh-js, so the
+ * app can take over without a second copy on screen.
+ */
+function renderGroupStaticArticle(ctx, groupId) {
+  const { DATA, CATEGORY_GROUPS } = ctx;
+  const group = CATEGORY_GROUPS[groupId];
+  const intro = String(group.intro || '').trim();
+  const words = wordCount(intro);
+  if (words < 150 || words > 300) {
+    throw new Error(`Group ${groupId} intro is ${words} words; expected 150–300`);
+  }
+  const sections = group.subcategories
+    .filter((id) => DATA[id])
+    .map((id) => renderStaticCategory(ctx, id))
+    .join('\n');
+  return `<article id="mh-group-static">
+<h1>${esc(group.title)}</h1>
+<div class="mh-group-lede">${paragraphs(intro)}</div>
+${sections}
+</article>`;
+}
+
+/**
+ * The app reads the group from the path, so every group page starts as a copy of index.html.
+ * The head gets its own title and canonical, and the body gets the static article above.
+ * Each head substitution must match exactly once, so an edit to index.html fails the build
+ * instead of silently shipping the home page's metadata.
  */
 function renderGroupAppPage(ctx, groupId, slug) {
   const { html, CATEGORY_GROUPS, published } = ctx;
@@ -589,6 +687,25 @@ function renderGroupAppPage(ctx, groupId, slug) {
     if (count !== 1) throw new Error(`Group page /${slug}: expected one match for ${re} in index.html, found ${count}`);
     out = out.replace(re, replacement);
   }
+
+  const marker = '<!-- MH_GROUP_STATIC -->';
+  const markerCount = out.split(marker).length - 1;
+  if (markerCount !== 1) {
+    throw new Error(`Group page /${slug}: expected one ${marker} in index.html, found ${markerCount}`);
+  }
+  // A function replacement, so a $ in a service note is not treated as a replace pattern.
+  out = out.replace(marker, () => renderGroupStaticArticle(ctx, groupId));
+
+  const crisisH1 = '<h1 style="font-size:1.1rem;color:#c0392b;margin:0 0 8px">במצב משבר — עזרה מיידית</h1>';
+  if (!out.includes(crisisH1)) throw new Error(`Group page /${slug}: noscript crisis heading not found`);
+  out = out.replace(crisisH1, '<h2 style="font-size:1.1rem;color:#c0392b;margin:0 0 8px">במצב משבר — עזרה מיידית</h2>');
+
+  const noscriptLead = '<p>המדריך המלא דורש JavaScript. הגרסה הנגישה ללא JavaScript זמינה כאן:</p>';
+  if (!out.includes(noscriptLead)) throw new Error(`Group page /${slug}: noscript lead not found`);
+  out = out.replace(
+    noscriptLead,
+    '<p>רשימת השירותים בעמוד הזה כתובה למטה גם בלי JavaScript. חיפוש וסינון דורשים JavaScript. עמודים נפרדים:</p>'
+  );
   return out;
 }
 
@@ -742,6 +859,50 @@ function assertReferralCodesValid(data) {
   }
   if (bad.length) throw new Error(`Unknown referral_route code(s):\n  ${bad.slice(0, 8).join('\n  ')}`);
   return data.entries.filter((e) => (e.raw.referralCodes || []).some((c) => c !== 'unknown')).length;
+}
+
+/**
+ * The five category URLs must carry their h1, intro and service text as HTML elements,
+ * ahead of the Babel script. A copy of index.html with only the <title> swapped does
+ * not count: crawlers that skip JavaScript would still see an empty page.
+ */
+function assertGroupPagesAreStatic(outRoot, data) {
+  const problems = [];
+  for (const [groupId, group] of Object.entries(data.CATEGORY_GROUPS)) {
+    const slug = (data.MH_GROUP_SLUGS || {})[groupId];
+    const rel = `${slug}/index.html`;
+    const html = fs.readFileSync(path.join(outRoot, rel), 'utf8');
+    const artAt = html.indexOf('<article id="mh-group-static">');
+    const artEnd = html.indexOf('</article>');
+    const scriptAt = html.indexOf('<script type="text/babel">');
+    const noscriptEnd = html.indexOf('</noscript>');
+    if (artAt < 0 || artEnd < artAt) {
+      problems.push(`/${slug}: static article missing`);
+      continue;
+    }
+    if (!(noscriptEnd < artAt && artAt < scriptAt)) {
+      problems.push(`/${slug}: static article must sit after the noscript block and before the app script`);
+    }
+    const article = html.slice(artAt, artEnd);
+    const h1 = `<h1>${esc(group.title)}</h1>`;
+    if ((article.match(/<h1>/g) || []).length !== 1 || !article.includes(h1)) {
+      problems.push(`/${slug}: expected a single h1 “${group.title}”`);
+    }
+    const words = wordCount(group.intro);
+    if (words < 150 || words > 300) problems.push(`/${slug}: intro is ${words} words, expected 150–300`);
+    const snippet = String(group.intro || '').trim().slice(0, 40);
+    if (!snippet || !article.includes(snippet)) problems.push(`/${slug}: intro text is not in the article HTML`);
+    for (const id of group.subcategories) {
+      const cat = data.DATA[id];
+      if (cat && !article.includes(`<h2><a href="/c/${id}">${cat.title}</a></h2>`)) {
+        problems.push(`/${slug}: category “${cat.title}” is not an h2 in the article`);
+      }
+    }
+    if (/<script/i.test(article)) problems.push(`/${slug}: static article contains a script`);
+  }
+  if (problems.length) {
+    throw new Error(`${problems.length} group-page problem(s):\n  ${problems.slice(0, 12).join('\n  ')}`);
+  }
 }
 
 function assertEmergencyReachable(written) {
@@ -898,6 +1059,7 @@ async function main() {
 
   const phoneCount = assertPhonesCameFromData(data, emittedPhones);
   assertEmergencyReachable(written);
+  assertGroupPagesAreStatic(outRoot, data);
   const referralKnown = assertReferralCodesValid(data);
   const linkTargets = assertNoDanglingLinks(outRoot, written);
   const sitemapCount = assertRobotsAgrees(outRoot, urls.length);

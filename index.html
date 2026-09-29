@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Marks that JavaScript started, so the pre-rendered group article can stay in the
+         source for crawlers and still not sit on top of the app. -->
+    <script>document.documentElement.classList.add('mh-js');</script>
     <title>מדריך בריאות הנפש בישראל</title>
     <meta name="description" content="הסבר על שירותי בריאות הנפש בישראל, וקישורים לארגונים השונים. מידע מקיף למתמודדי נפש ומשפחותיהם.">
     <!-- Consolidates every ?entry= / ?q= / ?section= variant onto the root, so the shared
@@ -105,11 +108,30 @@
         #root {
             min-height: 100vh;
         }
+        /* Until the app mounts, #root is an empty full-height box. Hide it so the
+           pre-rendered article (and the noscript crisis block) are what a no-JS visit shows. */
+        html:not(.mh-js) #root { display: none; }
+        html.mh-js #mh-group-static { display: none !important; }
+        #mh-group-static { max-width: 820px; margin: 0 auto; padding: 16px 16px 8px; color: var(--text); line-height: 1.7; }
+        #mh-group-static h1 { font-size: 1.5rem; margin: 0 0 12px; color: var(--primary); }
+        #mh-group-static h2 { font-size: 1.2rem; margin: 28px 0 8px; }
+        #mh-group-static h2 a { color: var(--primary); text-decoration: none; }
+        #mh-group-static h3 { font-size: 1.05rem; margin: 18px 0 6px; }
+        #mh-group-static h3 a { color: var(--primary-dark); text-decoration: none; }
+        #mh-group-static .mh-group-lede p { margin: 0 0 12px; }
+        #mh-group-static .entry-list { list-style: none; margin: 0; padding: 0; }
+        #mh-group-static .entry-list li { padding: 10px 0; border-top: 1px solid var(--border); }
+        #mh-group-static .entry-list a { font-weight: 600; color: var(--primary); text-decoration: none; }
+        #mh-group-static .count { unicode-bidi: isolate; direction: ltr; display: inline-block; color: var(--text-muted); font-weight: 500; }
+        #mh-group-static .svc { display: block; color: var(--text-muted); font-size: 0.92rem; margin-top: 2px; }
+        #mh-group-static .notes { margin: 6px 0 0; }
+        .mh-group-lede { margin: 0 0 var(--space-lg); }
+        .mh-group-lede p { margin: 0 0 var(--space-md); line-height: 1.75; }
         .mh-app { max-width: 1200px; margin: 0 auto; padding: var(--space-lg); min-height: 100vh; font-family: var(--font-hebrew); }
         .mh-hero { color: white; border-radius: var(--radius-lg); margin-bottom: var(--space-md); box-shadow: var(--shadow-elevated); }
         .mh-hero-inner { padding: var(--space-md) var(--space-lg); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md); }
         .mh-hero-text { flex: 1 0 auto; }
-        .mh-hero-text h1 { margin: 0; font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
+        .mh-hero-text h1, .mh-hero-text .mh-hero-site { margin: 0; font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
         .mh-hero-text p { margin: 4px 0 0; font-size: var(--text-sm); opacity: 0.95; }
         .mh-hero-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-sm); flex: 0 1 auto; }
         .mh-hero-actions .mh-btn { min-height: 40px; padding: 6px 12px; font-size: var(--text-sm); }
@@ -1039,6 +1061,7 @@
             <p style="color:#5a5a5a;font-size:.9rem">המידע אינו ייעוץ רפואי. אנא ודאו פרטים מול הגורם עצמו לפני פנייה.</p>
         </div>
     </noscript>
+    <!-- MH_GROUP_STATIC -->
     <!-- REFERRAL_CODES_START -->
 <script type="application/json" id="mh-referral-codes">{"rows":{"1":{"codes":["unknown"],"source":"","confidence":"none"},"2":{"codes":["unknown"],"source":"","confidence":"none"},"3":{"codes":["unknown"],"source":"","confidence":"none"},"4":{"codes":["self_referral"],"source":"ייעוץ והכנה בחינם לוועדה הרפואית","confidence":"curated"},"5":{"codes":["rehab_basket_committee"],"source":"חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000)","confidence":"curated"},"6":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"7":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"8":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"9":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"10":{"codes":["self_referral"],"source":"זמין 24/7 לחיילים, מילואים וכוחות הביטחון","confidence":"curated"},"11":{"codes":["self_referral"],"source":"ניתן לפנות באופן אנונימי","confidence":"curated"},"12":{"codes":["unknown"],"source":"","confidence":"none"},"13":{"codes":["unknown"],"source":"","confidence":"none"},"16":{"codes":["unknown"],"source":"","confidence":"none"},"18":{"codes":["unknown"],"source":"","confidence":"none"},"19":{"codes":["unknown"],"source":"","confidence":"none"},"21":{"codes":["unknown"],"source":"","confidence":"none"},"24":{"codes":["unknown"],"source":"","confidence":"none"},"28":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"29":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"31":{"codes":["unknown"],"source":"","confidence":"none"},"32":{"codes":["unknown"],"source":"","confidence":"none"},"33":{"codes":["unknown"],"source":"","confidence":"none"},"34":{"codes":["unknown"],"source":"","confidence":"none"},"35":{"codes":["unknown"],"source":"","confidence":"none"},"36":{"codes":["unknown"],"source":"","confidence":"none"},"37":{"codes":["unknown"],"source":"","confidence":"none"},"38":{"codes":["unknown"],"source":"","confidence":"curated"},"39":{"codes":["self_referral"],"source":"בית בטוח לטיפול מיידי — חלופת אשפוז","confidence":"curated"},"40":{"codes":["hmo_form17"],"source":"cost: לאומית ומאוחדת","confidence":"curated"},"41":{"codes":["self_referral"],"source":"שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.","confidence":"curated"},"42":{"codes":["mod_rehab_worker"],"source":"ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום.","confidence":"curated"},"43":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת ולאומית","confidence":"curated"},"44":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"45":{"codes":["self_referral"],"source":"שירות פרטי","confidence":"curated"},"46":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת (בירושלים)","confidence":"curated"},"47":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"48":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: מכבי, מאוחדת ולאומית","confidence":"curated"},"49":{"codes":["unknown"],"source":"","confidence":"none"},"50":{"codes":["unknown"],"source":"","confidence":"none"},"51":{"codes":["unknown"],"source":"","confidence":"none"},"52":{"codes":["unknown"],"source":"","confidence":"none"},"53":{"codes":["unknown"],"source":"","confidence":"curated"},"56":{"codes":["unknown"],"source":"","confidence":"none"},"57":{"codes":["unknown"],"source":"","confidence":"none"},"59":{"codes":["unknown"],"source":"","confidence":"none"},"60":{"codes":["unknown"],"source":"","confidence":"none"},"61":{"codes":["unknown"],"source":"","confidence":"none"},"62":{"codes":["unknown"],"source":"","confidence":"curated"},"63":{"codes":["self_referral"],"source":"התערבות רגשית ממוקדת וללא עלות","confidence":"curated"},"64":{"codes":["unknown"],"source":"","confidence":"none"},"65":{"codes":["unknown"],"source":"","confidence":"none"},"66":{"codes":["unknown"],"source":"","confidence":"none"},"67":{"codes":["unknown"],"source":"","confidence":"none"},"68":{"codes":["unknown"],"source":"","confidence":"none"},"69":{"codes":["unknown"],"source":"","confidence":"none"},"70":{"codes":["unknown"],"source":"","confidence":"none"},"71":{"codes":["unknown"],"source":"","confidence":"none"},"72":{"codes":["unknown"],"source":"","confidence":"none"},"73":{"codes":["unknown"],"source":"","confidence":"none"},"74":{"codes":["unknown"],"source":"","confidence":"none"},"76":{"codes":["unknown"],"source":"","confidence":"none"},"78":{"codes":["unknown"],"source":"","confidence":"curated"},"79":{"codes":["unknown"],"source":"","confidence":"none"},"80":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"81":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"82":{"codes":["unknown"],"source":"","confidence":"none"},"83":{"codes":["unknown"],"source":"","confidence":"none"},"84":{"codes":["unknown"],"source":"","confidence":"none"},"85":{"codes":["unknown"],"source":"","confidence":"none"},"87":{"codes":["unknown"],"source":"","confidence":"none"},"88":{"codes":["unknown"],"source":"","confidence":"none"},"89":{"codes":["unknown"],"source":"","confidence":"none"},"90":{"codes":["unknown"],"source":"","confidence":"none"},"94":{"codes":["unknown"],"source":"","confidence":"none"},"95":{"codes":["unknown"],"source":"","confidence":"none"},"96":{"codes":["unknown"],"source":"","confidence":"none"},"102":{"codes":["unknown"],"source":"","confidence":"none"},"104":{"codes":["unknown"],"source":"","confidence":"none"},"105":{"codes":["unknown"],"source":"","confidence":"none"},"106":{"codes":["unknown"],"source":"","confidence":"none"},"107":{"codes":["unknown"],"source":"","confidence":"none"},"108":{"codes":["unknown"],"source":"","confidence":"none"},"109":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל.","confidence":"curated"},"201":{"codes":["self_referral"],"source":"קווי המענה הארציים 1202/1203","confidence":"curated"},"202":{"codes":["unknown"],"source":"","confidence":"none"},"203":{"codes":["unknown"],"source":"","confidence":"none"},"204":{"codes":["unknown"],"source":"","confidence":"none"},"205":{"codes":["unknown"],"source":"","confidence":"none"},"206":{"codes":["unknown"],"source":"","confidence":"none"},"210":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"211":{"codes":["unknown"],"source":"להתקבל לתוכנית חייבת הכרה/אבחון טראומה.","confidence":"curated"},"212":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"213":{"codes":["unknown"],"source":"","confidence":"none"},"214":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"215":{"codes":["unknown"],"source":"","confidence":"none"},"216":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"217":{"codes":["unknown"],"source":"","confidence":"none"},"218":{"codes":["mod_rehab_worker"],"source":"במימון משרד הביטחון","confidence":"curated"},"219":{"codes":["unknown"],"source":"","confidence":"none"},"220":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"221":{"codes":["gp_referral"],"source":"מרפאת כללית","confidence":"curated"},"222":{"codes":["unknown"],"source":"","confidence":"none"},"223":{"codes":["unknown"],"source":"","confidence":"none"},"224":{"codes":["mod_rehab_worker"],"source":"החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.","confidence":"curated"},"225":{"codes":["unknown"],"source":"","confidence":"none"},"226":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"228":{"codes":["unknown"],"source":"","confidence":"none"},"229":{"codes":["unknown"],"source":"","confidence":"none"},"230":{"codes":["unknown"],"source":"","confidence":"none"},"231":{"codes":["unknown"],"source":"","confidence":"none"},"232":{"codes":["unknown"],"source":"","confidence":"none"},"233":{"codes":["unknown"],"source":"","confidence":"none"},"234":{"codes":["unknown"],"source":"","confidence":"none"},"235":{"codes":["unknown"],"source":"","confidence":"none"},"237":{"codes":["unknown"],"source":"","confidence":"none"},"238":{"codes":["unknown"],"source":"","confidence":"none"},"239":{"codes":["unknown"],"source":"","confidence":"none"},"243":{"codes":["unknown"],"source":"","confidence":"none"},"244":{"codes":["self_referral"],"source":"אתר עם שאלון התאמה לספקי שירות","confidence":"curated"},"247":{"codes":["self_referral"],"source":"הכוונה ראשונית ללא עלות וללא התחייבות","confidence":"curated"},"248":{"codes":["unknown"],"source":"","confidence":"none"},"249":{"codes":["unknown"],"source":"","confidence":"none"},"250":{"codes":["unknown"],"source":"","confidence":"none"},"251":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"252":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"253":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"254":{"codes":["self_referral"],"source":"קו חם מאויש 24/7 כולל סופי שבוע","confidence":"curated"},"257":{"codes":["unknown"],"source":"","confidence":"none"},"263":{"codes":["unknown"],"source":"","confidence":"none"},"264":{"codes":["unknown"],"source":"","confidence":"none"},"268":{"codes":["psychiatrist_referral"],"source":"נדרשת אבחנה של פסיכיאטר.","confidence":"curated"},"269":{"codes":["unknown"],"source":"","confidence":"none"},"270":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרש מרשם פסיכיאטר ואישור הקופה.","confidence":"curated"},"271":{"codes":["psychiatrist_referral"],"source":"נדרשת הערכה פסיכיאטרית.","confidence":"curated"},"272":{"codes":["unknown"],"source":"","confidence":"none"},"273":{"codes":["psychiatrist_referral"],"source":"הפניה מפסיכיאטר או נוירולוג.","confidence":"curated"},"274":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית","confidence":"keyword"},"275":{"codes":["unknown"],"source":"","confidence":"none"},"278":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"279":{"codes":["hmo_form17","psychiatrist_referral","mod_rehab_worker"],"source":"חינם דרך קופות החולים (טופס 17) או משרד הביטחון; הפניה מפסיכיאטר.","confidence":"curated"},"280":{"codes":["gp_referral","rehab_basket_committee"],"source":"הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.","confidence":"curated"},"281":{"codes":["mod_rehab_worker","nii_referral"],"source":"הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).","confidence":"curated"},"282":{"codes":["unknown"],"source":"","confidence":"none"},"283":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)","confidence":"curated"},"291":{"codes":["self_referral"],"source":"פרטי כל מרפאה באתר","confidence":"curated"}}}</script>
 <!-- REFERRAL_CODES_END -->
@@ -3087,6 +3110,13 @@
                 title: "עזרה דחופה ותמיכה במשבר",
                 titleEn: "Emergency & Crisis Support",
                 desc: "קווי חירום ותמיכה מיידית במצבי משבר",
+                intro: `הדף הזה מיועד לרגע שבו אי אפשר לחכות לתור במרפאה. אם אתם או מישהו לידכם בסכנה מיידית, השאירו את הדף והתקשרו. בראש כל עמוד באתר מופיעים קווי החירום הקבועים, ובראשם ער״ן 1201 לעזרה ראשונה נפשית, *2201 לחיילים ולמילואים, *6690 למערך בריאות הנפש בצה״ל, 1202 ו־1203 לנפגעות ולנפגעי תקיפה מינית. מתחת לפסקה הזו מופיעות הקטגוריות של העמוד, וכל שירות מקושר לעמוד משלו.
+
+בקטגוריה עזרה דחופה מרוכזים מענים למצב חריף, לא לטיפול מתמשך. כאן מופיעים קו נפש אחת של אגף השיקום, למי שמתמודד עם פוסט־טראומה בעקבות שירות צבאי, מרכזי החוסן ברחבי הארץ, ובתים בטוחים שמשמשים חלופת אשפוז קצרה למי שהוכר עם פגיעה נפשית ונמצא במשבר. לידם צוות משבר שמגיע לבית המטופל דרך חלק מקופות החולים, כחלופה לפנייה לחדר מיון. לכל שירות רשומים הקהל, הטלפון אם פורסם, וההערות כפי שהופיעו במקור.
+
+קווי סיוע הם השכבה הבאה: שיחה, הכוונה או צ׳אט, גם כשאין סכנת חיים ברגע זה. ברשימה מוקדים של משרד הבריאות ומשרד החינוך להורים ולתלמידים, קו של ביטוח לאומי לנפגעי טרור ולשכול, נט״ל, סה״ר למי שמעדיף לכתוב במקום לדבר, מטיבת״א לציבור הדתי והחרדי, וקו למשפחות של מתמודדי נפש. חלק מהקווים ארציים, וחלקם פונים לקהל מוגדר. שעות הפעילות והתנאים כתובים בכרטיס, ולא כדאי להסיק אותם מהשם בלבד.
+
+אפליקציות בזמן התקף חרדה אינן מחליפות את הקווים האלה. הן תרגול קצר מהטלפון, כשקשה לנשום ואין כוח לחפש מספר. בכל כרטיס יש קישור לעמוד השירות. המידע נאסף ממקורות ציבוריים ומתעדכן ידנית. הוא אינו ייעוץ רפואי, ויש לאשר פרטים מול הגורם עצמו לפני פנייה.`,
                 icon: "fa-life-ring",
                 priority: "urgent",
                 subcategories: ["emergency", "helplines", "anxiety_apps"]
@@ -3095,6 +3125,13 @@
                 title: "טיפול וטיפולים",
                 titleEn: "Treatment & Therapy",
                 desc: "מטפלים, סוגי טיפולים, קופות חולים, אשפוז וחלופות",
+                intro: `הדף הזה מרכז את הדרך אל טיפול נפשי בישראל, מהפניה הראשונה ועד אשפוז וחלופותיו. הוא אינו המלצה על שיטה או על מטפל. הוא מפה של הגופים שמופיעים במדריך: איפה מתחילים בקופת החולים, איך מאתרים מטפל, אילו סוגי טיפול רשומים כאן, ומה קיים כשמרפאה בקהילה כבר לא מספיקה. הפרטים בכל כרטיס — עלות, אזור, הפניה נדרשת — הם כפי שפורסמו, ויש לבדוק אותם מול הגוף עצמו.
+
+איתור מטפלים הוא אינדקס, לא תור. לצידו קטגוריית טיפולים, שמחולקת לפסיכיאטריה, לטיפולים רפואיים, לטיפול רגשי ולטיפולים נוספים. בטיפולים הרפואיים מופיעים בין השאר גרייה מגנטית, נזעי חשמל, אסקטמין וטיפולים ממוקדים לפוסט־טראומה, כל אחד עם תנאי הפניה ומימון משלו. בטיפול הרגשי יש אינדקסים לגישות כגון CBT וטיפול סומטי, לצד מרכזים שפונים לנוער או לציבור דתי וחרדי. לא כל טיפול בסל, ולא כל טיפול פרטי.
+
+קופות החולים הן לרוב דלת הכניסה לטיפול מסובסד: כללית, מכבי, מאוחדת ולאומית, עם מוקד והפניה מרופא משפחה. מרפאות בריאות הנפש הן המסגרת הקהילתית שאליה מפנים. אשפוז מפנה לרשימת בתי החולים והמחלקות, וחלופות אשפוז כוללות אשפוז יום ואשפוז בית למי שמתאים למסגרת כזו. התמכרויות וטראומה הן קטגוריות נפרדות, כי המענים שם אינם זהים לטיפול כללי. טיפול תזונתי לנפגעי נפש מופיע בסוף, כהשלמה ולא כתחליף.
+
+לפני פנייה כדאי לקרוא בכרטיס למי השירות מיועד והאם נדרשת הפניה מרופא, מפסיכיאטר, מוועדת סל שיקום או מאגף השיקום. שירות שמסומן כפרטי אינו ממומן אוטומטית. שירות שמסומן כמסובסד עדיין תלוי בחברות בקופה ובהפניה. כל שם מוביל לעמוד השירות, ושם רשומים הטלפון והקישור כפי שפורסמו.`,
                 icon: "fa-user-doctor",
                 priority: "normal",
                 subcategories: ["therapists", "treatments", "hmo", "mh_clinics", "hospitalization", "alternatives", "addictions", "trauma", "nutrition"]
@@ -3103,6 +3140,13 @@
                 title: "זכויות ושירותים ממשלתיים",
                 titleEn: "Rights & Government Services",
                 desc: "מיצוי זכויות, ביטוח לאומי, משרד הבריאות והביטחון, שיקום",
+                intro: `הדף הזה עוסק בזכויות ובשירותים שמדינת ישראל מפעילה או מממנת בתחום בריאות הנפש. הוא לא טופס ולא החלטה של ועדה. הוא מסביר אילו דלתות קיימות במדריך, ומי בדרך כלל הכתובת לכל אחת: מיצוי זכויות לפני ועדה, משרד הבריאות וסל השיקום, אגף השיקום במשרד הביטחון, ומסגרות השיקום עצמן. זכאות היא אישית. מה שכתוב בכרטיס הוא תיאור השירות, לא אישור שאתם זכאים.
+
+מיצוי זכויות מרכז גופים שעוזרים להתכונן לוועדה רפואית, להבין קצבה, או לסדר מסמכים. זה השלב שלפני שמבקשים סל או הכרה, כשהשפה של הטפסים זרה והפגישה קצרה. כדאי להגיע עם אבחנה כתובה ועם רשימת תפקוד ביומיום, ולשאול את הגוף המלווה מה הוא מכסה ומה לא. המדריך אינו מחליף ייעוץ משפטי.
+
+משרד הבריאות כאן הוא בעיקר סל שיקום לפי חוק שיקום מתמודדי נפש בקהילה, קווי ההכוונה של המשרד, וספקים שמפעילים שירותי סל: דיור, תעסוקה, חברה ופנאי, וליווי למשפחות. הכניסה לסל עוברת ועדה, לא הרשמה עצמית אצל הספק. משרד הביטחון הוא מסלול נפרד למי שהפגיעה קשורה לשירות צבאי או לכוחות הביטחון: קו נפש אחת, זכויות של אגף השיקום, וטיפולים במימון האגף. אל תערבבו בין שני המסלולים באותו טופס.
+
+שיקום הוא מה שקורה אחרי שיש זכאות: שילוב בקהילה, לא במקום הטיפול הרפואי. בכרטיסים מופיעים ארגונים שמפעילים את השירותים בפועל. לכל אחד קהל יעד, אזור וטלפון אם פורסמו. אם אינכם בטוחים לאיזה מסלול אתם שייכים, התחילו בקו ההכוונה של המשרד המתאים או בגוף למיצוי זכויות, ורק אחר כך פנו לספק. אשרו כל פרט מול הגורם עצמו. המידע כאן לצורכי התמצאות ואינו ייעוץ רפואי או משפטי.`,
                 icon: "fa-coins",
                 priority: "normal",
                 subcategories: ["rights", "moh", "mod", "rehabilitation"]
@@ -3111,6 +3155,13 @@
                 title: "תמיכה וקהילה",
                 titleEn: "Support & Community",
                 desc: "תמיכה למשפחות, נוער, אוכלוסיות מיוחדות וקהילות תמיכה",
+                intro: `הדף הזה מיועד למי שמחפש אנשים, לא רק תור. טיפול וזכויות יושבים בעמודים אחרים. כאן נמצאת התמיכה שמסביב: משפחה שצריכה לדעת מה לומר בבית, נער או צעיר שצריך מענה בגילו, קהילה עם שפה או אורח חיים משלה, וקבוצה שאפשר להצטרף אליה בלי לקבוע פגישה. אף אחד מהשירותים האלה אינו קו חירום. במצב משבר חוזרים לעמוד עזרה דחופה או לער״ן 1201.
+
+תמיכה למשפחות פונה לבני זוג, להורים, לאחים ולילדים של מתמודדים. החיים לצד משבר נפשי מייצרים שאלות שאין להן מקום בתוך הפגישה של בן המשפחה: איך מדברים בבית, מתי פונים למיון, ואיך שומרים על שגרה. חלק מהשירותים הם שיחה או קבוצה, וחלקם ליווי מתמשך. בדקו בכרטיס אם המענה למשפחה בלבד או גם למתמודד עצמו.
+
+נוער וצעירים מכסה בערך את הגילאים שכתובים בכרטיסים, לרוב מעשר ועד אמצע שנות השלושים, ולא את כל מי שמרגיש צעיר. יש שירותים חינמיים וממוקדים, ויש מרפאות שפונות גם להורים. אוכלוסיות מיוחדות אוספת מענים לציבור דתי וחרדי, לדוברי אנגלית ולקבוצות ששירות כללי לא תמיד מגיע אליהן בשפתן. התאמה תרבותית אינה קישוט: היא משנה אם פונים בכלל.
+
+קבוצות פייסבוק הן קהילות תמיכה, לא טיפול ולא גורם רשמי. מה שנכתב בהן הוא דעת המשתתפים. הן שימושיות כדי לא להרגיש לבד ולשמוע ניסיון של אחרים, והן מקום גרוע להחלטה על תרופה או על אשפוז. לפני הצטרפות קראו את תיאור הקבוצה בכרטיס. בכל הקטגוריות, הטלפון והקישור הם כפי שפורסמו, והם עשויים להשתנות. זהו מידע להתמצאות, לא תחליף לאבחון או לטיפול.`,
                 icon: "fa-people-group",
                 priority: "normal",
                 subcategories: ["families", "youth", "populations", "facebook"]
@@ -3119,6 +3170,13 @@
                 title: "מידע ושירותים מעשיים",
                 titleEn: "Information & Practical Services",
                 desc: "פורטלי מידע, שירותים מקומיים, הסעות, ספרים, סרטים ו-TED",
+                intro: `הדף הזה הוא שכבת ההתמצאות שמסביב לשירותים עצמם. הוא לא קו, לא מרפאה ולא ועדה. מי שנמצא במשבר מתחיל בעמוד עזרה דחופה. מי שכבר יודע איזה טיפול או איזו זכות הוא מחפש ימצא אותם בעמודים המתאימים. כאן נאספו כלים שעוזרים להבין את המפה, למצוא מענה קרוב לבית, להגיע פיזית, או ללמוד מניסיון של אחרים דרך ספר, סרט או הרצאה.
+
+פורטלים ומידע הם אתרים ואינדקסים: הסבר על המערכת, רשימות ארציות, ונקודת פתיחה למי שלא יודע איך קוראים לשירות שחסר לו. הם חוסכים חיפוש עיוור, והם מתיישנים. כתובת שמופיעה בפורטל כדאי לאמת מול הכרטיס במדריך הזה ומול הארגון. שירותים מקומיים הם ההפך מקו ארצי: מרפאה, עמותה או מוקד שפועלים באזור מסוים. אם אתם גרים מחוץ לאזור שכתוב בכרטיס, השירות כנראה לא שלכם, גם אם הוא נשמע מתאים.
+
+הסעות ואמבולנסים עונים על בעיה מעשית: איך מגיעים לטיפול או למיון כשאין רכב, ומי מממן את הנסיעה. חלק מהשירותים כאן הם מתנדבים וללא עלות, ועדיין יש להם אזור, שעות ותנאים. אל תניחו שנסיעה חינם זמינה בכל שעה. התקשרו למספר שבכרטיס ובדקו זמינות לאותו יום, בייחוד כשמדובר בהגעה דחופה.
+
+ספרים, סרטים ו־TED אינם טיפול. הם דרך לשמוע איך אנשים מתארים דיכאון, חרדה, אשפוז או חיים לצד בן משפחה מתמודד, בשפה יומיומית. הרשימה כוללת סרטים, סדרות וסרטי תעודה, עם שפת המקור ואיפה אפשר לצפות. צפייה אינה מחליפה שיחה עם איש מקצוע, ולפעמים תוכן על טראומה קשה לצפייה בלי הכנה. בחרו לפי הנושא שכתוב ליד כל פריט. כמו בשאר המדריך, זהו מידע שנאסף ידנית ממקורות ציבוריים, והוא אינו ייעוץ רפואי.`,
                 icon: "fa-globe",
                 priority: "normal",
                 subcategories: ["portals", "local", "transport", "books_movies"]
@@ -3799,7 +3857,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "27.09.2026"; 
+            const LAST_UPDATED = "29.09.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -6440,7 +6498,11 @@
                         </div>
                         <div className="mh-hero-inner">
                             <div className="mh-hero-text">
-                                <h1>מדריך בריאות הנפש בישראל</h1>
+                                {selectedCategoryGroup ? (
+                                    <p className="mh-hero-site">{MH_SITE_TITLE}</p>
+                                ) : (
+                                    <h1>{MH_SITE_TITLE}</h1>
+                                )}
                                 <p>מידע מקיף למתמודדי נפש ומשפחותיהם</p>
                             </div>
                             <div className="mh-hero-actions">
@@ -7380,9 +7442,16 @@
                             <button onClick={() => goToGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
                                 ← חזרה לכל הקטגוריות
                             </button>
-                            <h2 style={{ margin: '0 0 var(--space-lg)', color: 'var(--primary-dark)', fontSize: 'var(--text-xl)' }}>
+                            <h1 style={{ margin: '0 0 var(--space-md)', color: 'var(--primary-dark)', fontSize: 'var(--text-2xl)' }}>
                                 {CATEGORY_GROUPS[selectedCategoryGroup].title}
-                            </h2>
+                            </h1>
+                            {CATEGORY_GROUPS[selectedCategoryGroup].intro && (
+                                <div className="mh-group-lede">
+                                    {CATEGORY_GROUPS[selectedCategoryGroup].intro.split(/\n\n+/).filter(Boolean).map((para, i) => (
+                                        <p key={i}>{para}</p>
+                                    ))}
+                                </div>
+                            )}
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
                                 const cat = filtered[id];
                                 return (
