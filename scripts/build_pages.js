@@ -13,7 +13,6 @@
  * Output (all generated, all gitignored):
  *   /s/<row>            one per entry
  *   /c/<category>       one per category, /c/<category>/<subsection> for treatments
- *   /g/<group>          one per top-level group
  *   /term/<slug>        one per glossary term, /terms index
  *   /directory          hub linking everything, so nothing is more than two hops from the root
  *   /emergency, /treatment, /rights, /support, /information
@@ -21,6 +20,10 @@
  *                       description and canonical, plus a static article — h1, intro and the
  *                       services — so the text is in the HTML source without JavaScript.
  *                       Slugs come from MH_GROUP_SLUGS. The intro text lives on CATEGORY_GROUPS.
+ *   /g/<group>          not generated. vercel.json permanently redirects each one to the
+ *                       group page above (/g/rightsGov -> /rights). Those redirects are the
+ *                       only remaining use of the old crawlable twins, so an indexed /g/ URL
+ *                       lands on the app. scripts/build_pages.js asserts the map stays in sync.
  *   /sitemap.xml
  */
 
@@ -75,6 +78,12 @@ function firstSentence(text) {
   const t = String(text || '').replace(/\s+/g, ' ').trim();
   const m = t.match(/^(.{20,}?[.!?])\s/);
   return m ? m[1] : t;
+}
+
+/** Public path of a group: /rights, not /g/rightsGov. vercel.json redirects the old path. */
+function groupPath(ctx, groupId) {
+  const slug = (ctx.MH_GROUP_SLUGS || {})[groupId];
+  return slug ? `/${slug}` : '';
 }
 
 /**
@@ -188,7 +197,7 @@ function renderEntryPage(ctx, entry) {
 
   const trail = [
     { name: 'מדריך נפש', url: '/' },
-    ...(group.title ? [{ name: group.title, url: `/g/${groupId}` }] : []),
+    ...(group.title && groupPath(ctx, groupId) ? [{ name: group.title, url: groupPath(ctx, groupId) }] : []),
     ...(cat.title ? [{ name: cat.title, url: `/c/${primaryCat}` }] : []),
     { name: entry.org, url: entry.path },
   ];
@@ -355,7 +364,7 @@ ${media}
 
   const trail = [
     { name: 'מדריך נפש', url: '/' },
-    ...(group.title ? [{ name: group.title, url: `/g/${groupId}` }] : []),
+    ...(group.title && groupPath(ctx, groupId) ? [{ name: group.title, url: groupPath(ctx, groupId) }] : []),
     ...(subsectionId ? [{ name: cat.title, url: `/c/${categoryId}` }] : []),
     { name: title, url: pagePath },
   ];
@@ -372,52 +381,6 @@ ${media}
         name: title,
         description: desc,
         path: pagePath,
-        members,
-        trail,
-        lastUpdatedIso: isoDate(LAST_UPDATED),
-      })
-    ),
-    lastUpdated: LAST_UPDATED,
-    lastUpdatedIso: isoDate(LAST_UPDATED),
-  });
-}
-
-function renderGroupPage(ctx, groupId) {
-  const { DATA, CATEGORY_GROUPS, LAST_UPDATED, published } = ctx;
-  const group = CATEGORY_GROUPS[groupId];
-
-  const cats = group.subcategories
-    .filter((c) => DATA[c])
-    .map((c) => {
-      const n = published.filter((e) => e.categories.includes(c)).length;
-      return `<li><a href="/c/${esc(c)}">${esc(DATA[c].title)}</a> <span class="count">(${n})</span><span class="svc">${esc(DATA[c].desc || '')}</span></li>`;
-    })
-    .join('');
-
-  const body = `
-<h1>${esc(group.title)}</h1>
-${group.desc ? `<p class="lede">${esc(group.desc)}</p>` : ''}
-<h2>קטגוריות</h2>
-<ul class="entry-list">${cats}</ul>
-<p><a class="btn" href="/#${esc(groupId)}">פתחו את הקבוצה במדריך המלא</a></p>
-`;
-
-  const trail = [{ name: 'מדריך נפש', url: '/' }, { name: group.title, url: `/g/${groupId}` }];
-  const description = truncate(`${group.title}${group.desc ? ` — ${group.desc}` : ''}. מדריך נפש, שירותי בריאות הנפש בישראל.`, 155);
-  const members = published.filter((e) => e.categories.some((c) => group.subcategories.includes(c)));
-
-  return T.renderPage({
-    title: `${group.title} | מדריך נפש`,
-    description,
-    path: `/g/${groupId}`,
-    ogType: 'website',
-    trail,
-    body,
-    jsonLd: LD.serialize(
-      LD.collectionGraph({
-        name: group.title,
-        description,
-        path: `/g/${groupId}`,
         members,
         trail,
         lastUpdatedIso: isoDate(LAST_UPDATED),
@@ -512,7 +475,7 @@ function renderDirectoryHub(ctx) {
         .filter((c) => DATA[c])
         .map((c) => `<li><a href="/c/${esc(c)}">${esc(DATA[c].title)}</a> <span class="count">(${published.filter((e) => e.categories.includes(c)).length})</span></li>`)
         .join('');
-      return `<h2><a href="/g/${esc(gid)}">${esc(g.title)}</a></h2><ul class="entry-list">${cats}</ul>`;
+      return `<h2><a href="${esc(groupPath(ctx, gid))}">${esc(g.title)}</a></h2><ul class="entry-list">${cats}</ul>`;
     })
     .join('');
 
@@ -765,11 +728,6 @@ function build(outRoot, data = load()) {
     }
   }
 
-  for (const groupId of Object.keys(data.CATEGORY_GROUPS)) {
-    writePage(outRoot, `/g/${groupId}`, renderGroupPage(ctx, groupId), written);
-    urls.push({ path: `/g/${groupId}`, priority: '0.7' });
-  }
-
   const slugByKey = {};
   for (const key of Object.keys(data.terms)) slugByKey[key] = termSlug(key);
   const dupSlugs = Object.values(slugByKey).filter((s, i, a) => a.indexOf(s) !== i);
@@ -827,16 +785,17 @@ function assertPhonesCameFromData(data, emittedPhones) {
  * slice is the obvious way to get this wrong: withhold an entry but keep linking to it
  * from its category page.
  */
-function assertNoDanglingLinks(outRoot, written) {
+function assertNoDanglingLinks(outRoot, written, groupPaths) {
   const pages = new Set(written.map((w) => '/' + w.replace(/\/index\.html$/, '')));
   pages.add('/');
+  const groups = new Set(groupPaths || []);
   const dangling = [];
 
   for (const rel of written) {
     const html = fs.readFileSync(path.join(outRoot, rel), 'utf8');
     for (const m of html.matchAll(/href="(\/[^"#?]*)"/g)) {
       const target = m[1].replace(/\/$/, '') || '/';
-      if (!/^\/(s|c|g|term|terms|directory)(\/|$)/.test(target)) continue;
+      if (!/^\/(s|c|g|term|terms|directory)(\/|$)/.test(target) && !groups.has(target)) continue;
       if (!pages.has(target)) dangling.push({ from: rel, to: target });
     }
   }
@@ -845,6 +804,32 @@ function assertNoDanglingLinks(outRoot, written) {
     throw new Error(`${dangling.length} dangling internal link(s):\n${sample.join('\n')}`);
   }
   return pages.size;
+}
+
+/**
+ * /g/<group> used to be a separate static page. Google may still have those URLs.
+ * vercel.json must send each one to the group page people actually use, permanently,
+ * and the sitemap must not keep advertising the old URL.
+ */
+function assertGroupRedirects(data, urls) {
+  const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
+  const redirects = vercel.redirects || [];
+  const problems = [];
+  for (const [groupId, slug] of Object.entries(data.MH_GROUP_SLUGS || {})) {
+    const source = `/g/${groupId}`;
+    const destination = `/${slug}`;
+    const hit = redirects.find((r) => r.source === source);
+    if (!hit) {
+      problems.push(`missing redirect ${source} -> ${destination}`);
+      continue;
+    }
+    if (hit.destination !== destination || hit.permanent !== true) {
+      problems.push(`${source} goes to ${hit.destination} (permanent: ${hit.permanent}); expected ${destination}, permanent`);
+    }
+  }
+  const advertised = (urls || []).filter((u) => String(u.path || '').startsWith('/g/')).map((u) => u.path);
+  if (advertised.length) problems.push(`sitemap still lists ${advertised.join(', ')}`);
+  if (problems.length) throw new Error(`Group redirects:\n  ${problems.join('\n  ')}`);
 }
 
 function assertReferralCodesValid(data) {
@@ -1061,7 +1046,9 @@ async function main() {
   assertEmergencyReachable(written);
   assertGroupPagesAreStatic(outRoot, data);
   const referralKnown = assertReferralCodesValid(data);
-  const linkTargets = assertNoDanglingLinks(outRoot, written);
+  const groupPaths = Object.values(data.MH_GROUP_SLUGS || {}).map((slug) => `/${slug}`);
+  assertGroupRedirects(data, urls);
+  const linkTargets = assertNoDanglingLinks(outRoot, written, groupPaths);
   const sitemapCount = assertRobotsAgrees(outRoot, urls.length);
   const ld = assertJsonLdIsHonest(outRoot, written, data);
   const orgCount = assertOrgIdsUnique(data);

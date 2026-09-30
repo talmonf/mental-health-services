@@ -57,6 +57,31 @@
       ],
       "destination": "https://nefesh-il.org/$1",
       "permanent": true
+    },
+    {
+      "source": "/g/emergency",
+      "destination": "/emergency",
+      "permanent": true
+    },
+    {
+      "source": "/g/treatment",
+      "destination": "/treatment",
+      "permanent": true
+    },
+    {
+      "source": "/g/rightsGov",
+      "destination": "/rights",
+      "permanent": true
+    },
+    {
+      "source": "/g/support",
+      "destination": "/support",
+      "permanent": true
+    },
+    {
+      "source": "/g/information",
+      "destination": "/information",
+      "permanent": true
     }
   ],
   "headers": [

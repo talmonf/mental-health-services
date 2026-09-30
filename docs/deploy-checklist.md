@@ -32,11 +32,11 @@ The `?entry=` form is the one pasted into WhatsApp threads that will never be up
 /s/210/anything rewrite resolves to /s/210 (cosmetic slugs, no redirect needed later). A local file server will 404 this path; `vercel.json` rewrites it. Check it on the preview URL.
 /c/emergency    category page
 /c/treatments/therapy   subsection page
-/g/rights       group page
+/g/rightsGov  permanent redirect to /rights (also /g/emergency, /g/treatment, /g/support, /g/information)
 /term/cbt       glossary term
 /terms          glossary index
 /directory      hub
-/sitemap.xml    valid XML, 292 urls
+/sitemap.xml    valid XML, no /g/ urls (those redirect)
 /robots.txt     Sitemap line points at https://nefesh-il.org/sitemap.xml
 ```
 

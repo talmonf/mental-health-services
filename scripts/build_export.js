@@ -132,13 +132,17 @@ function buildExport(data = load()) {
     })),
   }));
 
-  const groups = Object.entries(data.CATEGORY_GROUPS).map(([key, g]) => ({
-    key,
-    title: clean(g.title),
-    description: clean(g.desc),
-    url: `${SITE}/g/${key}`,
-    categories: g.subcategories.filter((c) => data.DATA[c]),
-  }));
+  const groups = Object.entries(data.CATEGORY_GROUPS).map(([key, g]) => {
+    const slug = (data.MH_GROUP_SLUGS || {})[key];
+    if (!slug) throw new Error(`MH_GROUP_SLUGS in index.html has no slug for group ${key}`);
+    return {
+      key,
+      title: clean(g.title),
+      description: clean(g.desc),
+      url: `${SITE}/${slug}`,
+      categories: g.subcategories.filter((c) => data.DATA[c]),
+    };
+  });
 
   // Films, series and documentaries. A separate entity type from services: they are not
   // something you can phone, and flattening them into `entries` would misrepresent both.
