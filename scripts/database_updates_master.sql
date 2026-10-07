@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 050_directory_entries_mazor_ezrat_achim.sql
 [x] 049_directory_card_edits_ezra_lemarpe_notes.sql
 [x] 048_directory_entries_merhavim_open_wards.sql
 [x] 047_directory_entries_navigate.sql
