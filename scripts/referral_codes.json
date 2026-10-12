@@ -1056,8 +1056,69 @@
         "self_referral",
         "rehab_basket_committee"
       ],
-      "source": "מוקד *9913. דיור ״הד״ לזכאי סל שיקום",
+      "source": "מוקד *9913. מכינת הד: גילאי 18–28, זכאי סל שיקום",
       "confidence": "curated"
+    },
+    "297": {
+      "codes": [
+        "psychiatrist_referral",
+        "hmo_form17"
+      ],
+      "source": "הפניה מפסיכיאטר. טופס 17, קוד L0771.",
+      "confidence": "curated"
+    },
+    "298": {
+      "codes": [
+        "gp_referral"
+      ],
+      "source": "אשפוז יום ניתן רק לאחר הפניית רופא.",
+      "confidence": "curated"
+    },
+    "299": {
+      "codes": [
+        "gp_referral",
+        "psychiatrist_referral",
+        "hmo_form17"
+      ],
+      "source": "טופס 17, קוד L0822. הפניה מגורם בבריאות הנפש, מנוירולוג או מרופא משפחה; אם יש פסיכיאטר מטפל — לצרף מכתב.",
+      "confidence": "curated"
+    },
+    "300": {
+      "codes": [
+        "gp_referral",
+        "hmo_form17"
+      ],
+      "source": "כללית ומכבי: הפניה מרופא מטפל. מאוחדת ולאומית: טופס 17.",
+      "confidence": "curated"
+    },
+    "301": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "none"
+    },
+    "302": {
+      "codes": [
+        "psychiatrist_referral",
+        "hmo_form17"
+      ],
+      "source": "נדרשת הפניה מהפסיכיאטר המטפל או גורם מוסמך אחר בבריאות הנפש, וטופס התחייבות.",
+      "confidence": "curated"
+    },
+    "303": {
+      "codes": [
+        "gp_referral"
+      ],
+      "source": "בהפניית רופא.",
+      "confidence": "curated"
+    },
+    "304": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "none"
     }
   }
 }

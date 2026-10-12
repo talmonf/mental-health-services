@@ -43,7 +43,7 @@ function main() {
   });
   const referralAny = filled(entries, (e) => Array.isArray(e.raw.referralCodes) && e.raw.referralCodes.length > 0);
 
-  const TREAT = new Set(['therapists', 'treatments', 'hmo', 'mh_clinics', 'hospitalization', 'alternatives', 'addictions', 'trauma', 'nutrition']);
+  const TREAT = new Set(['therapists', 'treatments', 'hmo', 'mh_clinics', 'hospitalization', 'day_care', 'alternatives', 'addictions', 'trauma', 'nutrition']);
   const RIGHTS = new Set(['rights', 'moh', 'mod', 'rehabilitation']);
   const scoped = unique(entries.filter((e) => e.categories.some((c) => TREAT.has(c) || RIGHTS.has(c))));
   const scopedKnown = filled(scoped, (e) => {

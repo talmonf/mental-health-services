@@ -16,7 +16,7 @@ const { load } = require('./lib/extract_data');
 const VOCAB = JSON.parse(fs.readFileSync(path.join(__dirname, 'vocabularies.json'), 'utf8'));
 const VALID = new Set(VOCAB.referral_route.terms.map((t) => t.code));
 
-const TREAT = new Set(['therapists', 'treatments', 'hmo', 'mh_clinics', 'hospitalization', 'alternatives', 'addictions', 'trauma', 'nutrition']);
+const TREAT = new Set(['therapists', 'treatments', 'hmo', 'mh_clinics', 'hospitalization', 'day_care', 'alternatives', 'addictions', 'trauma', 'nutrition']);
 const RIGHTS = new Set(['rights', 'moh', 'mod', 'rehabilitation']);
 const SCOPE = new Set([...TREAT, ...RIGHTS]);
 
@@ -91,7 +91,13 @@ const CURATED = {
   283: { codes: ['rehab_basket_committee', 'mod_rehab_worker'], source: 'זכאי סל שיקום; נכי צה"ל (באישור עובד השיקום)' },
   291: { codes: ['self_referral'], source: 'פרטי כל מרפאה באתר' },
   293: { codes: ['hmo_form17'], source: 'טופס 17 — כללית ומאוחדת' },
-  296: { codes: ['self_referral', 'rehab_basket_committee'], source: 'מוקד *9913. דיור ״הד״ לזכאי סל שיקום' },
+  296: { codes: ['self_referral', 'rehab_basket_committee'], source: 'מוקד *9913. מכינת הד: גילאי 18–28, זכאי סל שיקום' },
+  297: { codes: ['psychiatrist_referral', 'hmo_form17'], source: 'הפניה מפסיכיאטר. טופס 17, קוד L0771.' },
+  298: { codes: ['gp_referral'], source: 'אשפוז יום ניתן רק לאחר הפניית רופא.' },
+  299: { codes: ['gp_referral', 'psychiatrist_referral', 'hmo_form17'], source: 'טופס 17, קוד L0822. הפניה מגורם בבריאות הנפש, מנוירולוג או מרופא משפחה; אם יש פסיכיאטר מטפל — לצרף מכתב.' },
+  300: { codes: ['gp_referral', 'hmo_form17'], source: 'כללית ומכבי: הפניה מרופא מטפל. מאוחדת ולאומית: טופס 17.' },
+  302: { codes: ['psychiatrist_referral', 'hmo_form17'], source: 'נדרשת הפניה מהפסיכיאטר המטפל או גורם מוסמך אחר בבריאות הנפש, וטופס התחייבות.' },
+  303: { codes: ['gp_referral'], source: 'בהפניית רופא.' },
 };
 
 function blob(entry) {

@@ -22,6 +22,7 @@ const PROVIDER_TYPE_BY_CATEGORY = {
   rights: 'GovernmentOrganization',
   mh_clinics: 'MedicalClinic',
   hospitalization: 'Hospital',
+  day_care: 'MedicalClinic',
   hmo: 'MedicalOrganization',
   therapists: 'MedicalOrganization',
   treatments: 'MedicalOrganization',
