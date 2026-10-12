@@ -1362,6 +1362,62 @@
             return `${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${tagPart}`.toLowerCase();
         };
 
+        // טיפול יום and אשפוז יום name the same service. A query that uses either phrase
+        // also matches cards written with the other, so the two searches return the same cards.
+        const MH_SEARCH_SYNONYM_GROUPS = [
+            ['טיפול יום', 'אשפוז יום']
+        ];
+        const mhSearchNeedles = (term) => {
+            const t = String(term || '').toLowerCase();
+            const needles = [t];
+            MH_SEARCH_SYNONYM_GROUPS.forEach((group) => {
+                group.forEach((phrase) => {
+                    if (!t.includes(phrase)) return;
+                    group.forEach((alt) => {
+                        if (alt !== phrase) needles.push(t.split(phrase).join(alt));
+                    });
+                });
+            });
+            return needles;
+        };
+        const mhServiceMatchesSearch = (service, term) => {
+            const haystack = mhServiceSearchText(service);
+            return mhSearchNeedles(term).some((needle) => haystack.includes(needle));
+        };
+
+        // A bare address in the notes is shown as a link. The visible text is the word
+        // before the address, so the full URL is not printed on the card.
+        const mhRenderLinkedNotes = (notes) => {
+            const text = String(notes || '');
+            const re = /([^\s]+)[ \t]+(https?:\/\/[^\s]+)/g;
+            const out = [];
+            let last = 0;
+            let key = 0;
+            let match;
+            while ((match = re.exec(text))) {
+                let url = match[2];
+                let trail = '';
+                const punct = url.match(/[.,;:]+$/);
+                if (punct) {
+                    trail = punct[0];
+                    url = url.slice(0, -trail.length);
+                }
+                const word = match[1];
+                const prefix = /^ו[א-ת]/.test(word) && word.length > 2 ? 'ו' : '';
+                const label = prefix ? word.slice(1) : word;
+                if (match.index > last) out.push(text.slice(last, match.index));
+                if (prefix) out.push(prefix);
+                out.push(
+                    <a key={`note-link-${key++}`} href={url} target="_blank" rel="noopener noreferrer" data-probe-external-link="true">{label}</a>
+                );
+                if (trail) out.push(trail);
+                last = match.index + match[0].length;
+                if (text[last] === ' ' && /[.,;:]/.test(text[last + 1] || '')) last += 1;
+            }
+            if (last < text.length) out.push(text.slice(last));
+            return out.length ? out : text;
+        };
+
         const mhGetEntryId = (svc, categoryKey) => {
             const org = svc.org || '';
             const desc = svc.svc || '';
@@ -4969,20 +5025,19 @@
             // On a group page the search covers only that group's categories; the home page covers everything.
             const filtered = useMemo(() => {
                 if (!searchTerm) return data;
-                const t = searchTerm.toLowerCase();
                 const scope = selectedCategoryGroup ? CATEGORY_GROUPS[selectedCategoryGroup]?.subcategories : null;
                 const r = {};
                 Object.entries(data).forEach(([id, cat]) => {
                     if (scope && !scope.includes(id)) return;
                     if (Array.isArray(cat.services)) {
-                        const m = cat.services.filter(s => mhServiceSearchText(s).includes(t));
+                        const m = cat.services.filter(s => mhServiceMatchesSearch(s, searchTerm));
                         if (m.length) r[id] = { ...cat, services: m };
                         return;
                     }
                     if (cat.subsections) {
                         const matchedSubsections = {};
                         Object.entries(cat.subsections).forEach(([subId, sub]) => {
-                            const m = (sub.services || []).filter(s => mhServiceSearchText(s).includes(t));
+                            const m = (sub.services || []).filter(s => mhServiceMatchesSearch(s, searchTerm));
                             if (m.length) matchedSubsections[subId] = { ...sub, services: m };
                         });
                         if (Object.keys(matchedSubsections).length) r[id] = { ...cat, subsections: matchedSubsections };
@@ -5463,7 +5518,7 @@
                                 {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
                                 {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {s.languages}</div>}
                                 {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {s.diseases}</div>}
-                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {s.notes}</div>}
+                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes)}</div>}
                             </div>
                         )}
                         <div className="mh-card-actions">
