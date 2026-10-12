@@ -91,6 +91,7 @@ const CURATED = {
   283: { codes: ['rehab_basket_committee', 'mod_rehab_worker'], source: 'זכאי סל שיקום; נכי צה"ל (באישור עובד השיקום)' },
   291: { codes: ['self_referral'], source: 'פרטי כל מרפאה באתר' },
   293: { codes: ['hmo_form17'], source: 'טופס 17 — כללית ומאוחדת' },
+  296: { codes: ['self_referral', 'rehab_basket_committee'], source: 'מוקד *9913. דיור ״הד״ לזכאי סל שיקום' },
 };
 
 function blob(entry) {

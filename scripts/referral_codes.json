@@ -1050,6 +1050,14 @@
       ],
       "source": "טופס 17 — כללית ומאוחדת",
       "confidence": "curated"
+    },
+    "296": {
+      "codes": [
+        "self_referral",
+        "rehab_basket_committee"
+      ],
+      "source": "מוקד *9913. דיור ״הד״ לזכאי סל שיקום",
+      "confidence": "curated"
     }
   }
 }

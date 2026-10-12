@@ -40,7 +40,10 @@ function emailVerifiedFlag(v: unknown): boolean {
 export async function exchangeGoogleCode(opts: { code: string; verifier: string }): Promise<GoogleProfile | null> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
+  if (!clientId || !clientSecret) {
+    console.error('google token exchange failed: oauth is not configured');
+    return null;
+  }
 
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -55,12 +58,19 @@ export async function exchangeGoogleCode(opts: { code: string; verifier: string 
     }),
   });
   if (!tokenRes.ok) {
-    console.error('google token exchange failed', tokenRes.status);
+    const errBody = (await tokenRes.json().catch(() => null)) as { error?: unknown; error_description?: unknown } | null;
+    console.error('google token exchange failed', tokenRes.status, {
+      error: typeof errBody?.error === 'string' ? errBody.error : undefined,
+      errorDescription: typeof errBody?.error_description === 'string' ? errBody.error_description : undefined,
+    });
     return null;
   }
   const tokens = (await tokenRes.json()) as { access_token?: unknown };
   const access = typeof tokens.access_token === 'string' ? tokens.access_token : '';
-  if (!access) return null;
+  if (!access) {
+    console.error('google token exchange failed: no access token');
+    return null;
+  }
 
   const infoRes = await fetch('https://openidconnect.googleapis.com/userinfo', {
     headers: { Authorization: `Bearer ${access}` },
@@ -72,6 +82,13 @@ export async function exchangeGoogleCode(opts: { code: string; verifier: string 
   const info = (await infoRes.json()) as Record<string, unknown>;
   const email = typeof info.email === 'string' ? info.email.trim().toLowerCase() : '';
   const sub = typeof info.sub === 'string' ? info.sub : '';
-  if (!email || !sub || !emailVerifiedFlag(info.email_verified)) return null;
+  if (!email || !sub || !emailVerifiedFlag(info.email_verified)) {
+    console.error('google userinfo rejected', {
+      hasEmail: Boolean(email),
+      hasSub: Boolean(sub),
+      emailVerified: emailVerifiedFlag(info.email_verified),
+    });
+    return null;
+  }
   return { sub, email };
 }

@@ -789,12 +789,18 @@ async function handleGoogleStart(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const ip = clientKey(req);
   if (!rateLimit(`google:${ip}`, 20, 60 * 60 * 1000)) {
+    console.error('google start failed: rate limited');
     res.statusCode = 302;
     res.setHeader('Location', googleDest(false));
     return res.end();
   }
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId || !process.env.GOOGLE_CLIENT_SECRET || !process.env.AUTH_SECRET) {
+    console.error('google start failed: oauth is not configured', {
+      hasClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
+      hasClientSecret: Boolean(process.env.GOOGLE_CLIENT_SECRET),
+      hasAuthSecret: Boolean(process.env.AUTH_SECRET),
+    });
     res.statusCode = 302;
     res.setHeader('Location', googleDest(false));
     return res.end();
@@ -865,10 +871,23 @@ async function handleGoogleCallback(req: VercelRequest, res: VercelResponse) {
   };
   const code = typeof req.query.code === 'string' ? req.query.code : '';
   const state = typeof req.query.state === 'string' ? req.query.state : '';
-  if (!code || !state || !process.env.DATABASE_URL || !process.env.AUTH_SECRET) return fail();
+  const googleError = typeof req.query.error === 'string' ? req.query.error : '';
+  if (!code || !state || !process.env.DATABASE_URL || !process.env.AUTH_SECRET) {
+    console.error('google callback failed: missing code, state, or server config', {
+      hasCode: Boolean(code),
+      hasState: Boolean(state),
+      hasDatabase: Boolean(process.env.DATABASE_URL),
+      hasAuthSecret: Boolean(process.env.AUTH_SECRET),
+      googleError: googleError || undefined,
+    });
+    return fail();
+  }
 
   const stored = await getOAuthStateFromRequest(req);
-  if (!stored || stored.state !== state) return fail();
+  if (!stored || stored.state !== state) {
+    console.error('google callback failed: oauth state cookie mismatch', { hasCookie: Boolean(stored) });
+    return fail();
+  }
 
   const profile = await exchangeGoogleCode({ code, verifier: stored.codeVerifier });
   if (!profile) return fail();
