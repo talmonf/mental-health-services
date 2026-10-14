@@ -1127,6 +1127,21 @@
       ],
       "source": "שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. פנייה ל-073-3952222.",
       "confidence": "curated"
+    },
+    "306": {
+      "codes": [
+        "self_referral",
+        "rehab_basket_committee"
+      ],
+      "source": "סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים. מוקד 1599-504949.",
+      "confidence": "curated"
+    },
+    "307": {
+      "codes": [
+        "rehab_basket_committee"
+      ],
+      "source": "ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.",
+      "confidence": "curated"
     }
   }
 }

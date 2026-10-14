@@ -1288,7 +1288,6 @@
       ['tags', 'מילות חיפוש (לא מוצגות כשדה בכרטיס)', true],
       ['whatsapp', 'וואטסאפ', false],
       ['whatsappLabel', 'תווית וואטסאפ', false],
-      ['email', 'דוא״ל', false],
       ['web', 'אתר', false],
       ['webLabel', 'תווית אתר', false],
       ['web2', 'אתר נוסף', false],
@@ -1297,7 +1296,8 @@
       ['addLabel', 'תווית קישור נוסף', false]
     ];
     const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
-    const DIR_LTR = new Set(['whatsapp', 'email', 'web', 'web2', 'add']);
+    const DIR_EMAILS = ['', '2', '3'];
+    const DIR_LTR = new Set(['whatsapp', 'web', 'web2', 'add']);
 
     function dirLines(value) {
       return String(value || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
@@ -1389,6 +1389,18 @@
             <label class="dir-check"><input type="checkbox" name="phoneShowNumber${suffix}"${show ? ' checked' : ''}> הצגת המספר על הכפתור</label>
           </div>`;
         }).join('');
+        const emails = DIR_EMAILS.map((suffix, index) => {
+          const address = fields[`email${suffix}`] == null ? '' : String(fields[`email${suffix}`]);
+          const label = fields[`emailLabel${suffix}`] == null ? '' : String(fields[`emailLabel${suffix}`]);
+          const show = fields[`emailShowAddress${suffix}`] === true;
+          return `<div>
+            <label for="d-email${suffix}">דוא״ל ${index + 1}</label>
+            <input id="d-email${suffix}" name="email${suffix}" type="text" dir="ltr" value="${esc(address)}">
+            <label for="d-emailLabel${suffix}">תווית</label>
+            <input id="d-emailLabel${suffix}" name="emailLabel${suffix}" type="text" value="${esc(label)}">
+            <label class="dir-check"><input type="checkbox" name="emailShowAddress${suffix}"${show ? ' checked' : ''}> הצגת הכתובת על הכפתור</label>
+          </div>`;
+        }).join('');
         const sex = elig.sex || 'any';
         const locationMode = elig.location_mode || 'any';
         const select = (name, label, current, options) => `<div><label for="d-${name}">${esc(label)}</label><select id="d-${name}" name="${name}">${options.map(([v, t]) => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></div>`;
@@ -1402,6 +1414,10 @@
             <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
               <summary>טלפונים</summary>
               <div class="dir-grid">${phones}</div>
+            </details>
+            <details class="chrome" ${DIR_EMAILS.some((suffix) => fields[`email${suffix}`]) ? 'open' : ''}>
+              <summary>דוא״ל</summary>
+              <div class="dir-grid">${emails}</div>
             </details>
             <h2>התאמה — לא מוצג בכרטיס</h2>
             <p class="dir-help">השדות כאן לא מופיעים על הכרטיס, אבל נכללים במקור הדף כדי שמנועי חיפוש וכלים דומים יוכלו לקרוא אותם. שדה ריק או «ללא הגבלה» פירושו שאין תנאי בממד הזה. תנאי שמולא הוא תנאי הכרחי, לא סיבה מספיקה בפני עצמה להתאים את השירות. הערות פנימיות נכללות גם הן במקור הדף — לא לרשום בהן הערות תפעוליות פרטיות.</p>
@@ -1463,6 +1479,11 @@
             publicFields[`phone${suffix}`] = text(`phone${suffix}`);
             publicFields[`phoneLabel${suffix}`] = text(`phoneLabel${suffix}`);
             publicFields[`phoneShowNumber${suffix}`] = form.querySelector(`[name="phoneShowNumber${suffix}"]`).checked;
+          });
+          DIR_EMAILS.forEach((suffix) => {
+            publicFields[`email${suffix}`] = text(`email${suffix}`);
+            publicFields[`emailLabel${suffix}`] = text(`emailLabel${suffix}`);
+            publicFields[`emailShowAddress${suffix}`] = form.querySelector(`[name="emailShowAddress${suffix}"]`).checked;
           });
           const age = (name) => {
             const v = text(name);

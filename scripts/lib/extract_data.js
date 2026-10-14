@@ -120,6 +120,8 @@ function getEntryId(svc, categoryKey) {
 
 /** Every phone slot an entry can carry: phone, phone2..phone6, each with a label and a show flag. */
 const PHONE_SLOTS = [1, 2, 3, 4, 5, 6];
+/** email, email2, email3 — a label hides the address unless emailShowAddress is strictly true. */
+const EMAIL_SLOTS = [1, 2, 3];
 
 function phonesOf(svc) {
   const out = [];
@@ -132,6 +134,22 @@ function phonesOf(svc) {
       number: String(number).trim(),
       label: (svc[`phoneLabel${suffix}`] || '').trim() || null,
       showNumber: svc[`phoneShowNumber${suffix}`] !== false,
+    });
+  }
+  return out;
+}
+
+function emailsOf(svc) {
+  const out = [];
+  for (const n of EMAIL_SLOTS) {
+    const suffix = n === 1 ? '' : String(n);
+    const address = svc[`email${suffix}`];
+    if (!address || !String(address).trim()) continue;
+    out.push({
+      slot: n,
+      address: String(address).trim(),
+      label: (svc[`emailLabel${suffix}`] || '').trim() || null,
+      showAddress: svc[`emailShowAddress${suffix}`] === true,
     });
   }
   return out;
@@ -333,6 +351,7 @@ module.exports = {
   rowCollisions,
   assignPaths,
   phonesOf,
+  emailsOf,
   getEntryId,
   slugify,
   shortHash,

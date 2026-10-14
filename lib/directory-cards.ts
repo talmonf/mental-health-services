@@ -25,7 +25,6 @@ export const PUBLIC_TEXT_KEYS = [
   'tags',
   'whatsapp',
   'whatsappLabel',
-  'email',
   'web',
   'webLabel',
   'web2',
@@ -47,7 +46,6 @@ const TEXT_MAX: Record<(typeof PUBLIC_TEXT_KEYS)[number], number> = {
   tags: 2000,
   whatsapp: 40,
   whatsappLabel: 120,
-  email: 200,
   web: 2000,
   webLabel: 120,
   web2: 2000,
@@ -57,9 +55,12 @@ const TEXT_MAX: Record<(typeof PUBLIC_TEXT_KEYS)[number], number> = {
 };
 
 export const PHONE_SUFFIXES = ['', '2', '3', '4', '5', '6'] as const;
+export const EMAIL_SUFFIXES = ['', '2', '3'] as const;
 
 const PHONE_MAX = 80;
 const PHONE_LABEL_MAX = 120;
+const EMAIL_MAX = 200;
+const EMAIL_LABEL_MAX = 120;
 
 const SEX_VALUES = ['any', 'female', 'male'] as const;
 const LOCATION_VALUES = ['any', 'nationwide', 'regions', 'sites'] as const;
@@ -137,8 +138,20 @@ export function normalizePublicFields(raw: unknown): PublicFields {
     out[key] = value;
   }
   if (!out.org) throw new DirectoryCardError('שם הארגון הוא שדה חובה');
-  if (out.email && !/^[^\s@]+@[^\s@]+$/.test(String(out.email))) {
-    throw new DirectoryCardError('כתובת הדוא״ל אינה תקינה');
+  for (const suffix of EMAIL_SUFFIXES) {
+    const email = textField(src[`email${suffix}`]);
+    const label = textField(src[`emailLabel${suffix}`]);
+    if (email.length > EMAIL_MAX || label.length > EMAIL_LABEL_MAX) {
+      throw new DirectoryCardError('כתובת הדוא״ל או התווית ארוכים מדי');
+    }
+    if (email && !/^[^\s@]+@[^\s@]+$/.test(email)) {
+      throw new DirectoryCardError('כתובת הדוא״ל אינה תקינה');
+    }
+    out[`email${suffix}`] = email;
+    out[`emailLabel${suffix}`] = label;
+    // The address is painted on the button only when this flag is strictly true.
+    // A missing flag stays false, so an email with no label keeps the icon-only button.
+    out[`emailShowAddress${suffix}`] = src[`emailShowAddress${suffix}`] === true;
   }
   for (const suffix of PHONE_SUFFIXES) {
     const phone = textField(src[`phone${suffix}`]);

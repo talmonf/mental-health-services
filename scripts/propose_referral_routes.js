@@ -98,6 +98,8 @@ const CURATED = {
   300: { codes: ['gp_referral', 'hmo_form17'], source: 'כללית ומכבי: הפניה מרופא מטפל. מאוחדת ולאומית: טופס 17.' },
   302: { codes: ['psychiatrist_referral', 'hmo_form17'], source: 'נדרשת הפניה מהפסיכיאטר המטפל או גורם מוסמך אחר בבריאות הנפש, וטופס התחייבות.' },
   303: { codes: ['gp_referral'], source: 'בהפניית רופא.' },
+  306: { codes: ['self_referral', 'rehab_basket_committee'], source: 'סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים. מוקד 1599-504949.' },
+  307: { codes: ['rehab_basket_committee'], source: 'ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.' },
 };
 
 function blob(entry) {

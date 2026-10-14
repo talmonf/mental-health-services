@@ -21,13 +21,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { load, phonesOf } = require('./lib/extract_data');
+const { load, phonesOf, emailsOf } = require('./lib/extract_data');
 const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const { validate } = require('./lib/validate_schema');
 const LD = require('./lib/jsonld');
 
 const ROOT = path.join(__dirname, '..');
-const SCHEMA_VERSION = '1.0.0';
+const SCHEMA_VERSION = '1.1.0';
 const SITE = 'https://nefesh-il.org';
 
 const clean = (v) => {
@@ -98,6 +98,11 @@ function buildExport(data = load()) {
       })),
       whatsapp: clean(r.whatsapp),
       email: clean(r.email),
+      emails: emailsOf(r).map((mail) => ({
+        slot: mail.slot,
+        address: mail.address,
+        label: mail.label,
+      })),
       website: /^https?:\/\//.test(r.web || '') ? r.web : null,
       website_label: clean(r.webLabel),
       additional_links: [
@@ -376,7 +381,21 @@ function buildSchema() {
               },
             },
             whatsapp: str,
-            email: str,
+            email: { ...str, description: 'First email slot. Further addresses are in `emails`.' },
+            emails: {
+              type: 'array',
+              description:
+                'Up to three labelled addresses. `email` remains the first slot. `label` is null when the card shows an icon-only button.',
+              items: {
+                type: 'object',
+                required: ['slot', 'address'],
+                properties: {
+                  slot: { type: 'integer', minimum: 1, maximum: 3 },
+                  address: { type: 'string' },
+                  label: { ...str, description: 'Name on the button. The address stays in `address` and off the button unless the card is set to show it.' },
+                },
+              },
+            },
             website: { type: ['string', 'null'], format: 'uri' },
             website_label: str,
             additional_links: {

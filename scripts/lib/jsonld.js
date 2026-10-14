@@ -11,7 +11,7 @@
 // `provider`, and every provider gets a stable `@id` so the 173 organisations are reusable
 // graph nodes rather than 197 duplicated blobs.
 
-const { phonesOf } = require('./extract_data');
+const { phonesOf, emailsOf } = require('./extract_data');
 
 const SITE = 'https://nefesh-il.org';
 
@@ -198,7 +198,11 @@ function entryGraph(entry, ctx, telsBySlot, trail) {
     '@id': providerNodeId,
     name: clean(entry.org),
     url: /^https?:\/\//.test(entry.raw.web || '') ? entry.raw.web : undefined,
-    email: clean(entry.raw.email),
+    email: (() => {
+      const addresses = emailsOf(entry.raw).map((mail) => mail.address);
+      if (addresses.length > 1) return addresses;
+      return addresses[0];
+    })(),
     location: locations.length ? locations : undefined,
     areaServed: areaServed(entry.raw.region),
   });

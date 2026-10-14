@@ -21,6 +21,11 @@ This file tracks the **schema**, not the data. Entries are added and corrected c
 Fields are never silently repurposed. If a field's meaning has to change, it gets a new name
 and the old one is deprecated.
 
+## 1.1.0 — 2026-10-14
+
+Added `entries[].emails`, an array of up to three labelled addresses (`slot`, `address`, `label`).
+`entries[].email` is unchanged: it is still the first address, or null when that slot is empty.
+
 ## 1.0.0 — 2026-09-08
 
 First published export.

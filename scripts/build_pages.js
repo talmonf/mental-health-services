@@ -29,7 +29,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { load, phonesOf, referralLabel } = require('./lib/extract_data');
+const { load, phonesOf, emailsOf, referralLabel } = require('./lib/extract_data');
 const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const T = require('./lib/page_template');
 const LD = require('./lib/jsonld');
@@ -67,7 +67,7 @@ const signature = (s) => String(s || '').replace(/[^\d*]/g, '');
 
 // ---------------------------------------------------------------- text helpers
 
-const { escapeHtml: esc, paragraphs, startsWithLatin, truncate } = T;
+const { escapeHtml: esc, linkifyNotes, paragraphs, startsWithLatin, truncate } = T;
 
 function isoDate(ddmmyyyy) {
   const m = String(ddmmyyyy || '').match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -75,7 +75,11 @@ function isoDate(ddmmyyyy) {
 }
 
 function firstSentence(text) {
-  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  const t = String(text || '')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '$1')
+    .replace(/([^\s]+)[ \t]+https?:\/\/\S+/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
   const m = t.match(/^(.{20,}?[.!?])\s/);
   return m ? m[1] : t;
 }
@@ -160,8 +164,10 @@ function renderContact(entry, emitted) {
     const label = r.whatsappLabel ? esc(r.whatsappLabel) : 'WhatsApp';
     items.push(`<li><span class="label">WhatsApp: </span><a href="https://wa.me/${esc(digits)}" rel="nofollow">${label}</a></li>`);
   }
-  if (r.email) {
-    items.push(`<li><span class="label">דוא"ל: </span><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></li>`);
+  for (const mail of emailsOf(r)) {
+    const linkText = mail.label || mail.address;
+    const prefix = mail.label ? '' : '<span class="label">דוא"ל: </span>';
+    items.push(`<li>${prefix}<a href="mailto:${esc(mail.address)}">${esc(linkText)}</a></li>`);
   }
   for (const [urlKey, labelKey, fallback] of [['web', 'webLabel', 'אתר הארגון'], ['web2', 'webLabel2', 'קישור נוסף'], ['add', 'addLabel', 'מידע נוסף']]) {
     const url = r[urlKey];
@@ -531,7 +537,8 @@ function entryMetaLine(entry) {
   if (r.specialty && String(r.specialty).trim()) bits.push(String(r.specialty).trim());
   const phones = phonesOf(r).map((p) => (p.label ? `${p.label}: ${p.number}` : p.number));
   if (phones.length) bits.push(phones.join(' · '));
-  if (r.email) bits.push(r.email);
+  const emails = emailsOf(r).map((mail) => mail.label || mail.address);
+  if (emails.length) bits.push(emails.join(' · '));
   return bits.join(' · ').replace(/\s+/g, ' ').trim();
 }
 
@@ -542,7 +549,7 @@ function renderStaticEntry(entry) {
   const ltr = entry.raw.dir === 'ltr' ? ' lang="en" dir="ltr"' : '';
   const meta = entryMetaLine(entry);
   return `<li><a href="${esc(entry.path)}"${ltr}>${esc(org)}</a><span class="svc"${ltr}>${esc(svc)}</span>${
-    notes ? `<p class="notes"${ltr}>${esc(notes)}</p>` : ''
+    notes ? `<p class="notes"${ltr}>${linkifyNotes(notes)}</p>` : ''
   }${meta ? `<span class="svc">${esc(meta)}</span>` : ''}</li>`;
 }
 

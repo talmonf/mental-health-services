@@ -20,13 +20,51 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Notes may name another card as [בית משלך](https://nefesh-il.org/support?entry=289&section=youth),
+ * or a single word followed by an address. The visible text is the name, not the URL.
+ * A link to this site stays in the same tab.
+ */
+function linkifyNotes(text) {
+  const raw = String(text || '');
+  const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|([^\s]+)[ \t]+(https?:\/\/[^\s]+)/g;
+  let out = '';
+  let last = 0;
+  let match;
+  while ((match = re.exec(raw))) {
+    const markdown = match[1] != null;
+    let url = markdown ? match[2] : match[4];
+    let trail = '';
+    if (!markdown) {
+      const punct = url.match(/[.,;:]+$/);
+      if (punct) {
+        trail = punct[0];
+        url = url.slice(0, -trail.length);
+      }
+    }
+    const word = markdown ? match[1] : match[3];
+    const prefix = !markdown && /^ו[א-ת]/.test(word) && word.length > 2 ? 'ו' : '';
+    const label = prefix ? word.slice(1) : word;
+    out += escapeHtml(raw.slice(last, match.index));
+    if (prefix) out += escapeHtml(prefix);
+    const sameSite = /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
+    const attrs = sameSite ? '' : ' target="_blank" rel="noopener noreferrer"';
+    out += `<a href="${escapeHtml(url)}"${attrs}>${escapeHtml(label)}</a>`;
+    if (trail) out += escapeHtml(trail);
+    last = match.index + match[0].length;
+    if (!markdown && raw[last] === ' ' && /[.,;:]/.test(raw[last + 1] || '')) last += 1;
+  }
+  out += escapeHtml(raw.slice(last));
+  return out;
+}
+
 /** Multi-line free text from DATA renders as paragraphs, not one run-on line. */
 function paragraphs(text) {
   return String(text || '')
     .split(/\n+/)
     .map((t) => t.trim())
     .filter(Boolean)
-    .map((t) => `<p>${escapeHtml(t)}</p>`)
+    .map((t) => `<p>${linkifyNotes(t)}</p>`)
     .join('');
 }
 
@@ -187,6 +225,7 @@ module.exports = {
   CSS,
   EMERGENCY_HTML,
   escapeHtml,
+  linkifyNotes,
   paragraphs,
   startsWithLatin,
   truncate,

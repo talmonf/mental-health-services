@@ -13,7 +13,10 @@ const { Client } = require('pg');
 
 const PUBLIC_KEYS = [
   'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
-  'whatsapp', 'whatsappLabel', 'email', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
+  'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
+  'email', 'emailLabel', 'emailShowAddress',
+  'email2', 'emailLabel2', 'emailShowAddress2',
+  'email3', 'emailLabel3', 'emailShowAddress3',
   'phone', 'phoneLabel', 'phoneShowNumber',
   'phone2', 'phoneLabel2', 'phoneShowNumber2',
   'phone3', 'phoneLabel3', 'phoneShowNumber3',
@@ -42,7 +45,9 @@ function replacePublicFields(svc, fields) {
     if (Object.prototype.hasOwnProperty.call(src, key)) {
       svc[key] = src[key];
     } else {
-      svc[key] = key.startsWith('phoneShowNumber') ? true : '';
+      if (key.startsWith('phoneShowNumber')) svc[key] = true;
+      else if (key.startsWith('emailShowAddress')) svc[key] = false;
+      else svc[key] = '';
     }
   }
 }
