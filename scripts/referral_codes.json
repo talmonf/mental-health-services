@@ -1119,6 +1119,14 @@
       ],
       "source": "",
       "confidence": "none"
+    },
+    "305": {
+      "codes": [
+        "self_referral",
+        "rehab_basket_committee"
+      ],
+      "source": "שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. פנייה ל-073-3952222.",
+      "confidence": "curated"
     }
   }
 }

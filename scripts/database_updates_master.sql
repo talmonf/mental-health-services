@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 056_directory_entries_ezrat_zion_mh.sql
 [x] 055_directory_card_edits_vinik_clinic.sql
 [x] 054_directory_entries_day_care.sql
 [x] 053_directory_card_edits_gvanim_services.sql
