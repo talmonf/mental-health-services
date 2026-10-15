@@ -368,17 +368,18 @@
     },
     "66": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "קבלת השירות אינה כרוכה בתשלום או בהפניה. מרכזי יה״ל, בשיתוף משרד הבריאות.",
+      "confidence": "curated"
     },
     "67": {
       "codes": [
-        "unknown"
+        "rehab_basket_committee",
+        "mod_rehab_worker"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "דיור, קהילה תומכת, תעסוקה נתמכת ויהלו״ם: זכאי סל שיקום או הפניה ממשרד הביטחון. תעסוקה נתמכת גם באופן פרטי. ייעוץ המשפחות בכרטיס מרכז יה״ל, בלי הפניה.",
+      "confidence": "curated"
     },
     "68": {
       "codes": [

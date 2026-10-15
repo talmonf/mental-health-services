@@ -1,4 +1,6 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 060_directory_card_edits_eychut_yahel.sql
+[x] 059_directory_card_edits_ezrat_zion_family.sql
 [x] 058_directory_card_notes_links.sql
 [x] 057_directory_slavpro_soulbird.sql
 [x] 056_directory_entries_ezrat_zion_mh.sql
