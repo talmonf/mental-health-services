@@ -1143,6 +1143,254 @@
       ],
       "source": "ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.",
       "confidence": "curated"
+    },
+    "308": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "פנייה ישירה, בלי אישור סל שיקום.",
+      "confidence": "curated"
+    },
+    "309": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "דף היחידה אינו מציין טופס 17. רוב הפונים מגיעים אחרי אשפוז מלא.",
+      "confidence": "curated"
+    },
+    "310": {
+      "codes": [
+        "hmo_form17",
+        "psychiatrist_referral"
+      ],
+      "source": "טופס 17 קוד L0771 לאינטייק, והפניה מפסיכיאטר בקהילה משישה החודשים האחרונים.",
+      "confidence": "curated"
+    },
+    "311": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "בכותרת הדף נכתב בלי טופס 17, ובגוף הדף בכפוף לטופס 17.",
+      "confidence": "curated"
+    },
+    "312": {
+      "codes": [
+        "psychiatrist_referral",
+        "hmo_form17"
+      ],
+      "source": "הפניה ממטפל בבריאות הנפש וטופס 17.",
+      "confidence": "curated"
+    },
+    "313": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "מסמך ההסכמה של איכילוב. לא נמצא דף תכנית נפרד.",
+      "confidence": "curated"
+    },
+    "314": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "315": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "316": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "317": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "318": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "319": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "320": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "321": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "322": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "323": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "324": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "325": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "326": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "327": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "328": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
+      "confidence": "curated"
+    },
+    "329": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "330": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "331": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "332": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "333": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "334": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "335": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "336": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "337": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
+      "confidence": "curated"
+    },
+    "338": {
+      "codes": [
+        "gp_referral"
+      ],
+      "source": "מרפאת חוץ. דף המרפאה אינו מפרט את דרך ההפניה.",
+      "confidence": "curated"
+    },
+    "339": {
+      "codes": [
+        "psychiatrist_referral"
+      ],
+      "source": "קבלה ממרפאות בריאות הנפש.",
+      "confidence": "curated"
+    },
+    "340": {
+      "codes": [
+        "psychiatrist_referral",
+        "hmo_form17"
+      ],
+      "source": "אשפוז ממוקד: הפניה מהגורם המטפל בקהילה. טיפול יום: טופס 17 והפניה מפסיכיאטר.",
+      "confidence": "curated"
+    },
+    "341": {
+      "codes": [
+        "hmo_form17"
+      ],
+      "source": "מנוי אבחוני של שתי פגישות מקופת החולים, דרך הגורם המטפל.",
+      "confidence": "curated"
+    },
+    "342": {
+      "codes": [
+        "psychiatrist_referral"
+      ],
+      "source": "תיאום מראש דרך גורם מטפל בקהילה, וטופס באתר היחידה.",
+      "confidence": "curated"
     }
   }
 }
