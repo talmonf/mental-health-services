@@ -1021,6 +1021,17 @@
         .mh-referral-badge { margin: 0 0 var(--space-md); font-size: var(--text-sm); background: #eef6f1; border: 1px solid #c5e4d4; border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-md); }
         .mh-referral-badge summary { cursor: pointer; font-weight: 600; color: var(--primary-dark); }
         .mh-referral-source { margin: var(--space-sm) 0 0; color: var(--text-muted); line-height: 1.5; }
+        .mh-referral-badge-plain { color: var(--primary-dark); }
+        .mh-card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: calc(-1 * var(--space-sm)) 0 var(--space-md); }
+        .mh-card-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; background: rgba(45, 90, 123, 0.1); color: var(--primary); font-size: 0.8rem; font-weight: 600; }
+        .mh-card-badge-org { background: rgba(82, 183, 136, 0.15); color: var(--primary-dark); }
+        .mh-card-badge-info-only { background: #eef0f2; color: var(--text-muted); }
+        .mh-card.mh-card-info-only { border-style: dashed; background: #fafbfc; }
+        .mh-card-filter { margin: var(--space-sm) 0 var(--space-md); font-size: var(--text-sm); }
+        .mh-card-filter summary { cursor: pointer; color: var(--primary); font-weight: 600; min-height: var(--touch-min); display: flex; align-items: center; gap: 6px; }
+        .mh-card-filter-group { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin: var(--space-sm) 0; }
+        .mh-card-filter-label { font-weight: 600; color: var(--primary-dark); }
+        .mh-card-filter-note { margin: var(--space-sm) 0 0; }
         @media (min-width: 600px) {
             .mh-resource-nav-grid { grid-template-columns: repeat(3, 1fr); }
             .mh-ted-playlists { grid-template-columns: repeat(2, 1fr); }
@@ -1416,6 +1427,49 @@
             } catch { return {}; }
         })();
         const mhReferralRecord = (row) => MH_REFERRAL_CODES[String(row)] || null;
+        const MH_OFFER_ORDER = ['info', 'navigate', 'care', 'claim', 'community'];
+        const MH_OFFER_LABELS_HE = { info: 'מידע', navigate: 'הכוונה ואיתור', care: 'טיפול ותמיכה', claim: 'מימוש זכות', community: 'קהילה ותמיכת עמיתים' };
+        const MH_OFFER_LABELS_EN = { info: 'Information', navigate: 'Finding services', care: 'Treatment & support', claim: 'Claiming a right', community: 'Community & peer support' };
+        const MH_OFFER_ICONS = { info: 'fa-circle-info', navigate: 'fa-compass', care: 'fa-hand-holding-heart', claim: 'fa-file-signature', community: 'fa-people-group' };
+        const MH_FUNDING_ORDER = ['free', 'hmo', 'moh', 'mod', 'welfare', 'btl', 'edu', 'supplementary', 'private'];
+        const MH_FUNDING_LABELS_HE = { private: 'בתשלום', free: 'חינם', hmo: 'קופות חולים', moh: 'משרד הבריאות', mod: 'משרד הביטחון', welfare: 'רווחה', btl: 'ביטוח לאומי', supplementary: 'ביטוח משלים / שב״ן', edu: 'משרד החינוך' };
+        const MH_FUNDING_LABELS_EN = { private: 'Paid', free: 'Free', hmo: 'Health funds (Kupot)', moh: 'Ministry of Health', mod: 'Ministry of Defense', welfare: 'Social services', btl: 'National Insurance', supplementary: 'Supplementary insurance', edu: 'Ministry of Education' };
+        const MH_FUNDING_TERMS_HE = { full: 'מימון מלא', partial: 'השתתפות עצמית', eligible: 'לזכאים' };
+        const MH_FUNDING_TERMS_EN = { full: 'fully covered', partial: 'co-payment', eligible: 'if eligible' };
+        // Indicators come only from directory_card_edits. A card with none set is "unknown",
+        // so filters never hide it and the embedded referral codes stay in use for it.
+        const mhCardIndicators = (s) => {
+            const ind = s && s.cardIndicators;
+            if (!ind || typeof ind !== 'object') return null;
+            const offers = Array.isArray(ind.offers) ? ind.offers.filter((c) => MH_OFFER_LABELS_HE[c]) : [];
+            const funding = Array.isArray(ind.funding) ? ind.funding.filter((f) => f && MH_FUNDING_LABELS_HE[f.channel]) : [];
+            const referral = Array.isArray(ind.referral) ? ind.referral.filter(Boolean) : [];
+            const wholeOrg = ind.whole_org === true;
+            if (!offers.length && !funding.length && !referral.length && !wholeOrg) return null;
+            const infoOnly = offers.length === 1 && offers[0] === 'info';
+            return {
+                offers,
+                funding: infoOnly ? [] : funding,
+                referral,
+                referralSource: typeof ind.referral_source === 'string' ? ind.referral_source : '',
+                wholeOrg,
+                infoOnly
+            };
+        };
+        const MH_CARD_FILTER_EMPTY = { offer: '', funding: '', hideInfoOnly: false };
+        const mhCardFilterActive = (f) => Boolean(f && (f.offer || f.funding || f.hideInfoOnly));
+        const mhServiceMatchesCardFilter = (s, f) => {
+            if (!mhCardFilterActive(f)) return true;
+            const ind = mhCardIndicators(s);
+            if (!ind) return true;
+            if (f.hideInfoOnly && ind.infoOnly) return false;
+            if (f.offer && ind.offers.length && !ind.offers.includes(f.offer)) return false;
+            if (f.funding) {
+                if (ind.infoOnly) return false;
+                if (ind.funding.length && !ind.funding.some((x) => x.channel === f.funding)) return false;
+            }
+            return true;
+        };
         const mhGoogleMapsUrl = (loc) => {
             const lat = Number(loc && loc.lat);
             const lng = Number(loc && loc.lng);
@@ -1453,8 +1507,10 @@
 
         // טיפול יום and אשפוז יום name the same service. A query that uses either phrase
         // also matches cards written with the other, so the two searches return the same cards.
+        // ציפור is often typed צפור, without the י after צ. Either spelling finds the same cards.
         const MH_SEARCH_SYNONYM_GROUPS = [
-            ['טיפול יום', 'אשפוז יום']
+            ['טיפול יום', 'אשפוז יום'],
+            ['ציפור', 'צפור']
         ];
         const mhSearchNeedles = (term) => {
             const t = mhNormalizeSearchText(term);
@@ -3547,6 +3603,8 @@
         const MentalHealthIsrael = () => {
             const initialUrlState = mhReadUrlState();
             const [searchTerm, setSearchTerm] = useState(() => initialUrlState.q);
+            const [cardFilter, setCardFilter] = useState(MH_CARD_FILTER_EMPTY);
+            const cardFilterOn = mhCardFilterActive(cardFilter);
             const [expandedCats, setExpandedCats] = useState([]);
             const [expandedSubsections, setExpandedSubsections] = useState([]);
             const [selectedCategoryGroup, setSelectedCategoryGroup] = useState(() => initialUrlState.group || null);
@@ -3997,6 +4055,8 @@
                     if (edit.eligibility && typeof edit.eligibility === 'object') next.cardEligibility = edit.eligibility;
                     if (Array.isArray(edit.sites) && edit.sites.length) next.cardSites = edit.sites;
                     if (Array.isArray(edit.terms) && edit.terms.length) next.cardTerms = edit.terms;
+                    if (edit.indicators && typeof edit.indicators === 'object') next.cardIndicators = edit.indicators;
+                    if (Array.isArray(edit.orgMembers) && edit.orgMembers.length) next.cardOrgMembers = edit.orgMembers;
                     if (edit.id) next.cardEditId = edit.id;
                     return next;
                 };
@@ -4012,6 +4072,20 @@
                 });
                 return out;
             }, [cardEditMap]);
+
+            // An organization's general card links to its member cards by directory_card_edits id.
+            const cardEditTargets = useMemo(() => {
+                const map = {};
+                const visit = (svc, categoryId) => {
+                    if (!svc || svc.cardEditId == null || map[svc.cardEditId]) return;
+                    map[svc.cardEditId] = { row: svc.row, org: svc.org, svc: svc.svc, dir: svc.dir, categoryId };
+                };
+                Object.entries(data).forEach(([id, cat]) => {
+                    (cat.services || []).forEach((svc) => visit(svc, id));
+                    Object.values(cat.subsections || {}).forEach((sub) => (sub.services || []).forEach((svc) => visit(svc, id)));
+                });
+                return map;
+            }, [data]);
 
             useEffect(() => {
                 const script = document.getElementById('mh-card-eligibility');
@@ -5368,27 +5442,28 @@
 
             // On a group page the search covers only that group's categories; the home page covers everything.
             const filtered = useMemo(() => {
-                if (!searchTerm) return data;
+                if (!searchTerm && !cardFilterOn) return data;
                 const scope = selectedCategoryGroup ? CATEGORY_GROUPS[selectedCategoryGroup]?.subcategories : null;
+                const matches = (s) => (!searchTerm || mhServiceMatchesSearch(s, searchTerm)) && mhServiceMatchesCardFilter(s, cardFilter);
                 const r = {};
                 Object.entries(data).forEach(([id, cat]) => {
                     if (scope && !scope.includes(id)) return;
                     if (Array.isArray(cat.services)) {
-                        const m = cat.services.filter(s => mhServiceMatchesSearch(s, searchTerm));
+                        const m = cat.services.filter(matches);
                         if (m.length) r[id] = { ...cat, services: m };
                         return;
                     }
                     if (cat.subsections) {
                         const matchedSubsections = {};
                         Object.entries(cat.subsections).forEach(([subId, sub]) => {
-                            const m = (sub.services || []).filter(s => mhServiceMatchesSearch(s, searchTerm));
+                            const m = (sub.services || []).filter(matches);
                             if (m.length) matchedSubsections[subId] = { ...sub, services: m };
                         });
                         if (Object.keys(matchedSubsections).length) r[id] = { ...cat, subsections: matchedSubsections };
                     }
                 });
                 return r;
-            }, [searchTerm, data, selectedCategoryGroup]);
+            }, [searchTerm, data, selectedCategoryGroup, cardFilter, cardFilterOn]);
             const resolvedEntryTarget = useMemo(() => {
                 if (!requestedEntryId) return null;
                 const candidates = entryTargets[requestedEntryId] || [];
@@ -5408,7 +5483,7 @@
             // When 3+ sections match: expand only sections with ≤3 items (keeps long lists folded).
             // When 1–2 sections match: expand all (e.g. a single section with one hit).
             useEffect(() => {
-                if (!searchTerm) return;
+                if (!searchTerm && !cardFilterOn) return;
                 const entries = Object.entries(filtered);
                 const sectionCount = entries.length;
                 if (sectionCount === 0) {
@@ -5431,7 +5506,7 @@
                         });
                     });
                 }
-            }, [searchTerm, filtered]);
+            }, [searchTerm, filtered, cardFilterOn]);
             useEffect(() => {
                 if (!resolvedEntryTarget) return;
                 const { entryId, groupId, categoryId, subsectionId } = resolvedEntryTarget;
@@ -5754,9 +5829,17 @@
                     ? rankedLocs.filter(({ loc }) => `${loc.label || ''} ${loc.address || ''}`.includes(mapNeedle))
                     : rankedLocs;
                 const nearestKm = rankedLocs.length && rankedLocs[0].km != null ? rankedLocs[0].km : null;
+                const ltr = s.dir === 'ltr';
+                const ind = mhCardIndicators(s);
+                const orgMembers = (ind && ind.wholeOrg && Array.isArray(s.cardOrgMembers) ? s.cardOrgMembers : [])
+                    .map((mid) => ({ id: mid, target: cardEditTargets[mid] }))
+                    .filter((m) => m.target);
+                const showFunding = ind && !ind.infoOnly && (
+                    !ind.offers.length || ind.wholeOrg || ind.offers.some((c) => c === 'care' || c === 'claim' || c === 'community')
+                );
                 return (
                 <div
-                    className={`mh-card ${isTargeted ? 'mh-card-targeted' : ''}`}
+                    className={`mh-card ${isTargeted ? 'mh-card-targeted' : ''}${ind && ind.infoOnly ? ' mh-card-info-only' : ''}`}
                     data-entry-id={entryId || undefined}
                     data-entry-category={categoryKey || undefined}
                     data-entry-subsection={subsectionId || undefined}
@@ -5813,6 +5896,24 @@
                             paddingLeft: entryId && s.dir !== 'ltr' ? '40px' : undefined,
                             paddingRight: entryId && s.dir === 'ltr' ? '40px' : undefined
                         }}>{s.org}</h3>
+                        {ind && (ind.offers.length > 0 || ind.wholeOrg) && (
+                            <div className="mh-card-badges">
+                                {ind.wholeOrg && (
+                                    <span className="mh-card-badge mh-card-badge-org">
+                                        <i className="fas fa-building" aria-hidden="true"></i> {ltr ? 'Organization overview' : 'כרטיס כללי של הארגון'}
+                                    </span>
+                                )}
+                                {ind.infoOnly ? (
+                                    <span className="mh-card-badge mh-card-badge-info-only">
+                                        <i className="fas fa-circle-info" aria-hidden="true"></i> {ltr ? 'Information only' : 'מידע בלבד'}
+                                    </span>
+                                ) : ind.offers.map((code) => (
+                                    <span key={code} className="mh-card-badge">
+                                        <i className={`fas ${MH_OFFER_ICONS[code]}`} aria-hidden="true"></i> {(ltr ? MH_OFFER_LABELS_EN : MH_OFFER_LABELS_HE)[code]}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         {distanceLabel && <p className="mh-nearby-distance">{distanceLabel}</p>}
                         {showHbLaunchBanner && (
                             <div className="mh-hb-launch-banner" role="status">
@@ -5831,26 +5932,59 @@
                         )}
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
                         {(() => {
-                            const rec = mhReferralRecord(s.row);
-                            const codes = (rec && rec.codes ? rec.codes : []).filter((c) => c && c !== 'unknown');
-                            if (!codes.length) return null;
-                            const labels = s.dir === 'ltr' ? MH_REFERRAL_LABELS_EN : MH_REFERRAL_LABELS_HE;
-                            const title = codes.includes('self_referral')
-                                ? labels.self_referral
-                                : codes.map((c) => labels[c] || c).join(' · ');
+                            const own = ind && ind.referral.length ? ind : null;
+                            const rec = own ? null : mhReferralRecord(s.row);
+                            const codes = (own ? own.referral : (rec && rec.codes ? rec.codes : [])).filter((c) => c && c !== 'unknown');
+                            const source = own ? own.referralSource : (rec && rec.source) || '';
+                            const labels = ltr ? MH_REFERRAL_LABELS_EN : MH_REFERRAL_LABELS_HE;
+                            const referralParts = codes.includes('self_referral')
+                                ? [labels.self_referral]
+                                : codes.map((c) => labels[c] || c);
+                            const fundLabels = ltr ? MH_FUNDING_LABELS_EN : MH_FUNDING_LABELS_HE;
+                            const termLabels = ltr ? MH_FUNDING_TERMS_EN : MH_FUNDING_TERMS_HE;
+                            const fundingParts = showFunding
+                                ? MH_FUNDING_ORDER
+                                    .map((code) => ind.funding.find((f) => f.channel === code))
+                                    .filter(Boolean)
+                                    .map((f) => (f.terms && termLabels[f.terms] ? `${fundLabels[f.channel]} (${termLabels[f.terms]})` : fundLabels[f.channel]))
+                                : [];
+                            const parts = [...fundingParts, ...referralParts];
+                            if (!parts.length) return null;
+                            const title = parts.join(' · ');
+                            const heading = ltr ? 'How to get it: ' : 'איך מקבלים: ';
+                            if (!source) {
+                                return (
+                                    <p className="mh-referral-badge mh-referral-badge-plain">
+                                        <strong>{heading}</strong>{title}
+                                    </p>
+                                );
+                            }
                             return (
                                 <details className="mh-referral-badge">
-                                    <summary>{title}</summary>
-                                    {rec.source ? (
-                                        <p className="mh-referral-source">
-                                            {s.dir === 'ltr' ? 'As published: ' : 'כפי שפורסם: '}
-                                            {rec.source}
-                                        </p>
-                                    ) : null}
+                                    <summary><strong>{heading}</strong>{title}</summary>
+                                    <p className="mh-referral-source">
+                                        {ltr ? 'As published: ' : 'כפי שפורסם: '}
+                                        {source}
+                                    </p>
                                 </details>
                             );
                         })()}
-                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length) && (
+                        {orgMembers.length > 0 && (
+                            <div className="mh-card-terms mh-card-org-members">
+                                <strong>{ltr ? 'Services of this organization:' : 'השירותים של הארגון:'}</strong>
+                                {orgMembers.map(({ id: mid, target }) => (
+                                    <a
+                                        key={mid}
+                                        href={buildEntryLink({ categoryId: target.categoryId, row: target.row })}
+                                        className="mh-card-term-chip"
+                                        data-tracking-name={`${s.trackingName || s.org}_org_member_${target.row}`}
+                                    >
+                                        {String(target.svc || target.org || '').split('\n')[0].slice(0, 70)}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length > 0) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
                                 {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
@@ -7877,7 +8011,7 @@
                                 </button>
                             ) : null}
                         </div>
-                        {searchTerm && Object.entries(filtered).length === 0 && (
+                        {(searchTerm || cardFilterOn) && Object.entries(filtered).length === 0 && (
                             <p className="mh-helper-text mh-search-empty">
                                 {selectedCategoryGroup
                                     ? `לא נמצאו שירותים התואמים לחיפוש ב${CATEGORY_GROUPS[selectedCategoryGroup].title}.`
@@ -7891,6 +8025,63 @@
                                     חיפוש בכל המדריך
                                 </button>
                             </p>
+                        )}
+                        {directorySource === 'database' && (
+                            <details className="mh-card-filter">
+                                <summary data-tracking-name="card_filter_toggle">
+                                    <i className="fas fa-filter" aria-hidden="true"></i> סינון לפי סוג הכרטיס והמימון
+                                </summary>
+                                <div className="mh-card-filter-group" role="group" aria-label="מה יש בכרטיס">
+                                    <span className="mh-card-filter-label">מה יש בכרטיס:</span>
+                                    {MH_OFFER_ORDER.map((code) => (
+                                        <button
+                                            key={code}
+                                            type="button"
+                                            className={`mh-resource-chip${cardFilter.offer === code ? ' active' : ''}`}
+                                            aria-pressed={cardFilter.offer === code}
+                                            onClick={() => setCardFilter((f) => ({ ...f, offer: f.offer === code ? '' : code }))}
+                                            data-tracking-name={`card_filter_offer_${code}`}
+                                        >
+                                            {MH_OFFER_LABELS_HE[code]}
+                                        </button>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        className={`mh-resource-chip${cardFilter.hideInfoOnly ? ' active' : ''}`}
+                                        aria-pressed={cardFilter.hideInfoOnly}
+                                        onClick={() => setCardFilter((f) => ({ ...f, hideInfoOnly: !f.hideInfoOnly }))}
+                                        data-tracking-name="card_filter_hide_info_only"
+                                    >
+                                        הסתרת «מידע בלבד»
+                                    </button>
+                                </div>
+                                <div className="mh-card-filter-group" role="group" aria-label="מימון">
+                                    <span className="mh-card-filter-label">מימון:</span>
+                                    {MH_FUNDING_ORDER.map((code) => (
+                                        <button
+                                            key={code}
+                                            type="button"
+                                            className={`mh-resource-chip${cardFilter.funding === code ? ' active' : ''}`}
+                                            aria-pressed={cardFilter.funding === code}
+                                            onClick={() => setCardFilter((f) => ({ ...f, funding: f.funding === code ? '' : code }))}
+                                            data-tracking-name={`card_filter_funding_${code}`}
+                                        >
+                                            {MH_FUNDING_LABELS_HE[code]}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="mh-helper-text mh-card-filter-note">
+                                    כרטיסים שעוד לא סומנו מוצגים תמיד.
+                                    {cardFilterOn && (
+                                        <>
+                                            {' '}
+                                            <button type="button" className="mh-search-scope-all" onClick={() => setCardFilter(MH_CARD_FILTER_EMPTY)} data-tracking-name="card_filter_clear">
+                                                ניקוי הסינון
+                                            </button>
+                                        </>
+                                    )}
+                                </p>
+                            </details>
                         )}
                         <button
                             type="button"
@@ -7984,7 +8175,7 @@
                         )}
                     </div>
 
-                    {!searchTerm && !selectedCategoryGroup && !nearbyOrigin && (
+                    {!searchTerm && !cardFilterOn && !selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
                     )}
                     {!searchTerm && selectedCategoryGroup && !nearbyOrigin && (
@@ -7995,7 +8186,7 @@
 
                     {directorySource === 'loading' ? (
                         <p className="mh-helper-text" role="status">טוען את המדריך…</p>
-                    ) : searchTerm ? (
+                    ) : (searchTerm || cardFilterOn) ? (
                         Object.entries(filtered).length === 0 ? null : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">

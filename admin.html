@@ -58,10 +58,13 @@
     .gate { max-width: 480px; margin: 80px auto; background: var(--card); padding: 32px; border-radius: 10px; text-align: center; }
     .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
     .tabs button {
-      background: transparent; color: var(--muted); border: none; border-radius: 8px 8px 0 0;
-      min-height: 44px; font-weight: 600;
+      background: transparent; color: var(--muted); border: none; border-bottom: 3px solid transparent;
+      border-radius: 8px 8px 0 0; min-height: 44px; font-weight: 600; margin-bottom: -2px;
     }
-    .tabs button.active { color: var(--primary-dark); background: #eef4f8; }
+    .tabs button:hover:not(.active) { color: var(--primary-dark); background: #f4f8fb; }
+    .tabs button.active {
+      color: var(--primary-dark); background: #dce8f2; border-bottom: 3px solid var(--primary);
+    }
     .filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; align-items: end; }
     .filters .wide { grid-column: span 2; }
     .filters .exclude { grid-column: span 2; }
@@ -100,10 +103,22 @@
     .dir-help { color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
     .dir-check { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; font-weight: 600; font-size: 0.85rem; }
     .dir-check input { width: auto; }
+    .dir-check .dir-help { margin: 0; font-weight: 400; }
+    .dir-fieldset { border: 1px solid var(--border, #ddd); border-radius: 8px; padding: 8px 12px 12px; margin: 0 0 12px; }
+    .dir-fieldset legend { font-weight: 700; padding: 0 4px; }
+    .dir-fieldset select { margin-top: 4px; }
+    #d-members { margin: 0 0 8px; padding-inline-start: 18px; }
+    .member-row { margin: 4px 0; }
     .dir-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
     @media (max-width: 700px) { .dir-grid { grid-template-columns: 1fr; } }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
+    .elig-mark { font-weight: 700; font-size: 1.15rem; line-height: 1; }
+    .elig-mark.yes { color: #1e7a4a; }
+    .elig-mark.no { color: #c0392b; }
+    .dir-list-filters { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .dir-list-filters .dir-list-search { flex: 1 1 240px; }
+    .dir-list-filters select { width: auto; min-width: 8rem; }
     .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eef4f8; color: var(--primary-dark); }
     .badge.warn { background: #fdf3e7; color: #8a5a12; }
     .badge.ok { background: #e7f6ee; color: #1e7a4a; }
@@ -315,6 +330,7 @@
       directoryCards: null,
       directoryCard: null,
       directoryMsg: '',
+      directoryEligFilter: '',
       cardInternal: null,
       cardInternalMsg: '',
       audit: null,
@@ -1335,6 +1351,35 @@
     const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
     const DIR_EMAILS = ['', '2', '3'];
     const DIR_LTR = new Set(['whatsapp', 'web', 'web2', 'add']);
+    const DIR_OFFERS = [
+      ['info', 'מידע', 'הסברים לקריאה: זכויות, תנאים, איך תהליך עובד'],
+      ['navigate', 'הכוונה ואיתור', 'מאגרים, אינדקסים וקווי הכוונה שמפנים למקום הנכון'],
+      ['care', 'טיפול ותמיכה', 'מקבלים עזרה ישירות: מרפאה, קו סיוע, שיקום'],
+      ['claim', 'מימוש זכות', 'מגישים בקשה: קצבה, ועדה, הכרה'],
+      ['community', 'קהילה ותמיכת עמיתים', 'קבוצות עמיתים וקבוצות ברשתות']
+    ];
+    const DIR_FUNDING = [
+      ['private', 'בתשלום', false],
+      ['free', 'חינם', false],
+      ['hmo', 'קופות חולים', true],
+      ['moh', 'משרד הבריאות', true],
+      ['mod', 'משרד הביטחון', true],
+      ['welfare', 'רווחה', true],
+      ['btl', 'ביטוח לאומי', true],
+      ['supplementary', 'ביטוח משלים / שב״ן', true],
+      ['edu', 'משרד החינוך', true]
+    ];
+    const DIR_FUNDING_TERMS = [['', 'לא צוין'], ['full', 'מלא'], ['partial', 'השתתפות עצמית'], ['eligible', 'לזכאים']];
+    const DIR_REFERRALS = [
+      ['self_referral', 'אפשר לפנות ישירות'],
+      ['gp_referral', 'הפניה מרופא משפחה'],
+      ['hmo_form17', 'טופס 17 מקופת החולים'],
+      ['psychiatrist_referral', 'הפניה מפסיכיאטר'],
+      ['rehab_basket_committee', 'ועדת סל שיקום'],
+      ['mod_rehab_worker', 'הפניה מעובד שיקום (משרד הביטחון)'],
+      ['nii_referral', 'הפניה מביטוח לאומי'],
+      ['court_or_welfare', 'בית משפט או רווחה']
+    ];
 
     function dirLines(value) {
       return String(value || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
@@ -1444,6 +1489,45 @@
         const locationMode = elig.location_mode || 'any';
         const select = (name, label, current, options) => `<div><label for="d-${name}">${esc(label)}</label><select id="d-${name}" name="${name}">${options.map(([v, t]) => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></div>`;
         const anyReq = [['any', 'ללא הגבלה'], ['required', 'נדרש']];
+        const ind = card.indicators || {};
+        const indOffers = Array.isArray(ind.offers) ? ind.offers : [];
+        const indFunding = {};
+        (Array.isArray(ind.funding) ? ind.funding : []).forEach((f) => { if (f && f.channel) indFunding[f.channel] = f.terms || ''; });
+        const indReferral = Array.isArray(ind.referral) ? ind.referral : [];
+        const memberRow = (m) => `<li class="member-row" data-id="${esc(m.id)}">שורה ${esc(m.rowId)} · ${esc(m.org)}${m.svc ? ` — ${esc(String(m.svc).split('\n')[0])}` : ''} <button type="button" class="secondary" data-act="remove-member">הסרה</button></li>`;
+        const memberOptions = (state.directoryCards || [])
+          .filter((c) => c.id !== card.id)
+          .map((c) => `<option value="${esc(c.id)}">שורה ${esc(c.rowId)} · ${esc(c.org)}${c.svc ? ` — ${esc(String(c.svc).split('\n')[0].slice(0, 60))}` : ''}</option>`)
+          .join('');
+        const indicatorsSection = card.indicatorsInstalled === false
+          ? '<h2>סימונים בכרטיס</h2><p class="dir-help">הסימונים יופיעו כאן אחרי הרצת סקריפט 077.</p>'
+          : `<h2>סימונים בכרטיס</h2>
+            <p class="dir-help">מוצגים על הכרטיס ומשמשים לסינון. שינוי בסימונים לא משנה את תאריך העדכון בכרטיס. כשמסמנים רק «מידע», הכרטיס מוצג כ«מידע בלבד» ובלי מימון.</p>
+            <fieldset class="dir-fieldset"><legend>מה יש בכרטיס</legend>
+              ${DIR_OFFERS.map(([code, label, help]) => `<label class="dir-check" title="${esc(help)}"><input type="checkbox" name="offer_${code}"${indOffers.includes(code) ? ' checked' : ''}> ${esc(label)} <span class="dir-help">— ${esc(help)}</span></label>`).join('')}
+            </fieldset>
+            <fieldset class="dir-fieldset"><legend>מימון</legend>
+              <div class="dir-grid">
+              ${DIR_FUNDING.map(([code, label, qualified]) => `<div>
+                <label class="dir-check"><input type="checkbox" name="fund_${code}"${Object.prototype.hasOwnProperty.call(indFunding, code) ? ' checked' : ''}> ${esc(label)}</label>
+                ${qualified ? `<select name="fundterms_${code}" aria-label="תנאי מימון: ${esc(label)}">${DIR_FUNDING_TERMS.map(([v, t]) => `<option value="${esc(v)}"${(indFunding[code] || '') === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
+              </div>`).join('')}
+              </div>
+              <p class="dir-help">כשמשרד הבריאות מממן שירות דרך הקופות, מסמנים גם «קופות חולים» וגם «משרד הבריאות». הפרטים במילים נשארים בשדה «עלות».</p>
+            </fieldset>
+            <fieldset class="dir-fieldset"><legend>איך מגיעים</legend>
+              ${DIR_REFERRALS.map(([code, label]) => `<label class="dir-check"><input type="checkbox" name="ref_${code}"${indReferral.includes(code) ? ' checked' : ''}> ${esc(label)}</label>`).join('')}
+              <label for="d-referral_source">כפי שפורסם (מוצג כשפותחים את השורה בכרטיס)</label>
+              <input id="d-referral_source" name="referral_source" type="text" value="${esc(ind.referral_source || '')}">
+            </fieldset>
+            <fieldset class="dir-fieldset"><legend>כרטיס כללי של הארגון</legend>
+              <label class="dir-check"><input type="checkbox" name="whole_org"${ind.whole_org === true ? ' checked' : ''}> זה הכרטיס הכללי של הארגון (האתר והטלפון הכלליים)</label>
+              <div id="d-members-wrap"${ind.whole_org === true ? '' : ' hidden'}>
+                <p class="dir-help">הכרטיסים של השירותים הספציפיים של הארגון. הם מוצגים כקישורים בכרטיס הכללי.</p>
+                <ul id="d-members">${(Array.isArray(card.orgMembers) ? card.orgMembers : []).map(memberRow).join('')}</ul>
+                <select id="d-member-pick" aria-label="הוספת כרטיס של הארגון"><option value="">הוספת כרטיס…</option>${memberOptions}</select>
+              </div>
+            </fieldset>`;
         root.appendChild(el(`<div class="card he-panel">
           ${msg}
           <p class="dir-help">שורה ${esc(card.rowId)}. <a href="/?entry=${encodeURIComponent(card.rowId)}">צפייה בכרטיס</a></p>
@@ -1458,6 +1542,7 @@
               <summary>דוא״ל</summary>
               <div class="dir-grid">${emails}</div>
             </details>
+            ${indicatorsSection}
             <h2>התאמה — לא מוצג בכרטיס</h2>
             <p class="dir-help">השדות כאן לא מופיעים על הכרטיס, אבל נכללים במקור הדף כדי שמנועי חיפוש וכלים דומים יוכלו לקרוא אותם. שדה ריק או «ללא הגבלה» פירושו שאין תנאי בממד הזה. תנאי שמולא הוא תנאי הכרחי, לא סיבה מספיקה בפני עצמה להתאים את השירות. הערות פנימיות נכללות גם הן במקור הדף — לא לרשום בהן הערות תפעוליות פרטיות.</p>
             <div class="dir-grid">
@@ -1497,6 +1582,26 @@
           location.hash = 'directory';
           render();
         });
+        const wholeOrg = form.querySelector('[name=whole_org]');
+        const membersWrap = form.querySelector('#d-members-wrap');
+        const membersBox = form.querySelector('#d-members');
+        const memberPick = form.querySelector('#d-member-pick');
+        if (wholeOrg && membersWrap) {
+          wholeOrg.addEventListener('change', () => { membersWrap.hidden = !wholeOrg.checked; });
+        }
+        if (memberPick && membersBox) {
+          memberPick.addEventListener('change', () => {
+            const id = Number(memberPick.value);
+            memberPick.value = '';
+            if (!id || membersBox.querySelector(`[data-id="${id}"]`)) return;
+            const c = (state.directoryCards || []).find((x) => x.id === id);
+            if (c) membersBox.insertAdjacentHTML('beforeend', memberRow(c));
+          });
+          membersBox.addEventListener('click', (ev) => {
+            const b = ev.target.closest('[data-act=remove-member]');
+            if (b) b.closest('.member-row').remove();
+          });
+        }
         const sitesBox = form.querySelector('#d-sites');
         form.querySelector('#d-add-site').addEventListener('click', () => {
           sitesBox.insertAdjacentHTML('beforeend', siteRow({}));
@@ -1560,6 +1665,17 @@
               };
             }).filter((site) => site.label || site.address)
           };
+          if (card.indicatorsInstalled !== false) {
+            const checked = (name) => Boolean(form.querySelector(`[name="${name}"]`) && form.querySelector(`[name="${name}"]`).checked);
+            body.indicators = {
+              offers: DIR_OFFERS.map(([code]) => code).filter((code) => checked(`offer_${code}`)),
+              whole_org: checked('whole_org'),
+              funding: DIR_FUNDING.filter(([code]) => checked(`fund_${code}`)).map(([code]) => ({ channel: code, terms: text(`fundterms_${code}`) })),
+              referral: DIR_REFERRALS.map(([code]) => code).filter((code) => checked(`ref_${code}`)),
+              referral_source: text('referral_source')
+            };
+            body.orgMembers = Array.from(form.querySelectorAll('.member-row')).map((li) => Number(li.dataset.id));
+          }
           try {
             const r = await fetch('/api/admin/directory', {
               method: 'PATCH',
@@ -1598,35 +1714,72 @@
         root.appendChild(el('<div class="card he-panel"><p>טוען…</p></div>'));
         return;
       }
+      const eligFilter = state.directoryEligFilter === 'yes' || state.directoryEligFilter === 'no'
+        ? state.directoryEligFilter
+        : '';
+      let shown = 0;
       const rows = cards.map((card) => {
         const hay = `${card.rowId} ${card.org || ''} ${card.svc || ''}`.toLowerCase();
-        return `<tr data-card-row data-hay="${esc(hay)}">
+        const elig = card.hasEligibility ? '1' : '0';
+        const hidden = (eligFilter === 'yes' && elig !== '1') || (eligFilter === 'no' && elig !== '0');
+        if (!hidden) shown += 1;
+        const mark = card.hasEligibility
+          ? '<span class="elig-mark yes" title="יש מידע פנימי" aria-label="יש מידע פנימי">✓</span>'
+          : '<span class="elig-mark no" title="אין מידע פנימי" aria-label="אין מידע פנימי">✗</span>';
+        return `<tr data-card-row data-hay="${esc(hay)}" data-elig="${elig}"${hidden ? ' hidden' : ''}>
           <td>${esc(card.rowId)}</td>
           <td>${esc(card.org)}</td>
           <td>${esc(card.svc)}</td>
-          <td>${card.hasEligibility ? '<span class="badge">יש מידע פנימי</span>' : ''}</td>
+          <td>${mark}</td>
           <td><button type="button" data-open="${esc(card.id)}">עריכה</button></td>
         </tr>`;
       }).join('');
       root.appendChild(el(`<div class="card he-panel">
         ${msg}
         <p class="dir-help">עריכת הטקסט שמוצג בכרטיס, ומידע התאמה שאינו מוצג על הכרטיס אך נכלל במקור הדף למנועי חיפוש.</p>
-        <label for="dir-q">חיפוש</label>
-        <input id="dir-q" type="text" placeholder="שם, תיאור או מספר שורה">
-        <div style="overflow-x:auto;margin-top:12px">
+        <div class="dir-list-filters">
+          <div class="dir-list-search">
+            <label for="dir-q">חיפוש</label>
+            <input id="dir-q" type="text" placeholder="שם, תיאור או מספר שורה">
+          </div>
+          <div>
+            <label for="dir-elig">מידע פנימי</label>
+            <select id="dir-elig">
+              <option value=""${eligFilter === '' ? ' selected' : ''}>הכול</option>
+              <option value="yes"${eligFilter === 'yes' ? ' selected' : ''}>יש</option>
+              <option value="no"${eligFilter === 'no' ? ' selected' : ''}>אין</option>
+            </select>
+          </div>
+        </div>
+        <p class="muted" id="dir-count">מוצגים ${shown} מתוך ${cards.length}</p>
+        <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>שורה</th><th>ארגון</th><th>תיאור</th><th></th><th></th></tr></thead>
+            <thead><tr><th>שורה</th><th>ארגון</th><th>תיאור</th><th>מידע פנימי</th><th></th></tr></thead>
             <tbody>${rows || '<tr><td colspan="5">אין כרטיסים. הריצו את סקריפט 045.</td></tr>'}</tbody>
           </table>
         </div>
       </div>`));
       const q = root.querySelector('#dir-q');
-      q.addEventListener('input', () => {
+      const eligSelect = root.querySelector('#dir-elig');
+      const count = root.querySelector('#dir-count');
+      const applyDirectoryFilter = () => {
         const needle = q.value.trim().toLowerCase();
+        const mode = eligSelect.value;
+        let visible = 0;
         root.querySelectorAll('[data-card-row]').forEach((row) => {
           const hay = row.getAttribute('data-hay') || '';
-          row.hidden = !!(needle && hay.indexOf(needle) === -1);
+          const elig = row.getAttribute('data-elig');
+          const textMiss = needle && hay.indexOf(needle) === -1;
+          const eligMiss = (mode === 'yes' && elig !== '1') || (mode === 'no' && elig !== '0');
+          row.hidden = !!(textMiss || eligMiss);
+          if (!row.hidden) visible += 1;
         });
+        count.textContent = `מוצגים ${visible} מתוך ${cards.length}`;
+      };
+      q.addEventListener('input', applyDirectoryFilter);
+      eligSelect.addEventListener('change', () => {
+        state.directoryEligFilter = eligSelect.value === 'yes' || eligSelect.value === 'no' ? eligSelect.value : '';
+        applyDirectoryFilter();
       });
       root.querySelectorAll('[data-open]').forEach((btn) => {
         btn.addEventListener('click', async () => {
@@ -2710,16 +2863,21 @@
           <span class="muted">${esc(state.user.email)}</span>
         </div>
         <h1>Admin</h1>
-        <div class="tabs">
-          <button type="button" data-tab="analytics" class="${state.tab === 'analytics' ? 'active' : ''}">Analytics</button>
-          <button type="button" data-tab="users" class="${state.tab === 'users' ? 'active' : ''}">Registered users</button>
-          <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות נפוצות</button>
-          <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">פרסום עדכונים</button>
-          <button type="button" data-tab="directory" class="${state.tab === 'directory' ? 'active' : ''}">כרטיסי מדריך</button>
-          <button type="button" data-tab="verification" class="${state.tab === 'verification' ? 'active' : ''}">אימות כרטיסים</button>
-          <button type="button" data-tab="glossary" class="${state.tab === 'glossary' ? 'active' : ''}">קישורי מילון</button>
-          <button type="button" data-tab="audit" class="${state.tab === 'audit' ? 'active' : ''}">יומן שינויים</button>
-          <button type="button" data-tab="kolzchut" class="${state.tab === 'kolzchut' ? 'active' : ''}">כל זכות</button>
+        <div class="tabs" role="tablist">
+          ${[
+            ['analytics', 'Analytics'],
+            ['users', 'Registered users'],
+            ['questions', 'שאלות נפוצות'],
+            ['updates', 'פרסום עדכונים'],
+            ['directory', 'כרטיסי מדריך'],
+            ['verification', 'אימות כרטיסים'],
+            ['glossary', 'קישורי מילון'],
+            ['audit', 'יומן שינויים'],
+            ['kolzchut', 'כל זכות']
+          ].map(([id, label]) => {
+            const on = state.tab === id;
+            return `<button type="button" role="tab" data-tab="${id}" aria-selected="${on ? 'true' : 'false'}" class="${on ? 'active' : ''}">${label}</button>`;
+          }).join('')}
         </div>
         <div id="tabbody"></div>
       </div>`);

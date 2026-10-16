@@ -1,4 +1,17 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 089_directory_card_eligibility_e5.sql
+[x] 088_directory_card_eligibility_e4.sql
+[x] 087_directory_card_eligibility_e3.sql
+[x] 086_directory_card_eligibility_e2.sql
+[x] 085_directory_card_eligibility_e1.sql
+[x] 084_site_audit_entries_admin_directory.sql
+[x] 083_card_indicators_b5.sql
+[x] 082_card_indicators_b4.sql
+[x] 081_card_indicators_b3.sql
+[x] 080_card_indicators_b2.sql
+[x] 079_card_indicators_b1.sql
+[x] 078_site_audit_entries_search_tsipor.sql
+[x] 077_card_indicators.sql
 [x] 076_site_audit_entries_privacy.sql
 [x] 075_glossary_link_suggestions_alternatives.sql
 [x] 074_site_audit_entries_card_review.sql

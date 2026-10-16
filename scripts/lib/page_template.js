@@ -115,6 +115,8 @@ h3{font-size:1rem;margin:16px 0 4px}
 .badge-ref{margin:0 0 12px;padding:8px 12px;background:#eef6f1;border:1px solid #c5e4d4;border-radius:8px;font-size:.9rem}
 .badge-ref summary{cursor:pointer;font-weight:600;color:var(--primary-dark)}
 .badge-ref p{margin:8px 0 0;color:var(--muted)}
+.badges{margin:0 0 8px;display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;background:#e8eff5;color:var(--primary);font-size:.85rem;font-weight:600}
 .btn{display:inline-block;background:var(--primary);color:#fff;text-decoration:none;
 padding:10px 18px;border-radius:var(--radius);font-weight:600;margin:4px 0}
 .btn-secondary{background:#fff;color:var(--primary);border:2px solid var(--primary)}

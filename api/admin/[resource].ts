@@ -21,7 +21,9 @@ import {
   DirectoryCardError,
   eligibilityEqual,
   hasEligibility,
+  indicatorsEqual,
   normalizeEligibility,
+  normalizeIndicators,
   normalizePublicFields,
   normalizeSites,
   publicFieldsEqual,
@@ -884,6 +886,9 @@ function directoryCardDetail(row: Record<string, unknown>) {
     publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
     eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
     sites: Array.isArray(row.sites) ? row.sites : [],
+    indicators: row.indicators && typeof row.indicators === 'object' ? row.indicators : {},
+    orgMembers: Array.isArray(row.org_members) ? row.org_members : [],
+    indicatorsInstalled: row.indicators !== undefined,
     hasEligibility: hasEligibility(row.eligibility),
     publicEditedAt: isoTime(row.public_edited_at),
     updatedAt: isoTime(row.updated_at),
@@ -904,6 +909,51 @@ function directoryCardSummary(row: Record<string, unknown>) {
 
 const DIRECTORY_CARD_COLUMNS =
   'id, card_key, row_id, public_fields, eligibility, sites, public_edited_at, updated_at';
+
+/** Migration 077 adds directory_card_edits.indicators and card_org_links. */
+async function indicatorsInstalled(client: Client): Promise<boolean> {
+  const { rows } = await client.query(
+    `SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'directory_card_edits' AND column_name = 'indicators'`
+  );
+  return rows.length > 0;
+}
+
+async function loadDirectoryCard(client: Client, id: number, withIndicators: boolean) {
+  const { rows } = await client.query(
+    `SELECT ${DIRECTORY_CARD_COLUMNS}${withIndicators ? ', indicators' : ''}
+       FROM directory_card_edits
+      WHERE id = $1`,
+    [id]
+  );
+  const row = rows[0];
+  if (!row || !withIndicators) return row || null;
+  const members = await client.query(
+    `SELECT c.id, c.row_id, c.card_key, c.public_fields
+       FROM card_org_links l
+       JOIN directory_card_edits c ON c.card_key = l.member_card_key
+      WHERE l.org_card_key = $1
+      ORDER BY l.sort_order, c.row_id, c.id`,
+    [row.card_key]
+  );
+  row.org_members = members.rows.map((m) => {
+    const fields = m.public_fields && typeof m.public_fields === 'object' ? m.public_fields : {};
+    return { id: Number(m.id), rowId: Number(m.row_id), org: String(fields.org || ''), svc: String(fields.svc || '') };
+  });
+  return row;
+}
+
+function parseMemberIds(raw: unknown, selfId: number): number[] {
+  if (!Array.isArray(raw)) return [];
+  const out: number[] = [];
+  for (const item of raw) {
+    const n = Number(item);
+    if (!Number.isInteger(n) || n <= 0 || n === selfId || out.includes(n)) continue;
+    out.push(n);
+  }
+  if (out.length > 60) throw new DirectoryCardError('יותר מדי כרטיסים משויכים לארגון');
+  return out;
+}
 
 function missingSitesColumn(err: unknown): boolean {
   return Boolean(err && typeof err === 'object' && 'code' in err && (err as { code?: string }).code === '42703');
@@ -969,18 +1019,15 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     await client.connect();
     if (!(await requireAdmin(req, res, client))) return;
 
+    const withIndicators = await indicatorsInstalled(client);
+
     if (req.method === 'GET') {
       const id = parseCardId(qstr(req.query, 'id'));
       if (qstr(req.query, 'id') && id == null) return res.status(400).json({ error: 'Invalid id' });
       if (id != null) {
-        const { rows } = await client.query(
-          `SELECT ${DIRECTORY_CARD_COLUMNS}
-             FROM directory_card_edits
-            WHERE id = $1`,
-          [id]
-        );
-        if (!rows[0]) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
-        return res.status(200).json({ card: directoryCardDetail(rows[0]) });
+        const card = await loadDirectoryCard(client, id, withIndicators);
+        if (!card) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
+        return res.status(200).json({ card: directoryCardDetail(card) });
       }
       const { rows } = await client.query(
         `SELECT id, row_id, public_fields, eligibility, public_edited_at
@@ -998,44 +1045,78 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     let publicFields;
     let eligibility;
     let sites;
+    let indicators;
+    let memberIds: number[] = [];
     try {
       publicFields = normalizePublicFields(body.publicFields);
       eligibility = normalizeEligibility(body.eligibility);
       sites = normalizeSites(await fillMissingSiteCoordinates(body.sites));
+      indicators = normalizeIndicators(body.indicators);
+      memberIds = indicators.whole_org ? parseMemberIds(body.orgMembers, id) : [];
     } catch (err) {
       if (err instanceof DirectoryCardError) return res.status(400).json({ error: err.message });
       throw err;
     }
 
-    const existing = await client.query(
-      `SELECT ${DIRECTORY_CARD_COLUMNS}
-         FROM directory_card_edits
-        WHERE id = $1`,
-      [id]
-    );
-    if (!existing.rows[0]) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
-    const current = existing.rows[0];
+    const current = await loadDirectoryCard(client, id, withIndicators);
+    if (!current) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
     const publicChanged = !publicFieldsEqual(current.public_fields, publicFields);
     const eligibilityChanged = !eligibilityEqual(current.eligibility, eligibility);
     const sitesChanged = !sitesEqual(current.sites, sites);
-    if (!publicChanged && !eligibilityChanged && !sitesChanged) {
+    const currentMemberIds = Array.isArray(current.org_members)
+      ? current.org_members.map((m: { id: number }) => m.id)
+      : [];
+    // A save that does not send indicators (an older admin page) leaves them as they are.
+    const indicatorsChanged =
+      withIndicators &&
+      body.indicators !== undefined &&
+      (!indicatorsEqual(current.indicators, indicators) ||
+        JSON.stringify(currentMemberIds) !== JSON.stringify(memberIds));
+    if (!withIndicators && body.indicators && !indicatorsEqual({}, indicators)) {
+      return res.status(500).json({ error: 'עמודת הסימונים עדיין לא הותקנה. הריצו את סקריפט 077.' });
+    }
+    if (!publicChanged && !eligibilityChanged && !sitesChanged && !indicatorsChanged) {
       return res.status(200).json({ card: directoryCardDetail(current) });
     }
 
     const jwtUser = await getAuthFromRequest(req);
-    const { rows } = await client.query(
-      `UPDATE directory_card_edits
-          SET public_fields = $2::jsonb,
-              eligibility = $3::jsonb,
-              sites = $4::jsonb,
-              public_edited_at = CASE WHEN $5::boolean THEN now() ELSE public_edited_at END,
-              updated_at = now(),
-              updated_by = $6::uuid
-        WHERE id = $1
-        RETURNING ${DIRECTORY_CARD_COLUMNS}`,
-      [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged, jwtUser ? jwtUser.id : null]
-    );
-    return res.status(200).json({ card: directoryCardDetail(rows[0]) });
+    await client.query('BEGIN');
+    try {
+      await client.query(
+        `UPDATE directory_card_edits
+            SET public_fields = $2::jsonb,
+                eligibility = $3::jsonb,
+                sites = $4::jsonb,
+                public_edited_at = CASE WHEN $5::boolean THEN now() ELSE public_edited_at END,
+                updated_at = now(),
+                updated_by = $6::uuid
+          WHERE id = $1`,
+        [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged, jwtUser ? jwtUser.id : null]
+      );
+      if (withIndicators && indicatorsChanged) {
+        await client.query(`UPDATE directory_card_edits SET indicators = $2::jsonb WHERE id = $1`, [
+          id,
+          JSON.stringify(indicators),
+        ]);
+        await client.query(`DELETE FROM card_org_links WHERE org_card_key = $1`, [current.card_key]);
+        if (memberIds.length) {
+          await client.query(
+            `INSERT INTO card_org_links (org_card_key, member_card_key, sort_order)
+             SELECT $1, c.card_key, m.ord - 1
+               FROM unnest($2::int[]) WITH ORDINALITY AS m(id, ord)
+               JOIN directory_card_edits c ON c.id = m.id
+             ON CONFLICT (org_card_key, member_card_key) DO NOTHING`,
+            [current.card_key, memberIds]
+          );
+        }
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    }
+    const saved = await loadDirectoryCard(client, id, withIndicators);
+    return res.status(200).json({ card: directoryCardDetail(saved) });
   } catch (err) {
     const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
     if (code === '42P01') {

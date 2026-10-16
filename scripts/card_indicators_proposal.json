@@ -1,0 +1,6123 @@
+{
+  "note": "Draft card indicators from propose_card_indicators.js. Edit values here after review; --sql writes a batch.",
+  "source": "https://nefesh-il.org/api/directory-cards",
+  "cards": [
+    {
+      "code": "I1-001",
+      "batch": 1,
+      "row": 1,
+      "cardKey": "1|||קצבת נכות למתמודדי נפש",
+      "org": "ביטוח לאומי",
+      "indicators": {
+        "offers": [
+          "info",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-002",
+      "batch": 1,
+      "row": 2,
+      "cardKey": "2|||שירותים מיוחדים (שר\"מ)",
+      "org": "ביטוח לאומי",
+      "indicators": {
+        "offers": [
+          "info",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הגשת תביעה, בצירוף המסמכים הנדרשים"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-003",
+      "batch": 1,
+      "row": 3,
+      "cardKey": "3|||קצבת סיעוד",
+      "org": "ביטוח לאומי",
+      "indicators": {
+        "offers": [
+          "info",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "יש למלא תביעה לקצבת סיעוד ולצרף מסמכים רפואיים ותלושי שכר"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-004",
+      "batch": 1,
+      "row": 4,
+      "cardKey": "4|||ייעוץ והכנה בחינם לוועדה הרפואית",
+      "org": "יד מכוונת",
+      "indicators": {
+        "offers": [
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לקביעת פגישה חייגו *2496"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-005",
+      "batch": 1,
+      "row": 5,
+      "cardKey": "5|||סל שיקום",
+      "org": "משרד הבריאות",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "טופס בקשה לסל שיקום (עצמאית או בעזרת איש מקצוע בקופת החולים), ואחר כך ועדת שיקום אזורית"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-006",
+      "batch": 1,
+      "row": 6,
+      "cardKey": "6|||שירותי סל שיקום",
+      "org": "אנוש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "target: זכאי סל שיקום"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-007",
+      "batch": 1,
+      "row": 7,
+      "cardKey": "7|||שירותי סל שיקום",
+      "org": "קידום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "target: זכאי סל שיקום"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-008",
+      "batch": 1,
+      "row": 8,
+      "cardKey": "8|||שירותי סל שיקום",
+      "org": "ידיד נפש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "target: זכאי סל שיקום ממשרד הבריאות או ממשרד הביטחון; יש גם שירות פרטי"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-009",
+      "batch": 1,
+      "row": 9,
+      "cardKey": "9|||שירותי סל שיקום",
+      "org": "אור לנפש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "target: זכאי סל שיקום"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-010",
+      "batch": 1,
+      "row": 10,
+      "cardKey": "10|||קבלת סיוע נפשי מיידי",
+      "org": "מערך בריאות הנפש בצה״ל",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוקד מקול הלב *6690 שלוחה 4, זמין 24/7 לחיילים בסדיר ובמילואים"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-011",
+      "batch": 1,
+      "row": 11,
+      "cardKey": "11|||קו המעניק תמיכה נפשית ראשונית",
+      "org": "\"נפש אחת בישראל\" (אגף השיקום, משרד הבטחון)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "ניתן לקיים שיחה אנונימית; הסיוע ללא עלות וללא אישורים או בירוקרטיה"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-012",
+      "batch": 1,
+      "row": 12,
+      "cardKey": "12|||זכויות למתמודדים עם פגיעה נפשית",
+      "org": "אגף השיקום, משרד הבטחון",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-013",
+      "batch": 1,
+      "row": 13,
+      "cardKey": "13|||קווי סיוע והכוונה",
+      "org": "בנפש בריאה - משרד הבריאות",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-014",
+      "batch": 1,
+      "row": 14,
+      "cardKey": "14|||רשימת מוקדי הטיפול ומרכזי החוסן",
+      "org": "ביטוח לאומי",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "btl",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קו חירום לנפגעי טרור; רשימת מרכזי החוסן לפי אזור"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-015",
+      "batch": 1,
+      "row": 15,
+      "cardKey": "15|||מוקד סיוע רגשי-חברתי להורים ולתלמידים",
+      "org": "מוקד \"קול לכולם\" - משרד החינוך",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "edu",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "ניתן להתקשר ל-6312* או לפתוח פנייה אנונימית בטופס"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-016",
+      "batch": 1,
+      "row": 15,
+      "cardKey": "15|||מרכזי תמיכה רגשית ונפשית\n",
+      "org": "משרד הבריאות, מינהל בריאות הנפש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-017",
+      "batch": 1,
+      "row": 16,
+      "cardKey": "16|||שירותים למתמודד\nאינדקס מטפלים\nפורומים\nועוד ועוד",
+      "org": "פורטל בריאות הנפש בישראל",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": true,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-018",
+      "batch": 1,
+      "row": 17,
+      "cardKey": "17|||",
+      "org": "החלמה - הנגשת מידע למתמודד נפש ומשפחתו",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-019",
+      "batch": 1,
+      "row": 18,
+      "cardKey": "18|||Provides English-speakers with access to verified mental health specialists as well as resources and information on navigating the mental health system in Israel",
+      "org": "GET HELP Israel",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "האתר חינם; הטיפול אצל המטפלים בתשלום, בפנייה ישירה"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-020",
+      "batch": 1,
+      "row": 19,
+      "cardKey": "19|||אינדקס שירותים למענה נפשי וטיפול בפוסט-טראומה",
+      "org": "בטיפולנט",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-021",
+      "batch": 1,
+      "row": 20,
+      "cardKey": "20|||קו סיוע והכוונה",
+      "org": "עמותת ער\"ן (עזרה ראשונה נפשית)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הפנייה אנונימית; השירות לכלל הציבור בכל גיל"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-022",
+      "batch": 1,
+      "row": 21,
+      "cardKey": "21|||תמיכה נפשית ותעסוקתית לנפגעי טראומה ממלחמה וטרור",
+      "org": "נט\"ל (נפגעי טראומה על רקע לאומי)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קו הסיוע של נט״ל זמין 24/7"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-023",
+      "batch": 1,
+      "row": 21,
+      "cardKey": "21|||רשת לאומית לחוסן נפשי המאפשרת יצירת כלים אינטראקטיביים מותאמים לקהלי יעד שונים",
+      "org": "רי\"ל - הרשת הישראלית לחוסן",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-024",
+      "batch": 1,
+      "row": 22,
+      "cardKey": "22|||קו סיוע והכוונה",
+      "org": "סיוע והקשבה ברשת (סהר)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "צ'אט אנונימי וחינמי; שתפו רק את מה שמתאים לכם"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-025",
+      "batch": 1,
+      "row": 23,
+      "cardKey": "23|||אינדקס שירותים",
+      "org": "סיוע והקשבה ברשת (סהר)",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-026",
+      "batch": 1,
+      "row": 24,
+      "cardKey": "24|||מוקדי סיוע\nמרכז טיפול\nועוד",
+      "org": "מטיבת\"א (מרכז טיפול יעוץ במשפחה תורני)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "care"
+        ],
+        "whole_org": true,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לסיוע חייגו *2837; פנייה בטלפון או במוקד"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-027",
+      "batch": 1,
+      "row": 25,
+      "cardKey": "25|||תמיכה ואוזן קשבת לבני משפחה למתמודדי נפש",
+      "org": "מוקד CALL לנפש (קואליציית הארגונים הדתיים למען בריאות הנפש)",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוקד *8246 לבני משפחה; פנייה גם במייל"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-028",
+      "batch": 1,
+      "row": 26,
+      "cardKey": "26|||קו ייעוץ ותמיכה - בימים א-ה בשעות 10:00-13:00 ו-16:00-22:00",
+      "org": "ידידי נפש (עזר מציון)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אינכם חייבים להזדהות; הקו נותן מענה גם לפניות אנונימיות"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-029",
+      "batch": 1,
+      "row": 27,
+      "cardKey": "27|||אינדקס שירותים למתמודדי נפש",
+      "org": "רגיש לי",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-030",
+      "batch": 1,
+      "row": 28,
+      "cardKey": "28|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+      "org": "כללית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral"
+        ],
+        "referral_source": "מסובסד עם המלצה מרופא משפחה"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-031",
+      "batch": 1,
+      "row": 29,
+      "cardKey": "29|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+      "org": "מכבי",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אין צורך בהפניית רופא: פונים למרפאה בטופס מקוון, והצוות חוזר תוך 5 ימי עבודה."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-032",
+      "batch": 1,
+      "row": 30,
+      "cardKey": "30|||רשימת מרכזי חוסן ברחבי הארץ",
+      "org": "מרכזי חוסן",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          },
+          {
+            "channel": "btl",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "השירות הראשוני דרך *5486, ומשם מפנים למרכז החוסן לפי כתובת המגורים."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-033",
+      "batch": 1,
+      "row": 30,
+      "cardKey": "30|||אינדקס מטפלים (כולל פסיכיאטרים)",
+      "org": "על הספה",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-034",
+      "batch": 1,
+      "row": 31,
+      "cardKey": "31|||אינדקס מטפלים (כולל פסיכיאטרים)",
+      "org": "פסיכולוגיה עברית",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-035",
+      "batch": 1,
+      "row": 32,
+      "cardKey": "32|||אינדקס מטפלים (כולל פסיכיאטרים)",
+      "org": "בטיפולנט",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-036",
+      "batch": 1,
+      "row": 33,
+      "cardKey": "33|||אינדקס פסיכיאטרים",
+      "org": "MEDREVIEWS",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-037",
+      "batch": 1,
+      "row": 34,
+      "cardKey": "34|||אינדקס פסיכיאטרים",
+      "org": "אינפומד",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "supplementary",
+            "terms": "partial"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-038",
+      "batch": 1,
+      "row": 35,
+      "cardKey": "35|||אינדקס פסיכולוגים מורשים",
+      "org": "משרד הבריאות",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-039",
+      "batch": 1,
+      "row": 36,
+      "cardKey": "36|||אינדקס משרד הבריאות - מהפנטים בעלי רשיון",
+      "org": "משרד הבריאות",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-040",
+      "batch": 1,
+      "row": 37,
+      "cardKey": "37|||אינדקס מטפלים",
+      "org": "רקליני - הבית לטיפולים קליניים",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-041",
+      "batch": 1,
+      "row": 38,
+      "cardKey": "38|||אשפוז פסיכיאטרי",
+      "org": "בתי חולים פסיכיאטריים ומחלקות פסיכיאטריות בבתי חולים כלליים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "gp_referral",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "ההפניה לחדר מיון ניתנת לרוב על ידי רופא המשפחה או הגורם המטפל בבריאות הנפש, או בהגעה עצמאית."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-042",
+      "batch": 1,
+      "row": 39,
+      "cardKey": "39|||בית בטוח לטיפול מיידי - חלופת אשפוז",
+      "org": "אגף השיקום, משרד הבטחון",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אפשר להגיע ישירות למיון בבית החולים ללא צורך בהתחייבות (הפניה רפואית) מהאגף."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-043",
+      "batch": 1,
+      "row": 40,
+      "cardKey": "40|||צוות משבר (חלופה לחדר מיון)",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-044",
+      "batch": 1,
+      "row": 41,
+      "cardKey": "41|||ייעוץ פסיכיאטרי מקוון",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-045",
+      "batch": 1,
+      "row": 42,
+      "cardKey": "42|||ייעוץ פסיכיאטרי מקוון",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "mod_rehab_worker"
+        ],
+        "referral_source": "השירות ניתן ללא תשלום, בהפניה ובאישור האגף."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-046",
+      "batch": 1,
+      "row": 43,
+      "cardKey": "43|||אשפוז בית פסיכיאטרי",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "gp_referral",
+          "hmo_form17",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "ללא תשלום בהפניה של קופת החולים. פונים לרופא המשפחה, לפסיכיאטר המטפל או לפסיכיאטר בחדר המיון. אם אין אישור, אפשר באופן פרטי."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-047",
+      "batch": 1,
+      "row": 45,
+      "cardKey": "45|||הקול שבפנים – טיפול ביתי לצעירים במצבי משבר נפשי",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "שירות פרטי"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-048",
+      "batch": 1,
+      "row": 46,
+      "cardKey": "46|||פסיכותרפיה מקוונת",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "gp_referral",
+          "hmo_form17",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "ההפניה ניתנת על ידי רופא משפחה או פסיכיאטר מטפל, ומותנית באישור הקופה. השירות ניתן גם באופן פרטי."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-049",
+      "batch": 1,
+      "row": 47,
+      "cardKey": "47|||פסיכותרפיה מקוונת",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "mod_rehab_worker"
+        ],
+        "referral_source": "זכאי משרד הבטחון"
+      },
+      "members": []
+    },
+    {
+      "code": "I1-050",
+      "batch": 1,
+      "row": 48,
+      "cardKey": "48|||אשפוז בית פסיכיאטרי",
+      "org": "צבר רפואה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral"
+        ],
+        "referral_source": "לבירור התאמה יש לפנות לגורם המטפל בקהילה או בבית החולים לבריאות הנפש."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-051",
+      "batch": 1,
+      "row": 49,
+      "cardKey": "49|||התאגדות המטפלים הדתיים",
+      "org": "טל הנפש",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-052",
+      "batch": 1,
+      "row": 50,
+      "cardKey": "50|||אינדקס מטפלים",
+      "org": "איט\"ה האגודה הישראלית לטיפול קוגניטיבי התנהגותי - CBT",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-053",
+      "batch": 1,
+      "row": 51,
+      "cardKey": "51|||אינדקס מטפלים",
+      "org": "טיפול סומטי Somatic Experiencing",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-054",
+      "batch": 1,
+      "row": 52,
+      "cardKey": "52|||מרכזי ייעוץ, הכוונה, סיוע והדרכה למשפחות מתמודדים",
+      "org": "מילם (מרכז ייעוץ למשפחות מתמודדים)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "צרו איתנו קשר ובואו להכיר."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-055",
+      "batch": 1,
+      "row": 53,
+      "cardKey": "53|||חלופת אשפוז",
+      "org": "בתים מאזנים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "hmo_form17",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "ממומן בטופס 17 עם השתתפות עצמית של כמה עשרות שקלים. פונים לצוות המטפל בקופה, או לרופא המשפחה אם לא טופלתם בעבר."
+      },
+      "members": []
+    },
+    {
+      "code": "I1-056",
+      "batch": 1,
+      "row": 54,
+      "cardKey": "54|||קבוצה בפייסבוק",
+      "org": "מתייעצים עם פסיכולוגים ופסיכותרפיסטים",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-057",
+      "batch": 1,
+      "row": 55,
+      "cardKey": "55|||קבוצה בפייסבוק",
+      "org": "מטפלים וטיפולים",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-058",
+      "batch": 1,
+      "row": 56,
+      "cardKey": "56|||קבוצה בפייסבוק",
+      "org": "CPTSD - פוסט טראומה מורכבת",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-059",
+      "batch": 1,
+      "row": 57,
+      "cardKey": "57|||קבוצה בפייסבוק",
+      "org": "מדברים על סל שיקום",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I1-060",
+      "batch": 1,
+      "row": 58,
+      "cardKey": "58|||קבוצה בפייסבוק",
+      "org": "ייעוץ פסיכולוגי - שאלות למטפלים פסיכולוגים",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-061",
+      "batch": 2,
+      "row": 59,
+      "cardKey": "59|||מיצוי זכויות",
+      "org": "זה מגיע לכם - ד\"ר גילי תמיר",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-062",
+      "batch": 2,
+      "row": 60,
+      "cardKey": "60|||מידע, ייעוץ ותמיכה\nמרכזי טיפול\nמרכזי שיקום",
+      "org": "עמותת בית חם",
+      "indicators": {
+        "offers": [
+          "info",
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": [
+        "61|||מידע, ייעוץ ותמיכה",
+        "62|||מרפאות לבריאות הנפש\n"
+      ]
+    },
+    {
+      "code": "I2-063",
+      "batch": 2,
+      "row": 61,
+      "cardKey": "61|||מידע, ייעוץ ותמיכה",
+      "org": "עמותת בית חם",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-064",
+      "batch": 2,
+      "row": 62,
+      "cardKey": "62|||מרפאות לבריאות הנפש\n",
+      "org": "עמותת בית חם",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-065",
+      "batch": 2,
+      "row": 63,
+      "cardKey": "63|||תמיכה לנוער וצעירים",
+      "org": "הדספייס",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "השירותים ניתנים ללא תשלום ישיר או באמצעות התחייבות מקופות החולים. לא צריך טפסים או הפניה."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-066",
+      "batch": 2,
+      "row": 64,
+      "cardKey": "64|||קבוצה חברתית לנערים ונערות מתמודדי ומתמודדות נפש דתיים ודתלשים",
+      "org": "נוער הקואליציה (קואליציית הארגונים הדתיים למען בריאות הנפש)",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-067",
+      "batch": 2,
+      "row": 65,
+      "cardKey": "65|||מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.",
+      "org": "מכון למרחב (מרכז טיפולי רב תחומי)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-068",
+      "batch": 2,
+      "row": 66,
+      "cardKey": "66|||ייעוץ והכוונה למשפחות בתחום בריאות הנפש · 18:00 - 22:00",
+      "org": "מרכז יה״ל - ייעוץ והכוונה למשפחות",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קבלת השירות אינה כרוכה בתשלום ו/או בהפניה מגורם רפואי או אחר."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-069",
+      "batch": 2,
+      "row": 67,
+      "cardKey": "67|||סיוע למתמודדי נפש דרך שילובם בקהילה תוך ליווי מקצועי אישי",
+      "org": "איכות בשיקום",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee",
+          "mod_rehab_worker"
+        ],
+        "referral_source": "לזכאי סל שיקום או בהפניה ממשרד הביטחון. אישור סל שיקום לתעסוקה נתמכת, הפניה ממשרד הביטחון, או באופן פרטי."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-070",
+      "batch": 2,
+      "row": 68,
+      "cardKey": "68|||סיוע למשפחות של מתמודדי נפש",
+      "org": "בלב ובנפש (עזר מציון)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-071",
+      "batch": 2,
+      "row": 69,
+      "cardKey": "69|||טיפול משפחתי-מערכתי למצבי משבר",
+      "org": "דיאלוג פתוח בישראל (דפ\"י)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "full"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לצורך פנייה לשירות יש למלא טופס הפנייה ולשלוח אותו לכתובת המייל המופיעה בו"
+      },
+      "members": []
+    },
+    {
+      "code": "I2-072",
+      "batch": 2,
+      "row": 70,
+      "cardKey": "70|||תמיכה נפשית וחברתית בניצולי השואה והדור השני ",
+      "org": "עמך - המרכז הישראלי לתמיכה נפשית וחברתית בניצולי השואה והדור השני",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-073",
+      "batch": 2,
+      "row": 71,
+      "cardKey": "71|||לשילוב מתמודדים והעצמה בבריאות הנפש",
+      "org": "עמותת לשמה",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-074",
+      "batch": 2,
+      "row": 72,
+      "cardKey": "72|||תמיכה בילדים ונוער המטופלים במרכזי בריאות הנפש",
+      "org": "זה בנפשי",
+      "indicators": {
+        "offers": [
+          "info",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-075",
+      "batch": 2,
+      "row": 73,
+      "cardKey": "73|||נתיבי שיקום והחלמה",
+      "org": "מכון צוהר",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-076",
+      "batch": 2,
+      "row": 74,
+      "cardKey": "74|||שיקום ובריאות הנפש",
+      "org": "חברת נתן",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee",
+          "mod_rehab_worker",
+          "self_referral"
+        ],
+        "referral_source": "ניתן לפנות אלינו: במסגרת סל שיקום - משרד הבריאות; במסגרת אגף השיקום – משרד הבטחון; באופן פרטי (בתקופת תהליך ההכרה לזכאות או באופן קבוע)"
+      },
+      "members": []
+    },
+    {
+      "code": "I2-077",
+      "batch": 2,
+      "row": 76,
+      "cardKey": "76|||Crisis Support, Family Support, Family & Sibling Therapy, Legal Support, Mentors and Volunteers, Network of Professionals",
+      "org": "Avnei Chein",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-078",
+      "batch": 2,
+      "row": 77,
+      "cardKey": "77|||Israel's Emergency Mental Health Resources During War - Comprehensive list of mental health resources",
+      "org": "Avnei Chein",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-079",
+      "batch": 2,
+      "row": 78,
+      "cardKey": "78|||המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.",
+      "org": "המרכז הירושלמי לבריאות הנפש (כפר שאול-איתנים)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": [
+        "297|||טיפול יום אינטנסיבי למבוגרים — מניעת אשפוז מלא",
+        "309|||אשפוז יום אחרי אשפוז מלא — הדרך שלך חזרה לקהילה",
+        "310|||טיפול יום לנשים עם טראומה מורכבת אחרי פגיעה מינית"
+      ]
+    },
+    {
+      "code": "I2-080",
+      "batch": 2,
+      "row": 79,
+      "cardKey": "79|||תוכנית טיפול ביתי ממושך למתמודדים עם מחלת נפש חמורה",
+      "org": "שרן רפואה עד הבית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-081",
+      "batch": 2,
+      "row": 80,
+      "cardKey": "80|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+      "org": "מאוחדת",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אין צורך בהפניית רופא: קובעים פגישת מיון במוקד *3833."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-082",
+      "batch": 2,
+      "row": 80,
+      "cardKey": "80|||Clinical case management for English-speakers in Israel from all walks of life: counseling, referrals to therapists, treatment programs, guidance through the legal process",
+      "org": "Amudim",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-083",
+      "batch": 2,
+      "row": 81,
+      "cardKey": "81|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+      "org": "לאומית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "self_referral"
+        ],
+        "referral_source": "אפשר בהפניית רופא, או בפנייה ישירה: מי שלא היה בטיפול בחצי השנה האחרונה קובע תור לתומך בריאות הנפש ב-*507."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-084",
+      "batch": 2,
+      "row": 81,
+      "cardKey": "81|||Help finding qualified mental health providers for English-speakers",
+      "org": "Relief Resources",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-085",
+      "batch": 2,
+      "row": 82,
+      "cardKey": "82|||קביעת נכות למתמודדי נפש",
+      "org": "כל זכות",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-086",
+      "batch": 2,
+      "row": 83,
+      "cardKey": "83|||קצבת שירותים מיוחדים למתמודדי נפש",
+      "org": "כל זכות",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-087",
+      "batch": 2,
+      "row": 83,
+      "cardKey": "83|||הסעות חולים, אמבולנסים לצרכים רפואיים ואירועים משפחתיים, נהגים מתנדבים",
+      "org": "עזר מציון הסעות",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-088",
+      "batch": 2,
+      "row": 84,
+      "cardKey": "84|||סל שיקום למתמודדי נפש",
+      "org": "כל זכות",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-089",
+      "batch": 2,
+      "row": 84,
+      "cardKey": "84|||סיוע באמבולנסים בהעברת חולים ונכים",
+      "org": "לב מלכה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-090",
+      "batch": 2,
+      "row": 85,
+      "cardKey": "85|||מדריך מיצוי זכויות למתמודדי נפש ובני משפחותיהם",
+      "org": "כל זכות",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-091",
+      "batch": 2,
+      "row": 86,
+      "cardKey": "86|||קבוצה בפייסבוק",
+      "org": "המלצות ואזהרות על פסיכיאטרים, מטפלים ושירותי בריאות הנפש",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-092",
+      "batch": 2,
+      "row": 87,
+      "cardKey": "87|||מומחית בהפרעות אכילה/תזונה/כושר/דיאטה, מטפלת בפגועי נפש עם רישיון. בעלות סימלית, חברות ביטוח מחזירות",
+      "org": "ענת אופיר מטיאש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "supplementary",
+            "terms": "partial"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-093",
+      "batch": 2,
+      "row": 88,
+      "cardKey": "88|||מרכז לפסיכותרפיה אינטגרטיבית. תמיכה נפשית, רגשית ורוחנית דרך מגוון רחב של גישות ועל ידי אנשי מקצוע מוסמכים",
+      "org": "אימפולס - מרכז קליני אינטגרטיבי",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-094",
+      "batch": 2,
+      "row": 90,
+      "cardKey": "90|||מרכזים לטיפול רגשי",
+      "org": "ME-MENTAL EXPERTS",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-095",
+      "batch": 2,
+      "row": 91,
+      "cardKey": "91|||Therapy for teenagers, couples therapy and parenting guidance",
+      "org": "Hakshiva Therapy Clinic - הקשיבה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-096",
+      "batch": 2,
+      "row": 92,
+      "cardKey": "92|||דיכאון אחרי לידה ועוד, דרך טיפת חלב בירושלים\nSupport and treatment for Maternal Mental Health through Tipat Halav. Services for mothers and families impacted by perinatal mental health disorders (PMHD) such as postpartum depression",
+      "org": "חבלי קשר - Hevlei Kesher",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-097",
+      "batch": 2,
+      "row": 93,
+      "cardKey": "93|||CBT, DBT, and Exposure-Based Therapies",
+      "org": "Modi'in Behavioral",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-098",
+      "batch": 2,
+      "row": 94,
+      "cardKey": "94|||מרכז לאומי מוביל לצמצום תופעת ההתמכרויות ונזקיה. טיפול, מידע והכוונה למי שמתמודד עם התמכרות",
+      "org": "המרכז הישראלי להתמכרויות ובריאות הנפש (ICA)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-099",
+      "batch": 2,
+      "row": 95,
+      "cardKey": "95|||מרכז גמילה הוליסטי לטיפול בהתמכרויות (סמים, אלכוהול, הימורים ועוד) המבוסס על 12 הצעדים וגישות טיפוליות נוספות",
+      "org": "מרכז גמילה - המרכז ההוליסטי \"אחרת\"",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-100",
+      "batch": 2,
+      "row": 96,
+      "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים לכם וסבסוד טיפולים",
+      "org": "חיים של טובה",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-101",
+      "batch": 2,
+      "row": 96,
+      "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים וסבסוד טיפולים פסיכולוגיים",
+      "org": "חיים של טובה",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-102",
+      "batch": 2,
+      "row": 96,
+      "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים לכם, סבסוד טיפולים, חוסן משפחתי. שינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.",
+      "org": "חיים של טובה",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-103",
+      "batch": 2,
+      "row": 101,
+      "cardKey": "101|||אפליקציה חינמית המספקת עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה, ומלווה את המשתמש עד חזרה הדרגתית לשגרה.",
+      "org": "אפליקציית Rescue",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-104",
+      "batch": 2,
+      "row": 102,
+      "cardKey": "102|||Therapy clinic for teenagers & young adults (11-27) and parents; specializes in Anglo olim; Halachik framework; therapy for individuals, couples and families",
+      "org": "Kav L'Noar (Merchav L'Noar)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "supplementary",
+            "terms": "partial"
+          },
+          {
+            "channel": "edu",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-105",
+      "batch": 2,
+      "row": 102,
+      "cardKey": "102|||אפליקציה אינטראקטיבית לבניית תוכניות תרגול יומי ומעקב לאורך זמן.",
+      "org": "VIVID - The Flexible App for Life-Changing Practices",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-106",
+      "batch": 2,
+      "row": 103,
+      "cardKey": "103|||אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).",
+      "org": "המדריך ל-PTSD",
+      "indicators": {
+        "offers": [
+          "info",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "full"
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-107",
+      "batch": 2,
+      "row": 104,
+      "cardKey": "104|||מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד",
+      "org": "מיינדמי (MindMe)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-108",
+      "batch": 2,
+      "row": 105,
+      "cardKey": "105|||טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים. דיכאון מג'ורי בסל לפי תנאים; שיפוי אגף השיקום ל-PTSD בחלק מבתי החולים הציבוריים.",
+      "org": "(BrainsWay) TMS - גרייה מגנטית מוחית",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "eligible"
+          },
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-109",
+      "batch": 2,
+      "row": 106,
+      "cardKey": "106|||Access center for psychedelic treatment and therapy.",
+      "org": "Psychedelic Treatment & Therapy",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-110",
+      "batch": 2,
+      "row": 107,
+      "cardKey": "107|||טיפול פסיכדלי ומידע מקצועי בתחום.",
+      "org": "טיפול פסיכדלי",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-111",
+      "batch": 2,
+      "row": 108,
+      "cardKey": "108|||טיפול בגרייה מגנטית מוחית (TMS) במרפאה לטיפולים מתקדמים. באותה יחידה גם ECT, אסקטמין ונוירופידבק.",
+      "org": "(איכילוב) TMS - גרייה מגנטית מוחית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "ניתן לפנות לקבלת טיפול באמצעות מילוי טופס הפנייה המקוון."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-112",
+      "batch": 2,
+      "row": 109,
+      "cardKey": "109|||טיפול ביולוגי תחת הרדמה קצרה במצבים נפשיים חמורים — בעיקר דיכאון קשה, קטטוניה ומצבים דחופים. ניתן בסדרה בבתי חולים פסיכיאטריים ובחטיבות פסיכיאטריות (למשל איכילוב, שלוותה, כפר שאול).",
+      "org": "ECT (נזעי חשמל)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral"
+        ],
+        "referral_source": "הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל."
+      },
+      "members": []
+    },
+    {
+      "code": "I2-113",
+      "batch": 2,
+      "row": 200,
+      "cardKey": "200|||קווי המענה הארציים של ארגון הגג למרכזי הסיוע",
+      "org": "איגוד מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית",
+      "indicators": {
+        "offers": [
+          "info",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-114",
+      "batch": 2,
+      "row": 201,
+      "cardKey": "201|||סיוע וליווי, חינוך ומניעה, קבוצות תמיכה (פרונטלי וזום)",
+      "org": "תאיר – מרכז הסיוע לנפגעות ולנפגעי תקיפה מינית",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-115",
+      "batch": 2,
+      "row": 202,
+      "cardKey": "202|||מידע, הכשרות, מוקדי חוסן ושותפות ארצית בטראומה וחוסן (Israel Trauma Coalition)",
+      "org": "הקואליציה הישראלית לטראומה",
+      "indicators": {
+        "offers": [
+          "info",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-116",
+      "batch": 2,
+      "row": 203,
+      "cardKey": "203|||רשת ארצית לטיפול פסיכולוגי, אבחון והכשרה — כולל טיפול בטראומה ובמצוקה נפשית.",
+      "org": "תלמ",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-117",
+      "batch": 2,
+      "row": 204,
+      "cardKey": "204|||נטורופתיה קלינית — איזון גוף–נפש (כאבים, עייפות, סטרס, עיכול, אכילה רגשית ועוד); קליניקה ומפגשים מקוונים.",
+      "org": "אדווה ליזר",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-118",
+      "batch": 2,
+      "row": 205,
+      "cardKey": "205|||יישומים פסיכולוגיים ממוקדים — הערכה ראשונית והתאמת טיפול (פגישות בקליניקה או זום).",
+      "org": "רזולוציה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-119",
+      "batch": 2,
+      "row": 206,
+      "cardKey": "206|||מודל נשימה — טיפול מסובסד, רשת מטפלים לטראומה מורכבת וגישת גוף–נפש קהילתית.",
+      "org": "מרכז נשימה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I2-120",
+      "batch": 2,
+      "row": 207,
+      "cardKey": "207|||עמותת בני ובנות משפחה של מתמודדי/ות נפש בישראל. מטרת העמותה היא לפעול למען המתמודדים ולמען משפחותיהם למימוש ולהרחבת זכויות, לטיפול מיטבי, להכלה ולשיקום בקהילה ולהסברה בקרב מקבלי החלטות, בקרב הממסד ובקרב הציבור.",
+      "org": "משפחות בריאות הנפש",
+      "indicators": {
+        "offers": [
+          "info",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-121",
+      "batch": 3,
+      "row": 208,
+      "cardKey": "208|||מנחה ומלווה משפחות למתמודדי נפש",
+      "org": "ענת רוסמן",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-122",
+      "batch": 3,
+      "row": 210,
+      "cardKey": "210|||טיפול ארצי ללא עלות לטווח ארוך בטראומה",
+      "org": "מטיב (המרכז הישראלי לפסיכוטראומה)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוזמנים לפנות, להעביר ולהפנות: shir@metiv.org, ווטסאפ: 02-5952240"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-123",
+      "batch": 3,
+      "row": 211,
+      "cardKey": "211|||טיפול, ליווי ושיקום לפוסט-טראומה (בהכרה או לאחר אבחון) — חוות במושב שמש",
+      "org": "רטורנו — חוות חוסן",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "בסבסוד מלא של אגף השיקום מטעם משרד הבטחון למתאימים. השאר/י פרטים ונחזור אליכם"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-124",
+      "batch": 3,
+      "row": 212,
+      "cardKey": "212|||טיפוליים מפגשים ללא עלות בצפון (פרונטלי או מקוון)",
+      "org": "עמ\"ך",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוזמנים לפנות לסניפים שלנו"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-125",
+      "batch": 3,
+      "row": 213,
+      "cardKey": "213|||עזרה ראשונה נפשית לנפגעי חרבות ברזל — עד 10 מפגשים",
+      "org": "מבצע הקשב",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "למידע נוסף ופנייה: https://www.hakshev.com/"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-126",
+      "batch": 3,
+      "row": 214,
+      "cardKey": "214|||סיוע נפשי לחיילים ומילואים",
+      "org": "היחידה לתגובות קרב (אגף השיקום, משרד הביטחון)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הטיפול ניתן ללא תשלום, ללא צורך בהכרה בנכות או בהוכחה כלשהי. ניתן לפנות אלינו תמיד"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-127",
+      "batch": 3,
+      "row": 215,
+      "cardKey": "215|||סיוע נפשי ללא עלות לאנשי קבע ומשפחותיהם",
+      "org": "מכון הקבע",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מהשנה השלישית בקבע: הפניה מתבצעת באופן עצמאי ודיסקרטי; בשנתיים הראשונות דרך קב\"ן היחידה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-128",
+      "batch": 3,
+      "row": 217,
+      "cardKey": "217|||קליניקה לטיפול בפוסט-טראומה (מילואים/משוחררים — תשלום סמלי)",
+      "org": "מרכז לטראומה וחוסן — אוניברסיטת ת\"א",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אתם מוזמנים לפנות לאבחון וקבלת טיפול בקליניקה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-129",
+      "batch": 3,
+      "row": 218,
+      "cardKey": "218|||טיפולים נפשיים מסובסדים ע\"י משרד הביטחון (חרבות ברזל)",
+      "org": "אגף השיקום — טיפולים רגשיים במימון",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "mod_rehab_worker"
+        ],
+        "referral_source": "לצורך קבלת התחייבות וסיוע בבחירת מטפל מתאים יש לפנות לעובדת השיקום במחוז שלך"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-130",
+      "batch": 3,
+      "row": 219,
+      "cardKey": "219|||תוכנית טיפול לפוסט-טראומה — מושב משק פרזון (רישום מוקדם)",
+      "org": "מרחב נשימה בעמק",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "חינם (נדרש רישום מוקדם)"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-131",
+      "batch": 3,
+      "row": 220,
+      "cardKey": "220|||CBT זוגי במחקר — 15 מפגשים בזום",
+      "org": "קליניקה לטיפול זוגי ב-PTSD (בר אילן)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הטיפול הוא חלק ממחקר קליני וניתן ללא עלות. לטופס הפנייה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-132",
+      "batch": 3,
+      "row": 221,
+      "cardKey": "221|||טיפול ממוקד טראומה למשרתי/מילואימניקים משוחררים (מלחמה/אובדן)",
+      "org": "קמה — מרפאה לטראומה ואובדן (שלוותה, כללית)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "ללא עלות, בהפניה מרופא משפחה וטופס 17 (כל הקופות)"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-133",
+      "batch": 3,
+      "row": 222,
+      "cardKey": "222|||טיפול קצר לילדי מילואימניקים 3-12 ומשפחות",
+      "org": "אדוות להחלמה (בר אילן)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מעוניינים בקבלת טיפול? למילוי טופס פנייה ואנו נחזור אליכם"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-134",
+      "batch": 3,
+      "row": 223,
+      "cardKey": "223|||סיוע מקצועי לנפגעים בצה\"ל ולבני משפחותיהם",
+      "org": "מרכז \"קשר עד\" (מערך הנפגעים, צה״ל)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הכתובת לכל הפניות אל מערך הנפגעים; מוקד 1111 שלוחה 6. סיוע בהגשת בקשה להכרה בזכות נכה אל מול אגף השיקום"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-135",
+      "batch": 3,
+      "row": 224,
+      "cardKey": "224|||רשת מטפלים מוסמכים לחיילים ומילואים — עד 10 מפגשים מסובסדים",
+      "org": "מטפלים באהבה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "10 מפגשים בסכום שתואם להחזר מהצבא (1,500 ₪), כך שהטיפול מכוסה במלואו. לבירורים: זהר 052-7014283"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-136",
+      "batch": 3,
+      "row": 225,
+      "cardKey": "225|||טיפול נפשי ללוחמי גזית/שריון (חטיבה 188) — ללא תשלום",
+      "org": "אור כי יהל (עמותת ברק, חטיבה 188)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "טיפול ללא תשלום למשך שנה. חיילים המעוניינים לקבל את השירות נרשמים בקישור"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-137",
+      "batch": 3,
+      "row": 226,
+      "cardKey": "226|||עד 12 מפגשים טיפול רגשי ללא עלות",
+      "org": "שיב\"א — המרפאה הלאומית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוזמנים לפנות למרפאה הלאומית של שיבא BEYOND, ללא עלות, במימון הביטוח הלאומי"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-138",
+      "batch": 3,
+      "row": 227,
+      "cardKey": "227|||שירותים חברתיים לצעירים 18-27",
+      "org": "יתד (משרד הרווחה)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "claim"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "court_or_welfare"
+        ],
+        "referral_source": "הפניה דרך מחלקה לשירותים חברתיים"
+      },
+      "members": [
+        "288|||עובד/ת סוציאלי/ת בתוכנית יתד — ליווי צעירים וצעירות (18–25/26) במצבי חיים מורכבים"
+      ]
+    },
+    {
+      "code": "I3-139",
+      "batch": 3,
+      "row": 228,
+      "cardKey": "228|||טיפול, ליווי ושיקום — רשפון",
+      "org": "חוות מרפא רשפון",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": true,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-140",
+      "batch": 3,
+      "row": 229,
+      "cardKey": "229|||מוקד סיוע רגשי מרחוק (מגיל 12) — עברית, ערבית, רוסית, אנגלית",
+      "org": "משאבים — מרכז גליל",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "btl",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "פנו אלינו. המענים ללא עלות, במסגרת נוהל חרדה במימון הביטוח הלאומי"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-141",
+      "batch": 3,
+      "row": 230,
+      "cardKey": "230|||תמיכה רגשית לצעירים 17-27 בחוות שמש — ללא עלות",
+      "org": "חיבוק ברזל (רטורנו)",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "התוכנית בסבסוד מלא וללא עלות. מוזמנים לקבל מגוון טיפולים אישיים וקבוצתיים"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-142",
+      "batch": 3,
+      "row": 231,
+      "cardKey": "231|||ייעוץ והפניה — חברתי-ביטחוני",
+      "org": "משרד הרווחה — שירותי התמכרויות",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "court_or_welfare"
+        ],
+        "referral_source": "נאשמים עם התנהגות עבריינית ומצוקה המופנים מבתי משפט קהילתיים. טלפון 072-3741814"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-143",
+      "batch": 3,
+      "row": 232,
+      "cardKey": "232|||מאגר תחנות לטיפול זוגי",
+      "org": "תחנות ציבוריות — טיפול זוגי ומשפחתי",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "רשימת תחנות לפי אזורים, לכל תחנה טלפון. בפיקוח השירות לרווחת הפרט והמשפחה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-144",
+      "batch": 3,
+      "row": 233,
+      "cardKey": "233|||סיוע וטיפול לשורדי המסיבות בנובה — הרצליה",
+      "org": "ארנה איזון",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-145",
+      "batch": 3,
+      "row": 234,
+      "cardKey": "234|||טיפול עומק לפצועי נובה — לפחות 24 מפגשים",
+      "org": "לב בטוח (SafeHeart)",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "full"
+          },
+          {
+            "channel": "btl",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מזמינים את מי שהיה במסיבות העוטף לקבל תמיכה ללא עלות. להרשמה לטיפול לחצו כאן"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-146",
+      "batch": 3,
+      "row": 235,
+      "cardKey": "235|||טיפול ממוקד בטראומה לשורדי מסיבות — מרכז רפואי + מסיבות בדרום",
+      "org": "לב השרון",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-147",
+      "batch": 3,
+      "row": 236,
+      "cardKey": "236|||מידע, סיוע והכוונה — 24/7",
+      "org": "מוקד 118 (משרד הרווחה)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אפשר לפנות בטלפון 118 (שיחת חינם) או בהודעת טקסט ל-050-2270118"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-148",
+      "batch": 3,
+      "row": 237,
+      "cardKey": "237|||טיפול לבני זוג שאיבדו בן/בת במהלך שירות (מלחמה, תאונה, מחלה, התאבדות)",
+      "org": "הותיר אחריו חבר.ה",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "צרו קשר בטלפון 077-770-3166. העמותה נתמכת על ידי משרד הבטחון"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-149",
+      "batch": 3,
+      "row": 238,
+      "cardKey": "238|||טיפול קבוצתי/זוגי/פרטני לשכולים ואחים/יתומים/אלמנות",
+      "org": "אגף משפחות, הנצחה ומורשת (משרד הביטחון)",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-150",
+      "batch": 3,
+      "row": 239,
+      "cardKey": "239|||טיפול פרטני, זוגי, משפחתי וייעוץ פסיכיאטרי",
+      "org": "אל\"ה — מרכז להתמודדות עם אבדן",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": true,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לתיאום טיפול: 1-800-800-440, או הודעה בוואטסאפ למספר 050-6644000"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-151",
+      "batch": 3,
+      "row": 240,
+      "cardKey": "240|||קישורים למטה להגנה, על\"ם, מצמיחים, בית בטוח לנוער, נע\"ן, עמותת ל.מ.ה, עמ\"י ועוד",
+      "org": "מאגר מענים — ילדים ונוער (חרבות ברזל)",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-152",
+      "batch": 3,
+      "row": 241,
+      "cardKey": "241|||טיפול משפחתי אינטנסיבי לילדים 6-18",
+      "org": "יחידה להתערבות במשבר — מרכז רפואי העמק (כללית)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "gp_referral",
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לרוב דרך חדרי מיון, אפשר גם דרך רופאי משפחה, פסיכיאטרים או יועצים חינוכיים, ואף לפנות ישירות. הטיפול מחייב התחייבות (טופס 17) מקופת החולים."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-153",
+      "batch": 3,
+      "row": 242,
+      "cardKey": "242|||קו סיוע וקישורים — להט\"ב, הורים, דתיים, נוער",
+      "org": "מענים לקהילה הגאה (חרבות ברזל)",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קו הקשב \"יש עם מי לדבר\" מציע אוזן קשבת, מידע ותמיכה לכלל חברות וחברי הקהילה, בני משפחה וחברים"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-154",
+      "batch": 3,
+      "row": 243,
+      "cardKey": "243|||3 שיחות טיפוליות מקוונות ללא עלות",
+      "org": "קווי תמיכה נפשית — קופות חולים (חרבות ברזל)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מכבי: מגיל 14, 3 שיחות פעמיים בשנה, בלי הפניה."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-155",
+      "batch": 3,
+      "row": 244,
+      "cardKey": "244|||מידע, זכויות ואיתור ספקי שירות בסל שיקום",
+      "org": "סל שיקום",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "בדיקת זכאות, הגשת בקשה, ועדת סל שיקום בוחנת את הבקשה, ואז בחירת שירות וספק"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-156",
+      "batch": 3,
+      "row": 245,
+      "cardKey": "245|||שירותי אמבולנס ללא תשלום להסעת חולים, נכים ומוגבלים לטיפולים, בדיקות ושמחות",
+      "org": "רפואה ושמחה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "מוקד ההזמנות זמין בימי חול 08:00-15:00; מומלץ לתאם מוקדם ככל האפשר, לרוב עד בוקר היום שלפני הנסיעה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-157",
+      "batch": 3,
+      "row": 246,
+      "cardKey": "246|||שירותי אמבולנס להסעת חולים, נכים ומוגבלים לטיפולים, בדיקות ואירועים משפחתיים",
+      "org": "עזרה למרפא",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לתיאום הזמנה באמבולנס: משרדי האגודה 03-5777000 שלוחה 5, ביתר השעות מוקד ארצי"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-158",
+      "batch": 3,
+      "row": 247,
+      "cardKey": "247|||טיפול בהתמכרויות התנהגותיות (מין, פורנו, הימורים, אוכל, קשרים, מסכים) ותמיכה מערכתית לבני משפחה ובני זוג — טיפול, קבוצות ותוכנית 12 הצעדים",
+      "org": "מרכז קשרים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "יצירת קשר להכוונה ראשונית ללא התחייבות, ללא עלות וללא צורך בהזדהות"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-159",
+      "batch": 3,
+      "row": 248,
+      "cardKey": "248|||טיפול בנפגעי אלכוהול, הימורים והתמכרויות התנהגותיות נוספות — למכורים ולבני משפחותיהם; הסברה ומניעה",
+      "org": "עמותת אפשר — יחידה להתמכרויות",
+      "indicators": {
+        "offers": [
+          "info",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "טלפון ישיר ליחידה 03-6733228; קו חם לנפגעי הימורים 1-700-500-888"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-160",
+      "batch": 3,
+      "row": 249,
+      "cardKey": "249|||אשפוזית, טיפול יום וקהילות טיפוליות לגמילה ושיקום; מותאם גם לאוכלוסייה דתית וחרדית; מפוקח ע״י משרדי הבריאות והרווחה",
+      "org": "רטורנו — גמילה מהתמכרויות",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-161",
+      "batch": 3,
+      "row": 250,
+      "cardKey": "250|||מרכז ברישיון משרד הבריאות לטיפול בהתמכרויות — בית מאזן לתחלואה כפולה, מרפאת יום, גמילה ותמיכה למשפחות; בשיתוף קופות החולים",
+      "org": "דרך אחרת",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-162",
+      "batch": 3,
+      "row": 251,
+      "cardKey": "251|||קבוצות עזרה עצמית אנונימיות (12 צעדים) למשפחות וחברים של מכורים לסמים",
+      "org": "נר-אנון ישראל",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "התמכרות אצל בן משפחה או חבר? לתמיכה חינם וקישור לקבוצות נר אנון. שמרו על ראש פתוח ובואו לכמה שיותר פגישות."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-163",
+      "batch": 3,
+      "row": 252,
+      "cardKey": "252|||קבוצות תמיכה אנונימיות (12 צעדים) למשפחות וחברים של אנשים הסובלים מאלכוהוליזם — פרונטלי וזום",
+      "org": "אל-אנון ישראל",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-164",
+      "batch": 3,
+      "row": 253,
+      "cardKey": "253|||קבוצות עזרה עצמית אנונימיות (12 צעדים) לאנשים הסובלים מבעיית שתייה",
+      "org": "א.א. אלכוהוליסטים אנונימיים",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הצטרף למרחב בטוח שבו אנו חולקים ניסיון, כוח ותקווה כדי להשתחרר מהדחף לשתות. התוכנית חינמית לחלוטין."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-165",
+      "batch": 3,
+      "row": 254,
+      "cardKey": "254|||כפר ומרכז לטיפול בהתמכרויות — גמילה פיזית, קהילות טיפוליות לנוער/צעירים/בגירים/נשים; בפיקוח משרדי הרווחה והבריאות",
+      "org": "עמותת נוה מלכישוע",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קו חם מאויש 24/7 כולל סופי שבוע"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-166",
+      "batch": 3,
+      "row": 255,
+      "cardKey": "255|||מפה ומאגר מענים טיפוליים ונפשיים בישראל לילדים, נוער ומבוגרים",
+      "org": "מפה לנפש",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-167",
+      "batch": 3,
+      "row": 256,
+      "cardKey": "256|||איתור, ליווי וטיפול בנוער וצעירים במצבי סיכון — בקהילה, ברחוב ובמרחב הדיגיטלי",
+      "org": "עמותת על\"ם",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": ""
+          },
+          {
+            "channel": "btl",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הצוות והמתנדבים של עלם דיגיטל זמינים א'-ה' 19:00-24:00 בצ'אט אנונימי בוואטסאפ"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-168",
+      "batch": 3,
+      "row": 257,
+      "cardKey": "257|||ייעוץ וטיפול לנוער וצעירים עד גיל 24 ולהוריהם בנושאי סמים, אלכוהול והתמכרויות",
+      "org": "עמותת אל-סם",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "העמותה מעניקה את שירותיה לכל דורש ללא תנאי קבלה. במידה ויש צורך, עלות הטיפול מסובסדת על ידי העמותה."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-169",
+      "batch": 3,
+      "row": 258,
+      "cardKey": "258|||תנועת נוער משלבת לילדים עם ובלי צרכים מיוחדים — שילוב חברתי מלא ושוויוני",
+      "org": "כנפיים של קרמבו",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-170",
+      "batch": 3,
+      "row": 259,
+      "cardKey": "259|||תנועת נוער וצעירים להט\"ב — קבוצות חברתיות ותמיכה בעשרות יישובים",
+      "org": "איגי — ארגון הנוער הגאה",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "הקבוצות נפגשות פעם בשבוע ומתאימות לכל מי שרוצה, בארון ומחוצה לו, ללא תשלום."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-171",
+      "batch": 3,
+      "row": 260,
+      "cardKey": "260|||הסברה וסדנאות בבתי ספר ובמסגרות נוער למניעת להט\"בופוביה ולתמיכה בנוער להט\"ב",
+      "org": "חוש\"ן — חינוך ושינוי",
+      "indicators": {
+        "offers": [
+          "info"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-172",
+      "batch": 3,
+      "row": 261,
+      "cardKey": "261|||מניעת אובדנות ותמיכה במשפחות שכולות לאחר התאבדות או מוות פתאומי",
+      "org": "בשביל החיים",
+      "indicators": {
+        "offers": [
+          "info",
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "לפניה למרכזי הסיוע בשיחה או בוואטסאפ: 054-4493113"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-173",
+      "batch": 3,
+      "row": 262,
+      "cardKey": "262|||פורום ארצי של בני משפחה של מתמודדי נפש — תמיכה, מיצוי זכויות, סנגור והפחתת סטיגמה",
+      "org": "עמותת עוצמה",
+      "indicators": {
+        "offers": [
+          "info",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "אם אתם בני משפחה של מתמודדי נפש ורוצים לפעול לשיפור המצב – נשמח לצרף אתכם לעמותת עוצמה"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-174",
+      "batch": 3,
+      "row": 263,
+      "cardKey": "263|||פורום משפחות המתמודדות עם הפרעות אכילה — קבוצות תמיכה, מידע על זכויות וסנגור",
+      "org": "המסע שלנו",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "פעילות דיסקרטית בקבוצת פייסבוק ובקבוצת וואטסאפ למידע, היוועצות ותמיכה הדדית של הורים"
+      },
+      "members": []
+    },
+    {
+      "code": "I3-175",
+      "batch": 3,
+      "row": 264,
+      "cardKey": "264|||מידע לציבור ולמשפחות, מפת מסגרות טיפול ואינדקס מטפלים בהפרעות אכילה",
+      "org": "IAED — העמותה הישראלית להפרעות אכילה",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-176",
+      "batch": 3,
+      "row": 265,
+      "cardKey": "265|||ליווי ילדים ובוגרים על הרצף האוטיסטי ומשפחותיהם — זכויות, מרכזי משפחה ותמיכה",
+      "org": "אלו\"ט",
+      "indicators": {
+        "offers": [
+          "info",
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קו תמיכה רגשי מהורים להורים ללא תשלום. מיצוי זכויות ב-*5922 ללא תשלום."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-177",
+      "batch": 3,
+      "row": 266,
+      "cardKey": "266|||מרכז רב-תחומי לייעוץ, טיפול וחינוך בקהילה — ילדים, מתבגרים ומבוגרים; כולל יחידת קשב",
+      "org": "עמותת מיט\"ב",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I3-178",
+      "batch": 3,
+      "row": 267,
+      "cardKey": "267|||דיווח ומענה 24/7 על פגיעות, בריונות, סחיטה ופשיעה נגד ילדים ונוער במרחב המקוון",
+      "org": "מוקד 105 — המטה הלאומי להגנה על ילדים ברשת",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "ילדים, בני נוער, הוריהם וצוותי החינוך יכולים לפנות למוקד ולקבל מענה מידי. המוקד פועל 24/7."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-179",
+      "batch": 3,
+      "row": 268,
+      "cardKey": "268|||הליך רפואי קצר (Stellate Ganglion Block): שתי זריקות הרדמה מקומית בצידי הצוואר תחת אולטרסאונד, להקלה על תסמינים פיזיים של פוסט־טראומה, חרדה ודיכאון. מיועד לשילוב עם טיפול רגשי.",
+      "org": "SGB — סטלה ישראל",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "נדרשת אבחנה של פסיכיאטר. עלות שני הטיפולים אחרי סבסוד כ-4,000 ש\"ח; סבסוד נוסף אם האבחנה קשורה למשרד הביטחון או לנפגעי חרבות ברזל."
+      },
+      "members": []
+    },
+    {
+      "code": "I3-180",
+      "batch": 3,
+      "row": 269,
+      "cardKey": "269|||טיפול EEG לא פולשני (GrayMatters Health) לאימון ויסות פעילות מוחית הקשורה לפוסט־טראומה, ללא חשיפה לטראומה. מאושר FDA ו־אמ\"ר; מוכר לאגף השיקום למטופלים זכאים. רשימת מרכזים באתר (שיבא, איכילוב, ברזילי, מעלה הכרמל, בתי הלוחם ועוד).",
+      "org": "Prism — גרייה עצמית לפוסט טראומה",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "השאירו פרטים ונציג יחזור לתיאום. לשימוש באמצעות מרשם בלבד. מי שאינו מוכר במשרד הביטחון פונה ישירות למרכז הטיפול."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-181",
+      "batch": 4,
+      "row": 270,
+      "cardKey": "270|||תרסיס אף של אסקטמין לדיכאון מג'ורי עמיד. בסל הבריאות (מ-2020) למבוגרים שלא הגיבו לשני קווי טיפול משתי קבוצות פרמקולוגיות, בשילוב SSRI/SNRI. ניתן רק במרפאה מורשית תחת השגחה.",
+      "org": "אסקטמין / Spravato (ספראבטו)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "eligible"
+          },
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "נדרש מרשם פסיכיאטר ואישור הקופה."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-182",
+      "batch": 4,
+      "row": 271,
+      "cardKey": "271|||מרפאה פסיכיאטרית מקבוצת Stella Israel: עירוי קטמין במינון נמוך בהשגחה רפואית לדיכאון, חרדה ופוסט־טראומה.",
+      "org": "קטמיינד (KetaMind) — עירוי קטמין",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "במידה שהינך מעוניין בטיפול או בפרטים נוספים על התהליך, בבקשה תמלא את הטופס בקישור ונחזור אליך בהקדם."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-183",
+      "batch": 4,
+      "row": 272,
+      "cardKey": "272|||Ketamine-assisted psychotherapy in Jerusalem: psychiatrist and KAP therapist (mainly IM ketamine with preparation and integration) for treatment-resistant depression, PTSD and anxiety.",
+      "org": "Keter Health — KAP",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "Start Your Process / Free Consultation — פנייה ישירה דרך האתר; הערכה פסיכיאטרית במרפאה."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-184",
+      "batch": 4,
+      "row": 273,
+      "cardKey": "273|||גרייה מוחית בזרם ישר חלש (tDCS) במרפאה לגרייה מוחית בהרצוג. לא פולשני; למצבים פסיכיאטריים ונוירולוגיים לפי הערכה רפואית. באותה מרפאה גם Deep TMS לדיכאון מג'ורי (טופס 17).",
+      "org": "tDCS — המרכז הרפואי הרצוג",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "eligible"
+          },
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "זכאים כנגד טופס 17 מקופת החולים... לאחר הפנייה של הרופא המטפל – פסיכיאטר או נוירולוג."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-185",
+      "batch": 4,
+      "row": 274,
+      "cardKey": "274|||השתלת קוצב המגרה את עצב הואגוס לדיכאון קשה עמיד לטיפול. בישראל: הערכה ביחידה לגרייה מוחית בלב השרון; ההשתלה בנוירוכירורגיה תפקודית באיכילוב. מוגבל, דורש הפניה פסיכיאטרית.",
+      "org": "VNS — גירוי העצב התועה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לכל פנייה יש לצרף מכתב הפניה מפסיכיאטר מטפל וטופס 17 מהקופה."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-186",
+      "batch": 4,
+      "row": 275,
+      "cardKey": "275|||הליך נוירוכירורגי להשתלת אלקטרודות וקוצב מוחי במקרי OCD חמורים ועמידים לטיפול. ניתן במספר מרכזים בודדים (למשל רמב\"ם). אינו בסל הבריאות; רק באישור מיוחד של משרד הבריאות או במחקר.",
+      "org": "DBS — גירוי מוחי עמוק (OCD עמיד)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "psychiatrist_referral"
+        ],
+        "referral_source": "ההפניה להערכה ברמב״ם מהפסיכיאטר המטפל."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-187",
+      "batch": 4,
+      "row": 276,
+      "cardKey": "276|||ייעוץ הלכתי ורוחני למתמודדים ולבני משפחה — רבנים ורבניות שעברו הכשרה בבריאות הנפש (לא טיפול קליני)",
+      "org": "מעגלי נפש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "קבע מפגש של חצי שעה עם אחד מהרבנים שלנו."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-188",
+      "batch": 4,
+      "row": 277,
+      "cardKey": "277|||קבוצה בפייסבוק",
+      "org": "מתייעצים עם מטפלים מוסמכים",
+      "indicators": {
+        "offers": [
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-189",
+      "batch": 4,
+      "row": 278,
+      "cardKey": "278|||שירותי סל שיקום",
+      "org": "האגודה לבריאות הציבור",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "welfare",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "המוכרים כזכאים לשירות על ידי משרד הבריאות, אגף השיקום של משרד הרווחה ומשרד הביטחון."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-190",
+      "batch": 4,
+      "row": 279,
+      "cardKey": "279|||טיפול יום פסיכיאטרי — חלופת אשפוז למבוגרים במצבי משבר",
+      "org": "בית רעים (האגודה לבריאות הציבור)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17",
+          "mod_rehab_worker",
+          "self_referral"
+        ],
+        "referral_source": "מקופות החולים – מכתב הפנייה מפסיכיאטר וטופס 17; ממשרד הביטחון: הפנייה ממשרד הביטחון ומכתב מפסיכיאטר; באופן פרטי: פנייה טלפונית."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-191",
+      "batch": 4,
+      "row": 280,
+      "cardKey": "280|||טיפול נפשי מרפאתי — הערכה פסיכיאטרית, טיפול תרופתי ופסיכותרפיה",
+      "org": "מרפאת הנגב (האגודה לבריאות הציבור)",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral"
+        ],
+        "referral_source": "הפנייה למרפאה ניתן לקבל מרופא.ת המשפחה דרך קופת החולים."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-192",
+      "batch": 4,
+      "row": 281,
+      "cardKey": "281|||שיקום לנכי צה\"ל ונפגעי פעולות איבה — מרכז החממה ותכנית תושייה למשפחות הלומי קרב",
+      "org": "האגודה לבריאות הציבור",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "btl",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "mod_rehab_worker",
+          "nii_referral"
+        ],
+        "referral_source": "הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה)."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-193",
+      "batch": 4,
+      "row": 282,
+      "cardKey": "282|||מרכז יום לנוער וצעירים (12–35) על רצף הטראומה וההתמכרות — אבחון, טיפול פרטני וקבוצתי וליווי שיקומי",
+      "org": "מרכז צ׳ויס (CHOICE)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-194",
+      "batch": 4,
+      "row": 283,
+      "cardKey": "283|||שיקום תעסוקתי, תעסוקה נתמכת ויזמות — כולל תוכנית צרכנים נותני שירות",
+      "org": "יוזמה דרך הלב",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee",
+          "mod_rehab_worker"
+        ],
+        "referral_source": "זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-195",
+      "batch": 4,
+      "row": 284,
+      "cardKey": "284|||בית חם, מרחב פתוח והלנת חירום לנוער וצעירים בסיכון — כולל שלטר לצעירות חרדיות",
+      "org": "החוט המשולש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "court_or_welfare"
+        ],
+        "referral_source": "פנייה עצמית או דרך רווחה."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-196",
+      "batch": 4,
+      "row": 285,
+      "cardKey": "285|||בית חם ומקלט חירום לנוער בסיכון ובסכנת חיים (14–21)",
+      "org": "בית השנטי",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-197",
+      "batch": 4,
+      "row": 286,
+      "cardKey": "286|||קורת גג 24/7 לנוער 12–18 ללא קבלה בירוקרטית — עד 3 חודשים",
+      "org": "עמותת יחדיו — קורת גג בראשית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "free",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "פנייה עצמית או הפניית גורם חיצוני."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-198",
+      "batch": 4,
+      "row": 287,
+      "cardKey": "287|||קורת גג 24/7 לצעירים 18–25 ללא עורף משפחתי — עד 6 חודשים",
+      "org": "אנוש — הלנת חירום",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-199",
+      "batch": 4,
+      "row": 288,
+      "cardKey": "288|||עובד/ת סוציאלי/ת בתוכנית יתד — ליווי צעירים וצעירות (18–25/26) במצבי חיים מורכבים",
+      "org": "עו״ס יתד",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "court_or_welfare"
+        ],
+        "referral_source": "הפניה גם דרך המחלקה לשירותים חברתיים. מי שמעוניין ממלא שאלון באתר יתד."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-200",
+      "batch": 4,
+      "row": 289,
+      "cardKey": "289|||רשת הוסטלים לנערות וצעירות במצבי סיכון — ראשון לציון; גישה מודעת טראומה",
+      "org": "בית משלך (חכמת נשים)",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "welfare",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "court_or_welfare"
+        ],
+        "referral_source": "נערות דרך חסות הנוער (CRM); צעירות בדו״ח סוציאלי מהמחלקה לשירותים חברתיים."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-201",
+      "batch": 4,
+      "row": 290,
+      "cardKey": "290|||קליניקה לטיפול בנשים ובנערות — פסיכותרפיה, פגיעות מיניות, הפרעות אכילה, דיכאון אחרי לידה ואלימות ביחסים",
+      "org": "חכמת נשים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "יצירת קשר: 050-4080498"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-202",
+      "batch": 4,
+      "row": 291,
+      "cardKey": "291|||תוכנית טיפול קהילתית מוקדמת לצעירים אחרי אפיזודה פסיכוטית ראשונה",
+      "org": "נויגייט (NAVIGATE)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "פרטי כל מרפאה באתר"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-203",
+      "batch": 4,
+      "row": 292,
+      "cardKey": "292|||מחלקה פתוחה לאשפוז בטראומה מורכבת — כולל נפגעי 7 באוקטובר ובני משפחותיהם",
+      "org": "בדרכי (מרחבים, באר יעקב)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-204",
+      "batch": 4,
+      "row": 293,
+      "cardKey": "293|||מחלקה פתוחה לנשים עם פוסט־טראומה מורכבת והפרעות אכילה",
+      "org": "לצידך (מרחבים, באר יעקב)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "eligible"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "hmo_form17"
+        ],
+        "referral_source": "טופס 17 — כללית ומאוחדת"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-205",
+      "batch": 4,
+      "row": 294,
+      "cardKey": "294|||הכוונה וליווי למציאת מענה בפסיכיאטריה ובריאות הנפש",
+      "org": "מזור (הרב שמעון רגובי)",
+      "indicators": {
+        "offers": [
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "גם כשקשה למצוא את המילים, אפשר להתחיל בפנייה אחת."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-206",
+      "batch": 4,
+      "row": 295,
+      "cardKey": "295|||הסעות מסובסדות לבתי חולים מבית שמש לירושלים, אמבולנסים ורכבים מונגשים",
+      "org": "עזרת אחים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "במוקד ניתן להזמין מקום לנסיעה."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-207",
+      "batch": 4,
+      "row": 296,
+      "cardKey": "296|||תעסוקה נתמכת, מועדון חברתי באשקלון, מכינת הד, דיור מוגן לבודדים / ליווי, וסייעים בחינוך",
+      "org": "עמותת גוונים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "rehab_basket_committee"
+        ],
+        "referral_source": "מוקד *9913. מכינת הד: גילאי 18–28, זכאי סל שיקום"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-208",
+      "batch": 4,
+      "row": 297,
+      "cardKey": "297|||טיפול יום אינטנסיבי למבוגרים — מניעת אשפוז מלא",
+      "org": "מעון ירושלים (המרכז הירושלמי לבריאות הנפש)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "hmo_form17",
+          "psychiatrist_referral"
+        ],
+        "referral_source": "מכתב הפנייה מרופא/ה מטפל/ת (בעדיפות גבוהה מפסיכיאטר/ית), וטופס 17 מקופת החולים, קוד L0771."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-209",
+      "batch": 4,
+      "row": 298,
+      "cardKey": "298|||אשפוז יום פסיכיאטרי למבוטחי כללית",
+      "org": "ויניק טלביה (כללית)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral"
+        ],
+        "referral_source": "אשפוז יום ניתן רק לאחר הפניית רופא."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-210",
+      "batch": 4,
+      "row": 299,
+      "cardKey": "299|||טיפול יום למצבים נוירופסיכיאטריים וסומטיים — לא מסגרת כללית למשבר",
+      "org": "איכילוב — טיפול יום נוירופסיכיאטרי",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "טופס 17, קוד L0822. הפניה מגורם בבריאות הנפש, מנוירולוג או מרופא משפחה; אם יש פסיכיאטר מטפל — לצרף מכתב."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-211",
+      "batch": 4,
+      "row": 300,
+      "cardKey": "300|||טיפול יום פסיכיאטרי בהפרדה מגדרית — לציבור הדתי והחרדי",
+      "org": "מעייני הישועה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          },
+          {
+            "channel": "mod",
+            "terms": "eligible"
+          },
+          {
+            "channel": "private",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "חברי כללית ומכבי: הפניה מהרופא המטפל/רופא המשפחה. מאוחדת ולאומית: טופס 17. משרד הביטחון: טופס התחייבות."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-212",
+      "batch": 4,
+      "row": 301,
+      "cardKey": "301|||טיפול יום פסיכיאטרי בשני שלבים",
+      "org": "רמב״ם — היחידה לטיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-213",
+      "batch": 4,
+      "row": 302,
+      "cardKey": "302|||טיפול יום פסיכיאטרי, חמישה ימים בשבוע",
+      "org": "הלל יפה — יחידת טיפול יום מבוגרים",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לצורך קבלה ליחידה נדרשת הפניה מהפסיכיאטר המטפל, או גורם טיפולי מוסמך אחר מתחום בריאות הנפש, וכן טופס התחייבות."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-214",
+      "batch": 4,
+      "row": 303,
+      "cardKey": "303|||טיפול יום פסיכיאטרי למבוטחי כללית",
+      "org": "כללית — טיפול יום מבוגרים, יפו",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "gp_referral"
+        ],
+        "referral_source": "הטיפול מיועד ללקוחות כללית עם אבחנה או חשד לאבחנה נפשית, וניתן בהפניית רופא."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-215",
+      "batch": 4,
+      "row": 304,
+      "cardKey": "304|||הסבר על השירות, וטבלאות מרכזים שאין להם כרטיס נפרד",
+      "org": "רשימות ארציות — טיפול יום פסיכיאטרי",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "צריך לפנות לגורם המטפל, פסיכיאטר או מטפל בבריאות הנפש, שיפיק מכתב הפניה. אם טיפול היום לא ניתן ישירות על ידי הקופה, יש לקבל טופס 17."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-216",
+      "batch": 4,
+      "row": 305,
+      "cardKey": "305|||שיקום תעסוקתי, תעסוקה נתמכת, פנאי ומרכזי משפחות למתמודדי נפש מגיל 18",
+      "org": "האגף לבריאות הנפש (עזר מציון)",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "rehab_basket_committee"
+        ],
+        "referral_source": "שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. מרכז ייעוץ למשפחות מסובסד על ידי משרד הבריאות: 12 פגישות חינם."
+      },
+      "members": [
+        "26|||קו ייעוץ ותמיכה - בימים א-ה בשעות 10:00-13:00 ו-16:00-22:00",
+        "68|||סיוע למשפחות של מתמודדי נפש"
+      ]
+    },
+    {
+      "code": "I4-217",
+      "batch": 4,
+      "row": 306,
+      "cardKey": "306|||סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים",
+      "org": "שלו — שיקום וטיפול",
+      "indicators": {
+        "offers": [
+          "navigate",
+          "care"
+        ],
+        "whole_org": true,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          },
+          {
+            "channel": "welfare",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "עברת ועדה לסל שיקום? נסייע לך לבחור ולהגיע לשירות המיטבי עבורך. תעסוקה נתמכת: סל שיקום ושירותי רווחה."
+      },
+      "members": [
+        "307|||ליווי ממוקד הורות להורים המתמודדים עם קשיים נפשיים"
+      ]
+    },
+    {
+      "code": "I4-218",
+      "batch": 4,
+      "row": 307,
+      "cardKey": "307|||ליווי ממוקד הורות להורים המתמודדים עם קשיים נפשיים",
+      "org": "ציפור הנפש",
+      "indicators": {
+        "offers": [
+          "care",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "eligible"
+          }
+        ],
+        "referral": [
+          "rehab_basket_committee"
+        ],
+        "referral_source": "ניתן אל מול אישור ועדת סל שיקום לדיור מוגן."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-219",
+      "batch": 4,
+      "row": 308,
+      "cardKey": "308|||רשימת מרכזי הייעוץ למשפחות בקהילה ובבתי החולים",
+      "org": "מרכזי ייעוץ למשפחות",
+      "indicators": {
+        "offers": [
+          "info",
+          "navigate",
+          "care",
+          "claim",
+          "community"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "moh",
+            "terms": "full"
+          }
+        ],
+        "referral": [
+          "self_referral"
+        ],
+        "referral_source": "כל אחד ואחת יכולים לפנות אל מרכז יעוץ ותמיכה למשפחות מתמודדי נפש, ללא עלות וללא צורך בהכרה או אישור מוקדם, גם אם אין זכאות לסל שיקום."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-220",
+      "batch": 4,
+      "row": 309,
+      "cardKey": "309|||אשפוז יום אחרי אשפוז מלא — הדרך שלך חזרה לקהילה",
+      "org": "כפר שאול — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-221",
+      "batch": 4,
+      "row": 310,
+      "cardKey": "310|||טיפול יום לנשים עם טראומה מורכבת אחרי פגיעה מינית",
+      "org": "לוטוס (כפר שאול)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "הפנייה מפסיכיאטר בקהילה מששת החודשים האחרונים, וטופס התחייבות (טופס 17) למנוי אבחוני (קוד L0771) לאינטייק."
+      },
+      "members": []
+    },
+    {
+      "code": "I4-222",
+      "batch": 4,
+      "row": 311,
+      "cardKey": "311|||מחלקת טיפול יום, כחודש וחצי בממוצע",
+      "org": "קפלן — טיפול יום פסיכיאטרי",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "hmo_form17"
+        ],
+        "referral_source": "טופס 17"
+      },
+      "members": []
+    },
+    {
+      "code": "I4-223",
+      "batch": 4,
+      "row": 312,
+      "cardKey": "312|||טיפול יום למבוגרים",
+      "org": "גהה — מחלקה ח׳",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-224",
+      "batch": 4,
+      "row": 313,
+      "cardKey": "313|||מחלקה לטיפול יום פסיכיאטרי לילדים ולנוער",
+      "org": "חופים (איכילוב)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-225",
+      "batch": 4,
+      "row": 314,
+      "cardKey": "314|||טיפול יום לקטינים באתיופיה, ואשפוז יום בעין כרם",
+      "org": "הדסה — טיפול יום ואשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-226",
+      "batch": 4,
+      "row": 315,
+      "cardKey": "315|||טיפול יום ואשפוז יום למבוגרים, וטיפול יום לקטינים בבית ספר שקד",
+      "org": "ברזילי — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-227",
+      "batch": 4,
+      "row": 316,
+      "cardKey": "316|||טיפול יום ואשפוז יום",
+      "org": "זיו — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-228",
+      "batch": 4,
+      "row": 317,
+      "cardKey": "317|||טיפול יום למבוגרים",
+      "org": "מזרע — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-229",
+      "batch": 4,
+      "row": 318,
+      "cardKey": "318|||טיפול יום ואשפוז יום למבוגרים",
+      "org": "העמק — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-230",
+      "batch": 4,
+      "row": 319,
+      "cardKey": "319|||אשפוז יום למבוגרים",
+      "org": "האנגלי בנצרת — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-231",
+      "batch": 4,
+      "row": 320,
+      "cardKey": "320|||אשפוז יום לקטינים",
+      "org": "נהריה — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-232",
+      "batch": 4,
+      "row": 321,
+      "cardKey": "321|||טיפול יום למבוגרים במרכז לבריאות הנפש",
+      "org": "באר שבע — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-233",
+      "batch": 4,
+      "row": 322,
+      "cardKey": "322|||טיפול יום למבוגרים",
+      "org": "סורוקה — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-234",
+      "batch": 4,
+      "row": 323,
+      "cardKey": "323|||טיפול יום למבוגרים",
+      "org": "באר יעקב — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-235",
+      "batch": 4,
+      "row": 324,
+      "cardKey": "324|||טיפול יום למבוגרים ואשפוז יום",
+      "org": "שלוותה — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-236",
+      "batch": 4,
+      "row": 325,
+      "cardKey": "325|||אשפוז יום לקטינים",
+      "org": "שניידר — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-237",
+      "batch": 4,
+      "row": 326,
+      "cardKey": "326|||טיפול יום למבוגרים",
+      "org": "אברבנאל — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-238",
+      "batch": 4,
+      "row": 327,
+      "cardKey": "327|||טיפול יום למבוגרים של כללית",
+      "org": "בארי — טיפול יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "partial"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-239",
+      "batch": 4,
+      "row": 328,
+      "cardKey": "328|||אשפוז יום במחלקת ילדים",
+      "org": "שיבא — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    },
+    {
+      "code": "I4-240",
+      "batch": 4,
+      "row": 329,
+      "cardKey": "329|||טיפול יום לנוער, בשיבולים ובצור הדסה",
+      "org": "בית דניאלה",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-241",
+      "batch": 5,
+      "row": 330,
+      "cardKey": "330|||טיפול יום באבן יהודה וביבנה",
+      "org": "איזון נפש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-242",
+      "batch": 5,
+      "row": 331,
+      "cardKey": "331|||טיפול יום לנשים אחרי בית מאזן להפרעות אכילה",
+      "org": "קידום השביל (חולון)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-243",
+      "batch": 5,
+      "row": 332,
+      "cardKey": "332|||טיפול יום למבוגרים",
+      "org": "מסאחה (חמרה)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-244",
+      "batch": 5,
+      "row": 333,
+      "cardKey": "333|||טיפול יום למבוגרים עם הפרעות אכילה",
+      "org": "גשר לתקווה (כרמיאל)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-245",
+      "batch": 5,
+      "row": 334,
+      "cardKey": "334|||טיפול יום למבוגרים",
+      "org": "רגעים (מגדל העמק)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-246",
+      "batch": 5,
+      "row": 335,
+      "cardKey": "335|||טיפול יום למבוגרים",
+      "org": "אופק רם (עכו)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-247",
+      "batch": 5,
+      "row": 336,
+      "cardKey": "336|||טיפול יום למבוגרים",
+      "org": "מעיין הנפש (קריית אתא)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-248",
+      "batch": 5,
+      "row": 337,
+      "cardKey": "337|||טיפול יום לילדים ולנוער",
+      "org": "קרני שמש",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-249",
+      "batch": 5,
+      "row": 338,
+      "cardKey": "338|||מרפאת חוץ לבריאות הנפש, ליד שער בית החולים",
+      "org": "מרפאת עירון (שער מנשה)",
+      "indicators": {
+        "offers": [
+          "care",
+          "claim"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "self_referral",
+          "gp_referral"
+        ],
+        "referral_source": "הפניה מגורם תוך מוסדי, מגורם בקהילה, או עצמית; פניה ראשונה: מכתב הפניה מרופא משפחה + בדיקות דם בפקס"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-250",
+      "batch": 5,
+      "row": 339,
+      "cardKey": "339|||מחלקת אשפוז יום לטיפול אינטנסיבי או אחרי אשפוז מלא",
+      "org": "שער מנשה — אשפוז יום",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "קבלת מטופלים ממרפאות בריאות הנפש; נדרש טופס 17 למסגרת טיפול יום מבוגרים בשער מנשה, והפניה ע\"י הפסיכיאטר המטפל בקהילה"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-251",
+      "batch": 5,
+      "row": 340,
+      "cardKey": "340|||אשפוז ממוקד, מרפאה וטיפול יום לנפגעי ולנפגעות טראומה מינית",
+      "org": "שער מנשה — טראומה מינית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "psychiatrist_referral",
+          "hmo_form17"
+        ],
+        "referral_source": "אשפוז ממוקד: הפנייה ע\"י הגורם המטפל בקהילה. טיפול יום: נדרש טופס 17 והפניה ע\"י הפסיכיאטר המטפל בקהילה"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-252",
+      "batch": 5,
+      "row": 341,
+      "cardKey": "341|||אשפוז ממוקד ל-16 יום, וטיפול יום במרכז עוגן",
+      "org": "לב השרון — טראומה מינית",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": "full"
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [
+          "hmo_form17"
+        ],
+        "referral_source": "על הגורם המטפל לשלוח מנוי אבחוני (שתי פגישות) מקופת החולים; ההפניה דרך הגורמים המטפלים בקהילה"
+      },
+      "members": []
+    },
+    {
+      "code": "I5-253",
+      "batch": 5,
+      "row": 342,
+      "cardKey": "342|||יחידת אשפוז לנשים אחרי פגיעה מינית",
+      "org": "מגן (איכילוב)",
+      "indicators": {
+        "offers": [
+          "care"
+        ],
+        "whole_org": false,
+        "funding": [
+          {
+            "channel": "hmo",
+            "terms": ""
+          },
+          {
+            "channel": "moh",
+            "terms": ""
+          }
+        ],
+        "referral": [],
+        "referral_source": ""
+      },
+      "members": []
+    }
+  ]
+}

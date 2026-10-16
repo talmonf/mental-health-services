@@ -292,6 +292,90 @@ export function normalizeSites(raw: unknown): CardSite[] {
   return out;
 }
 
+export const OFFER_CODES = ['info', 'navigate', 'care', 'claim', 'community'] as const;
+export const FUNDING_CHANNELS = [
+  'private',
+  'free',
+  'hmo',
+  'moh',
+  'mod',
+  'welfare',
+  'btl',
+  'supplementary',
+  'edu',
+] as const;
+export const FUNDING_TERMS = ['', 'full', 'partial', 'eligible'] as const;
+/** Channels whose cost is not conditional; a qualifier on them would be meaningless. */
+const UNQUALIFIED_CHANNELS = new Set<string>(['private', 'free']);
+export const REFERRAL_CODES = [
+  'self_referral',
+  'gp_referral',
+  'hmo_form17',
+  'psychiatrist_referral',
+  'rehab_basket_committee',
+  'mod_rehab_worker',
+  'nii_referral',
+  'court_or_welfare',
+] as const;
+const REFERRAL_SOURCE_MAX = 500;
+
+export type FundingEntry = {
+  channel: (typeof FUNDING_CHANNELS)[number];
+  terms: (typeof FUNDING_TERMS)[number];
+};
+
+export type Indicators = {
+  offers: (typeof OFFER_CODES)[number][];
+  whole_org: boolean;
+  funding: FundingEntry[];
+  referral: (typeof REFERRAL_CODES)[number][];
+  referral_source: string;
+};
+
+export function emptyIndicators(): Indicators {
+  return { offers: [], whole_org: false, funding: [], referral: [], referral_source: '' };
+}
+
+function codeList<T extends string>(raw: unknown, allowed: readonly T[], label: string): T[] {
+  const items = stringList(raw, label);
+  const out: T[] = [];
+  for (const item of items) {
+    if (!(allowed as readonly string[]).includes(item)) throw new DirectoryCardError(`${label}: ערך לא מוכר`);
+    out.push(item as T);
+  }
+  return allowed.filter((code) => out.includes(code));
+}
+
+export function normalizeIndicators(raw: unknown): Indicators {
+  const src = asObject(raw);
+  let fundingRaw: unknown[] = [];
+  if (Array.isArray(src.funding)) fundingRaw = src.funding;
+  else if (src.funding != null && src.funding !== '') throw new DirectoryCardError('המימון אינו רשימה');
+  const byChannel = new Map<string, FundingEntry>();
+  for (const item of fundingRaw) {
+    const entry = asObject(item);
+    const channel = oneOf(entry.channel, FUNDING_CHANNELS, 'ערוץ מימון', 'private');
+    if (entry.channel == null || entry.channel === '') continue;
+    let terms = oneOf(entry.terms, FUNDING_TERMS, 'תנאי המימון', '');
+    if (UNQUALIFIED_CHANNELS.has(channel)) terms = '';
+    byChannel.set(channel, { channel, terms });
+  }
+  const funding = FUNDING_CHANNELS.filter((c) => byChannel.has(c)).map((c) => byChannel.get(c)!);
+  const referralSource = textField(src.referral_source);
+  if (referralSource.length > REFERRAL_SOURCE_MAX) throw new DirectoryCardError('מקור דרך ההפניה ארוך מדי');
+  return {
+    offers: codeList(src.offers, OFFER_CODES, 'מה יש בכרטיס'),
+    whole_org: src.whole_org === true,
+    funding,
+    referral: codeList(src.referral, REFERRAL_CODES, 'דרך ההפניה'),
+    referral_source: referralSource,
+  };
+}
+
+export function indicatorsEqual(a: unknown, b: unknown): boolean {
+  return stable(normalizeIndicators(a)) === stable(normalizeIndicators(b));
+}
+
 export function hasEligibility(raw: unknown): boolean {
   try {
     const e = normalizeEligibility(raw);

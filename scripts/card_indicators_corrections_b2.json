@@ -1,0 +1,1315 @@
+[
+  {
+    "code": "I2-061",
+    "cardKey": "59|||מיצוי זכויות",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "תוכנית רדיו על זכויות – מידע בלבד; דף הפייסבוק לא נגיש לבדיקה אוטומטית; ללא שינוי",
+    "url": "https://www.facebook.com/drgilitamir/"
+  },
+  {
+    "code": "I2-062",
+    "cardKey": "60|||מידע, ייעוץ ותמיכה\nמרכזי טיפול\nמרכזי שיקום",
+    "indicators": {
+      "offers": [
+        "info",
+        "care",
+        "claim",
+        "community"
+      ],
+      "whole_org": true,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "moh",
+          "terms": "eligible"
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [
+      "61|||מידע, ייעוץ ותמיכה",
+      "62|||מרפאות לבריאות הנפש\n"
+    ],
+    "note": "אומת באתר: אגף טיפול (מרפאות בהסדר עם כל הקופות), אגף שיקום, מרכז \"זכותך\" למיצוי זכויות, פעילות ופנאי ומרכז למשפחות; נוספו claim, community ומימון קופות / סל שיקום",
+    "url": "https://www.bayit-cham.org.il/"
+  },
+  {
+    "code": "I2-063",
+    "cardKey": "61|||מידע, ייעוץ ותמיכה",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מוקד \"קשובים\" *9518 – מענה טלפוני מאנשי מקצוע; הוסר info (קו תמיכה, לא דפי מידע); עלות לא מצוינת",
+    "url": "https://www.bayit-cham.org.il/%d7%a7%d7%95%d7%95%d7%99-%d7%99%d7%99%d7%a2%d7%95%d7%a5-%d7%a7%d7%a9%d7%95%D7%91%D7%99%D7%9D/"
+  },
+  {
+    "code": "I2-064",
+    "cardKey": "62|||מרפאות לבריאות הנפש\n",
+    "indicators": {
+      "offers": [
+        "care",
+        "claim"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מרפאות בפיקוח משרד הבריאות בשיתוף כל הקופות; הצוות מלווה בקבלת זכאות לסל שיקום – נוספו claim ומימון קופה/משרד הבריאות",
+    "url": "https://www.bayit-cham.org.il/%d7%9e%d7%a8%d7%a4%d7%90%d7%aa-%d7%93%d7%a8%d7%95%d7%a8/"
+  },
+  {
+    "code": "I2-065",
+    "cardKey": "63|||תמיכה לנוער וצעירים",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        },
+        {
+          "channel": "hmo",
+          "terms": "full"
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral",
+        "hmo_form17"
+      ],
+      "referral_source": "השירותים ניתנים ללא תשלום ישיר או באמצעות התחייבות מקופות החולים. לא צריך טפסים או הפניה."
+    },
+    "members": [],
+    "note": "אומת באתר: ללא תשלום ישיר או בהתחייבות קופה; נוסף free ועודכן מקור ההפניה",
+    "url": "https://headspace.org.il/"
+  },
+  {
+    "code": "I2-066",
+    "cardKey": "64|||קבוצה חברתית לנערים ונערות מתמודדי ומתמודדות נפש דתיים ודתלשים",
+    "indicators": {
+      "offers": [
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "קבוצה חברתית לנוער – שונה מ-care ל-community; עמוד האינסטגרם לא נגיש לבדיקה",
+    "url": "https://www.instagram.com/noarhakoalitzya/"
+  },
+  {
+    "code": "I2-067",
+    "cardKey": "65|||מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": "full"
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: ספק של כל הקופות במסגרת הרפורמה, טיפולים חינם; ללא שינוי",
+    "url": "https://www.lamerchav.org.il/"
+  },
+  {
+    "code": "I2-068",
+    "cardKey": "66|||ייעוץ והכוונה למשפחות בתחום בריאות הנפש · 18:00 - 22:00",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care",
+        "claim",
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "moh",
+          "terms": "full"
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": "קבלת השירות אינה כרוכה בתשלום ו/או בהפניה מגורם רפואי או אחר."
+    },
+    "members": [],
+    "note": "אומת באתר: מרכזי יה\"ל פועלים בשיתוף משרד הבריאות, ללא תשלום וללא הפניה; ייעוץ משפטי למיצוי זכויות, קבוצות ובן משפחה מניסיון – נוספו claim, community; free הוחלף ב-moh מלא",
+    "url": "https://eychut.org.il/%D7%9E%D7%A8%D7%9B%D7%96-%D7%99%D7%94%D7%B4%D7%9C-%D7%99%D7%99%D7%A2%D7%95%D7%A5-%D7%95%D7%94%D7%9B%D7%95%D7%95%D7%A0%D7%94-%D7%9C%D7%9E%D7%A9%D7%A4%D7%97%D7%95%D7%AA-2/"
+  },
+  {
+    "code": "I2-069",
+    "cardKey": "67|||סיוע למתמודדי נפש דרך שילובם בקהילה תוך ליווי מקצועי אישי",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care",
+        "claim"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "moh",
+          "terms": "eligible"
+        },
+        {
+          "channel": "mod",
+          "terms": "eligible"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "rehab_basket_committee",
+        "mod_rehab_worker"
+      ],
+      "referral_source": "לזכאי סל שיקום או בהפניה ממשרד הביטחון. אישור סל שיקום לתעסוקה נתמכת, הפניה ממשרד הביטחון, או באופן פרטי."
+    },
+    "members": [],
+    "note": "לפי טקסט הכרטיס ואתר הארגון: הוסטל, דיור מוגן ותעסוקה נתמכת בסל שיקום / משרד הביטחון / פרטי; יהלו\"ם – ליווי במיצוי זכויות. נוספו navigate, claim, פרטי והפניות; הוסר community (קהילה תומכת היא שירות שיקום)",
+    "url": "https://eychut.org.il/centers/"
+  },
+  {
+    "code": "I2-070",
+    "cardKey": "68|||סיוע למשפחות של מתמודדי נפש",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "claim"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר עזר מציון: \"ייעוץ, ליווי והכוונה למתמודדי נפש בדרך לשיקום\", כולל ליווי לקבלת סל שיקום – שונה מ-care ל-navigate + claim; עלות לא מצוינת",
+    "url": "https://www.ami.org.il/services"
+  },
+  {
+    "code": "I2-071",
+    "cardKey": "69|||טיפול משפחתי-מערכתי למצבי משבר",
+    "indicators": {
+      "offers": [
+        "info",
+        "navigate"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "moh",
+          "terms": "full"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": "לצורך פנייה לשירות יש למלא טופס הפנייה ולשלוח אותו לכתובת המייל המופיעה בו"
+    },
+    "members": [],
+    "note": "אומת באתר: דפ\"י ארגון הכשרה שאינו נותן טיפול – מכוון לטיפול פרטי, למרפאות הציבוריות בעכו ובכפר שאול (מימון מלא) ולפרויקט מעגלים (מסובסד). care→info+navigate; הוסר hmo",
+    "url": "https://opendialogue.co.il/therapy/"
+  },
+  {
+    "code": "I2-072",
+    "cardKey": "70|||תמיכה נפשית וחברתית בניצולי השואה והדור השני ",
+    "indicators": {
+      "offers": [
+        "care",
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: טיפול במסגרת הסדרים עם קופות החולים וטיפול פרטי מסובסד; מועדונים וביקורי מתנדבים לניצולי שואה – נוסף community",
+    "url": "https://www.amcha.org/"
+  },
+  {
+    "code": "I2-073",
+    "cardKey": "71|||לשילוב מתמודדים והעצמה בבריאות הנפש",
+    "indicators": {
+      "offers": [
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: עמותת צרכנים (מתמודדים) לקידום מעמדם – שונה מ-care ל-community",
+    "url": "https://www.lishma.co.il/"
+  },
+  {
+    "code": "I2-074",
+    "cardKey": "72|||תמיכה בילדים ונוער המטופלים במרכזי בריאות הנפש",
+    "indicators": {
+      "offers": [
+        "info",
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: העלאת מודעות, פעילויות לילדים ולהורים ומדריך זכויות – שונה מ-care ל-info + community",
+    "url": "https://www.zebenafshi.com/"
+  },
+  {
+    "code": "I2-075",
+    "cardKey": "73|||נתיבי שיקום והחלמה",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מענה טיפולי ושיקומי, פנייה ישירה לאנשי קשר לפי אזור; עלות לא מצוינת; ללא שינוי",
+    "url": "https://www.machon-tzohar.com/"
+  },
+  {
+    "code": "I2-076",
+    "cardKey": "74|||שיקום ובריאות הנפש",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "moh",
+          "terms": "eligible"
+        },
+        {
+          "channel": "mod",
+          "terms": "eligible"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "rehab_basket_committee",
+        "mod_rehab_worker",
+        "self_referral"
+      ],
+      "referral_source": "ניתן לפנות אלינו: במסגרת סל שיקום - משרד הבריאות; במסגרת אגף השיקום – משרד הבטחון; באופן פרטי (בתקופת תהליך ההכרה לזכאות או באופן קבוע)"
+    },
+    "members": [],
+    "note": "אומת באתר; עודכן מקור ההפניה לנוסח האתר",
+    "url": "https://nathan.co.il/%d7%a9%d7%99%d7%a7%d7%95%d7%9d-%d7%95%d7%91%d7%a8%d7%99%d7%90%d7%95%d7%aa-%d7%94%d7%a0%d7%a4%d7%a9/"
+  },
+  {
+    "code": "I2-077",
+    "cardKey": "76|||Crisis Support, Family Support, Family & Sibling Therapy, Legal Support, Mentors and Volunteers, Network of Professionals",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: ליווי במשבר, הכוונת משפחות במערכות הרווחה, בריאות הנפש והמשפט, סבסוד טיפול חירום כשאין חלופה – נוסף navigate",
+    "url": "https://www.avneichein.org/services/"
+  },
+  {
+    "code": "I2-078",
+    "cardKey": "77|||Israel's Emergency Mental Health Resources During War - Comprehensive list of mental health resources",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: רשימת משאבים לא מאומתת – מידע בלבד; ללא שינוי",
+    "url": "https://www.avneichein.org/emergency-mental-health-resources/"
+  },
+  {
+    "code": "I2-079",
+    "cardKey": "78|||המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": true,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        },
+        {
+          "channel": "mod",
+          "terms": "eligible"
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [
+      "297|||טיפול יום אינטנסיבי למבוגרים — מניעת אשפוז מלא",
+      "309|||אשפוז יום אחרי אשפוז מלא — הדרך שלך חזרה לקהילה",
+      "310|||טיפול יום לנשים עם טראומה מורכבת אחרי פגיעה מינית"
+    ],
+    "note": "אומת באתר: מרכז ממשלתי עם מחלקות אשפוז, אשפוז יום, מרפאות ו\"בית בטוח לזכאי משרד הביטחון\". הכרטיס הוא הכניסה הכללית למרכז – whole_org=true עם כרטיסי מעון ירושלים, אשפוז יום כפר שאול ולוטוס; נוסף מימון",
+    "url": "http://www.psjer.org.il/"
+  },
+  {
+    "code": "I2-080",
+    "cardKey": "79|||תוכנית טיפול ביתי ממושך למתמודדים עם מחלת נפש חמורה",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אין אתר בכרטיס; לפי הכרטיס התוכנית הסתיימה בסוף 2024 ואינה מקבלת מטופלים; ללא שינוי",
+    "url": ""
+  },
+  {
+    "code": "I2-081",
+    "cardKey": "80|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": "partial"
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": "אין צורך בהפניית רופא: קובעים פגישת מיון במוקד *3833."
+    },
+    "members": [],
+    "note": "לפי טקסט הכרטיס (טיפול פסיכולוגי ללא עלות, פסיכיאטר בהשתתפות עצמית, בלי הפניה); הוחלף gp_referral ב-self_referral ועודכן מקור",
+    "url": "https://www.meuhedet.co.il/%D7%9E%D7%90%D7%95%D7%97%D7%93%D7%AA-%D7%9C%D7%A0%D7%A4%D7%A9/"
+  },
+  {
+    "code": "I2-082",
+    "cardKey": "80|||Clinical case management for English-speakers in Israel from all walks of life: counseling, referrals to therapists, treatment programs, guidance through the legal process",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: ניהול מקרה, ליווי במשבר והפניה למטפלים. הוסרו hmo ו-gp_referral שהועתקו בטעות מכרטיס מאוחדת באותה שורה; נוסף navigate; עלות לא מצוינת",
+    "url": "https://amudim.org.il/"
+  },
+  {
+    "code": "I2-083",
+    "cardKey": "81|||מרפאות בריאות הנפש - פסיכיאטר ופסיכותרפיה",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "gp_referral",
+        "self_referral"
+      ],
+      "referral_source": "אפשר בהפניית רופא, או בפנייה ישירה: מי שלא היה בטיפול בחצי השנה האחרונה קובע תור לתומך בריאות הנפש ב-*507."
+    },
+    "members": [],
+    "note": "אומת באתר לאומית ובכרטיס: הפניית רופא או פנייה ישירה; נוסף self_referral ועודכן מקור",
+    "url": "https://www.leumit.co.il/mental-health-arena/"
+  },
+  {
+    "code": "I2-084",
+    "cardKey": "81|||Help finding qualified mental health providers for English-speakers",
+    "indicators": {
+      "offers": [
+        "navigate"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מאגר אנשי מקצוע מאומתים והפניה לפי צורך – שונה מ-care ל-navigate; הוסרו hmo ו-gp_referral שהועתקו בטעות מכרטיס לאומית באותה שורה",
+    "url": "https://www.reliefhelp.org/"
+  },
+  {
+    "code": "I2-085",
+    "cardKey": "82|||קביעת נכות למתמודדי נפש",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף מידע של כל זכות – מידע בלבד; הוסר claim (האתר חסום לבדיקה אוטומטית)",
+    "url": "https://www.kolzchut.org.il/he/%D7%A7%D7%91%D7%99%D7%A2%D7%AA_%D7%A0%D7%9B%D7%95%D7%AA_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9"
+  },
+  {
+    "code": "I2-086",
+    "cardKey": "83|||קצבת שירותים מיוחדים למתמודדי נפש",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף מידע של כל זכות – מידע בלבד; הוסר claim (האתר חסום לבדיקה אוטומטית)",
+    "url": "https://www.kolzchut.org.il/he/%D7%A7%D7%A6%D7%91%D7%AA_%D7%A9%D7%99%D7%A8%D7%95%D7%AA%D7%99%D7%9D_%D7%9E%D7%99%D7%95%D7%97%D7%93%D7%99%D7%9D"
+  },
+  {
+    "code": "I2-087",
+    "cardKey": "83|||הסעות חולים, אמבולנסים לצרכים רפואיים ואירועים משפחתיים, נהגים מתנדבים",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר עזר מציון: \"שירותי אמבולנס ללא תשלום\" ונהגים מתנדבים; הזמנה ישירה – נוסף self_referral",
+    "url": "https://www.ami.org.il/services"
+  },
+  {
+    "code": "I2-088",
+    "cardKey": "84|||סל שיקום למתמודדי נפש",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף מידע של כל זכות – מידע בלבד; ללא שינוי (האתר חסום לבדיקה אוטומטית)",
+    "url": "https://www.kolzchut.org.il/he/%D7%A1%D7%9C_%D7%A9%D7%99%D7%A7%D7%95%D7%9D_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9"
+  },
+  {
+    "code": "I2-089",
+    "cardKey": "84|||סיוע באמבולנסים בהעברת חולים ונכים",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: ארגון מתנדבים; לפי הכרטיס הנסיעות חינם וללא תנאים; ללא שינוי",
+    "url": "https://levmalka.org.il/"
+  },
+  {
+    "code": "I2-090",
+    "cardKey": "85|||מדריך מיצוי זכויות למתמודדי נפש ובני משפחותיהם",
+    "indicators": {
+      "offers": [
+        "info"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "מדריך של כל זכות – מידע בלבד; ללא שינוי (האתר חסום לבדיקה אוטומטית)",
+    "url": "https://www.kolzchut.org.il/he/%D7%9E%D7%93%D7%A8%D7%99%D7%9A_%D7%9E%D7%99%D7%A6%D7%95%D7%99_%D7%96%D7%9B%D7%95%D7%99%D7%95%D7%AA_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9_%D7%95%D7%91%D7%A0%D7%99_%D7%9E%D7%A9%D7%A4%D7%97%D7%95%D7%AA%D7%99%D7%94%D7%9D"
+  },
+  {
+    "code": "I2-091",
+    "cardKey": "86|||קבוצה בפייסבוק",
+    "indicators": {
+      "offers": [
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "קבוצת פייסבוק של משתמשים; הקבוצה לא נגישה לבדיקה; ללא שינוי",
+    "url": "https://www.facebook.com/groups/1225241461655254/"
+  },
+  {
+    "code": "I2-092",
+    "cardKey": "87|||מומחית בהפרעות אכילה/תזונה/כושר/דיאטה, מטפלת בפגועי נפש עם רישיון. בעלות סימלית, חברות ביטוח מחזירות",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "supplementary",
+          "terms": "partial"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: קליניקה פרטית של דיאטנית קלינית; לפי הכרטיס עלות סמלית וחברות ביטוח מחזירות – נוספו private ו-supplementary",
+    "url": "https://www.fiteat.com"
+  },
+  {
+    "code": "I2-093",
+    "cardKey": "88|||מרכז לפסיכותרפיה אינטגרטיבית. תמיכה נפשית, רגשית ורוחנית דרך מגוון רחב של גישות ועל ידי אנשי מקצוע מוסמכים",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מתאמת טיפול מתאימה מטפל אחרי מילוי טופס; מרכז פרטי – נוספו navigate ו-private",
+    "url": "https://impulseclinics.com/"
+  },
+  {
+    "code": "I2-094",
+    "cardKey": "90|||מרכזים לטיפול רגשי",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: \"השירות הינו שירות פרטי, לא עובדים עם קופות החולים. עובדים עם חברות הביטוח הרפואי הפרטיות\" – נוסף private",
+    "url": "https://mexp.co.il/"
+  },
+  {
+    "code": "I2-095",
+    "cardKey": "91|||Therapy for teenagers, couples therapy and parenting guidance",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: טיפול לנוער, זוגות והדרכת הורים, קביעת אינטייק ישירה – נוסף self_referral; עלות לא מצוינת",
+    "url": "https://hakshiva.org/"
+  },
+  {
+    "code": "I2-096",
+    "cardKey": "92|||דיכאון אחרי לידה ועוד, דרך טיפת חלב בירושלים\nSupport and treatment for Maternal Mental Health through Tipat Halav. Services for mothers and families impacted by perinatal mental health disorders (PMHD) such as postpartum depression",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: טיפול פרטני בבית ע\"י עו\"ס קלינית, הכשרות ומודעות; עלות לא מצוינת; ללא שינוי",
+    "url": "https://hevleikesher.org/he/%D7%97%D7%91%D7%9C%D7%99-%D7%A7%D7%A9%D7%A8-%D7%93%D7%A3-%D7%94%D7%91%D7%99%D7%AA/"
+  },
+  {
+    "code": "I2-097",
+    "cardKey": "93|||CBT, DBT, and Exposure-Based Therapies",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: \"private group psychology practice\"; נוסף private",
+    "url": "https://www.modiinbehavioral.com/"
+  },
+  {
+    "code": "I2-098",
+    "cardKey": "94|||מרכז לאומי מוביל לצמצום תופעת ההתמכרויות ונזקיה. טיפול, מידע והכוונה למי שמתמודד עם התמכרות",
+    "indicators": {
+      "offers": [
+        "info",
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מרכז מידע, חיפוש מסגרות טיפול ומרפאה עם טופס פנייה ישיר – נוספו info ו-self_referral",
+    "url": "https://ica.org.il/"
+  },
+  {
+    "code": "I2-099",
+    "cardKey": "95|||מרכז גמילה הוליסטי לטיפול בהתמכרויות (סמים, אלכוהול, הימורים ועוד) המבוסס על 12 הצעדים וגישות טיפוליות נוספות",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: מכון גמילה פרטי, פגישת ייעוץ ראשונה חינם; נוסף self_referral",
+    "url": "https://hacheret.com/"
+  },
+  {
+    "code": "I2-100",
+    "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים לכם וסבסוד טיפולים",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: הכוונה לטיפול, תעריפים מוזלים וקרן סבסוד למי שלא יכול לשאת בעלות הטיפול בשוק הפרטי – נוסף private",
+    "url": "https://hst.org.il/"
+  },
+  {
+    "code": "I2-101",
+    "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים וסבסוד טיפולים פסיכולוגיים",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: תעריפים מוזלים וקרן סבסוד בשוק הפרטי – נוסף private",
+    "url": "https://hst.org.il/"
+  },
+  {
+    "code": "I2-102",
+    "cardKey": "96|||הכוונה לטיפול הפסיכולוגי המתאים לכם, סבסוד טיפולים, חוסן משפחתי. שינוי מפת ההתמודדות המשפחתית והקהילתית במצבי מצוקה אישיים ומשפחתיים.",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: הסבסוד הוא של העמותה בשוק הפרטי ולא דרך קופות החולים – hmo partial הוחלף ב-private",
+    "url": "https://hst.org.il/"
+  },
+  {
+    "code": "I2-103",
+    "cardKey": "101|||אפליקציה חינמית המספקת עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה, ומלווה את המשתמש עד חזרה הדרגתית לשגרה.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת בחנות Google Play: אפליקציה חינמית; ללא שינוי (App Store לא נגיש)",
+    "url": "https://play.google.com/store/apps/details?id=com.anxietyapporg.anxietyapp"
+  },
+  {
+    "code": "I2-104",
+    "cardKey": "102|||Therapy clinic for teenagers & young adults (11-27) and parents; specializes in Anglo olim; Halachik framework; therapy for individuals, couples and families",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "supplementary",
+          "terms": "partial"
+        },
+        {
+          "channel": "edu",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: \"funded through Bituach Mashlim and Misrad Hachinuch contracts\"; לפי הכרטיס השתתפות עצמית קטנה – נוספו supplementary ו-edu",
+    "url": "https://www.kavlnoar.org/"
+  },
+  {
+    "code": "I2-105",
+    "cardKey": "102|||אפליקציה אינטראקטיבית לבניית תוכניות תרגול יומי ומעקב לאורך זמן.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: פלטפורמת תרגול בשלב בטא; עלות לא מצוינת; ללא שינוי",
+    "url": "https://www.vivid.me/"
+  },
+  {
+    "code": "I2-106",
+    "cardKey": "103|||אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).",
+    "indicators": {
+      "offers": [
+        "info",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "mod",
+          "terms": "full"
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר אגף השיקום: אפליקציה של אגף השיקום להורדה חופשית, לא רק לזכאים – mod שונה מ-eligible ל-full",
+    "url": "https://shikum.mod.gov.il/medical/mental-therapy/ptsd-app"
+  },
+  {
+    "code": "I2-107",
+    "cardKey": "104|||מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: \"מרכז מתקדם לטיפול פסיכיאטרי פרטי\"; ללא שינוי",
+    "url": "https://mindme.co.il/"
+  },
+  {
+    "code": "I2-108",
+    "cardKey": "105|||טיפולי גרייה מוחית (TMS ו-Deep TMS) למגוון מצבים נפשיים ונוירולוגיים. דיכאון מג'ורי בסל לפי תנאים; שיפוי אגף השיקום ל-PTSD בחלק מבתי החולים הציבוריים.",
+    "indicators": {
+      "offers": [
+        "navigate",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": "eligible"
+        },
+        {
+          "channel": "moh",
+          "terms": "eligible"
+        },
+        {
+          "channel": "mod",
+          "terms": "eligible"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אתר החברה מאתר מרפאות TMS – נוסף navigate; לפי הכרטיס דיכאון מג'ורי בסל לפי תנאים ושיפוי אגף השיקום ל-PTSD – נוספו hmo/moh eligible ו-private",
+    "url": "https://brainsway.co.il/treatments/"
+  },
+  {
+    "code": "I2-109",
+    "cardKey": "106|||Access center for psychedelic treatment and therapy.",
+    "indicators": {
+      "offers": [
+        "info",
+        "navigate"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: עמותה שמבררת אילו טיפולים זמינים, אפשרויות מימון ועלויות, ומתאמת את הטיפול – care הוחלף ב-info + navigate",
+    "url": "https://acptisrael.com/en/access-center-for-psychedelic-treatment-and-therapy/"
+  },
+  {
+    "code": "I2-110",
+    "cardKey": "107|||טיפול פסיכדלי ומידע מקצועי בתחום.",
+    "indicators": {
+      "offers": [
+        "info",
+        "navigate"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: רשימת מרכזים ומחקרים עם פרטי קשר (PsyCircle אינו נותן את הטיפול) – care הוחלף ב-navigate",
+    "url": "https://psycircle.co.il/psychedelic-therapy/"
+  },
+  {
+    "code": "I2-111",
+    "cardKey": "108|||טיפול בגרייה מגנטית מוחית (TMS) במרפאה לטיפולים מתקדמים. באותה יחידה גם ECT, אסקטמין ונוירופידבק.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "mod",
+          "terms": "eligible"
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": "ניתן לפנות לקבלת טיפול באמצעות מילוי טופס הפנייה המקוון."
+    },
+    "members": [],
+    "note": "אומת באתר איכילוב: פנייה בטופס מקוון; נוירופידבק בתשלום, מוכרי משרד הביטחון עם PTSD עשויים לקבל מימון; נוסף מקור",
+    "url": "https://www.tasmc.org.il/unit-index-page/psychiatr/psychiatry-clinic/brain-magnetic-stimulation/"
+  },
+  {
+    "code": "I2-112",
+    "cardKey": "109|||טיפול ביולוגי תחת הרדמה קצרה במצבים נפשיים חמורים — בעיקר דיכאון קשה, קטטוניה ומצבים דחופים. ניתן בסדרה בבתי חולים פסיכיאטריים ובחטיבות פסיכיאטריות (למשל איכילוב, שלוותה, כפר שאול).",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "hmo",
+          "terms": ""
+        },
+        {
+          "channel": "moh",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "psychiatrist_referral"
+      ],
+      "referral_source": "הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל."
+    },
+    "members": [],
+    "note": "לפי הכרטיס ורשימת יחידות ה-ECT הממשלתיות של משרד הבריאות: מימון דרך הקופה והמרכז – נוספו hmo + moh",
+    "url": "https://www.gov.il/BlobFolder/reports/ect-electroconvulsive-therapy/he/units_governmental_health_centers_ect-electroconvulsive-therapy-ac.pdf"
+  },
+  {
+    "code": "I2-113",
+    "cardKey": "200|||קווי המענה הארציים של ארגון הגג למרכזי הסיוע",
+    "indicators": {
+      "offers": [
+        "info",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: קווי סיוע ארציים ומידע נרחב על זכויות וטיפול לנפגעות – נוספו info, free ו-self_referral",
+    "url": "https://1202.org.il/"
+  },
+  {
+    "code": "I2-114",
+    "cardKey": "201|||סיוע וליווי, חינוך ומניעה, קבוצות תמיכה (פרונטלי וזום)",
+    "indicators": {
+      "offers": [
+        "care",
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "free",
+          "terms": ""
+        },
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "לפי הכרטיס: ליווי חינם, קבוצות תמיכה בתשלום סמלי – נוסף free; הוסר מקור הפניה שלא היה נוסח הפניה",
+    "url": "https://www.tair-1202.org/"
+  },
+  {
+    "code": "I2-115",
+    "cardKey": "202|||מידע, הכשרות, מוקדי חוסן ושותפות ארצית בטראומה וחוסן (Israel Trauma Coalition)",
+    "indicators": {
+      "offers": [
+        "info",
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: חומרי חוסן, הכשרות ומרכזי חוסן; ללא שינוי",
+    "url": "https://israeltraumacoalition.org/"
+  },
+  {
+    "code": "I2-116",
+    "cardKey": "203|||רשת ארצית לטיפול פסיכולוגי, אבחון והכשרה — כולל טיפול בטראומה ובמצוקה נפשית.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: רשת טיפול ואבחון עם טופס פנייה; אין באתר אזכור למימון קופות – הוסר hmo, נוסף self_referral",
+    "url": "https://www.telem.org.il/"
+  },
+  {
+    "code": "I2-117",
+    "cardKey": "204|||נטורופתיה קלינית — איזון גוף–נפש (כאבים, עייפות, סטרס, עיכול, אכילה רגשית ועוד); קליניקה ומפגשים מקוונים.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: קליניקה לריפוי טבעי; עלות לא מצוינת; ללא שינוי",
+    "url": "https://adva-lieser.co.il"
+  },
+  {
+    "code": "I2-118",
+    "cardKey": "205|||יישומים פסיכולוגיים ממוקדים — הערכה ראשונית והתאמת טיפול (פגישות בקליניקה או זום).",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [
+        "self_referral"
+      ],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: שיחת היכרות והערכה ואז התאמת טיפול; עלות לא מצוינת; ללא שינוי",
+    "url": "https://www.resolution.co.il/"
+  },
+  {
+    "code": "I2-119",
+    "cardKey": "206|||מודל נשימה — טיפול מסובסד, רשת מטפלים לטראומה מורכבת וגישת גוף–נפש קהילתית.",
+    "indicators": {
+      "offers": [
+        "care"
+      ],
+      "whole_org": false,
+      "funding": [
+        {
+          "channel": "private",
+          "terms": ""
+        }
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: \"עלות מסובסדת\" של המרכז, בלי קשר לקופות – hmo partial הוחלף ב-private",
+    "url": "https://neshima-ptsd.co.il/%d7%9e%d7%95%d7%93%d7%9c-%d7%a0%d7%a9%d7%99%d7%9e%d7%94/"
+  },
+  {
+    "code": "I2-120",
+    "cardKey": "207|||עמותת בני ובנות משפחה של מתמודדי/ות נפש בישראל. מטרת העמותה היא לפעול למען המתמודדים ולמען משפחותיהם למימוש ולהרחבת זכויות, לטיפול מיטבי, להכלה ולשיקום בקהילה ולהסברה בקרב מקבלי החלטות, בקרב הממסד ובקרב הציבור.",
+    "indicators": {
+      "offers": [
+        "info",
+        "community"
+      ],
+      "whole_org": false,
+      "funding": [],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר: עמותת משפחות – \"משפחות מלוות משפחות\", ייצוג, כנסים וספריית פרסומים; care הוחלף ב-info",
+    "url": "https://www.mishpachot.org/"
+  }
+]

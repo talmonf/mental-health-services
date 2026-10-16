@@ -1,0 +1,516 @@
+[
+  {
+    "code": "I4-211",
+    "cardKey": "300|||טיפול יום פסיכיאטרי בהפרדה מגדרית — לציבור הדתי והחרדי",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""},
+        {"channel": "mod", "terms": "eligible"},
+        {"channel": "private", "terms": ""}
+      ],
+      "referral": ["gp_referral", "hmo_form17"],
+      "referral_source": "חברי כללית ומכבי: הפניה מהרופא המטפל/רופא המשפחה. מאוחדת ולאומית: טופס 17. משרד הביטחון: טופס התחייבות."
+    },
+    "members": [],
+    "note": "אומת באתר; נוסף תשלום פרטי (בהעדר התחייבות — תעריף בית החולים)",
+    "url": "https://www.mymc.co.il/main-departments/psychiatric-day-care/"
+  },
+  {
+    "code": "I4-212",
+    "cardKey": "301|||טיפול יום פסיכיאטרי בשני שלבים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף היחידה אינו מפרט מימון או הפניה; נוסף מימון קופה + משרד הבריאות (השתתפות רבעונית) לפי דף טיפול יום של משרד הבריאות",
+    "url": "https://www.rambam.org.il/departmentsandclinics/mental-health-division/day-care-unit/"
+  },
+  {
+    "code": "I4-213",
+    "cardKey": "302|||טיפול יום פסיכיאטרי, חמישה ימים בשבוע",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["psychiatrist_referral", "hmo_form17"],
+      "referral_source": "לצורך קבלה ליחידה נדרשת הפניה מהפסיכיאטר המטפל, או גורם טיפולי מוסמך אחר מתחום בריאות הנפש, וכן טופס התחייבות."
+    },
+    "members": [],
+    "note": "אומת באתר; קופה סומנה כהשתתפות עצמית (השתתפות רבעונית בטופס 17, לפי משרד הבריאות)",
+    "url": "https://hymc.org.il/?CategoryID=234"
+  },
+  {
+    "code": "I4-214",
+    "cardKey": "303|||טיפול יום פסיכיאטרי למבוטחי כללית",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["gp_referral"],
+      "referral_source": "הטיפול מיועד ללקוחות כללית עם אבחנה או חשד לאבחנה נפשית, וניתן בהפניית רופא."
+    },
+    "members": [],
+    "note": "אומת בכל שירות; ללא שינוי",
+    "url": "https://www.kolsherut.org.il/p/card/c/1b891eb0"
+  },
+  {
+    "code": "I4-215",
+    "cardKey": "304|||הסבר על השירות, וטבלאות מרכזים שאין להם כרטיס נפרד",
+    "indicators": {
+      "offers": ["info", "navigate"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["psychiatrist_referral", "hmo_form17"],
+      "referral_source": "צריך לפנות לגורם המטפל, פסיכיאטר או מטפל בבריאות הנפש, שיפיק מכתב הפניה. אם טיפול היום לא ניתן ישירות על ידי הקופה, יש לקבל טופס 17."
+    },
+    "members": [],
+    "note": "כרטיס הסבר ורשימות, לא שירות טיפולי — הוחלף 'טיפול' במידע + הכוונה; נוספו הפניה והשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://me.health.gov.il/mental-health/therapy-rehabilitation/public-care/community-treatment/psychiatric-day-care/"
+  },
+  {
+    "code": "I4-216",
+    "cardKey": "305|||שיקום תעסוקתי, תעסוקה נתמכת, פנאי ומרכזי משפחות למתמודדי נפש מגיל 18",
+    "indicators": {
+      "offers": ["care", "community"],
+      "whole_org": true,
+      "funding": [
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["self_referral", "rehab_basket_committee"],
+      "referral_source": "שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. מרכז ייעוץ למשפחות מסובסד על ידי משרד הבריאות: 12 פגישות חינם."
+    },
+    "members": [
+      "26|||קו ייעוץ ותמיכה - בימים א-ה בשעות 10:00-13:00 ו-16:00-22:00",
+      "68|||סיוע למשפחות של מתמודדי נפש"
+    ],
+    "note": "אומת באתר; כרטיס כללי של האגף לבריאות הנפש — סומן כארגון שלם עם ידידי נפש ובלב ובנפש; הוסרה קופת חולים; נוספו קהילה (מרכזי פנאי ומשפחות) ופנייה עצמית למרכז המשפחות",
+    "url": "https://www.ami.org.il/communities/mental-health"
+  },
+  {
+    "code": "I4-217",
+    "cardKey": "306|||סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים",
+    "indicators": {
+      "offers": ["navigate", "care"],
+      "whole_org": true,
+      "funding": [
+        {"channel": "moh", "terms": "eligible"},
+        {"channel": "welfare", "terms": "eligible"}
+      ],
+      "referral": ["rehab_basket_committee"],
+      "referral_source": "עברת ועדה לסל שיקום? נסייע לך לבחור ולהגיע לשירות המיטבי עבורך. תעסוקה נתמכת: סל שיקום ושירותי רווחה."
+    },
+    "members": [
+      "307|||ליווי ממוקד הורות להורים המתמודדים עם קשיים נפשיים"
+    ],
+    "note": "אומת באתר; כרטיס כללי של שלו — סומן כארגון שלם עם ציפור הנפש; נוספו רווחה והכוונה; הוסרה פנייה עצמית (מספר המוקד אינו מסלול הפניה)",
+    "url": "https://slavpro.co.il/"
+  },
+  {
+    "code": "I4-218",
+    "cardKey": "307|||ליווי ממוקד הורות להורים המתמודדים עם קשיים נפשיים",
+    "indicators": {
+      "offers": ["care", "community"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "moh", "terms": "eligible"}
+      ],
+      "referral": ["rehab_basket_committee"],
+      "referral_source": "ניתן אל מול אישור ועדת סל שיקום לדיור מוגן."
+    },
+    "members": [],
+    "note": "האתר מציג מעט מידע; לפי הכרטיס נוספה קהילה (קבוצות הורים, מעגל אמהות)",
+    "url": "https://www.soulbird.co.il/"
+  },
+  {
+    "code": "I4-219",
+    "cardKey": "308|||רשימת מרכזי הייעוץ למשפחות בקהילה ובבתי החולים",
+    "indicators": {
+      "offers": ["info", "navigate", "care", "claim", "community"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "moh", "terms": "full"}
+      ],
+      "referral": ["self_referral"],
+      "referral_source": "כל אחד ואחת יכולים לפנות אל מרכז יעוץ ותמיכה למשפחות מתמודדי נפש, ללא עלות וללא צורך בהכרה או אישור מוקדם, גם אם אין זכאות לסל שיקום."
+    },
+    "members": [],
+    "note": "אומת בדף משרד הבריאות; חינם לכל המשפחות (לא רק זכאי סל) — מימון משרד הבריאות מלא; נוספו מידע, מיצוי זכויות ופנייה עצמית",
+    "url": "https://me.health.gov.il/mental-health/therapy-rehabilitation/rehabilitation/rehabilitation-basket/family-counseling-centers/"
+  },
+  {
+    "code": "I4-220",
+    "cardKey": "309|||אשפוז יום אחרי אשפוז מלא — הדרך שלך חזרה לקהילה",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת באתר; הדף אינו מזכיר טופס 17 — הוסרה ההפניה; רוב המטופלים מופנים מאשפוז מלא; הוסרה קהילה",
+    "url": "https://psjer.org.il/clinics/%d7%90%d7%a9%d7%a4%d7%95%d7%96-%d7%99%d7%95%d7%9d/"
+  },
+  {
+    "code": "I4-221",
+    "cardKey": "310|||טיפול יום לנשים עם טראומה מורכבת אחרי פגיעה מינית",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["psychiatrist_referral", "hmo_form17"],
+      "referral_source": "הפנייה מפסיכיאטר בקהילה מששת החודשים האחרונים, וטופס התחייבות (טופס 17) למנוי אבחוני (קוד L0771) לאינטייק."
+    },
+    "members": [],
+    "note": "אומת באתר לוטוס; נוספה הפניה מפסיכיאטר; קופה סומנה כהשתתפות רבעונית לפי דף טיפול יום של משרד הבריאות",
+    "url": "https://psjer.org.il/clinics/%d7%9c%d7%95%d7%98%d7%95%d7%a1/"
+  },
+  {
+    "code": "I4-222",
+    "cardKey": "311|||מחלקת טיפול יום, כחודש וחצי בממוצע",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["hmo_form17"],
+      "referral_source": "טופס 17"
+    },
+    "members": [],
+    "note": "דף קפלן חסום; נשמר טופס 17 למרות סתירה בכרטיס (הכותרת בלי, הגוף בכפוף); קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://hospitals.clalit.co.il/kaplan/he/med_units/psychiatric_care/Pages/psychiatric_day_care.aspx"
+  },
+  {
+    "code": "I4-223",
+    "cardKey": "312|||טיפול יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף גהה חסום; לפי הכרטיס אין הגבלת קופה; קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות; אין פירוט הפניה",
+    "url": "https://hospitals.clalit.co.il/geha/he/med/mature/Pages/hdept.aspx"
+  },
+  {
+    "code": "I4-224",
+    "cardKey": "313|||מחלקה לטיפול יום פסיכיאטרי לילדים ולנוער",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אומת במסמך ההסכמה להורים; אין בו מימון או הפניה; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף טיפול יום של משרד הבריאות",
+    "url": "https://www.tasmc.org.il/media/ggzdwfvx/hascama_div.pdf"
+  },
+  {
+    "code": "I4-225",
+    "cardKey": "314|||טיפול יום לקטינים באתיופיה, ואשפוז יום בעין כרם",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג רק טלפון וכתובת; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף משרד הבריאות; אשפוז היום אינו מתומחר בנפרד",
+    "url": "https://www.mh-israel.co.il/Article/49/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_ירושלים"
+  },
+  {
+    "code": "I4-226",
+    "cardKey": "315|||טיפול יום ואשפוז יום למבוגרים, וטיפול יום לקטינים בבית ספר שקד",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג רק טלפון וכתובת (מבוגרים בברזילי, קטינים בבית ספר שקד); נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/40/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_דרום"
+  },
+  {
+    "code": "I4-227",
+    "cardKey": "316|||טיפול יום ואשפוז יום",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "האתר בכתובת שבכרטיס אינו אתר בית החולים; לפי הפורטל יש טיפול יום ואשפוז יום; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות",
+    "url": "http://ziv.org.il"
+  },
+  {
+    "code": "I4-228",
+    "cardKey": "317|||טיפול יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אתר מזרע לא נפתח; לפי הכרטיס והפורטל טיפול יום למבוגרים; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף משרד הבריאות",
+    "url": "http://mazra.org.il"
+  },
+  {
+    "code": "I4-229",
+    "cardKey": "318|||טיפול יום ואשפוז יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג טיפול יום של כללית ואשפוז יום, בלי עלות או הפניה; קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/41/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_צפון"
+  },
+  {
+    "code": "I4-230",
+    "cardKey": "319|||אשפוז יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף הבית של בית החולים האנגלי אינו מתאר אשפוז יום; לפי הפורטל נוסף מימון קופה ומשרד הבריאות, בלי פירוט השתתפות",
+    "url": "http://nazhosp.com"
+  },
+  {
+    "code": "I4-231",
+    "cardKey": "320|||אשפוז יום לקטינים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג רק טלפון לאשפוז יום בנהריה; נוסף מימון קופה ומשרד הבריאות, בלי פירוט השתתפות או הפניה",
+    "url": "https://www.mh-israel.co.il/Article/41/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_צפון"
+  },
+  {
+    "code": "I4-232",
+    "cardKey": "321|||טיפול יום למבוגרים במרכז לבריאות הנפש",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג רק טלפון וכתובת; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/40/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_דרום"
+  },
+  {
+    "code": "I4-233",
+    "cardKey": "322|||טיפול יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל משייך את סורוקה למרכז טיפול יום של כללית, בלי עלות או הפניה; קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/40/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_דרום"
+  },
+  {
+    "code": "I4-234",
+    "cardKey": "323|||טיפול יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "אתר באר יעקב לא נפתח; לפי הכרטיס והפורטל טיפול יום למבוגרים בלוד; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות",
+    "url": "http://www.beer-ness.co.il"
+  },
+  {
+    "code": "I4-235",
+    "cardKey": "324|||טיפול יום למבוגרים ואשפוז יום",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג טיפול יום של כללית ואשפוז יום, בלי עלות או הפניה; קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/43/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_מרכז"
+  },
+  {
+    "code": "I4-236",
+    "cardKey": "325|||אשפוז יום לקטינים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף הבית של שניידר אינו מתאר אשפוז יום; לפי הפורטל נוסף מימון קופה ומשרד הבריאות, בלי פירוט השתתפות",
+    "url": "http://www.schneider.org.il"
+  },
+  {
+    "code": "I4-237",
+    "cardKey": "326|||טיפול יום למבוגרים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל מציג רק טלפון וכתובת; נוסף מימון קופה (השתתפות רבעונית) ומשרד הבריאות לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/48/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_תל_אביב"
+  },
+  {
+    "code": "I4-238",
+    "cardKey": "327|||טיפול יום למבוגרים של כללית",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "partial"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "הפורטל משייך את בארי למרכז טיפול יום של כללית, בלי עלות או הפניה; קופה סומנה כהשתתפות רבעונית לפי דף משרד הבריאות",
+    "url": "https://www.mh-israel.co.il/Article/48/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_תל_אביב"
+  },
+  {
+    "code": "I4-239",
+    "cardKey": "328|||אשפוז יום במחלקת ילדים",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": ""},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": [],
+      "referral_source": ""
+    },
+    "members": [],
+    "note": "דף שיבא לא נפתח; לפי הפורטל אשפוז יום בבניין הילדים; נוסף מימון קופה ומשרד הבריאות, בלי פירוט השתתפות",
+    "url": "http://rehabilitation.sheba.co.il/Psychiatric_Division/"
+  },
+  {
+    "code": "I4-240",
+    "cardKey": "329|||טיפול יום לנוער, בשיבולים ובצור הדסה",
+    "indicators": {
+      "offers": ["care"],
+      "whole_org": false,
+      "funding": [
+        {"channel": "hmo", "terms": "full"},
+        {"channel": "moh", "terms": ""}
+      ],
+      "referral": ["psychiatrist_referral", "hmo_form17"],
+      "referral_source": "לקבל הפניה מרופא/ה פסיכיאטר; להגיש בקשת התחייבות למכבי; בכפוף לאישור מקדים של פסיכיאטר מחוזי"
+    },
+    "members": [],
+    "note": "אומת בדף הזכאות של מכבי: במרכזי טיפול יום ללא עלות; נוספו הפניה מפסיכיאטר והתחייבות קופה; קופה במימון מלא",
+    "url": "https://www.maccabi4u.co.il/eligibilites/64533/"
+  }
+]

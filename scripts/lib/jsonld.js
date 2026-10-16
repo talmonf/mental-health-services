@@ -11,7 +11,7 @@
 // `provider`, and every provider gets a stable `@id` so the 173 organisations are reusable
 // graph nodes rather than 197 duplicated blobs.
 
-const { phonesOf, emailsOf } = require('./extract_data');
+const { phonesOf, emailsOf, cardIndicators, fundingLabel } = require('./extract_data');
 
 const SITE = 'https://nefesh-il.org';
 
@@ -207,7 +207,56 @@ function entryGraph(entry, ctx, telsBySlot, trail) {
     areaServed: areaServed(entry.raw.region),
   });
 
+  const ind = cardIndicators(entry.raw);
+  const audience = entry.raw.target
+    ? {
+        '@type': 'PeopleAudience',
+        audienceType: clean(entry.raw.target),
+      }
+    : undefined;
+
+  // An information-only card points at a page to read, not a service to receive.
+  if (ind && ind.infoOnly) {
+    const page = prune({
+      '@type': 'WebPage',
+      '@id': serviceId(entry),
+      name: clean(entry.svc) || clean(entry.org),
+      alternateName: clean(entry.svc) ? clean(entry.org) : undefined,
+      description: clean(entry.raw.notes) || clean(entry.svc),
+      url: /^https?:\/\//.test(entry.raw.web || '') ? entry.raw.web : `${SITE}${entry.path}`,
+      inLanguage: entry.raw.dir === 'ltr' ? 'en' : 'he',
+      dateModified: lastUpdatedIso,
+      about: categoryTitles.length ? categoryTitles : undefined,
+      publisher: { '@id': providerNodeId },
+      audience,
+      isAccessibleForFree: true,
+    });
+    return [page, provider, breadcrumbList(trail)].filter(Boolean);
+  }
+
+  // Funding channels set by the site owner. "free" means free to anyone, so it alone
+  // earns a price of 0; a qualified channel ("for eligible people") never does.
+  const funding = ind ? ind.funding : [];
+  const fundedFree = funding.some((f) => f.channel === 'free') && !funding.some((f) => f.channel === 'private');
+  const fundingOffers = funding.map((f) =>
+    prune({
+      '@type': 'Offer',
+      name: fundingLabel(f, 'he'),
+      category: f.channel,
+      ...(f.channel === 'free' ? { price: 0, priceCurrency: 'ILS' } : {}),
+    })
+  );
+
   const cost = clean(entry.raw.cost);
+  const costOffer = cost
+    ? prune({
+        '@type': 'Offer',
+        description: cost,
+        availability: 'https://schema.org/InStock',
+        ...(isLiterallyFree(cost) ? { price: 0, priceCurrency: 'ILS' } : {}),
+      })
+    : undefined;
+  const allOffers = [costOffer, ...fundingOffers].filter(Boolean);
   const service = prune({
     '@type': 'Service',
     '@id': serviceId(entry),
@@ -224,26 +273,14 @@ function entryGraph(entry, ctx, telsBySlot, trail) {
     provider: { '@id': providerNodeId },
     areaServed: areaServed(entry.raw.region),
     availableLanguage: languageCodes(entry.raw.languages),
-    audience: entry.raw.target
-      ? {
-          '@type': 'PeopleAudience',
-          // Free text, so not machine-comparable. Phase 3's controlled vocabulary is what
-          // would make this useful; until then it is a faithful copy of the source.
-          audienceType: clean(entry.raw.target),
-        }
-      : undefined,
+    // Free text, so not machine-comparable. Phase 3's controlled vocabulary is what
+    // would make this useful; until then it is a faithful copy of the source.
+    audience,
     availableChannel: availableChannel(entry, telsBySlot),
-    // An Offer with a description and no price. There is no price to state for most of
-    // these, and inventing one would be worse than omitting it.
-    offers: cost
-      ? prune({
-          '@type': 'Offer',
-          description: cost,
-          availability: 'https://schema.org/InStock',
-          ...(isLiterallyFree(cost) ? { price: 0, priceCurrency: 'ILS' } : {}),
-        })
-      : undefined,
-    isAccessibleForFree: cost ? isLiterallyFree(cost) : undefined,
+    // The cost Offer has a description and no price. There is no price to state for most
+    // of these, and inventing one would be worse than omitting it.
+    offers: allOffers.length > 1 ? allOffers : allOffers[0],
+    isAccessibleForFree: fundedFree ? true : cost ? isLiterallyFree(cost) : undefined,
   });
 
   return [service, provider, breadcrumbList(trail)].filter(Boolean);

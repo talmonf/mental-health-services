@@ -333,16 +333,44 @@ function attachReferralCodes(entries) {
   }
 }
 
-function referralLabel(code, lang = 'he') {
+function vocabLabel(vocabName, code, lang = 'he') {
   const vocabPath = path.join(__dirname, '..', 'vocabularies.json');
   if (!fs.existsSync(vocabPath)) return code;
   const vocab = JSON.parse(fs.readFileSync(vocabPath, 'utf8'));
-  const term = (vocab.referral_route?.terms || []).find((t) => t.code === code);
+  const term = (vocab[vocabName]?.terms || []).find((t) => t.code === code);
   if (!term) return code;
   return lang === 'en' ? term.label_en : term.label_he;
 }
 
+function referralLabel(code, lang = 'he') {
+  return vocabLabel('referral_route', code, lang);
+}
+
+/**
+ * Card indicators set in directory_card_edits (migration 077), or null when none are set.
+ * Mirrors mhCardIndicators in index.html: funding is dropped from information-only cards.
+ */
+function cardIndicators(raw) {
+  const ind = raw && raw.cardIndicators;
+  if (!ind || typeof ind !== 'object') return null;
+  const offers = Array.isArray(ind.offers) ? ind.offers.filter(Boolean) : [];
+  const funding = Array.isArray(ind.funding) ? ind.funding.filter((f) => f && f.channel) : [];
+  const wholeOrg = ind.whole_org === true;
+  if (!offers.length && !funding.length && !wholeOrg && !(Array.isArray(ind.referral) && ind.referral.length)) return null;
+  const infoOnly = offers.length === 1 && offers[0] === 'info';
+  const showFunding = !infoOnly && (!offers.length || wholeOrg || offers.some((c) => c === 'care' || c === 'claim' || c === 'community'));
+  return { offers, funding: showFunding ? funding : [], wholeOrg, infoOnly };
+}
+
+function fundingLabel(entry, lang = 'he') {
+  const label = vocabLabel('funding_channel', entry.channel, lang);
+  return entry.terms ? `${label} (${vocabLabel('funding_terms', entry.terms, lang)})` : label;
+}
+
 module.exports = {
+  vocabLabel,
+  cardIndicators,
+  fundingLabel,
   load,
   readIndexHtml,
   extractLiteralSource,

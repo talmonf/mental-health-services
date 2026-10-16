@@ -5,7 +5,8 @@
  *
  * GET /api/directory-cards (rewritten here) returns visible card edits and eligibility.
  * Eligibility is not painted on the card; the page publishes set values as JSON-LD.
- * Each card also lists its approved glossary term keys (glossary_card_links, migration 064).
+ * Each card also lists its approved glossary term keys (glossary_card_links, migration 064),
+ * its indicators, and for an organization's general card the ids of its member cards (077).
  *
  * Env: DATABASE_URL (same as /api/analytics)
  *
@@ -100,6 +101,29 @@ async function handlePublicCards(res: VercelResponse) {
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
       if (code !== '42P01') throw err;
     }
+    // Migration 077. Before it runs, cards carry no indicators and no organization members.
+    const indicatorsByCard = new Map<string, unknown>();
+    const membersByCard = new Map<string, number[]>();
+    try {
+      const ind = await client.query(
+        `SELECT card_key, indicators FROM directory_card_edits WHERE indicators <> '{}'::jsonb`
+      );
+      ind.rows.forEach((r) => indicatorsByCard.set(String(r.card_key).replace(/\r/g, ''), r.indicators));
+      const links = await client.query(
+        `SELECT l.org_card_key, c.id
+           FROM card_org_links l
+           JOIN directory_card_edits c ON c.card_key = l.member_card_key
+          ORDER BY l.org_card_key, l.sort_order, c.row_id, c.id`
+      );
+      links.rows.forEach((link) => {
+        const key = String(link.org_card_key).replace(/\r/g, '');
+        if (!membersByCard.has(key)) membersByCard.set(key, []);
+        membersByCard.get(key)!.push(Number(link.id));
+      });
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
+      if (code !== '42P01' && code !== '42703') throw err;
+    }
     res.setHeader('Cache-Control', 'no-cache');
     return res.status(200).json({
       cards: rows.map((row) => ({
@@ -111,6 +135,8 @@ async function handlePublicCards(res: VercelResponse) {
         eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
         sites: Array.isArray(row.sites) ? row.sites : [],
         terms: termsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],
+        indicators: indicatorsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || null,
+        orgMembers: membersByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],
         publicEditedAt: isoTime(row.public_edited_at),
       })),
     });

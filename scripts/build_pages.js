@@ -29,7 +29,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { load, phonesOf, emailsOf, referralLabel } = require('./lib/extract_data');
+const { load, phonesOf, emailsOf, referralLabel, vocabLabel, cardIndicators, fundingLabel } = require('./lib/extract_data');
 const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const T = require('./lib/page_template');
 const LD = require('./lib/jsonld');
@@ -180,18 +180,32 @@ function renderContact(entry, emitted) {
   return items.length ? `<h2>יצירת קשר</h2><ul class="contact">${items.join('')}</ul>` : '';
 }
 
+function renderIndicatorBadges(entry) {
+  const ind = cardIndicators(entry.raw);
+  if (!ind || (!ind.offers.length && !ind.wholeOrg)) return '';
+  const lang = entry.raw.dir === 'ltr' ? 'en' : 'he';
+  const badges = [];
+  if (ind.wholeOrg) badges.push(lang === 'en' ? 'Organization overview' : 'כרטיס כללי של הארגון');
+  if (ind.infoOnly) badges.push(lang === 'en' ? 'Information only' : 'מידע בלבד');
+  else ind.offers.forEach((code) => badges.push(vocabLabel('card_offer', code, lang)));
+  return `<p class="badges">${badges.map((b) => `<span class="badge">${esc(b)}</span>`).join('')}</p>`;
+}
+
 function renderReferralBadge(entry) {
   const codes = (entry.raw.referralCodes || []).filter((c) => c && c !== 'unknown');
-  if (!codes.length) return '';
   const isLtr = entry.raw.dir === 'ltr';
-  const title = codes.includes('self_referral')
-    ? (isLtr ? 'You can contact directly' : 'אפשר לפנות ישירות')
-    : codes.map((c) => referralLabel(c, isLtr ? 'en' : 'he')).join(' · ');
-  const source = entry.raw.referralSource;
+  const ind = cardIndicators(entry.raw);
+  const fundingParts = ind ? ind.funding.map((f) => fundingLabel(f, isLtr ? 'en' : 'he')) : [];
+  const referralParts = codes.includes('self_referral')
+    ? [isLtr ? 'You can contact directly' : 'אפשר לפנות ישירות']
+    : codes.map((c) => referralLabel(c, isLtr ? 'en' : 'he'));
+  const parts = [...fundingParts, ...referralParts];
+  if (!parts.length) return '';
+  const heading = isLtr ? 'How to get it: ' : 'איך מקבלים: ';
+  const source = codes.length ? entry.raw.referralSource : '';
   const sourceLabel = isLtr ? 'As published: ' : 'כפי שפורסם: ';
-  return `<details class="badge-ref"><summary>${esc(title)}</summary>${
-    source ? `<p>${esc(sourceLabel)}${esc(source)}</p>` : ''
-  }</details>`;
+  if (!source) return `<p class="badge-ref"><strong>${esc(heading)}</strong>${esc(parts.join(' · '))}</p>`;
+  return `<details class="badge-ref"><summary>${esc(heading)}${esc(parts.join(' · '))}</summary><p>${esc(sourceLabel)}${esc(source)}</p></details>`;
 }
 
 function renderEntryPage(ctx, entry) {
@@ -250,6 +264,7 @@ function renderEntryPage(ctx, entry) {
 <article>
   <header${ltrAttrs}>
     <h1>${esc(entry.org)}</h1>
+    ${renderIndicatorBadges(entry)}
     ${entry.svc ? `<p class="lede">${esc(entry.svc.replace(/\s+/g, ' '))}</p>` : ''}
   </header>
   <div class="card">
