@@ -1,0 +1,17 @@
+---
+description: Every published website change gets an owner-approved audit entry
+alwaysApply: true
+---
+
+# Audit log workflow
+
+`site_audit_entries` (migration 062, shown newest first in `/admin#audit`) is the internal log of changes to the website. Every entry's wording is approved by the site owner before it is recorded.
+
+For every change that affects what visitors or admins see (cards, glossary, UI copy, admin pages, data fixes):
+
+1. **Propose the entry first.** Before writing any audit insert, show the user the proposed `title`, `description`, `area` (`cards` | `glossary` | `ui` | `admin` | `data`), `happened_at` date, and which cards (row numbers) and glossary term keys it touches. Use the `AskQuestion` tool or ask in plain text, and wait for approval or corrections.
+2. **Write the wording for the owner, not for a reviewer.** Say what changed on the site in plain Hebrew or English, as the owner would describe it later. No file names, no implementation detail, no "fixed bug in X".
+3. **Record it only after approval**, as an `INSERT INTO site_audit_entries (...) ... ON CONFLICT (entry_key) DO NOTHING` inside the numbered migration that makes the change (or a small dedicated migration when the change has no migration). `entry_key` is a lowercase slug such as `2026-10-16-glossary-day-treatment`. `card_keys` are `directory_card_edits.card_key` values (`row|||svc`); `term_keys` are keys of the `terms` object in `index.html`; `migration` is the migration's file name.
+4. Register the migration in `scripts/database_updates_master.sql` as `[ ]`, per the directory-entries rule. Never mark it `[x]`.
+
+If the user rejects or edits the wording, use their version verbatim.

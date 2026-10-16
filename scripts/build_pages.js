@@ -240,6 +240,11 @@ function renderEntryPage(ctx, entry) {
 
   const appUrl = `/?entry=${encodeURIComponent(entry.row)}&section=${encodeURIComponent(primaryCat)}`;
 
+  const termLinks = (entry.raw.cardTerms || [])
+    .filter((k) => ctx.terms[k])
+    .map((k) => `<a class="tag" href="/term/${esc(termSlug(k))}">${esc(ctx.terms[k].title)}</a>`)
+    .join('');
+
   const body = `
 <article>
   <header${ltrAttrs}>
@@ -255,6 +260,7 @@ function renderEntryPage(ctx, entry) {
   </div>
   <p><a class="btn" href="${esc(appUrl)}">פתחו את הכרטיס במדריך המלא</a></p>
   ${catTags ? `<h2>קטגוריות</h2><div>${catTags}</div>` : ''}
+  ${termLinks ? `<h2>מונחים קשורים</h2><div>${termLinks}</div>` : ''}
   ${siblings ? `<h2>שירותים נוספים ב${esc(cat.title || 'קטגוריה זו')}</h2><ul class="entry-list">${siblings}</ul>
   <p><a class="btn btn-secondary" href="/c/${esc(primaryCat)}">כל השירותים בקטגוריה</a></p>` : ''}
 </article>`;
@@ -407,12 +413,18 @@ function renderTermPage(ctx, key, term, slugByKey) {
     .filter((k) => slugByKey[k])
     .map((k) => `<li><a href="/term/${esc(slugByKey[k])}">${esc(ctx.terms[k].title)}</a></li>`)
     .join('');
+  const services = ctx.published
+    .filter((e) => (e.raw.cardTerms || []).includes(key))
+    .sort((a, b) => a.org.localeCompare(b.org, 'he'))
+    .map((e) => `<li><a href="${esc(e.path)}">${esc(e.org)}</a><span class="svc">${esc(truncate(e.svc, 90))}</span></li>`)
+    .join('');
 
   const body = `
 <h1>${esc(term.title)}</h1>
 ${cat ? `<p class="lede">${esc(cat.title)}</p>` : ''}
 <div class="card">${paragraphs(term.text)}
 ${term.phone ? `<p><strong>טלפון:</strong> ${esc(term.phone)}</p>` : ''}</div>
+${services ? `<h2>שירותים במדריך</h2><ul class="entry-list">${services}</ul>` : ''}
 ${related ? `<h2>מונחים קשורים</h2><ul class="entry-list">${related}</ul>` : ''}
 <p><a class="btn btn-secondary" href="/terms">כל המונחים</a></p>
 `;

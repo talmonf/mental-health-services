@@ -1,9 +1,20 @@
 /**
  * One Serverless Function for /api/admin/analytics, /api/admin/users,
- * /api/admin/updates, /api/admin/questions, /api/admin/faq, and /api/admin/directory.
+ * /api/admin/updates, /api/admin/questions, /api/admin/faq, /api/admin/directory,
+ * and the internal resources in lib/admin-internal.ts (audit, verification, contacts,
+ * card-contacts, google-connect, google-callback, glossary-links).
  * See api/auth/[action].ts for why these are not separate files.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  handleAudit,
+  handleCardContacts,
+  handleContacts,
+  handleGlossaryLinks,
+  handleGoogleCallback,
+  handleGoogleConnect,
+  handleVerification,
+} from '../../lib/admin-internal';
 import { getAuthFromRequest, originAllowed, parseJsonBody, setAuthCors } from '../../lib/auth';
 import { pgClient } from '../../lib/db';
 import {
@@ -1058,6 +1069,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleFaq(req, res);
     case 'directory':
       return handleDirectory(req, res);
+    case 'audit':
+      return handleAudit(req, res);
+    case 'verification':
+      return handleVerification(req, res);
+    case 'contacts':
+      return handleContacts(req, res);
+    case 'card-contacts':
+      return handleCardContacts(req, res);
+    case 'google-connect':
+      return handleGoogleConnect(req, res);
+    case 'google-callback':
+      return handleGoogleCallback(req, res);
+    case 'glossary-links':
+      return handleGlossaryLinks(req, res);
     default:
       return res.status(404).json({ error: 'Not found' });
   }

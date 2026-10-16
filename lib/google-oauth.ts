@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'crypto';
 import { appUrl } from './db';
 
 export function googleRedirectUri(): string {
-  return `${appUrl()}/api/auth/google/callback`;
+  return `${appUrl()}/api/auth/callback/google`;
 }
 
 export function newCodeVerifier(): string {

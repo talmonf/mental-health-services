@@ -139,6 +139,30 @@
     .kz-hit { display: block; width: 100%; text-align: inherit; background: transparent; color: inherit; border: none; padding: 8px 0; cursor: pointer; font: inherit; }
     .kz-hit:hover b { text-decoration: underline; }
     .kz-meta { font-size: 0.8rem; color: var(--muted); word-break: break-all; margin: 8px 0; }
+    .audit-entry { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: #fff; }
+    .audit-entry .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.85rem; margin-bottom: 6px; }
+    .audit-entry h3 { margin: 4px 0 8px; }
+    .audit-entry .desc { white-space: pre-wrap; margin: 0 0 8px; }
+    .audit-links { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 0.85rem; }
+    .lvl { display: inline-block; min-width: 1.6em; text-align: center; font-weight: 700; border-radius: 999px; padding: 2px 8px; font-size: 0.8rem; }
+    .lvl-0 { background: #fbeaea; color: #8a2a2a; }
+    .lvl-1 { background: #fdf3e7; color: #8a5a12; }
+    .lvl-2 { background: #eef4f8; color: var(--primary-dark); }
+    .lvl-3 { background: #e7f6ee; color: #1e7a4a; }
+    .internal-section { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 16px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: 4px 6px 4px 10px; background: #fff; font-size: 0.85rem; }
+    .chip.suggested { border-style: dashed; background: #fdfaf3; }
+    .chip button { min-height: 26px; padding: 2px 8px; font-size: 0.75rem; }
+    .picker-results { max-height: 260px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 8px; }
+    .picker-results button.kz-hit { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .picker-results .muted { font-size: 0.8rem; }
+    .contact-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .contact-row .who { flex: 1 1 220px; }
+    .contact-row input { flex: 1 1 200px; width: auto; }
+    .gloss-term { margin-bottom: 16px; }
+    .gloss-term h3 { display: flex; gap: 8px; align-items: center; }
+    .gloss-term label.dir-check { font-weight: 400; }
     [dir=auto] { unicode-bidi: plaintext; }
     @media (max-width: 700px) {
       .filters .wide, .filters .exclude { grid-column: span 1; }
@@ -276,7 +300,7 @@
     const app = document.getElementById('app');
     function hashToTab() {
       const h = (location.hash || '').replace(/^#/, '');
-      if (h === 'users' || h === 'questions' || h === 'updates' || h === 'kolzchut') return h;
+      if (['users', 'questions', 'updates', 'kolzchut', 'audit', 'verification', 'glossary'].includes(h)) return h;
       if (h === 'directory' || h.indexOf('directory/') === 0) return 'directory';
       return 'analytics';
     }
@@ -291,6 +315,19 @@
       directoryCards: null,
       directoryCard: null,
       directoryMsg: '',
+      cardInternal: null,
+      cardInternalMsg: '',
+      audit: null,
+      auditMsg: '',
+      auditFilter: { area: '', card: '', from: '', to: '' },
+      auditEdit: null,
+      verif: null,
+      verifMsg: '',
+      verifFilter: { q: '', level: '', stale: '', gap: '' },
+      glossLinks: null,
+      glossStatus: 'suggested',
+      glossMsg: '',
+      termTitles: null,
       kz: {
         action: 'search',
         q: '',
@@ -1330,6 +1367,8 @@
       }
       state.directoryMsg = '';
       state.directoryCard = data.card;
+      state.cardInternalMsg = '';
+      await loadCardInternal(data.card.id);
     }
 
     async function loadDirectory() {
@@ -1550,6 +1589,7 @@
             render();
           }
         });
+        renderCardInternal(root, card);
         return;
       }
 
@@ -2008,6 +2048,631 @@
       });
     }
 
+    /* ---------- Internal pages: audit log, verification, glossary links ---------- */
+
+    const AUDIT_AREAS = { cards: 'כרטיסים', glossary: 'מילון מונחים', ui: 'ממשק ותוכן האתר', admin: 'ניהול', data: 'נתונים ומסד נתונים' };
+    const LEVELS = {
+      0: 'לא אומת',
+      1: 'האתר נבדק',
+      2: 'אושר בטלפון או בדוא״ל מול הארגון',
+      3: 'אושר על ידי איש קשר בארגון'
+    };
+    const GAP_LABELS = {
+      no_contact: 'אין דרך יצירת קשר',
+      phones_unlabeled: 'טלפונים בלי תווית',
+      address_no_site: 'כתובת בלי מיקום במפה',
+      branches_few_sites: 'כמה סניפים, מעט מיקומים',
+      row_ref_text: '«שורה N» במקום קישור',
+      empty_target: 'אין «למי»',
+      empty_region: 'אין «אזור»',
+      empty_cost: 'אין «עלות»',
+      eligibility_any: 'אין תנאי התאמה'
+    };
+    const GOOGLE_RESULT = {
+      connected: ['ok', 'חובר ל-Google Contacts.'],
+      denied: ['err', 'החיבור ל-Google בוטל במסך האישור.'],
+      scope: ['err', 'Google לא נתן הרשאה לאנשי הקשר. יש לסמן את ההרשאה במסך האישור ולנסות שוב.'],
+      'not-configured': ['err', 'חסרים GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET או GOOGLE_TOKEN_KEY בשרת.'],
+      error: ['err', 'החיבור ל-Google נכשל. יש להתחבר לאתר כמנהל ולנסות שוב.']
+    };
+
+    function todayYmd() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function levelBadge(level) {
+      const n = Number(level) || 0;
+      return `<span class="lvl lvl-${n}" title="${esc(LEVELS[n])}">${n}</span>`;
+    }
+    function msgHtml(text) {
+      if (!text) return '';
+      const ok = /^(נשמר|נוסף|חובר|עודכן)/.test(text);
+      return `<p class="${ok ? 'ok' : 'err'}">${esc(text)}</p>`;
+    }
+    function contactLink(name, url) {
+      if (!name) return '<span class="muted">—</span>';
+      return url
+        ? `<a class="name-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" dir="auto">${esc(name)}</a>`
+        : `<span dir="auto">${esc(name)}</span>`;
+    }
+    async function api(path, opts) {
+      const init = Object.assign({ credentials: 'include' }, opts || {});
+      if (init.body && typeof init.body !== 'string') {
+        init.headers = { 'Content-Type': 'application/json' };
+        init.body = JSON.stringify(init.body);
+      }
+      const r = await fetch(path, init);
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || `הבקשה נכשלה (${r.status})`);
+      return data;
+    }
+    async function loadTermTitles() {
+      if (state.termTitles) return;
+      try {
+        const r = await fetch('/directory.json');
+        const data = await r.json();
+        const map = {};
+        (data.glossary || []).forEach((t) => { map[t.key] = t.title; });
+        state.termTitles = map;
+      } catch {
+        state.termTitles = {};
+      }
+    }
+    function termTitle(key) {
+      return (state.termTitles && state.termTitles[key]) || key;
+    }
+
+    async function loadAudit() {
+      const p = new URLSearchParams();
+      const f = state.auditFilter;
+      if (f.area) p.set('area', f.area);
+      if (f.from) p.set('from', f.from);
+      if (f.to) p.set('to', f.to);
+      try {
+        let entries = (await api('/api/admin/audit?' + p.toString())).entries || [];
+        const row = String(f.card || '').replace(/\D/g, '');
+        if (row) entries = entries.filter((e) => (e.cards || []).some((c) => String(c.rowId) === row));
+        state.audit = entries;
+        state.auditMsg = '';
+      } catch (e) {
+        state.audit = [];
+        state.auditMsg = e.message;
+      }
+    }
+
+    function auditForm(entry) {
+      const e = entry || { happenedAt: todayYmd(), area: 'cards', title: '', description: '', cards: [], termKeys: [], migration: '' };
+      const rows = [...new Set((e.cards || []).map((c) => c.rowId))].join(', ');
+      return `<form id="audit-form" class="card">
+        <h2>${entry ? 'עריכת רשומה' : 'רשומה חדשה'}</h2>
+        <div class="dir-grid">
+          <div><label for="a-date">תאריך השינוי</label><input id="a-date" name="happenedAt" type="date" value="${esc(e.happenedAt)}" required></div>
+          <div><label for="a-area">תחום</label><select id="a-area" name="area">${Object.entries(AUDIT_AREAS).map(([k, v]) => `<option value="${k}"${k === e.area ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
+          <div class="full"><label for="a-title">כותרת</label><input id="a-title" name="title" type="text" maxlength="200" value="${esc(e.title)}" required></div>
+          <div class="full"><label for="a-desc">תיאור</label><textarea id="a-desc" name="description" maxlength="8000" required>${esc(e.description)}</textarea></div>
+          <div><label for="a-rows">מספרי שורה של כרטיסים (מופרדים בפסיק)</label><input id="a-rows" name="cardRows" type="text" dir="ltr" value="${esc(rows)}"></div>
+          <div><label for="a-terms">מפתחות מונחים במילון (מופרדים בפסיק)</label><input id="a-terms" name="termKeys" type="text" dir="ltr" value="${esc((e.termKeys || []).join(', '))}"></div>
+          <div class="full"><label for="a-mig">סקריפט מיגרציה (לא חובה)</label><input id="a-mig" name="migration" type="text" dir="ltr" value="${esc(e.migration || '')}"></div>
+        </div>
+        <div class="dir-actions">
+          <button type="submit">שמירה</button>
+          <button type="button" class="secondary" data-act="cancel-audit">ביטול</button>
+        </div>
+      </form>`;
+    }
+
+    function renderAudit(root) {
+      const f = state.auditFilter;
+      const entries = state.audit;
+      const editing = state.auditEdit;
+      const list = !entries
+        ? '<p>טוען…</p>'
+        : !entries.length
+          ? '<p class="lede">אין רשומות.</p>'
+          : entries.map((e) => `<article class="audit-entry">
+              <div class="meta">
+                <b>${esc(ymdToDmy(e.happenedAt))}</b>
+                <span class="badge">${esc(AUDIT_AREAS[e.area] || e.area)}</span>
+                ${e.migration ? `<span class="badge muted" dir="ltr">${esc(e.migration)}</span>` : ''}
+                <button type="button" class="secondary" data-edit-audit="${esc(e.id)}" style="min-height:30px;padding:2px 10px;margin-inline-start:auto">עריכה</button>
+              </div>
+              <h3 dir="auto">${esc(e.title)}</h3>
+              <p class="desc" dir="auto">${esc(e.description)}</p>
+              ${(e.cards || []).length ? `<div class="audit-links"><span class="muted">כרטיסים:</span>${e.cards.map((c) => `<span><a class="name-link" href="#directory/${esc(c.id)}">${esc(c.rowId)} · ${esc(c.org)}</a> <a class="open" href="/?entry=${esc(c.rowId)}" target="_blank" rel="noopener">באתר</a></span>`).join('')}</div>` : ''}
+              ${(e.termKeys || []).length ? `<div class="audit-links"><span class="muted">מונחים:</span>${e.termKeys.map((k) => `<a class="name-link" href="/term/${esc(k.replace(/_/g, '-'))}" target="_blank" rel="noopener">${esc(termTitle(k))}</a>`).join('')}</div>` : ''}
+            </article>`).join('');
+      root.appendChild(el(`<div class="he-panel">
+        ${msgHtml(state.auditMsg)}
+        <div class="card">
+          <p class="dir-help">יומן השינויים באתר, מהחדש לישן. התיאור של כל רשומה מאושר לפני שהיא נרשמת. היומן פנימי ולא מוצג באתר.</p>
+          <div class="filters">
+            <div><label for="af-area">תחום</label><select id="af-area"><option value="">הכול</option>${Object.entries(AUDIT_AREAS).map(([k, v]) => `<option value="${k}"${k === f.area ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
+            <div><label for="af-card">מספר שורה</label><input id="af-card" type="text" dir="ltr" value="${esc(f.card)}"></div>
+            <div><label for="af-from">מתאריך</label><input id="af-from" type="date" value="${esc(f.from)}"></div>
+            <div><label for="af-to">עד תאריך</label><input id="af-to" type="date" value="${esc(f.to)}"></div>
+            <div><button type="button" id="af-go">סינון</button></div>
+            <div><button type="button" class="secondary" id="af-new">רשומה חדשה</button></div>
+          </div>
+        </div>
+        <div id="audit-form-slot">${editing ? auditForm(editing === 'new' ? null : (entries || []).find((e) => e.id === editing)) : ''}</div>
+        ${list}
+      </div>`));
+      root.querySelector('#af-go').addEventListener('click', async () => {
+        state.auditFilter = {
+          area: root.querySelector('#af-area').value,
+          card: root.querySelector('#af-card').value.trim(),
+          from: root.querySelector('#af-from').value,
+          to: root.querySelector('#af-to').value
+        };
+        await loadAudit();
+        render();
+      });
+      root.querySelector('#af-new').addEventListener('click', () => { state.auditEdit = 'new'; render(); });
+      root.querySelectorAll('[data-edit-audit]').forEach((btn) => btn.addEventListener('click', () => {
+        state.auditEdit = Number(btn.getAttribute('data-edit-audit'));
+        render();
+        window.scrollTo(0, 0);
+      }));
+      const form = root.querySelector('#audit-form');
+      if (!form) return;
+      form.querySelector('[data-act=cancel-audit]').addEventListener('click', () => { state.auditEdit = null; render(); });
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const fd = new FormData(form);
+        const list = (name) => String(fd.get(name) || '').split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+        const body = {
+          happenedAt: String(fd.get('happenedAt') || ''),
+          area: String(fd.get('area') || ''),
+          title: String(fd.get('title') || '').trim(),
+          description: String(fd.get('description') || '').trim(),
+          cardRows: list('cardRows').map(Number).filter((n) => Number.isInteger(n) && n > 0),
+          termKeys: list('termKeys'),
+          migration: String(fd.get('migration') || '').trim()
+        };
+        if (state.auditEdit !== 'new') body.id = state.auditEdit;
+        try {
+          await api('/api/admin/audit', { method: state.auditEdit === 'new' ? 'POST' : 'PATCH', body });
+          state.auditEdit = null;
+          await loadAudit();
+          state.auditMsg = 'נשמר.';
+        } catch (e) {
+          state.auditMsg = e.message;
+        }
+        render();
+      });
+    }
+
+    async function loadVerification() {
+      try {
+        state.verif = await api('/api/admin/verification');
+        state.verifMsg = '';
+      } catch (e) {
+        state.verif = { cards: [], google: { connected: false, configured: false } };
+        state.verifMsg = e.message;
+      }
+    }
+
+    function googleBox(google) {
+      const g = google || {};
+      if (g.connected) {
+        return `<p>Google Contacts מחובר לחשבון <b dir="ltr">${esc(g.email)}</b> מאז ${esc(fmtDate(g.connectedAt))}.
+          <button type="button" class="secondary" id="g-disconnect" style="margin-inline-start:8px">ניתוק</button></p>
+          <p class="dir-help">קישורים ל-contacts.google.com נפתחים רק בחשבון הזה. מנהלים אחרים רואים את השם, הדוא״ל והטלפון שנשמרו.</p>`;
+      }
+      if (!g.configured) {
+        return '<p class="dir-help">Google Contacts לא מוגדר בשרת (חסרים GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET או GOOGLE_TOKEN_KEY). אפשר עדיין להדביק קישור לאיש קשר או להקליד את פרטיו.</p>';
+      }
+      return `<p>Google Contacts לא מחובר. <a class="btn" href="/api/admin/google-connect">התחברות ל-Google Contacts</a></p>
+        <p class="dir-help">החיבור מבקש הרשאת קריאה בלבד לאנשי הקשר. עד שהוא מחובר, אפשר להדביק קישור לאיש קשר או להקליד את פרטיו.</p>`;
+    }
+
+    function renderVerification(root) {
+      const data = state.verif;
+      if (!data) {
+        root.appendChild(el('<div class="card he-panel"><p>טוען…</p></div>'));
+        return;
+      }
+      const f = state.verifFilter;
+      const cards = data.cards || [];
+      const counts = [0, 1, 2, 3].map((n) => cards.filter((c) => c.level === n).length);
+      const avg = cards.length ? Math.round(cards.reduce((s, c) => s + c.score, 0) / cards.length) : 0;
+      const staleBefore = (() => {
+        const m = Number(f.stale);
+        if (!m) return '';
+        const d = new Date();
+        d.setMonth(d.getMonth() - m);
+        return d.toISOString().slice(0, 10);
+      })();
+      const needle = f.q.trim().toLowerCase();
+      const shown = cards.filter((c) => {
+        if (needle && `${c.rowId} ${c.org} ${c.svc} ${c.verifiedBy}`.toLowerCase().indexOf(needle) === -1) return false;
+        if (f.level !== '' && c.level > Number(f.level)) return false;
+        if (staleBefore && c.verifiedOn && c.verifiedOn >= staleBefore) return false;
+        if (f.gap && c.gaps.indexOf(f.gap) === -1) return false;
+        return true;
+      });
+      const rows = shown.map((c) => `<tr>
+          <td>${esc(c.rowId)}</td>
+          <td dir="auto">${esc(c.org)}<div class="muted" dir="auto">${esc(c.svc)}</div></td>
+          <td>${levelBadge(c.level)}</td>
+          <td>${c.verifiedOn ? esc(ymdToDmy(c.verifiedOn)) : '<span class="muted">—</span>'}</td>
+          <td>${contactLink(c.verifiedBy, c.verifiedByUrl)}</td>
+          <td>${esc(c.contacts)}</td>
+          <td title="${esc(c.gaps.map((g) => GAP_LABELS[g] || g).join(' · '))}">${esc(c.score)}%</td>
+          <td><a class="open" href="#directory/${esc(c.id)}">פתיחה</a></td>
+        </tr>`).join('');
+      root.appendChild(el(`<div class="he-panel">
+        ${msgHtml(state.verifMsg)}
+        <div class="card">${googleBox(data.google)}</div>
+        <div class="card">
+          <p class="dir-help">רמת האימות הנוכחית של כל כרטיס היא האימות האחרון שנרשם. ${Object.entries(LEVELS).map(([n, t]) => `${levelBadge(n)} ${esc(t)}`).join(' · ')}</p>
+          <div class="row">
+            ${counts.map((n, i) => `<div class="stat"><b>${n}</b><span>${levelBadge(i)} ${esc(LEVELS[i])}</span></div>`).join('')}
+            <div class="stat"><b>${avg}%</b><span>שלמות ממוצעת</span></div>
+          </div>
+          <div class="filters" style="margin-top:12px">
+            <div class="wide"><label for="vf-q">חיפוש</label><input id="vf-q" type="text" value="${esc(f.q)}" placeholder="שם, תיאור, מספר שורה או מאמת"></div>
+            <div><label for="vf-level">רמה</label><select id="vf-level">
+              <option value="">הכול</option>
+              <option value="0"${f.level === '0' ? ' selected' : ''}>לא אומת</option>
+              <option value="1"${f.level === '1' ? ' selected' : ''}>עד רמה 1</option>
+              <option value="2"${f.level === '2' ? ' selected' : ''}>עד רמה 2</option>
+            </select></div>
+            <div><label for="vf-stale">אומת לפני יותר מ־(חודשים)</label><input id="vf-stale" type="number" min="0" value="${esc(f.stale)}"></div>
+            <div><label for="vf-gap">חסר בכרטיס</label><select id="vf-gap"><option value="">הכול</option>${Object.entries(GAP_LABELS).map(([k, v]) => `<option value="${k}"${k === f.gap ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
+          </div>
+          <p class="muted">${shown.length} מתוך ${cards.length} כרטיסים</p>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>שורה</th><th>כרטיס</th><th>רמה</th><th>תאריך</th><th>אומת על ידי</th><th>אנשי קשר</th><th>שלמות</th><th></th></tr></thead>
+              <tbody>${rows || '<tr><td colspan="8">אין כרטיסים שמתאימים לסינון.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`));
+      const bindFilter = (id, key, evName) => {
+        const node = root.querySelector(id);
+        node.addEventListener(evName, () => {
+          state.verifFilter[key] = node.value;
+          const pos = node.selectionStart;
+          render();
+          const again = document.querySelector(id);
+          if (again && evName === 'input') {
+            again.focus();
+            if (pos != null && again.setSelectionRange) again.setSelectionRange(pos, pos);
+          }
+        });
+      };
+      bindFilter('#vf-q', 'q', 'input');
+      bindFilter('#vf-level', 'level', 'change');
+      bindFilter('#vf-stale', 'stale', 'change');
+      bindFilter('#vf-gap', 'gap', 'change');
+      const disc = root.querySelector('#g-disconnect');
+      if (disc) disc.addEventListener('click', async () => {
+        if (!confirm('לנתק את Google Contacts? אנשי הקשר שכבר נשמרו יישארו.')) return;
+        try {
+          const out = await api('/api/admin/google-connect', { method: 'DELETE' });
+          state.verif.google = out.google;
+          state.verifMsg = '';
+        } catch (e) {
+          state.verifMsg = e.message;
+        }
+        render();
+      });
+    }
+
+    /** Search box over saved contacts and Google, with paste-a-link and type-a-name fallbacks. */
+    function contactPickerHtml(prefix) {
+      return `<div class="contact-picker" data-picker="${prefix}">
+        <label for="${prefix}-q">חיפוש איש קשר (שם, דוא״ל, ארגון)</label>
+        <input id="${prefix}-q" type="text" autocomplete="off">
+        <div class="picker-results" id="${prefix}-results" hidden></div>
+        <details class="chrome" style="margin-top:8px">
+          <summary>הדבקת קישור או הקלדת פרטים</summary>
+          <div class="dir-grid">
+            <div class="full"><label for="${prefix}-url">קישור מ-contacts.google.com</label><input id="${prefix}-url" type="text" dir="ltr" placeholder="https://contacts.google.com/person/c123…"></div>
+            <div><label for="${prefix}-name">שם</label><input id="${prefix}-name" type="text"></div>
+            <div><label for="${prefix}-org">ארגון ותפקיד</label><input id="${prefix}-org" type="text"></div>
+            <div><label for="${prefix}-email">דוא״ל</label><input id="${prefix}-email" type="text" dir="ltr"></div>
+            <div><label for="${prefix}-phone">טלפון</label><input id="${prefix}-phone" type="text" dir="ltr"></div>
+            <div class="full"><button type="button" class="secondary" id="${prefix}-manual">שימוש בפרטים האלה</button></div>
+          </div>
+        </details>
+      </div>`;
+    }
+
+    function bindContactPicker(root, prefix, onPick) {
+      const q = root.querySelector(`#${prefix}-q`);
+      const box = root.querySelector(`#${prefix}-results`);
+      let timer = null;
+      let found = [];
+      const show = (data) => {
+        const local = data.local || [];
+        const localIds = new Set(local.map((c) => c.resourceName).filter(Boolean));
+        const google = (data.google || []).filter((c) => !localIds.has(c.resourceName));
+        found = [...local.map((c) => ({ kind: 'local', c })), ...google.map((c) => ({ kind: 'google', c }))];
+        const note = data.googleError
+          ? `<p class="err" style="padding:0 10px">${esc(data.googleError)}</p>`
+          : !data.connected ? '<p class="muted" style="padding:0 10px">Google Contacts לא מחובר, מוצגים רק אנשי קשר שכבר נשמרו.</p>' : '';
+        box.innerHTML = note + (found.length ? found.map((item, i) => `<button type="button" class="kz-hit" data-pick="${i}">
+            <b dir="auto">${esc(item.c.displayName)}</b>
+            <span class="muted">${item.kind === 'google' ? ' · Google' : ' · שמור'}</span>
+            <div class="muted" dir="auto">${esc([item.c.organization, item.c.email, item.c.phone].filter(Boolean).join(' · '))}</div>
+          </button>`).join('') : '<p class="muted" style="padding:0 10px">אין תוצאות.</p>');
+        box.hidden = false;
+      };
+      q.addEventListener('input', () => {
+        clearTimeout(timer);
+        const v = q.value.trim();
+        if (v.length < 2) { box.hidden = true; return; }
+        timer = setTimeout(async () => {
+          try {
+            show(await api('/api/admin/contacts?q=' + encodeURIComponent(v)));
+          } catch (e) {
+            box.innerHTML = `<p class="err" style="padding:0 10px">${esc(e.message)}</p>`;
+            box.hidden = false;
+          }
+        }, 300);
+      });
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-pick]');
+        if (!btn) return;
+        const item = found[Number(btn.getAttribute('data-pick'))];
+        if (!item) return;
+        onPick(item.kind === 'local' ? { contactId: item.c.id } : { contact: { resourceName: item.c.resourceName, displayName: item.c.displayName } });
+      });
+      root.querySelector(`#${prefix}-manual`).addEventListener('click', () => {
+        const val = (s) => root.querySelector(`#${prefix}-${s}`).value.trim();
+        const contact = { url: val('url'), displayName: val('name'), organization: val('org'), email: val('email'), phone: val('phone') };
+        if (!contact.url && !contact.displayName) {
+          alert('צריך קישור או שם.');
+          return;
+        }
+        onPick({ contact });
+      });
+    }
+
+    async function loadCardInternal(id) {
+      const out = { verifications: null, completeness: null, contacts: null, links: null, errors: [] };
+      const tasks = [
+        api(`/api/admin/verification?id=${id}`).then((d) => { out.verifications = d.verifications; out.completeness = d.completeness; }),
+        api(`/api/admin/card-contacts?id=${id}`).then((d) => { out.contacts = d.contacts; }),
+        api(`/api/admin/glossary-links?card=${id}`).then((d) => { out.links = d.links; })
+      ];
+      const results = await Promise.allSettled(tasks);
+      results.forEach((r) => { if (r.status === 'rejected') out.errors.push(r.reason && r.reason.message); });
+      await loadTermTitles();
+      state.cardInternal = { id, ...out };
+    }
+
+    function renderCardInternal(root, card) {
+      const data = state.cardInternal && state.cardInternal.id === card.id ? state.cardInternal : null;
+      if (!data) {
+        root.appendChild(el('<div class="card he-panel"><p>טוען מידע פנימי…</p></div>'));
+        return;
+      }
+      const vers = data.verifications || [];
+      const current = vers[0];
+      const contacts = data.contacts || [];
+      const links = (data.links || []).filter((l) => l.status !== 'rejected');
+      const comp = data.completeness;
+      const termOptions = Object.entries(state.termTitles || {})
+        .filter(([k]) => !links.some((l) => l.termKey === k))
+        .sort((a, b) => a[1].localeCompare(b[1], 'he'))
+        .map(([k, t]) => `<option value="${esc(k)}">${esc(t)}</option>`).join('');
+      root.appendChild(el(`<div class="card he-panel" id="card-internal">
+        <h2>פנימי — לא מוצג באתר</h2>
+        ${msgHtml(state.cardInternalMsg)}
+        ${data.errors.length ? `<p class="err">${esc(data.errors.join(' · '))}</p>` : ''}
+        ${comp ? `<p class="dir-help">שלמות הכרטיס: <b>${esc(comp.score)}%</b>${comp.gaps.length ? ` · חסר: ${comp.gaps.map((g) => esc(g.label + (g.detail ? ` (${g.detail})` : ''))).join(' · ')}` : ''}</p>` : ''}
+
+        <div class="internal-section">
+          <h3>אימות</h3>
+          <p>${current ? `${levelBadge(current.level)} ${esc(LEVELS[current.level])} · ${esc(ymdToDmy(current.verifiedOn))} · ${contactLink(current.contact && current.contact.displayName, current.contact && current.contact.contactUrl)}` : `${levelBadge(0)} ${esc(LEVELS[0])}`}</p>
+          <form id="verif-form" class="dir-grid">
+            <div><label for="v-level">רמה</label><select id="v-level" name="level">${Object.entries(LEVELS).map(([n, t]) => `<option value="${n}"${Number(n) === (current ? current.level : 1) ? ' selected' : ''}>${n} — ${esc(t)}</option>`).join('')}</select></div>
+            <div><label for="v-date">תאריך האימות</label><input id="v-date" name="verifiedOn" type="date" max="${todayYmd()}" value="${todayYmd()}" required></div>
+            <div class="full"><label for="v-contact">אומת על ידי</label><select id="v-contact" name="contactId">
+              <option value="">— ללא איש קשר —</option>
+              ${contacts.map((c) => `<option value="${esc(c.contact.id)}">${esc(c.contact.displayName)}${c.roleNote ? ` (${esc(c.roleNote)})` : ''}</option>`).join('')}
+            </select><p class="dir-help">הרשימה היא אנשי הקשר של הכרטיס. כדי לבחור מישהו אחר, הוסיפו אותו קודם למטה.</p></div>
+            <div class="full"><label for="v-note">איך אומת ומה נבדק</label><textarea id="v-note" name="methodNote" maxlength="2000" style="min-height:70px"></textarea></div>
+            <div class="full"><button type="submit">רישום אימות</button></div>
+          </form>
+          ${vers.length ? `<details class="chrome"><summary>היסטוריה (${vers.length})</summary>${table(['תאריך', 'רמה', 'אומת על ידי', 'הערה', 'נרשם על ידי'], vers, (v) => [
+            esc(ymdToDmy(v.verifiedOn)), levelBadge(v.level),
+            contactLink(v.contact && v.contact.displayName, v.contact && v.contact.contactUrl),
+            `<span dir="auto" style="white-space:pre-wrap">${esc(v.methodNote)}</span>`,
+            `<span class="muted" dir="ltr">${esc(v.recordedBy)}</span>`
+          ])}</details>` : ''}
+        </div>
+
+        <div class="internal-section">
+          <h3>אנשי קשר שקשורים לכרטיס</h3>
+          ${contacts.length ? contacts.map((c) => `<div class="contact-row" data-link="${esc(c.linkId)}">
+              <div class="who">${contactLink(c.contact.displayName, c.contact.contactUrl)}
+                <div class="muted" dir="auto">${esc([c.contact.organization, c.contact.email, c.contact.phone].filter(Boolean).join(' · '))}</div></div>
+              <input type="text" name="role" value="${esc(c.roleNote)}" placeholder="תפקיד או הקשר" maxlength="500">
+              <button type="button" class="secondary" data-act="save-role">שמירה</button>
+              <button type="button" class="secondary" data-act="remove-contact">הסרה</button>
+            </div>`).join('') : '<p class="muted">אין אנשי קשר.</p>'}
+          <div style="margin-top:12px">
+            <label for="cc-role">תפקיד או הקשר של איש הקשר החדש</label>
+            <input id="cc-role" type="text" maxlength="500">
+            ${contactPickerHtml('cc')}
+          </div>
+        </div>
+
+        <div class="internal-section">
+          <h3>מונחים במילון</h3>
+          <p class="dir-help">מונח מאושר מופיע בכרטיס תחת «מונחים קשורים», והכרטיס מופיע בדף המונח תחת «שירותים במדריך».</p>
+          <div class="chips">${links.length ? links.map((l) => `<span class="chip ${l.status === 'suggested' ? 'suggested' : ''}" title="${esc(l.matchedText)}">
+              ${esc(termTitle(l.termKey))}${l.status === 'suggested' ? ' <span class="muted">(הצעה)</span>' : ''}
+              ${l.status === 'suggested' ? `<button type="button" data-link-status="approved" data-link-id="${esc(l.id)}">אישור</button>` : ''}
+              <button type="button" class="secondary" data-link-status="rejected" data-link-id="${esc(l.id)}">${l.status === 'suggested' ? 'דחייה' : 'הסרה'}</button>
+            </span>`).join('') : '<span class="muted">אין מונחים מקושרים.</span>'}</div>
+          <div class="toolbar"><select id="term-add" style="max-width:320px"><option value="">הוספת מונח…</option>${termOptions}</select><button type="button" class="secondary" id="term-add-btn">הוספה</button></div>
+        </div>
+      </div>`));
+
+      const panel = root.querySelector('#card-internal');
+      const refresh = async (text) => {
+        await loadCardInternal(card.id);
+        state.cardInternalMsg = text || '';
+        render();
+      };
+      const fail = (e) => { state.cardInternalMsg = e.message; render(); };
+
+      panel.querySelector('#verif-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const fd = new FormData(ev.target);
+        try {
+          await api('/api/admin/verification', {
+            method: 'POST',
+            body: {
+              cardId: card.id,
+              level: Number(fd.get('level')),
+              verifiedOn: String(fd.get('verifiedOn') || ''),
+              contactId: fd.get('contactId') ? Number(fd.get('contactId')) : null,
+              methodNote: String(fd.get('methodNote') || '').trim()
+            }
+          });
+          state.verif = null;
+          await refresh('נשמר.');
+        } catch (e) { fail(e); }
+      });
+
+      panel.querySelectorAll('.contact-row').forEach((row) => {
+        const linkId = Number(row.getAttribute('data-link'));
+        row.querySelector('[data-act=save-role]').addEventListener('click', async () => {
+          try {
+            await api('/api/admin/card-contacts', { method: 'PATCH', body: { linkId, roleNote: row.querySelector('[name=role]').value.trim() } });
+            await refresh('נשמר.');
+          } catch (e) { fail(e); }
+        });
+        row.querySelector('[data-act=remove-contact]').addEventListener('click', async () => {
+          if (!confirm('להסיר את איש הקשר מהכרטיס? אימותים קודמים שרשומים על שמו יישמרו.')) return;
+          try {
+            await fetch(`/api/admin/card-contacts?id=${linkId}`, { method: 'DELETE', credentials: 'include' }).then(async (r) => {
+              if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'ההסרה נכשלה');
+            });
+            await refresh('עודכן.');
+          } catch (e) { fail(e); }
+        });
+      });
+
+      bindContactPicker(panel, 'cc', async (picked) => {
+        try {
+          await api('/api/admin/card-contacts', {
+            method: 'POST',
+            body: Object.assign({ cardId: card.id, roleNote: panel.querySelector('#cc-role').value.trim() }, picked)
+          });
+          state.verif = null;
+          await refresh('נוסף.');
+        } catch (e) { fail(e); }
+      });
+
+      panel.querySelectorAll('[data-link-status]').forEach((btn) => btn.addEventListener('click', async () => {
+        try {
+          await api('/api/admin/glossary-links', { method: 'PATCH', body: { id: Number(btn.getAttribute('data-link-id')), status: btn.getAttribute('data-link-status') } });
+          state.glossLinks = null;
+          await refresh('עודכן.');
+        } catch (e) { fail(e); }
+      }));
+      panel.querySelector('#term-add-btn').addEventListener('click', async () => {
+        const termKey = panel.querySelector('#term-add').value;
+        if (!termKey) return;
+        try {
+          await api('/api/admin/glossary-links', { method: 'POST', body: { termKey, cardId: card.id } });
+          state.glossLinks = null;
+          await refresh('נוסף.');
+        } catch (e) { fail(e); }
+      });
+    }
+
+    async function loadGlossaryLinks() {
+      await loadTermTitles();
+      try {
+        state.glossLinks = (await api('/api/admin/glossary-links?status=' + encodeURIComponent(state.glossStatus))).links || [];
+        state.glossMsg = '';
+      } catch (e) {
+        state.glossLinks = [];
+        state.glossMsg = e.message;
+      }
+    }
+
+    function renderGlossary(root) {
+      const links = state.glossLinks;
+      const statusLabels = { suggested: 'הצעות לאישור', approved: 'מאושרים', rejected: 'נדחו' };
+      const byTerm = new Map();
+      (links || []).forEach((l) => {
+        if (!byTerm.has(l.termKey)) byTerm.set(l.termKey, []);
+        byTerm.get(l.termKey).push(l);
+      });
+      const groups = [...byTerm.entries()].sort((a, b) => termTitle(a[0]).localeCompare(termTitle(b[0]), 'he'));
+      const actions = state.glossStatus === 'suggested'
+        ? [['approved', 'אישור'], ['rejected', 'דחייה']]
+        : state.glossStatus === 'approved' ? [['rejected', 'הסרה']] : [['approved', 'אישור'], ['suggested', 'החזרה להצעות']];
+      root.appendChild(el(`<div class="he-panel">
+        ${msgHtml(state.glossMsg)}
+        <div class="card">
+          <p class="dir-help">קישורים בין מונחים במילון לכרטיסים. ההצעות נוצרות מהתאמת שם המונח וכינוייו לטקסט של הכרטיס. רק קישור מאושר מופיע באתר, בכרטיס ובדף המונח.</p>
+          <div class="status-filters">${Object.entries(statusLabels).map(([k, v]) => `<button type="button" class="${k === state.glossStatus ? '' : 'secondary'}" data-gstatus="${k}">${esc(v)}</button>`).join('')}</div>
+          ${links == null ? '<p>טוען…</p>' : !links.length ? '<p class="lede">אין קישורים במצב הזה.</p>' : `<p class="muted">${links.length} קישורים, ${groups.length} מונחים</p>
+            <div class="toolbar">${actions.map(([s, t]) => `<button type="button" class="secondary" data-bulk="${s}">${esc(t)} למסומנים</button>`).join('')}
+              <label class="dir-check"><input type="checkbox" id="g-all"> סימון הכול</label></div>`}
+        </div>
+        ${groups.map(([key, list]) => `<div class="card gloss-term">
+          <h3><label class="dir-check" style="margin:0"><input type="checkbox" data-term-all="${esc(key)}"></label>${esc(termTitle(key))} <span class="badge muted" dir="ltr">${esc(key)}</span> <span class="muted">${list.length}</span></h3>
+          ${list.map((l) => `<div class="contact-row">
+            <label class="dir-check who" style="margin:0"><input type="checkbox" data-gid="${esc(l.id)}" data-gterm="${esc(key)}">
+              <span><a class="name-link" href="#directory/${esc(l.card.id)}">${esc(l.card.rowId)} · ${esc(l.card.org)}</a> <span class="muted" dir="auto">${esc(l.card.svc)}</span>
+              ${l.matchedText ? `<div class="muted" dir="auto">«${esc(l.matchedText)}»</div>` : ''}</span></label>
+            ${actions.map(([s, t]) => `<button type="button" class="secondary" data-gone="${s}" data-gid-one="${esc(l.id)}">${esc(t)}</button>`).join('')}
+          </div>`).join('')}
+        </div>`).join('')}
+      </div>`));
+      const setStatus = async (ids, status) => {
+        if (!ids.length) return;
+        try {
+          await api('/api/admin/glossary-links', { method: 'PATCH', body: { ids, status } });
+          await loadGlossaryLinks();
+          state.glossMsg = 'עודכן.';
+        } catch (e) {
+          state.glossMsg = e.message;
+        }
+        render();
+      };
+      root.querySelectorAll('[data-gstatus]').forEach((btn) => btn.addEventListener('click', async () => {
+        state.glossStatus = btn.getAttribute('data-gstatus');
+        state.glossLinks = null;
+        render();
+        await loadGlossaryLinks();
+        render();
+      }));
+      const all = root.querySelector('#g-all');
+      if (all) all.addEventListener('change', () => root.querySelectorAll('[data-gid], [data-term-all]').forEach((c) => { c.checked = all.checked; }));
+      root.querySelectorAll('[data-term-all]').forEach((box) => box.addEventListener('change', () => {
+        root.querySelectorAll(`[data-gterm="${box.getAttribute('data-term-all')}"]`).forEach((c) => { c.checked = box.checked; });
+      }));
+      root.querySelectorAll('[data-bulk]').forEach((btn) => btn.addEventListener('click', () => {
+        const ids = Array.from(root.querySelectorAll('[data-gid]:checked')).map((c) => Number(c.getAttribute('data-gid')));
+        setStatus(ids, btn.getAttribute('data-bulk'));
+      }));
+      root.querySelectorAll('[data-gone]').forEach((btn) => btn.addEventListener('click', () => {
+        setStatus([Number(btn.getAttribute('data-gid-one'))], btn.getAttribute('data-gone'));
+      }));
+    }
+
+    async function loadTab(tab) {
+      if (tab === 'audit' && !state.audit) {
+        await loadTermTitles();
+        await loadAudit();
+      }
+      if (tab === 'verification' && !state.verif) await loadVerification();
+      if (tab === 'glossary' && !state.glossLinks) await loadGlossaryLinks();
+    }
+
     function render() {
       if (!state.user) {
         renderGate('Sign in on the directory first, then come back here. This page is for operators only.');
@@ -2051,6 +2716,9 @@
           <button type="button" data-tab="questions" class="${state.tab === 'questions' ? 'active' : ''}">שאלות נפוצות</button>
           <button type="button" data-tab="updates" class="${state.tab === 'updates' ? 'active' : ''}">פרסום עדכונים</button>
           <button type="button" data-tab="directory" class="${state.tab === 'directory' ? 'active' : ''}">כרטיסי מדריך</button>
+          <button type="button" data-tab="verification" class="${state.tab === 'verification' ? 'active' : ''}">אימות כרטיסים</button>
+          <button type="button" data-tab="glossary" class="${state.tab === 'glossary' ? 'active' : ''}">קישורי מילון</button>
+          <button type="button" data-tab="audit" class="${state.tab === 'audit' ? 'active' : ''}">יומן שינויים</button>
           <button type="button" data-tab="kolzchut" class="${state.tab === 'kolzchut' ? 'active' : ''}">כל זכות</button>
         </div>
         <div id="tabbody"></div>
@@ -2072,11 +2740,15 @@
             if (!state.faq) await loadFaqAdmin();
           }
           if (tab === 'directory' && !state.directoryCards) await loadDirectoryList();
+          await loadTab(tab);
           render();
         });
       });
       const body = wrap.querySelector('#tabbody');
-      if (state.tab === 'users') renderUsers(body);
+      if (state.tab === 'audit') renderAudit(body);
+      else if (state.tab === 'verification') renderVerification(body);
+      else if (state.tab === 'glossary') renderGlossary(body);
+      else if (state.tab === 'users') renderUsers(body);
       else if (state.tab === 'questions') renderQuestions(body);
       else if (state.tab === 'updates') renderUpdates(body);
       else if (state.tab === 'directory') renderDirectory(body);
@@ -2101,6 +2773,7 @@
         if (nextId) await loadDirectoryCard(nextId);
         else state.directoryCard = null;
       }
+      await loadTab(next);
       render();
     });
 
@@ -2113,7 +2786,13 @@
             await loadQuestions();
             await loadFaqAdmin();
           } else if (state.tab === 'directory') await loadDirectory();
+          else if (['audit', 'verification', 'glossary'].includes(state.tab)) await loadTab(state.tab);
           else await loadAnalytics();
+          const googleResult = new URLSearchParams(location.search).get('google');
+          if (googleResult && GOOGLE_RESULT[googleResult]) {
+            state.verifMsg = GOOGLE_RESULT[googleResult][1];
+            history.replaceState(null, '', location.pathname + location.hash);
+          }
         }
         render();
       } catch (e) {

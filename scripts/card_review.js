@@ -1,0 +1,166 @@
+#!/usr/bin/env node
+/**
+ * Card review: a completeness score and a list of gaps for every card.
+ *
+ *   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/card_review.js        writes docs/card-gaps.md
+ *   ... scripts/card_review.js --json                                                  prints JSON to stdout
+ *
+ * With DATABASE_URL the published text, sites and eligibility come from directory_card_edits,
+ * which is what visitors see. Without it they come from the live /api/directory-cards
+ * (CARDS_URL overrides the address). With --offline, or if that fails, the embedded copy in
+ * index.html and ENTRY_LOCATIONS are used, eligibility is unknown, and the report says so.
+ *
+ * The per-card checks live in lib/card-completeness.ts and are shared with /admin#verification.
+ * This script adds the checks that need the catalog: referral codes and shared rows.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { Client } = require('pg');
+const { load } = require('./lib/extract_data');
+
+const ROOT = path.join(__dirname, '..');
+const OUT = path.join(ROOT, 'docs', 'card-gaps.md');
+
+function normalizePgSslMode(connectionString) {
+  try {
+    const u = new URL(connectionString);
+    const mode = u.searchParams.get('sslmode');
+    if (mode === 'prefer' || mode === 'require' || mode === 'verify-ca') u.searchParams.set('sslmode', 'verify-full');
+    return u.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
+async function databaseCards() {
+  if (!process.env.DATABASE_URL) return null;
+  const client = new Client({ connectionString: normalizePgSslMode(process.env.DATABASE_URL) });
+  await client.connect();
+  try {
+    const { rows } = await client.query(
+      `SELECT id, card_key, row_id, public_fields, eligibility, sites FROM directory_card_edits ORDER BY row_id, id`
+    );
+    return new Map(rows.map((r) => [String(r.card_key), r]));
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+async function liveCards() {
+  const url = process.env.CARDS_URL || 'https://nefesh-il.org/api/directory-cards';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { cards } = await res.json();
+    if (!Array.isArray(cards) || !cards.length) throw new Error('no cards');
+    const map = new Map(
+      cards.map((c) => [
+        String(c.cardKey),
+        { id: c.id, public_fields: c.publicFields, eligibility: c.eligibility, sites: c.sites },
+      ])
+    );
+    return { map, url };
+  } catch (err) {
+    console.warn(`Could not load ${url}: ${err.message}`);
+    return null;
+  }
+}
+
+async function main() {
+  const { cardCompleteness } = await import('../lib/card-completeness.ts');
+  const data = load();
+  let db = await databaseCards();
+  let source = 'directory_card_edits';
+  if (!db && !process.argv.includes('--offline')) {
+    const live = await liveCards();
+    if (live) {
+      db = live.map;
+      source = live.url;
+    }
+  }
+  if (!db) source = 'index.html fallback (no database or live data; eligibility not checked)';
+
+  const report = data.entries.map((entry) => {
+    const row = db ? db.get(entry.key) : null;
+    const fields = row ? row.public_fields : entry.raw;
+    const dbSites = row && Array.isArray(row.sites) ? row.sites : [];
+    const sites = dbSites.length ? dbSites : data.ENTRY_LOCATIONS[String(entry.row)] || [];
+    const result = cardCompleteness(fields, sites, row ? row.eligibility : null);
+    let gaps = result.gaps;
+    let checks = result.checks;
+    if (!row) {
+      gaps = gaps.filter((g) => g.code !== 'eligibility_any');
+      checks -= 1;
+    }
+    const codes = entry.raw.referralCodes || [];
+    checks += 1;
+    if (!codes.length || codes.every((c) => c === 'unknown')) {
+      gaps = [...gaps, { code: 'referral_unknown', label: 'דרך ההפניה לא ידועה' }];
+    }
+    if (entry.rowIsAmbiguous) {
+      gaps = [...gaps, { code: 'row_shared', label: 'מספר השורה משותף לכרטיס אחר' }];
+    }
+    const score = checks ? Math.round(((checks - gaps.filter((g) => g.code !== 'row_shared').length) / checks) * 100) : 100;
+    return {
+      row: entry.row,
+      cardKey: entry.key,
+      cardEditId: row ? Number(row.id) : null,
+      org: String(fields.org || entry.org || ''),
+      svc: String(fields.svc || entry.svc || ''),
+      categories: entry.categories,
+      sites: sites.length,
+      score,
+      gaps,
+    };
+  });
+
+  if (process.argv.includes('--json')) {
+    process.stdout.write(JSON.stringify({ source, cards: report }, null, 2) + '\n');
+    return;
+  }
+
+  const byCode = new Map();
+  for (const card of report) {
+    for (const gap of card.gaps) {
+      if (!byCode.has(gap.code)) byCode.set(gap.code, { label: gap.label, rows: [] });
+      byCode.get(gap.code).rows.push(card.row);
+    }
+  }
+  const avg = Math.round(report.reduce((s, c) => s + c.score, 0) / report.length);
+  const lines = [
+    '# Card gaps',
+    '',
+    `Generated by \`scripts/card_review.js\` on ${new Date().toISOString().slice(0, 10)}. Source: ${source}.`,
+    '',
+    `${report.length} cards, average completeness ${avg}%.`,
+    '',
+    '## By gap',
+    '',
+    '| Gap | Cards | Rows |',
+    '|---|---:|---|',
+    ...[...byCode.values()]
+      .sort((a, b) => b.rows.length - a.rows.length)
+      .map((g) => `| ${g.label} | ${g.rows.length} | ${[...new Set(g.rows)].sort((a, b) => a - b).join(', ')} |`),
+    '',
+    '## By card (lowest score first)',
+    '',
+    '| Row | Card | Sections | Sites | Score | Gaps |',
+    '|---:|---|---|---:|---:|---|',
+    ...[...report]
+      .sort((a, b) => a.score - b.score || a.row - b.row)
+      .map((c) => {
+        const gaps = c.gaps.map((g) => (g.detail ? `${g.label} (${g.detail})` : g.label)).join('; ');
+        const name = `${c.org}${c.svc ? ` — ${c.svc}` : ''}`.replace(/\|/g, '/').replace(/\s+/g, ' ').slice(0, 90);
+        return `| ${c.row} | ${name} | ${c.categories.join(', ')} | ${c.sites} | ${c.score}% | ${gaps.replace(/\|/g, '/')} |`;
+      }),
+    '',
+  ];
+  fs.writeFileSync(OUT, lines.join('\n'), 'utf8');
+  console.log(`Wrote ${path.relative(ROOT, OUT)}: ${report.length} cards, average ${avg}%. Source: ${source}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

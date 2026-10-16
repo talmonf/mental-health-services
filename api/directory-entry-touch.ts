@@ -5,6 +5,7 @@
  *
  * GET /api/directory-cards (rewritten here) returns visible card edits and eligibility.
  * Eligibility is not painted on the card; the page publishes set values as JSON-LD.
+ * Each card also lists its approved glossary term keys (glossary_card_links, migration 064).
  *
  * Env: DATABASE_URL (same as /api/analytics)
  *
@@ -85,15 +86,31 @@ async function handlePublicCards(res: VercelResponse) {
       );
       rows = result.rows;
     }
+    const termsByCard = new Map<string, string[]>();
+    try {
+      const links = await client.query(
+        `SELECT term_key, card_key FROM glossary_card_links WHERE status = 'approved' ORDER BY term_key`
+      );
+      links.rows.forEach((link) => {
+        const key = String(link.card_key).replace(/\r/g, '');
+        if (!termsByCard.has(key)) termsByCard.set(key, []);
+        termsByCard.get(key)!.push(String(link.term_key));
+      });
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
+      if (code !== '42P01') throw err;
+    }
     res.setHeader('Cache-Control', 'no-cache');
     return res.status(200).json({
       cards: rows.map((row) => ({
         id: Number(row.id),
-        cardKey: String(row.card_key || ''),
+        // index.html is served with \n line breaks; keys seeded on Windows carry \r\n.
+        cardKey: String(row.card_key || '').replace(/\r/g, ''),
         rowId: Number(row.row_id),
         publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
         eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
         sites: Array.isArray(row.sites) ? row.sites : [],
+        terms: termsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],
         publicEditedAt: isoTime(row.public_edited_at),
       })),
     });

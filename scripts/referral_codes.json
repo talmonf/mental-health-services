@@ -4,24 +4,24 @@
   "rows": {
     "1": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "2": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "3": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "4": {
       "codes": [
@@ -102,10 +102,10 @@
     },
     "18": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: האתר חינם",
+      "confidence": "curated"
     },
     "19": {
       "codes": [
@@ -123,10 +123,10 @@
     },
     "24": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "28": {
       "codes": [
@@ -137,38 +137,38 @@
     },
     "29": {
       "codes": [
-        "gp_referral"
+        "self_referral"
       ],
-      "source": "מסובסד עם המלצה מרופא משפחה",
+      "source": "אין צורך בהפניית רופא: פונים למרפאה בטופס מקוון, והצוות חוזר תוך 5 ימי עבודה.",
       "confidence": "curated"
     },
     "31": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "32": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "33": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "34": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "35": {
       "codes": [
@@ -186,23 +186,26 @@
     },
     "37": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "38": {
       "codes": [
-        "unknown"
+        "self_referral",
+        "gp_referral",
+        "psychiatrist_referral"
       ],
       "source": "",
       "confidence": "curated"
     },
     "39": {
       "codes": [
-        "self_referral"
+        "self_referral",
+        "mod_rehab_worker"
       ],
-      "source": "בית בטוח לטיפול מיידי — חלופת אשפוז",
+      "source": "הבתים נמצאים בתוך בתי חולים, פעילים 24/7, ואפשר לשהות בהם עד 10 ימים, ללא עלות.",
       "confidence": "curated"
     },
     "40": {
@@ -228,16 +231,11 @@
     },
     "43": {
       "codes": [
+        "gp_referral",
+        "psychiatrist_referral",
         "hmo_form17"
       ],
-      "source": "ממומן ע\"י הקופות: כללית, מאוחדת ולאומית",
-      "confidence": "curated"
-    },
-    "44": {
-      "codes": [
-        "mod_rehab_worker"
-      ],
-      "source": "cost: זכאי משרד הבטחון",
+      "source": "cost: ללא תשלום בהפניה של קופת החולים (כללית, מאוחדת ולאומית).",
       "confidence": "curated"
     },
     "45": {
@@ -249,9 +247,12 @@
     },
     "46": {
       "codes": [
-        "hmo_form17"
+        "gp_referral",
+        "psychiatrist_referral",
+        "hmo_form17",
+        "self_referral"
       ],
-      "source": "ממומן ע\"י הקופות: כללית, מאוחדת (בירושלים)",
+      "source": "ההפניה מרופא משפחה או מפסיכיאטר מטפל.",
       "confidence": "curated"
     },
     "47": {
@@ -263,9 +264,10 @@
     },
     "48": {
       "codes": [
+        "psychiatrist_referral",
         "hmo_form17"
       ],
-      "source": "ממומן ע\"י הקופות: מכבי, מאוחדת ולאומית",
+      "source": "cost: ממונן ע\"י הקופות: מכבי, מאוחדת ולאומית",
       "confidence": "curated"
     },
     "49": {
@@ -277,10 +279,10 @@
     },
     "50": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "51": {
       "codes": [
@@ -291,16 +293,18 @@
     },
     "52": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "53": {
       "codes": [
-        "unknown"
+        "gp_referral",
+        "psychiatrist_referral",
+        "hmo_form17"
       ],
-      "source": "",
+      "source": "cost: במימון קופת החולים (טופס 17), עם השתתפות עצמית של כמה עשרות שקלים",
       "confidence": "curated"
     },
     "56": {
@@ -333,10 +337,10 @@
     },
     "61": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "62": {
       "codes": [
@@ -347,9 +351,10 @@
     },
     "63": {
       "codes": [
-        "self_referral"
+        "self_referral",
+        "hmo_form17"
       ],
-      "source": "התערבות רגשית ממוקדת וללא עלות",
+      "source": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.",
       "confidence": "curated"
     },
     "64": {
@@ -368,18 +373,17 @@
     },
     "66": {
       "codes": [
-        "self_referral"
+        "unknown"
       ],
-      "source": "קבלת השירות אינה כרוכה בתשלום או בהפניה. מרכזי יה״ל, בשיתוף משרד הבריאות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "67": {
       "codes": [
-        "rehab_basket_committee",
-        "mod_rehab_worker"
+        "unknown"
       ],
-      "source": "דיור, קהילה תומכת, תעסוקה נתמכת ויהלו״ם: זכאי סל שיקום או הפניה ממשרד הביטחון. תעסוקה נתמכת גם באופן פרטי. ייעוץ המשפחות בכרטיס מרכז יה״ל, בלי הפניה.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "68": {
       "codes": [
@@ -397,10 +401,10 @@
     },
     "70": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "71": {
       "codes": [
@@ -418,24 +422,26 @@
     },
     "73": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "74": {
       "codes": [
-        "unknown"
+        "rehab_basket_committee",
+        "mod_rehab_worker",
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: במסגרת סל שיקום, אגף השיקום במשרד הביטחון, או באופן פרטי",
+      "confidence": "curated"
     },
     "76": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "78": {
       "codes": [
@@ -495,31 +501,24 @@
     },
     "87": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "88": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
-    },
-    "89": {
-      "codes": [
-        "unknown"
-      ],
-      "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "90": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "94": {
       "codes": [
@@ -551,10 +550,10 @@
     },
     "104": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "105": {
       "codes": [
@@ -579,10 +578,10 @@
     },
     "108": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "109": {
       "codes": [
@@ -614,17 +613,17 @@
     },
     "204": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "205": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "206": {
       "codes": [
@@ -642,9 +641,10 @@
     },
     "211": {
       "codes": [
-        "unknown"
+        "self_referral",
+        "mod_rehab_worker"
       ],
-      "source": "להתקבל לתוכנית חייבת הכרה/אבחון טראומה.",
+      "source": "cost: במימון מלא של אגף השיקום, משרד הביטחון (למתאימים)",
       "confidence": "curated"
     },
     "212": {
@@ -670,13 +670,6 @@
     },
     "215": {
       "codes": [
-        "unknown"
-      ],
-      "source": "",
-      "confidence": "none"
-    },
-    "216": {
-      "codes": [
         "self_referral"
       ],
       "source": "cost: חינם",
@@ -684,10 +677,10 @@
     },
     "217": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "218": {
       "codes": [
@@ -712,38 +705,39 @@
     },
     "221": {
       "codes": [
-        "gp_referral"
+        "gp_referral",
+        "hmo_form17"
       ],
-      "source": "מרפאת כללית",
+      "source": "cost: ללא עלות, בהפניה מרופא משפחה וטופס 17 (כל הקופות)",
       "confidence": "curated"
     },
     "222": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "223": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "224": {
       "codes": [
-        "mod_rehab_worker"
+        "self_referral"
       ],
-      "source": "החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.",
+      "source": "",
       "confidence": "curated"
     },
     "225": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "226": {
       "codes": [
@@ -761,17 +755,17 @@
     },
     "229": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "230": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "231": {
       "codes": [
@@ -796,10 +790,10 @@
     },
     "234": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "235": {
       "codes": [
@@ -810,10 +804,10 @@
     },
     "237": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "cost: חינם",
+      "confidence": "curated"
     },
     "238": {
       "codes": [
@@ -824,17 +818,17 @@
     },
     "239": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "243": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "מאוחדת *3833 · לאומית *507 (קו כוננים 24/7).",
+      "confidence": "curated"
     },
     "244": {
       "codes": [
@@ -901,10 +895,10 @@
     },
     "257": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "263": {
       "codes": [
@@ -929,10 +923,10 @@
     },
     "269": {
       "codes": [
-        "unknown"
+        "self_referral"
       ],
       "source": "",
-      "confidence": "none"
+      "confidence": "curated"
     },
     "270": {
       "codes": [
@@ -958,24 +952,26 @@
     },
     "273": {
       "codes": [
-        "psychiatrist_referral"
+        "psychiatrist_referral",
+        "hmo_form17"
       ],
       "source": "הפניה מפסיכיאטר או נוירולוג.",
       "confidence": "curated"
     },
     "274": {
       "codes": [
-        "psychiatrist_referral"
+        "psychiatrist_referral",
+        "hmo_form17"
       ],
-      "source": "הפניה פסיכיאטרית",
-      "confidence": "keyword"
+      "source": "לכל פנייה יש לצרף מכתב הפניה מפסיכיאטר מטפל וטופס 17 מהקופה.",
+      "confidence": "curated"
     },
     "275": {
       "codes": [
-        "unknown"
+        "psychiatrist_referral"
       ],
-      "source": "",
-      "confidence": "none"
+      "source": "ההפניה להערכה ברמב״ם מהפסיכיאטר המטפל.",
+      "confidence": "curated"
     },
     "278": {
       "codes": [
@@ -995,10 +991,9 @@
     },
     "280": {
       "codes": [
-        "gp_referral",
-        "rehab_basket_committee"
+        "gp_referral"
       ],
-      "source": "הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.",
+      "source": "הפנייה מרופא משפחה דרך קופת החולים.",
       "confidence": "curated"
     },
     "281": {
@@ -1123,11 +1118,10 @@
     },
     "305": {
       "codes": [
-        "self_referral",
         "rehab_basket_committee"
       ],
-      "source": "שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. פנייה ל-073-3952222.",
-      "confidence": "curated"
+      "source": "זכאי סל שיקום",
+      "confidence": "keyword"
     },
     "306": {
       "codes": [
@@ -1144,253 +1138,243 @@
       "source": "ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.",
       "confidence": "curated"
     },
-    "308": {
-      "codes": [
-        "self_referral"
-      ],
-      "source": "פנייה ישירה, בלי אישור סל שיקום.",
-      "confidence": "curated"
-    },
     "309": {
       "codes": [
-        "unknown"
+        "hmo_form17"
       ],
-      "source": "דף היחידה אינו מציין טופס 17. רוב הפונים מגיעים אחרי אשפוז מלא.",
-      "confidence": "curated"
+      "source": "טופס 17",
+      "confidence": "keyword"
     },
     "310": {
       "codes": [
-        "hmo_form17",
-        "psychiatrist_referral"
+        "hmo_form17"
       ],
-      "source": "טופס 17 קוד L0771 לאינטייק, והפניה מפסיכיאטר בקהילה משישה החודשים האחרונים.",
-      "confidence": "curated"
+      "source": "טופס 17",
+      "confidence": "keyword"
     },
     "311": {
       "codes": [
         "hmo_form17"
       ],
-      "source": "בכותרת הדף נכתב בלי טופס 17, ובגוף הדף בכפוף לטופס 17.",
-      "confidence": "curated"
+      "source": "טופס 17",
+      "confidence": "keyword"
     },
     "312": {
       "codes": [
-        "psychiatrist_referral",
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "הפניה ממטפל בבריאות הנפש וטופס 17.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "313": {
       "codes": [
         "unknown"
       ],
-      "source": "מסמך ההסכמה של איכילוב. לא נמצא דף תכנית נפרד.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "314": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "315": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "316": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "317": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "318": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "319": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "320": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "321": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "322": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "323": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "324": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "325": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "326": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "327": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "328": {
       "codes": [
         "unknown"
       ],
-      "source": "הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "329": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "330": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "331": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "332": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "333": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "334": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "335": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "336": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "337": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "338": {
       "codes": [
-        "gp_referral"
+        "unknown"
       ],
-      "source": "מרפאת חוץ. דף המרפאה אינו מפרט את דרך ההפניה.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "339": {
       "codes": [
-        "psychiatrist_referral"
+        "unknown"
       ],
-      "source": "קבלה ממרפאות בריאות הנפש.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "340": {
       "codes": [
-        "psychiatrist_referral",
         "hmo_form17"
       ],
-      "source": "אשפוז ממוקד: הפניה מהגורם המטפל בקהילה. טיפול יום: טופס 17 והפניה מפסיכיאטר.",
-      "confidence": "curated"
+      "source": "טופס 17",
+      "confidence": "keyword"
     },
     "341": {
       "codes": [
-        "hmo_form17"
+        "unknown"
       ],
-      "source": "מנוי אבחוני של שתי פגישות מקופת החולים, דרך הגורם המטפל.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     },
     "342": {
       "codes": [
-        "psychiatrist_referral"
+        "unknown"
       ],
-      "source": "תיאום מראש דרך גורם מטפל בקהילה, וטופס באתר היחידה.",
-      "confidence": "curated"
+      "source": "",
+      "confidence": "none"
     }
   }
 }

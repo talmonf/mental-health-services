@@ -78,6 +78,19 @@ Environment variables the middleware reads:
 2. Record the baseline indexed page count in `docs/measurement-baseline.md`.
 3. Watch the "Crawled – currently not indexed" bucket. For thin entry pages that is the expected failure mode, not a surprise.
 
+## Google Contacts for card verification (`/admin#verification`)
+
+The card editor's "related contacts" and "verified by" fields search the site owner's Google Contacts through the People API. This is a separate consent from Google sign-in and uses the same OAuth client.
+
+1. In Google Cloud Console, open the project that owns `GOOGLE_CLIENT_ID`, then **APIs & Services → Library** and enable **Google People API**.
+2. **Credentials → the OAuth client → Authorized redirect URIs**: add `https://nefesh-il.org/api/admin/google-callback` (and the preview origin if you test there).
+3. **OAuth consent screen → Data access**: add the scope `https://www.googleapis.com/auth/contacts.readonly`.
+4. **OAuth consent screen → Audience**: set the publishing status to **In production**. In *Testing*, Google expires the refresh token of a personal Gmail account after 7 days, so the connection would silently drop every week. In production without verification, the consent screen shows a one-time "Google hasn't verified this app" warning: choose **Advanced → Go to nefesh-il.org**. This is fine because only the owner consents; Google's 100-user cap for unverified apps does not matter here.
+5. Set `GOOGLE_TOKEN_KEY` in the Vercel project (a long random string). It encrypts the stored refresh token. Rotating it means reconnecting.
+6. Run migrations 062, 063 and 064, deploy, sign in to the site as an admin with the Google account that holds the contacts, then open `/admin#verification` and choose **התחברות ל-Google Contacts**. Tick the contacts permission on Google's screen.
+
+Without steps 1–5 everything else still works: admins can paste a `contacts.google.com/person/…` link or type a contact's details.
+
 ## Rollback
 
 Redeploy the previous deployment from the Vercel dashboard. Because the generated pages are not committed, reverting the commit also removes them; nothing needs cleaning up by hand.

@@ -69,6 +69,22 @@ async function fetchCardRows() {
     const { rows } = await client.query(
       `SELECT card_key, public_fields FROM directory_card_edits`
     );
+    let links = [];
+    try {
+      const result = await client.query(
+        `SELECT term_key, card_key FROM glossary_card_links WHERE status = 'approved' ORDER BY term_key`
+      );
+      links = result.rows;
+    } catch (err) {
+      if (!err || err.code !== '42P01') throw err;
+    }
+    const termsByCard = new Map();
+    for (const link of links) {
+      const key = String(link.card_key).replace(/\r/g, '');
+      if (!termsByCard.has(key)) termsByCard.set(key, []);
+      termsByCard.get(key).push(String(link.term_key));
+    }
+    for (const row of rows) row.terms = termsByCard.get(String(row.card_key).replace(/\r/g, '')) || [];
     return rows;
   } finally {
     await client.end().catch(() => {});
@@ -85,7 +101,8 @@ async function overlayDirectoryCards(data) {
 
   const byKey = new Map();
   for (const row of rows) {
-    if (row && row.card_key) byKey.set(String(row.card_key), row.public_fields);
+    // index.html is checked out with \n; keys seeded on Windows carry \r\n.
+    if (row && row.card_key) byKey.set(String(row.card_key).replace(/\r/g, ''), row);
   }
 
   let applied = 0;
@@ -95,9 +112,11 @@ async function overlayDirectoryCards(data) {
     if (!svc || seen.has(svc)) continue;
     seen.add(svc);
     const key = `${svc.row}|||${svc.svc || ''}`;
-    const fields = byKey.get(key);
-    if (!fields) continue;
-    replacePublicFields(svc, fields);
+    const row = byKey.get(key);
+    if (!row) continue;
+    replacePublicFields(svc, row.public_fields);
+    // Approved glossary links (migration 064). Term pages list these cards; entry pages list the terms.
+    svc.cardTerms = row.terms;
     applied++;
   }
 

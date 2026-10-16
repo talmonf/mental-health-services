@@ -1,4 +1,17 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 074_site_audit_entries_card_review.sql
+[x] 073_directory_card_review_b6.sql
+[x] 072_directory_card_review_b5.sql
+[x] 071_directory_card_review_b4.sql
+[x] 070_directory_card_review_b3.sql
+[x] 069_directory_card_review_b2.sql
+[x] 068_directory_card_review_b1.sql
+[x] 067_directory_card_edits_key_newlines.sql
+[x] 066_glossary_link_suggestions.sql
+[x] 065_site_audit_entries_oct_2026.sql
+[x] 064_glossary_card_links.sql
+[x] 063_card_verification_contacts.sql
+[x] 062_site_audit_entries.sql
 [x] 061_directory_entries_family_and_day.sql
 [x] 060_directory_card_edits_eychut_yahel.sql
 [x] 059_directory_card_edits_ezrat_zion_family.sql

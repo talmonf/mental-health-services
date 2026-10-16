@@ -804,6 +804,13 @@
         .mh-terms-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
         .mh-term-card { transition: all 0.2s ease; }
         .mh-term-card:hover { transform: translateY(-2px); }
+        .mh-term-card-focused { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .mh-term-services { margin: 0 0 var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); font-size: var(--text-sm); line-height: 1.8; }
+        .mh-term-services a { text-decoration: underline; }
+        .mh-card-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 var(--space-md); font-size: var(--text-sm); }
+        .mh-card-terms strong { color: var(--primary); }
+        .mh-card-term-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--primary); text-decoration: none; font: inherit; cursor: pointer; }
+        .mh-card-term-chip:hover, .mh-card-term-chip:focus-visible { border-color: var(--primary); text-decoration: underline; }
         .mh-terms-az-nav button:disabled { cursor: not-allowed; }
         .mh-terms-az-nav button:not(:disabled):hover { transform: scale(1.1); transition: transform 0.2s; }
         @media (min-width: 600px) {
@@ -1063,7 +1070,7 @@
     </noscript>
     <!-- MH_GROUP_STATIC -->
     <!-- REFERRAL_CODES_START -->
-<script type="application/json" id="mh-referral-codes">{"rows":{"1":{"codes":["unknown"],"source":"","confidence":"none"},"2":{"codes":["unknown"],"source":"","confidence":"none"},"3":{"codes":["unknown"],"source":"","confidence":"none"},"4":{"codes":["self_referral"],"source":"ייעוץ והכנה בחינם לוועדה הרפואית","confidence":"curated"},"5":{"codes":["rehab_basket_committee"],"source":"חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000)","confidence":"curated"},"6":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"7":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"8":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"9":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"10":{"codes":["self_referral"],"source":"זמין 24/7 לחיילים, מילואים וכוחות הביטחון","confidence":"curated"},"11":{"codes":["self_referral"],"source":"ניתן לפנות באופן אנונימי","confidence":"curated"},"12":{"codes":["unknown"],"source":"","confidence":"none"},"13":{"codes":["unknown"],"source":"","confidence":"none"},"16":{"codes":["unknown"],"source":"","confidence":"none"},"18":{"codes":["unknown"],"source":"","confidence":"none"},"19":{"codes":["unknown"],"source":"","confidence":"none"},"21":{"codes":["unknown"],"source":"","confidence":"none"},"24":{"codes":["unknown"],"source":"","confidence":"none"},"28":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"29":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"31":{"codes":["unknown"],"source":"","confidence":"none"},"32":{"codes":["unknown"],"source":"","confidence":"none"},"33":{"codes":["unknown"],"source":"","confidence":"none"},"34":{"codes":["unknown"],"source":"","confidence":"none"},"35":{"codes":["unknown"],"source":"","confidence":"none"},"36":{"codes":["unknown"],"source":"","confidence":"none"},"37":{"codes":["unknown"],"source":"","confidence":"none"},"38":{"codes":["unknown"],"source":"","confidence":"curated"},"39":{"codes":["self_referral"],"source":"בית בטוח לטיפול מיידי — חלופת אשפוז","confidence":"curated"},"40":{"codes":["hmo_form17"],"source":"cost: לאומית ומאוחדת","confidence":"curated"},"41":{"codes":["self_referral"],"source":"שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.","confidence":"curated"},"42":{"codes":["mod_rehab_worker"],"source":"ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום.","confidence":"curated"},"43":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת ולאומית","confidence":"curated"},"44":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"45":{"codes":["self_referral"],"source":"שירות פרטי","confidence":"curated"},"46":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: כללית, מאוחדת (בירושלים)","confidence":"curated"},"47":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"48":{"codes":["hmo_form17"],"source":"ממומן ע\"י הקופות: מכבי, מאוחדת ולאומית","confidence":"curated"},"49":{"codes":["unknown"],"source":"","confidence":"none"},"50":{"codes":["unknown"],"source":"","confidence":"none"},"51":{"codes":["unknown"],"source":"","confidence":"none"},"52":{"codes":["unknown"],"source":"","confidence":"none"},"53":{"codes":["unknown"],"source":"","confidence":"curated"},"56":{"codes":["unknown"],"source":"","confidence":"none"},"57":{"codes":["unknown"],"source":"","confidence":"none"},"59":{"codes":["unknown"],"source":"","confidence":"none"},"60":{"codes":["unknown"],"source":"","confidence":"none"},"61":{"codes":["unknown"],"source":"","confidence":"none"},"62":{"codes":["unknown"],"source":"","confidence":"curated"},"63":{"codes":["self_referral"],"source":"התערבות רגשית ממוקדת וללא עלות","confidence":"curated"},"64":{"codes":["unknown"],"source":"","confidence":"none"},"65":{"codes":["unknown"],"source":"","confidence":"none"},"66":{"codes":["self_referral"],"source":"קבלת השירות אינה כרוכה בתשלום או בהפניה. מרכזי יה״ל, בשיתוף משרד הבריאות.","confidence":"curated"},"67":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"דיור, קהילה תומכת, תעסוקה נתמכת ויהלו״ם: זכאי סל שיקום או הפניה ממשרד הביטחון. תעסוקה נתמכת גם באופן פרטי. ייעוץ המשפחות בכרטיס מרכז יה״ל, בלי הפניה.","confidence":"curated"},"68":{"codes":["unknown"],"source":"","confidence":"none"},"69":{"codes":["unknown"],"source":"","confidence":"none"},"70":{"codes":["unknown"],"source":"","confidence":"none"},"71":{"codes":["unknown"],"source":"","confidence":"none"},"72":{"codes":["unknown"],"source":"","confidence":"none"},"73":{"codes":["unknown"],"source":"","confidence":"none"},"74":{"codes":["unknown"],"source":"","confidence":"none"},"76":{"codes":["unknown"],"source":"","confidence":"none"},"78":{"codes":["unknown"],"source":"","confidence":"curated"},"79":{"codes":["unknown"],"source":"","confidence":"none"},"80":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"81":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"82":{"codes":["unknown"],"source":"","confidence":"none"},"83":{"codes":["unknown"],"source":"","confidence":"none"},"84":{"codes":["unknown"],"source":"","confidence":"none"},"85":{"codes":["unknown"],"source":"","confidence":"none"},"87":{"codes":["unknown"],"source":"","confidence":"none"},"88":{"codes":["unknown"],"source":"","confidence":"none"},"89":{"codes":["unknown"],"source":"","confidence":"none"},"90":{"codes":["unknown"],"source":"","confidence":"none"},"94":{"codes":["unknown"],"source":"","confidence":"none"},"95":{"codes":["unknown"],"source":"","confidence":"none"},"96":{"codes":["unknown"],"source":"","confidence":"none"},"102":{"codes":["unknown"],"source":"","confidence":"none"},"104":{"codes":["unknown"],"source":"","confidence":"none"},"105":{"codes":["unknown"],"source":"","confidence":"none"},"106":{"codes":["unknown"],"source":"","confidence":"none"},"107":{"codes":["unknown"],"source":"","confidence":"none"},"108":{"codes":["unknown"],"source":"","confidence":"none"},"109":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל.","confidence":"curated"},"201":{"codes":["self_referral"],"source":"קווי המענה הארציים 1202/1203","confidence":"curated"},"202":{"codes":["unknown"],"source":"","confidence":"none"},"203":{"codes":["unknown"],"source":"","confidence":"none"},"204":{"codes":["unknown"],"source":"","confidence":"none"},"205":{"codes":["unknown"],"source":"","confidence":"none"},"206":{"codes":["unknown"],"source":"","confidence":"none"},"210":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"211":{"codes":["unknown"],"source":"להתקבל לתוכנית חייבת הכרה/אבחון טראומה.","confidence":"curated"},"212":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"213":{"codes":["unknown"],"source":"","confidence":"none"},"214":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"215":{"codes":["unknown"],"source":"","confidence":"none"},"216":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"217":{"codes":["unknown"],"source":"","confidence":"none"},"218":{"codes":["mod_rehab_worker"],"source":"במימון משרד הביטחון","confidence":"curated"},"219":{"codes":["unknown"],"source":"","confidence":"none"},"220":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"221":{"codes":["gp_referral"],"source":"מרפאת כללית","confidence":"curated"},"222":{"codes":["unknown"],"source":"","confidence":"none"},"223":{"codes":["unknown"],"source":"","confidence":"none"},"224":{"codes":["mod_rehab_worker"],"source":"החזר משרד הביטחון עד תקרת 1500 ₪ למפגש.","confidence":"curated"},"225":{"codes":["unknown"],"source":"","confidence":"none"},"226":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"228":{"codes":["unknown"],"source":"","confidence":"none"},"229":{"codes":["unknown"],"source":"","confidence":"none"},"230":{"codes":["unknown"],"source":"","confidence":"none"},"231":{"codes":["unknown"],"source":"","confidence":"none"},"232":{"codes":["unknown"],"source":"","confidence":"none"},"233":{"codes":["unknown"],"source":"","confidence":"none"},"234":{"codes":["unknown"],"source":"","confidence":"none"},"235":{"codes":["unknown"],"source":"","confidence":"none"},"237":{"codes":["unknown"],"source":"","confidence":"none"},"238":{"codes":["unknown"],"source":"","confidence":"none"},"239":{"codes":["unknown"],"source":"","confidence":"none"},"243":{"codes":["unknown"],"source":"","confidence":"none"},"244":{"codes":["self_referral"],"source":"אתר עם שאלון התאמה לספקי שירות","confidence":"curated"},"247":{"codes":["self_referral"],"source":"הכוונה ראשונית ללא עלות וללא התחייבות","confidence":"curated"},"248":{"codes":["unknown"],"source":"","confidence":"none"},"249":{"codes":["unknown"],"source":"","confidence":"none"},"250":{"codes":["unknown"],"source":"","confidence":"none"},"251":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"252":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"253":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"254":{"codes":["self_referral"],"source":"קו חם מאויש 24/7 כולל סופי שבוע","confidence":"curated"},"257":{"codes":["unknown"],"source":"","confidence":"none"},"263":{"codes":["unknown"],"source":"","confidence":"none"},"264":{"codes":["unknown"],"source":"","confidence":"none"},"268":{"codes":["psychiatrist_referral"],"source":"נדרשת אבחנה של פסיכיאטר.","confidence":"curated"},"269":{"codes":["unknown"],"source":"","confidence":"none"},"270":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרש מרשם פסיכיאטר ואישור הקופה.","confidence":"curated"},"271":{"codes":["psychiatrist_referral"],"source":"נדרשת הערכה פסיכיאטרית.","confidence":"curated"},"272":{"codes":["unknown"],"source":"","confidence":"none"},"273":{"codes":["psychiatrist_referral"],"source":"הפניה מפסיכיאטר או נוירולוג.","confidence":"curated"},"274":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית","confidence":"keyword"},"275":{"codes":["unknown"],"source":"","confidence":"none"},"278":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"279":{"codes":["hmo_form17","psychiatrist_referral","mod_rehab_worker"],"source":"חינם דרך קופות החולים (טופס 17) או משרד הביטחון; הפניה מפסיכיאטר.","confidence":"curated"},"280":{"codes":["gp_referral","rehab_basket_committee"],"source":"הפנייה מרופא משפחה דרך קופת החולים. כולל ועדות סל שיקום במרפאה.","confidence":"curated"},"281":{"codes":["mod_rehab_worker","nii_referral"],"source":"הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).","confidence":"curated"},"282":{"codes":["unknown"],"source":"","confidence":"none"},"283":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)","confidence":"curated"},"290":{"codes":["unknown"],"source":"","confidence":"none"},"291":{"codes":["self_referral"],"source":"פרטי כל מרפאה באתר","confidence":"curated"},"292":{"codes":["unknown"],"source":"","confidence":"none"},"293":{"codes":["hmo_form17"],"source":"טופס 17 — כללית ומאוחדת","confidence":"curated"},"296":{"codes":["self_referral","rehab_basket_committee"],"source":"מוקד *9913. מכינת הד: גילאי 18–28, זכאי סל שיקום","confidence":"curated"},"297":{"codes":["psychiatrist_referral","hmo_form17"],"source":"הפניה מפסיכיאטר. טופס 17, קוד L0771.","confidence":"curated"},"298":{"codes":["gp_referral"],"source":"אשפוז יום ניתן רק לאחר הפניית רופא.","confidence":"curated"},"299":{"codes":["gp_referral","psychiatrist_referral","hmo_form17"],"source":"טופס 17, קוד L0822. הפניה מגורם בבריאות הנפש, מנוירולוג או מרופא משפחה; אם יש פסיכיאטר מטפל — לצרף מכתב.","confidence":"curated"},"300":{"codes":["gp_referral","hmo_form17"],"source":"כללית ומכבי: הפניה מרופא מטפל. מאוחדת ולאומית: טופס 17.","confidence":"curated"},"301":{"codes":["unknown"],"source":"","confidence":"none"},"302":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרשת הפניה מהפסיכיאטר המטפל או גורם מוסמך אחר בבריאות הנפש, וטופס התחייבות.","confidence":"curated"},"303":{"codes":["gp_referral"],"source":"בהפניית רופא.","confidence":"curated"},"304":{"codes":["unknown"],"source":"","confidence":"none"},"305":{"codes":["self_referral","rehab_basket_committee"],"source":"שיקום תעסוקתי ותעסוקה בשוק החופשי: זכאי סל שיקום. פנייה ל-073-3952222.","confidence":"curated"},"306":{"codes":["self_referral","rehab_basket_committee"],"source":"סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים. מוקד 1599-504949.","confidence":"curated"},"307":{"codes":["rehab_basket_committee"],"source":"ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.","confidence":"curated"},"308":{"codes":["self_referral"],"source":"פנייה ישירה, בלי אישור סל שיקום.","confidence":"curated"},"309":{"codes":["unknown"],"source":"דף היחידה אינו מציין טופס 17. רוב הפונים מגיעים אחרי אשפוז מלא.","confidence":"curated"},"310":{"codes":["hmo_form17","psychiatrist_referral"],"source":"טופס 17 קוד L0771 לאינטייק, והפניה מפסיכיאטר בקהילה משישה החודשים האחרונים.","confidence":"curated"},"311":{"codes":["hmo_form17"],"source":"בכותרת הדף נכתב בלי טופס 17, ובגוף הדף בכפוף לטופס 17.","confidence":"curated"},"312":{"codes":["psychiatrist_referral","hmo_form17"],"source":"הפניה ממטפל בבריאות הנפש וטופס 17.","confidence":"curated"},"313":{"codes":["unknown"],"source":"מסמך ההסכמה של איכילוב. לא נמצא דף תכנית נפרד.","confidence":"curated"},"314":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"315":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"316":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"317":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"318":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"319":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"320":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"321":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"322":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"323":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"324":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"325":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"326":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"327":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"328":{"codes":["unknown"],"source":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","confidence":"curated"},"329":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"330":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"331":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"332":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"333":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"334":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"335":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"336":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"337":{"codes":["hmo_form17"],"source":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות.","confidence":"curated"},"338":{"codes":["gp_referral"],"source":"מרפאת חוץ. דף המרפאה אינו מפרט את דרך ההפניה.","confidence":"curated"},"339":{"codes":["psychiatrist_referral"],"source":"קבלה ממרפאות בריאות הנפש.","confidence":"curated"},"340":{"codes":["psychiatrist_referral","hmo_form17"],"source":"אשפוז ממוקד: הפניה מהגורם המטפל בקהילה. טיפול יום: טופס 17 והפניה מפסיכיאטר.","confidence":"curated"},"341":{"codes":["hmo_form17"],"source":"מנוי אבחוני של שתי פגישות מקופת החולים, דרך הגורם המטפל.","confidence":"curated"},"342":{"codes":["psychiatrist_referral"],"source":"תיאום מראש דרך גורם מטפל בקהילה, וטופס באתר היחידה.","confidence":"curated"}}}</script>
+<script type="application/json" id="mh-referral-codes">{"rows":{"1":{"codes":["self_referral"],"source":"","confidence":"curated"},"2":{"codes":["self_referral"],"source":"","confidence":"curated"},"3":{"codes":["self_referral"],"source":"","confidence":"curated"},"4":{"codes":["self_referral"],"source":"ייעוץ והכנה בחינם לוועדה הרפואית","confidence":"curated"},"5":{"codes":["rehab_basket_committee"],"source":"חוק שיקום מתמודדי נפש בקהילה (התש\"ס, 2000)","confidence":"curated"},"6":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"7":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"8":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"9":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"10":{"codes":["self_referral"],"source":"זמין 24/7 לחיילים, מילואים וכוחות הביטחון","confidence":"curated"},"11":{"codes":["self_referral"],"source":"ניתן לפנות באופן אנונימי","confidence":"curated"},"12":{"codes":["unknown"],"source":"","confidence":"none"},"13":{"codes":["unknown"],"source":"","confidence":"none"},"16":{"codes":["unknown"],"source":"","confidence":"none"},"18":{"codes":["self_referral"],"source":"cost: האתר חינם","confidence":"curated"},"19":{"codes":["unknown"],"source":"","confidence":"none"},"21":{"codes":["unknown"],"source":"","confidence":"none"},"24":{"codes":["self_referral"],"source":"","confidence":"curated"},"28":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"29":{"codes":["self_referral"],"source":"אין צורך בהפניית רופא: פונים למרפאה בטופס מקוון, והצוות חוזר תוך 5 ימי עבודה.","confidence":"curated"},"31":{"codes":["self_referral"],"source":"","confidence":"curated"},"32":{"codes":["self_referral"],"source":"","confidence":"curated"},"33":{"codes":["self_referral"],"source":"","confidence":"curated"},"34":{"codes":["self_referral"],"source":"","confidence":"curated"},"35":{"codes":["unknown"],"source":"","confidence":"none"},"36":{"codes":["unknown"],"source":"","confidence":"none"},"37":{"codes":["self_referral"],"source":"","confidence":"curated"},"38":{"codes":["self_referral","gp_referral","psychiatrist_referral"],"source":"","confidence":"curated"},"39":{"codes":["self_referral","mod_rehab_worker"],"source":"הבתים נמצאים בתוך בתי חולים, פעילים 24/7, ואפשר לשהות בהם עד 10 ימים, ללא עלות.","confidence":"curated"},"40":{"codes":["hmo_form17"],"source":"cost: לאומית ומאוחדת","confidence":"curated"},"41":{"codes":["self_referral"],"source":"שירות פרטי. פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.","confidence":"curated"},"42":{"codes":["mod_rehab_worker"],"source":"ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום.","confidence":"curated"},"43":{"codes":["gp_referral","psychiatrist_referral","hmo_form17"],"source":"cost: ללא תשלום בהפניה של קופת החולים (כללית, מאוחדת ולאומית).","confidence":"curated"},"45":{"codes":["self_referral"],"source":"שירות פרטי","confidence":"curated"},"46":{"codes":["gp_referral","psychiatrist_referral","hmo_form17","self_referral"],"source":"ההפניה מרופא משפחה או מפסיכיאטר מטפל.","confidence":"curated"},"47":{"codes":["mod_rehab_worker"],"source":"cost: זכאי משרד הבטחון","confidence":"curated"},"48":{"codes":["psychiatrist_referral","hmo_form17"],"source":"cost: ממונן ע\"י הקופות: מכבי, מאוחדת ולאומית","confidence":"curated"},"49":{"codes":["unknown"],"source":"","confidence":"none"},"50":{"codes":["self_referral"],"source":"","confidence":"curated"},"51":{"codes":["unknown"],"source":"","confidence":"none"},"52":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"53":{"codes":["gp_referral","psychiatrist_referral","hmo_form17"],"source":"cost: במימון קופת החולים (טופס 17), עם השתתפות עצמית של כמה עשרות שקלים","confidence":"curated"},"56":{"codes":["unknown"],"source":"","confidence":"none"},"57":{"codes":["unknown"],"source":"","confidence":"none"},"59":{"codes":["unknown"],"source":"","confidence":"none"},"60":{"codes":["unknown"],"source":"","confidence":"none"},"61":{"codes":["self_referral"],"source":"","confidence":"curated"},"62":{"codes":["unknown"],"source":"","confidence":"curated"},"63":{"codes":["self_referral","hmo_form17"],"source":"נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.","confidence":"curated"},"64":{"codes":["unknown"],"source":"","confidence":"none"},"65":{"codes":["unknown"],"source":"","confidence":"none"},"66":{"codes":["unknown"],"source":"","confidence":"none"},"67":{"codes":["unknown"],"source":"","confidence":"none"},"68":{"codes":["unknown"],"source":"","confidence":"none"},"69":{"codes":["unknown"],"source":"","confidence":"none"},"70":{"codes":["self_referral"],"source":"","confidence":"curated"},"71":{"codes":["unknown"],"source":"","confidence":"none"},"72":{"codes":["unknown"],"source":"","confidence":"none"},"73":{"codes":["self_referral"],"source":"","confidence":"curated"},"74":{"codes":["rehab_basket_committee","mod_rehab_worker","self_referral"],"source":"cost: במסגרת סל שיקום, אגף השיקום במשרד הביטחון, או באופן פרטי","confidence":"curated"},"76":{"codes":["self_referral"],"source":"","confidence":"curated"},"78":{"codes":["unknown"],"source":"","confidence":"curated"},"79":{"codes":["unknown"],"source":"","confidence":"none"},"80":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"81":{"codes":["gp_referral"],"source":"מסובסד עם המלצה מרופא משפחה","confidence":"curated"},"82":{"codes":["unknown"],"source":"","confidence":"none"},"83":{"codes":["unknown"],"source":"","confidence":"none"},"84":{"codes":["unknown"],"source":"","confidence":"none"},"85":{"codes":["unknown"],"source":"","confidence":"none"},"87":{"codes":["self_referral"],"source":"","confidence":"curated"},"88":{"codes":["self_referral"],"source":"","confidence":"curated"},"90":{"codes":["self_referral"],"source":"","confidence":"curated"},"94":{"codes":["unknown"],"source":"","confidence":"none"},"95":{"codes":["unknown"],"source":"","confidence":"none"},"96":{"codes":["unknown"],"source":"","confidence":"none"},"102":{"codes":["unknown"],"source":"","confidence":"none"},"104":{"codes":["self_referral"],"source":"","confidence":"curated"},"105":{"codes":["unknown"],"source":"","confidence":"none"},"106":{"codes":["unknown"],"source":"","confidence":"none"},"107":{"codes":["unknown"],"source":"","confidence":"none"},"108":{"codes":["self_referral"],"source":"","confidence":"curated"},"109":{"codes":["psychiatrist_referral"],"source":"הפניה פסיכיאטרית; מימון דרך הקופה והמרכז המטפל.","confidence":"curated"},"201":{"codes":["self_referral"],"source":"קווי המענה הארציים 1202/1203","confidence":"curated"},"202":{"codes":["unknown"],"source":"","confidence":"none"},"203":{"codes":["unknown"],"source":"","confidence":"none"},"204":{"codes":["self_referral"],"source":"","confidence":"curated"},"205":{"codes":["self_referral"],"source":"","confidence":"curated"},"206":{"codes":["unknown"],"source":"","confidence":"none"},"210":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"211":{"codes":["self_referral","mod_rehab_worker"],"source":"cost: במימון מלא של אגף השיקום, משרד הביטחון (למתאימים)","confidence":"curated"},"212":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"213":{"codes":["unknown"],"source":"","confidence":"none"},"214":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"215":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"217":{"codes":["self_referral"],"source":"","confidence":"curated"},"218":{"codes":["mod_rehab_worker"],"source":"במימון משרד הביטחון","confidence":"curated"},"219":{"codes":["unknown"],"source":"","confidence":"none"},"220":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"221":{"codes":["gp_referral","hmo_form17"],"source":"cost: ללא עלות, בהפניה מרופא משפחה וטופס 17 (כל הקופות)","confidence":"curated"},"222":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"223":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"224":{"codes":["self_referral"],"source":"","confidence":"curated"},"225":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"226":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"228":{"codes":["unknown"],"source":"","confidence":"none"},"229":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"230":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"231":{"codes":["unknown"],"source":"","confidence":"none"},"232":{"codes":["unknown"],"source":"","confidence":"none"},"233":{"codes":["unknown"],"source":"","confidence":"none"},"234":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"235":{"codes":["unknown"],"source":"","confidence":"none"},"237":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"238":{"codes":["unknown"],"source":"","confidence":"none"},"239":{"codes":["self_referral"],"source":"","confidence":"curated"},"243":{"codes":["self_referral"],"source":"מאוחדת *3833 · לאומית *507 (קו כוננים 24/7).","confidence":"curated"},"244":{"codes":["self_referral"],"source":"אתר עם שאלון התאמה לספקי שירות","confidence":"curated"},"247":{"codes":["self_referral"],"source":"הכוונה ראשונית ללא עלות וללא התחייבות","confidence":"curated"},"248":{"codes":["unknown"],"source":"","confidence":"none"},"249":{"codes":["unknown"],"source":"","confidence":"none"},"250":{"codes":["unknown"],"source":"","confidence":"none"},"251":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"252":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"253":{"codes":["self_referral"],"source":"cost: חינם","confidence":"curated"},"254":{"codes":["self_referral"],"source":"קו חם מאויש 24/7 כולל סופי שבוע","confidence":"curated"},"257":{"codes":["self_referral"],"source":"","confidence":"curated"},"263":{"codes":["unknown"],"source":"","confidence":"none"},"264":{"codes":["unknown"],"source":"","confidence":"none"},"268":{"codes":["psychiatrist_referral"],"source":"נדרשת אבחנה של פסיכיאטר.","confidence":"curated"},"269":{"codes":["self_referral"],"source":"","confidence":"curated"},"270":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרש מרשם פסיכיאטר ואישור הקופה.","confidence":"curated"},"271":{"codes":["psychiatrist_referral"],"source":"נדרשת הערכה פסיכיאטרית.","confidence":"curated"},"272":{"codes":["unknown"],"source":"","confidence":"none"},"273":{"codes":["psychiatrist_referral","hmo_form17"],"source":"הפניה מפסיכיאטר או נוירולוג.","confidence":"curated"},"274":{"codes":["psychiatrist_referral","hmo_form17"],"source":"לכל פנייה יש לצרף מכתב הפניה מפסיכיאטר מטפל וטופס 17 מהקופה.","confidence":"curated"},"275":{"codes":["psychiatrist_referral"],"source":"ההפניה להערכה ברמב״ם מהפסיכיאטר המטפל.","confidence":"curated"},"278":{"codes":["rehab_basket_committee"],"source":"target: זכאי סל שיקום","confidence":"curated"},"279":{"codes":["hmo_form17","psychiatrist_referral","mod_rehab_worker"],"source":"חינם דרך קופות החולים (טופס 17) או משרד הביטחון; הפניה מפסיכיאטר.","confidence":"curated"},"280":{"codes":["gp_referral"],"source":"הפנייה מרופא משפחה דרך קופת החולים.","confidence":"curated"},"281":{"codes":["mod_rehab_worker","nii_referral"],"source":"הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה).","confidence":"curated"},"282":{"codes":["unknown"],"source":"","confidence":"none"},"283":{"codes":["rehab_basket_committee","mod_rehab_worker"],"source":"זכאי סל שיקום; נכי צה\"ל (באישור עובד השיקום)","confidence":"curated"},"290":{"codes":["unknown"],"source":"","confidence":"none"},"291":{"codes":["self_referral"],"source":"פרטי כל מרפאה באתר","confidence":"curated"},"292":{"codes":["unknown"],"source":"","confidence":"none"},"293":{"codes":["hmo_form17"],"source":"טופס 17 — כללית ומאוחדת","confidence":"curated"},"296":{"codes":["self_referral","rehab_basket_committee"],"source":"מוקד *9913. מכינת הד: גילאי 18–28, זכאי סל שיקום","confidence":"curated"},"297":{"codes":["psychiatrist_referral","hmo_form17"],"source":"הפניה מפסיכיאטר. טופס 17, קוד L0771.","confidence":"curated"},"298":{"codes":["gp_referral"],"source":"אשפוז יום ניתן רק לאחר הפניית רופא.","confidence":"curated"},"299":{"codes":["gp_referral","psychiatrist_referral","hmo_form17"],"source":"טופס 17, קוד L0822. הפניה מגורם בבריאות הנפש, מנוירולוג או מרופא משפחה; אם יש פסיכיאטר מטפל — לצרף מכתב.","confidence":"curated"},"300":{"codes":["gp_referral","hmo_form17"],"source":"כללית ומכבי: הפניה מרופא מטפל. מאוחדת ולאומית: טופס 17.","confidence":"curated"},"301":{"codes":["unknown"],"source":"","confidence":"none"},"302":{"codes":["psychiatrist_referral","hmo_form17"],"source":"נדרשת הפניה מהפסיכיאטר המטפל או גורם מוסמך אחר בבריאות הנפש, וטופס התחייבות.","confidence":"curated"},"303":{"codes":["gp_referral"],"source":"בהפניית רופא.","confidence":"curated"},"304":{"codes":["unknown"],"source":"","confidence":"none"},"305":{"codes":["rehab_basket_committee"],"source":"זכאי סל שיקום","confidence":"keyword"},"306":{"codes":["self_referral","rehab_basket_committee"],"source":"סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים. מוקד 1599-504949.","confidence":"curated"},"307":{"codes":["rehab_basket_committee"],"source":"ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.","confidence":"curated"},"309":{"codes":["hmo_form17"],"source":"טופס 17","confidence":"keyword"},"310":{"codes":["hmo_form17"],"source":"טופס 17","confidence":"keyword"},"311":{"codes":["hmo_form17"],"source":"טופס 17","confidence":"keyword"},"312":{"codes":["unknown"],"source":"","confidence":"none"},"313":{"codes":["unknown"],"source":"","confidence":"none"},"314":{"codes":["unknown"],"source":"","confidence":"none"},"315":{"codes":["unknown"],"source":"","confidence":"none"},"316":{"codes":["unknown"],"source":"","confidence":"none"},"317":{"codes":["unknown"],"source":"","confidence":"none"},"318":{"codes":["unknown"],"source":"","confidence":"none"},"319":{"codes":["unknown"],"source":"","confidence":"none"},"320":{"codes":["unknown"],"source":"","confidence":"none"},"321":{"codes":["unknown"],"source":"","confidence":"none"},"322":{"codes":["unknown"],"source":"","confidence":"none"},"323":{"codes":["unknown"],"source":"","confidence":"none"},"324":{"codes":["unknown"],"source":"","confidence":"none"},"325":{"codes":["unknown"],"source":"","confidence":"none"},"326":{"codes":["unknown"],"source":"","confidence":"none"},"327":{"codes":["unknown"],"source":"","confidence":"none"},"328":{"codes":["unknown"],"source":"","confidence":"none"},"329":{"codes":["unknown"],"source":"","confidence":"none"},"330":{"codes":["unknown"],"source":"","confidence":"none"},"331":{"codes":["unknown"],"source":"","confidence":"none"},"332":{"codes":["unknown"],"source":"","confidence":"none"},"333":{"codes":["unknown"],"source":"","confidence":"none"},"334":{"codes":["unknown"],"source":"","confidence":"none"},"335":{"codes":["unknown"],"source":"","confidence":"none"},"336":{"codes":["unknown"],"source":"","confidence":"none"},"337":{"codes":["unknown"],"source":"","confidence":"none"},"338":{"codes":["unknown"],"source":"","confidence":"none"},"339":{"codes":["unknown"],"source":"","confidence":"none"},"340":{"codes":["hmo_form17"],"source":"טופס 17","confidence":"keyword"},"341":{"codes":["unknown"],"source":"","confidence":"none"},"342":{"codes":["unknown"],"source":"","confidence":"none"}}}</script>
 <!-- REFERRAL_CODES_END -->
 
     <script type="text/babel">
@@ -1175,7 +1182,6 @@
             { categories: ["trauma", "helplines"], entry: {"row": 213, "org": "מבצע הקשב", "svc": "עזרה ראשונה נפשית לנפגעי חרבות ברזל — עד 10 מפגשים", "phone": "", "web": "https://www.hakshev.com/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "ייתכן שאתר לא זמין לעיתים — בדקו לפני הפניה.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["mod", "trauma"], entry: {"row": 214, "org": "יחידה לתגובות קרב (צה\"ל)", "svc": "סיוע נפשי לחיילים ומילואים", "phone": "03-6401400", "web": "", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["trauma", "mod"], entry: {"row": 215, "org": "מכון הקבע", "svc": "סיוע נפשי ללא עלות לאנשי קבע ומשפחותיהם", "phone": "07-686000010", "web": "", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
-            { categories: ["helplines", "trauma"], entry: {"row": 216, "org": "ל\"נט", "svc": "עד 12 מפגשים טיפוליים פרטניים ללא עלות", "phone": "1800-363-363", "web": "", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "שונה מנט\"ל (*3362) — מכון לנט.", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["trauma", "mod"], entry: {"row": 217, "org": "מרכז לטראומה וחוסן — אוניברסיטת ת\"א", "svc": "קליניקה לטיפול בפוסט-טראומה (מילואים/משוחררים — תשלום סמלי)", "phone": "03-6406900", "web": "https://people.socsci.tau.ac.il/mu/traumaresilience", "target": "", "region": "תל אביב", "cost": "", "specialty": "", "notes": "א'-ה' 9:00-20:00", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "ראשי", "phoneShowNumber": true, "phone2": "050-2874955", "phoneLabel2": "נייד", "phoneShowNumber2": true} },
             { categories: ["mod"], entry: {"row": 218, "org": "אגף השיקום — טיפולים רגשיים במימון", "svc": "טיפולים נפשיים מסובסדים ע\"י משרד הביטחון (חרבות ברזל)", "phone": "", "web": "https://shikum.mod.gov.il/medical/treatment/therapy#3", "target": "", "region": "כל הארץ", "cost": "במימון משרד הביטחון", "specialty": "", "notes": "גם מופיע בכרטיס [זכויות שיקום](https://nefesh-il.org/rights?entry=12&section=rights).", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH} },
             { categories: ["trauma", "mod"], entry: {"row": 219, "org": "נשימה מרחב בעמק", "svc": "תוכנית טיפול לפוסט-טראומה — מושב משק פרזון (רישום מוקדם)", "phone": "050-6300138", "web": "", "target": "", "region": "עמק יזרעאל", "cost": "", "specialty": "", "notes": "יעל זיו 054-6633269 · טלי בשור 052-9555210", "languages": "", "diseases": "", "add": "", "tags": HARAVOT_BARZEL_SEARCH, "phoneLabel": "ליאורה דותן", "phoneShowNumber": true} },
@@ -2024,7 +2030,6 @@
          {"row": 39, "org": "אגף השיקום, משרד הבטחון", "svc": "בית בטוח לטיפול מיידי - חלופת אשפוז", "phone": "*8944", "phoneLabel": "מוקד", "phoneShowNumber": false, "phone2": "052-4614896", "phoneLabel2": "באר שבע", "phoneShowNumber2": false, "phone3": "02-6551303", "phoneLabel3": "ירושלים", "phoneShowNumber3": false, "phone4": "052-6669512", "phoneLabel4": "טירת הכרמל", "phoneShowNumber4": false, "phone5": "052-6669512", "phoneLabel5": "תל השומר", "phoneShowNumber5": false, "web": "https://shikum.mod.gov.il/medical/mental-therapy/safe_housing", "target": "נכי ונכות צה\"ל שהוכרו עם פוסט טראומה, או למי שנמצאים בתהליך הכרה על פגיעה נפשית, ונמצאים במשבר נפשי הדורש מיון, חלופת אשפוז זמנית או השגחה", "region": "", "cost": "", "specialty": "", "notes": "הבתים הבטוחים מהווים חלופת אשפוז מיידית ונקודתית למתמודדים עם פוסט טראומה בזמן של משבר נפשי ואישי. ירושלים שלוחה 2815", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/hospitalization/safehouse#1"},
 
          {"row": 42, "org": "שרן רפואה עד הבית", "svc": "ייעוץ פסיכיאטרי מקוון", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "https://sharanmedical.co.il/online-psychiatric-consultation-for-idf/", "target": "", "region": "", "cost": "זכאי משרד הבטחון", "specialty": "", "notes": "ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום. ", "languages": "", "diseases": "", "add": ""},
-         {"row": 44, "org": "שרן רפואה עד הבית", "svc": "אשפוז בית פסיכיאטרי", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "כל הארץ", "cost": "זכאי משרד הבטחון", "specialty": "חלופת אשפוז\nמיצוי זכויות", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 281, "org": "האגודה לבריאות הציבור", "svc": "שיקום לנכי צה\"ל ונפגעי פעולות איבה — מרכז החממה ותכנית תושייה למשפחות הלומי קרב", "phone": "02-5656900", "web": "https://www.aguda.co.il/service-categories/%d7%a9%d7%99%d7%a7%d7%95%d7%9d-%d7%9c%d7%a0%d7%9b%d7%99-%d7%a6%d7%94%d7%9c-%d7%95%d7%a0%d7%a4%d7%92%d7%a2%d7%99-%d7%a4%d7%a2%d7%95%d7%9c%d7%95%d7%aa-%d7%90%d7%99%d7%91%d7%94/", "target": "נכי צה\"ל ונפגעי פעולות איבה", "region": "", "cost": "", "specialty": "", "notes": "הפניה דרך עובדות השיקום של משרד הביטחון או ביטוח לאומי (פעולות איבה). החממה: גד פיינשטיין 4, רחובות.", "languages": "", "diseases": "", "add": ""}
         ]},
          
@@ -2114,7 +2119,6 @@
          {"row": 40, "org": "שרן רפואה עד הבית", "svc": "צוות משבר (חלופה לחדר מיון)", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "", "cost": "לאומית ומאוחדת", "specialty": "", "notes": "התערבות במשבר בבית המטופל", "languages": "", "diseases": "", "add": ""},
 
          {"row": 43, "org": "שרן רפואה עד הבית", "svc": "אשפוז בית פסיכיאטרי", "phone": "", "web": "https://sharanmedical.co.il/psychiatric-home-hospitalization/", "target": "", "region": "כל הארץ\n(בכללית רק ל 5 מחוזות שלהם)", "cost": "ממונן ע\"י הקופות: כללית, מאוחדת ולאומית", "specialty": "חלופת אשפוז\nמיצוי זכויות", "notes": "חלופה לאשפוז בבית חולים בסביבה הטבעית. טיפול אינטנסיבי של צוות רב-מקצועי למשך 6-8 שבועות.", "languages": "", "diseases": "", "add": ""},
-         {"row": 44, "org": "שרן רפואה עד הבית", "svc": "אשפוז בית פסיכיאטרי", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "כל הארץ", "cost": "זכאי משרד הבטחון", "specialty": "חלופת אשפוז\nמיצוי זכויות", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 45, "org": "שרן רפואה עד הבית", "svc": "הקול שבפנים – טיפול ביתי לצעירים במצבי משבר נפשי", "phone": "", "web": "https://sharanmedical.co.il/voiceover/", "target": "", "region": "", "cost": "שירות פרטי", "specialty": "", "notes": "שירות למשפחות וצעירים (12-35) החווים הסתגרות ונסיגה תפקודית. ", "languages": "", "diseases": "", "add": ""},
 
          {"row": 48, "org": "צבר רפואה", "svc": "אשפוז בית פסיכיאטרי", "phone": "", "web": "https://www.sabarhealth.co.il/%d7%a4%d7%a1%d7%99%d7%9b%d7%99%d7%90%d7%98%d7%a8%d7%99%d7%94-%d7%91%d7%91%d7%99%d7%aa/", "target": "", "region": "", "cost": "ממונן ע\"י הקופות: מכבי, מאוחדת ולאומית", "specialty": "חלופת אשפוז", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -2214,8 +2218,7 @@
         {"row": 96, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים וסבסוד טיפולים פסיכולוגיים", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה מסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים.", "languages": "", "diseases": "", "add": ""}
         ]},
         "others": {"title": "אחר", "titleEn": "Others", "services": [
-        {"row": 36, "org": "מהפנטים", "svc": "אינדקס משרד הבריאות - מהפנטים בעלי רשיון", "phone": "", "web": "https://practitioners.health.gov.il/Hypnotists/901", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
-        {"row": 89, "org": "המרכז הישראלי להתמכרויות", "svc": "טיפול והתמודדות עם התמכרויות", "phone": "09-9789510", "email": "info@ica.org.il", "web": "https://ica.org.il/treatment_frames", "target": "", "region": "", "cost": "", "specialty": "התמכרויות", "notes": "", "languages": "", "diseases": "", "add": "https://ica.org.il/contact", "iconOnly": true}
+        {"row": 36, "org": "מהפנטים", "svc": "אינדקס משרד הבריאות - מהפנטים בעלי רשיון", "phone": "", "web": "https://practitioners.health.gov.il/Hypnotists/901", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
         ]}}}, 
          
          "addictions": {"icon": "💊", "title": "התמכרויות", "titleEn": "Addictions", "desc": "טיפול במכורים, תמיכה למשפחות, קבוצות עזרה עצמית ומחקר", "services": [
@@ -3554,7 +3557,15 @@
             const [copiedSectionKey, setCopiedSectionKey] = useState(null);
             const [showIntro, setShowIntro] = useState(() => !mhIntroHiddenLocal());
             const [showFullIntro, setShowFullIntro] = useState(false);
-            const [showTerms, setShowTerms] = useState(false);
+            const [focusedTerm, setFocusedTerm] = useState(() => {
+                try {
+                    const key = (new URL(window.location.href).searchParams.get('term') || '').trim();
+                    return /^[a-z0-9_]{1,80}$/.test(key) ? key : null;
+                } catch {
+                    return null;
+                }
+            });
+            const [showTerms, setShowTerms] = useState(() => focusedTerm != null);
             const [termsSearch, setTermsSearch] = useState('');
             const [termsCategory, setTermsCategory] = useState(null);
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
@@ -3981,6 +3992,7 @@
                     });
                     if (edit.eligibility && typeof edit.eligibility === 'object') next.cardEligibility = edit.eligibility;
                     if (Array.isArray(edit.sites) && edit.sites.length) next.cardSites = edit.sites;
+                    if (Array.isArray(edit.terms) && edit.terms.length) next.cardTerms = edit.terms;
                     if (edit.id) next.cardEditId = edit.id;
                     return next;
                 };
@@ -4116,7 +4128,8 @@
             const terms = {
                 // Rights & Benefits
                 disability: { 
-                    title: "קצבת נכות", 
+                    title: "קצבת נכות",
+                    aliases: ["קצבת נכות כללית", "נכות נפשית"],
                     text: "קצבה חודשית מהביטוח הלאומי למי שיש ירידה ביכולת השתכרות עקב מגבלה רפואית או נפשית. קיימות 3 רמות נכות: חלקית (20-74%), מלאה (75-100%), ומלאה עם תוספת. קביעת הנכות נעשית בוועדה רפואית של הביטוח הלאומי. הקצבה ניתנת לפי אחוזי הנכות שנקבעו. למידע: *6050 או אתר ביטוח לאומי.",
                     category: "rights",
                     phone: "*6050",
@@ -4126,7 +4139,7 @@
                     title: "שר\"מ - שירותים מיוחדים", 
                     text: "שירותים מיוחדים לשיקום מהביטוח הלאומי. סל מקיף הכולל: ליווי אישי, טיפולים פסיכולוגיים ופסיכיאטריים, שיקום תעסוקתי, דיור נתמך, וסיוע במיצוי זכויות. מיועד למי שיש לו מחלת נפש קשה או מוגבלות משמעותית (75% נכות ומעלה) וזקוק לסיוע נרחב. השירותים ניתנים ללא עלות דרך ספקים מוכרים.",
                     category: "rights",
-                    related: ["disability", "rehab_basket", "rehab_services"]
+                    related: ["disability", "rehab_basket", "rehabilitation", "btl"]
                 },
                 nursing: { 
                     title: "קצבת סיעוד", 
@@ -4140,10 +4153,11 @@
                     text: "שירותים קהילתיים חינמיים ממשרד הבריאות לזכאים בגילאי 18-67 המתמודדים עם מגבלה נפשית. הסל כולל: דיור מוגן, מועדונים שיקומיים, שיקום תעסוקתי, ליווי בקהילה, תמיכה נפשית, וסיוע במיצוי זכויות. הספקים העיקריים: אנוש, קידום, ידיד נפש, אור לנפש. הזכאות נקבעת על ידי ועדת זכאות. למידע: *5400.",
                     category: "rights",
                     phone: "*5400",
-                    related: ["rehab_services", "supported_housing", "rehab_club", "vocational_rehab"]
+                    related: ["rehab_committee", "supported_housing", "hostel", "rehab_club", "vocational_rehab"]
                 },
                 medical_committee: {
                     title: "וועדה רפואית",
+                    aliases: ["ועדה רפואית", "ועדות רפואיות"],
                     text: "וועדה של הביטוח הלאומי הקובעת את אחוזי הנכות וזכאות לקצבאות. הוועדה כוללת רופא מומחה הבודק את המסמכים הרפואיים ומבצע בדיקה גופנית/נפשית. חשוב להגיע מוכן עם כל המסמכים הרפואיים, חוות דעת מטפלים, ותיעוד רפואי. ניתן לקבל סיוע בהכנה לוועדה דרך 'יד מכוונת' (*2496) או ארגונים שונים.",
                     category: "rights",
                     phone: "*2496",
@@ -4231,6 +4245,7 @@
                 },
                 online_therapy: {
                     title: "טיפול מקוון",
+                    aliases: ["טיפול אונליין", "טיפול בזום", "טיפול מרחוק"],
                     text: "טיפול פסיכותרפויטי המתקיים מרחוק דרך וידאו (Zoom, Skype) או טלפון. מאפשר גישה נוחה לטיפול ללא צורך להגיע פיזית, חשוב במיוחד למי שגר באזורים מרוחקים או מתקשה לצאת מהבית. חלק מקופות החולים מציעות טיפול מקוון מסובסד. חשוב לוודא שהמטפל בעל הכשרה מתאימה ושהוא עובד בסביבה בטוחה ומאובטחת.",
                     category: "treatment",
                     related: ["therapy", "psychologist"]
@@ -4298,12 +4313,14 @@
                 },
                 psychologist: {
                     title: "פסיכולוג קליני",
+                    aliases: ["פסיכולוג", "פסיכולוגית", "פסיכולוגים"],
                     text: "מטפל נפשי בעל תואר שני או שלישי בפסיכולוגיה קלינית. הפסיכולוג הקליני יכול לבצע אבחונים פסיכולוגיים, טיפולים פסיכותרפויטיים, אך לא יכול לרשום תרופות. ההכשרה כוללת התמחות קלינית מעמיקה. ניתן לקבל טיפול דרך קופות החולים (מסובסד עם הפניה) או באופן פרטי. חשוב לבדוק שהמטפל רשום בפנקס הפסיכולוגים של משרד הבריאות.",
                     category: "professionals",
                     related: ["psychiatrist", "therapy", "cbt", "psychodynamic"]
                 },
                 social_worker: {
                     title: "עובד סוציאלי פסיכיאטרי",
+                    aliases: ["עובד סוציאלי", "עובדת סוציאלית", "עובדים סוציאליים", "עו\"ס", "עו״ס"],
                     text: "עובד סוציאלי בעל הכשרה מיוחדת בבריאות הנפש. העובד הסוציאלי מסייע במיצוי זכויות, ליווי במערכות השונות, טיפול בשיחה (פסיכותרפיה), וקשר עם משפחה וקהילה. עובדים סוציאליים פסיכיאטריים עובדים בבתי חולים, מרפאות בריאות הנפש, וסל שיקום. חלקם בעלי תואר שני (MSW) ומתמחים בטיפול קליני.",
                     category: "professionals",
                     related: ["rights_utilization", "rehab_basket", "therapy"]
@@ -4322,7 +4339,8 @@
                 },
                 // Hospitalization & Alternatives
                 hospitalization: { 
-                    title: "אשפוז פסיכיאטרי", 
+                    title: "אשפוז פסיכיאטרי",
+                    aliases: ["אשפוז מלא", "מחלקה פסיכיאטרית", "מחלקות פסיכיאטריות"],
                     text: "אשפוז בבית חולים פסיכיאטרי או במחלקה פסיכיאטרית בבית חולים כללי. קיימים שני סוגים: אשפוז רצוני (בהסכמת המטופל) ואשפוז כפוי (בכורח, על פי צו פסיכיאטרי כאשר יש סכנה לעצמו או לאחרים). במהלך האשפוז יש זכויות: הגנה משפטית, טיפול הולם, קשר עם העולם החיצון, וזכות לערער על האשפוז. קיימות חלופות לאשפוז מלא: אשפוז יום, אשפוז בית, ובתים מאזנים.",
                     category: "hospitalization",
                     related: ["voluntary_hosp", "involuntary_hosp", "psychiatric_order", "day_hosp", "home_hosp", "balancing_homes"]
@@ -4347,6 +4365,7 @@
                 },
                 day_hosp: {
                     title: "אשפוז יום",
+                    aliases: ["אשפוזי יום"],
                     text: "חלופת אשפוז המאפשרת טיפול אינטנסיבי במהלך היום עם חזרה הביתה בלילה. המטופל מגיע לבית החולים בבוקר, מקבל טיפולים (פסיכותרפיה, תרופות, פעילויות), וחוזר הביתה בערב. מתאים למי שזקוק לטיפול אינטנסיבי אך יכול לתפקד בבית. מאפשר שמירה על קשרים משפחתיים ותפקוד חלקי. ניתן דרך קופות החולים או בתי חולים.",
                     category: "hospitalization",
                     related: ["hospitalization", "alternatives", "home_hosp"]
@@ -4359,6 +4378,7 @@
                 },
                 balancing_homes: {
                     title: "בתים מאזנים",
+                    aliases: ["בית מאזן"],
                     text: "מסגרות דיור זמניות המהוות חלופת אשפוז. מספקות סביבה תומכת ומבנה יומיומי למתמודדים במשבר נפשי. השהות היא זמנית (מספר שבועות עד חודשים) ומטרתה לספק יציבות ותמיכה בתקופת משבר. כוללות צוות מקצועי, פעילויות שיקומיות, ותמיכה נפשית. חלק ממשרד הבריאות וחלק פרטיות.",
                     category: "hospitalization",
                     related: ["hospitalization", "alternatives", "safe_house"],
@@ -4373,6 +4393,7 @@
                 },
                 crisis_team: {
                     title: "צוות משבר",
+                    aliases: ["צוותי משבר"],
                     text: "צוות מקצועי המגיע לבית המטופל במצב משבר נפשי חריף. מהווה חלופה לחדר מיון פסיכיאטרי ומאפשר התערבות מהירה בסביבה הטבעית. הצוות כולל פסיכיאטר, עובד סוציאלי, ואחיות. מתאים למצבי חירום נפשיים הדורשים התערבות מיידית. זמין דרך קופות החולים (לאומית ומאוחדת) או שירותים פרטיים.",
                     category: "hospitalization",
                     related: ["hospitalization", "alternatives", "home_hosp"]
@@ -4386,12 +4407,14 @@
                 // Rehabilitation Services
                 supported_housing: {
                     title: "דיור מוגן",
+                    aliases: ["דיור נתמך"],
                     text: "מסגרות דיור תומכות למתמודדי נפש המאפשרות חיים עצמאיים עם תמיכה מקצועית. כוללות דירות או בתים משותפים עם צוות מקצועי זמין. רמות התמיכה משתנות - מדיור מוגן מלא עם השגחה צמודה ועד דיור מוגן קל עם תמיכה לפי צורך. חלק מסל שיקום ומאפשרות שיקום והשתלבות בקהילה תוך תמיכה מתמשכת.",
                     category: "rehabilitation",
                     related: ["rehab_basket", "rehab_club", "community_support"]
                 },
                 rehab_club: {
                     title: "מועדון שיקומי",
+                    aliases: ["מועדון חברתי", "מועדונים חברתיים", "מועדונים שיקומיים"],
                     text: "מסגרת קהילתית למתמודדי נפש המספקת פעילויות חברתיות, תעסוקתיות, ותמיכה נפשית. המועדונים פועלים במהלך היום ומאפשרים מפגש עם אנשים נוספים, פעילויות משמעותיות, ותמיכה הדדית. חלק מסל שיקום וניתן ללא עלות לזכאים. המועדונים שונים זה מזה באופי הפעילות והאוכלוסייה. חשובים לתהליך השיקום והחלמה.",
                     category: "rehabilitation",
                     related: ["rehab_basket", "supported_housing", "vocational_rehab"]
@@ -4412,50 +4435,50 @@
                     title: "שיקום",
                     text: "תהליך מקיף של החזרה לתפקוד והשתלבות בקהילה לאחר משבר נפשי או מגבלה נפשית. השיקום כולל: טיפול נפשי, שיקום תעסוקתי, דיור תומך, תמיכה חברתית, ופיתוח כישורים. מתבצע דרך סל שיקום, שירותים מיוחדים (שר\"מ), ומסגרות שיקומיות שונות. מטרת השיקום היא לאפשר חיים משמעותיים ועצמאיים ככל האפשר בקהילה.",
                     category: "rehabilitation",
-                    related: ["rehab_basket", "sharam", "supported_housing", "vocational_rehab"]
+                    related: ["rehab_basket", "sharam", "supported_housing", "vocational_rehab"],
+                    noAutoLink: true
                 },
                 // Health Funds (HMOs)
                 hmo: {
                     title: "קופת חולים",
+                    aliases: ["קופת החולים", "קופות חולים", "קופות החולים"],
                     text: "ארגון בריאות המספק שירותי רפואה וביטוח בריאות לתושבי ישראל. קיימות 4 קופות חולים: כללית, מכבי, מאוחדת, ולאומית. כל קופת חולים מספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. כל קופה מציעה גם שירותי חירום נפשיים.",
                     category: "hmo",
                     related: ["clalit", "maccabi", "meuhedet", "leumit", "mental_health_clinic"]
                 },
                 clalit: {
                     title: "כללית",
-                    text: "קופת החולים הגדולה בישראל. מספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. קו חירום נפשי: 1-700-50-70-50. למידע: *2700.",
+                    text: "קופת החולים הגדולה בישראל. מספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. מוקד תמיכה נפשית, 24 שעות ביממה: *8703. למידע: *2700.",
                     category: "hmo",
                     phone: "*2700",
-                    phone2: "1-700-50-70-50",
-                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
+                    phone2: "*8703",
+                    related: ["mental_health_clinic", "hmo"]
                 },
                 maccabi: {
                     title: "מכבי",
-                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. קו חירום נפשי: 1-800-401-040. למידע: *3555.",
+                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אין צורך בהפניית רופא: פונים למרפאה בטופס מקוון. מוקד תמיכה נפשית, 24 שעות ביממה: *3555.",
                     category: "hmo",
                     phone: "*3555",
-                    phone2: "1-800-401-040",
-                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
+                    related: ["mental_health_clinic", "hmo"]
                 },
                 meuhedet: {
                     title: "מאוחדת",
-                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. קו חירום נפשי: 1-800-20-20-60. למידע: *3833.",
+                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אין צורך בהפניית רופא: קובעים פגישת מיון במוקד. מוקד תמיכה נפשית, 24 שעות ביממה: *3833.",
                     category: "hmo",
                     phone: "*3833",
-                    phone2: "1-800-20-20-60",
-                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
+                    related: ["mental_health_clinic", "hmo"]
                 },
                 leumit: {
                     title: "לאומית",
-                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. קו חירום נפשי: 1-800-240-240. למידע: *507.",
+                    text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אפשר בהפניית רופא, או בפנייה ישירה לתומך בריאות הנפש. מוקד תמיכה נפשית, 24 שעות ביממה: *507.",
                     category: "hmo",
                     phone: "*507",
-                    phone2: "1-800-240-240",
-                    related: ["mh_clinics", "hmo", "mental_health_clinic"]
+                    related: ["mental_health_clinic", "hmo"]
                 },
                 // Conditions & Disorders
                 ptsd: { 
-                    title: "PTSD - הפרעת דחק פוסט-טראומטית", 
+                    title: "PTSD - הפרעת דחק פוסט-טראומטית",
+                    aliases: ["פוסט טראומה", "פוסט-טראומה", "פוסט־טראומה", "הפרעת דחק"],
                     text: "הפרעה נפשית המתפתחת אחרי חשיפה לאירוע טראומטי (מלחמה, תאונה, פיגוע, תקיפה, אונס). התסמינים כוללים: זיכרונות חודרניים וחלומות, הימנעות מגירויים הקשורים לטראומה, ערנות יתר, ושינויים במצב רוח ובחשיבה. הטיפול כולל: CBT, EMDR, תרופות (SSRI), וטיפול סומטי. חשוב לפנות לטיפול מוקדם. נט\"ל - ארגון תמיכה לנפגעי טראומה: *3362.",
                     category: "conditions",
                     phone: "*3362",
@@ -4481,6 +4504,7 @@
                 },
                 eating_disorders: {
                     title: "הפרעות אכילה",
+                    aliases: ["אנורקסיה", "בולימיה", "הפרעת אכילה"],
                     text: "הפרעות נפשיות הקשורות לאכילה ולדימוי גוף. כוללות: אנורקסיה נרבוזה, בולימיה נרבוזה, והפרעת אכילה כפייתית (BED). מתאפיינות בהתנהגויות אכילה לא תקינות, דאגה מוגזמת ממשקל ודימוי גוף, ופגיעה בתפקוד. הטיפול כולל: טיפול פסיכותרפויטי (CBT), טיפול תזונתי, ולעיתים תרופות או אשפוז. דורש טיפול מקצועי מיוחד. ניתן דרך קופות החולים או מרכזים מיוחדים.",
                     category: "conditions",
                     related: ["cbt", "therapy", "psychiatrist"]
@@ -4505,6 +4529,7 @@
                 },
                 adhd: {
                     title: "ADHD - הפרעת קשב וריכוז",
+                    aliases: ["הפרעת קשב", "הפרעות קשב"],
                     text: "הפרעה נוירו-התפתחותית המתאפיינת בקשיי קשב, היפראקטיביות, ואימפולסיביות. יכולה להופיע בילדות ולהמשיך לבגרות. הטיפול כולל: תרופות (ריטלין, קונצרטה, אדרל), טיפול התנהגותי, וסיוע בלימודים/עבודה. דורש אבחון מקצועי (נוירולוג, פסיכיאטר). ניתן טיפול דרך קופות החולים או פרטי. חשוב להבין שזו הפרעה אמיתית ולא בעיית התנהגות.",
                     category: "conditions",
                     related: ["psychiatrist", "medication"]
@@ -4514,22 +4539,26 @@
                     title: "מרפאת בריאות הנפש",
                     text: "מרפאה של קופת החולים המספקת שירותי בריאות הנפש. כוללת: פסיכיאטרים, פסיכולוגים, עובדים סוציאליים, וטיפולים פסיכותרפויטיים. השירותים מסובסדים עם הפניה מרופא משפחה. ניתן לקבוע תור דרך קופת החולים. חשוב להביא הפניה מרופא משפחה ומסמכים רפואיים רלוונטיים.",
                     category: "mh_clinics",
-                    related: ["mh_clinics", "hmo", "psychiatrist", "psychologist"]
+                    related: ["hmo", "family_doctor", "psychiatrist", "psychologist"],
+                    aliases: ["מרפאה לבריאות הנפש", "מרפאות בריאות הנפש", "מרפאות לבריאות הנפש", "מרפאת חוץ"]
                 },
                 psychiatric_er: {
                     title: "חדר מיון פסיכיאטרי",
+                    aliases: ["מיון פסיכיאטרי"],
                     text: "מחלקה בבתי חולים המטפלת במצבי חירום נפשיים. מיועדת למי שנמצא במשבר נפשי חריף, סכנה לעצמו או לאחרים, או פסיכוזה חריפה. הצוות כולל פסיכיאטרים, אחיות, ועובדים סוציאליים. מתבצעת הערכה, טיפול מיידי, והחלטה על המשך טיפול (שחרור, אשפוז, או חלופת אשפוז). קיים בכל בתי החולים הגדולים.",
                     category: "other",
                     related: ["hospitalization", "crisis_team"]
                 },
                 resilience_center: {
                     title: "מרכז חוסן",
+                    aliases: ["מרכזי חוסן", "מרכז החוסן"],
                     text: "מרכזים של ביטוח לאומי המספקים תמיכה נפשית וטיפול למתמודדי נפש. כוללים צוותים מקצועיים, טיפולים פסיכותרפויטיים, ופעילויות שיקומיות. מיועדים למי שזקוק לתמיכה נפשית נוספת מעבר למה שקיים בקופות החולים. ניתן למצוא רשימת מרכזי החוסן באתר ביטוח הלאומי.",
                     category: "other",
                     related: ["hmo", "therapy"]
                 },
                 helpline: {
                     title: "קו סיוע",
+                    aliases: ["קו חם", "קווי סיוע", "קו תמיכה", "קווי תמיכה"],
                     text: "שירות טלפוני המספק תמיכה נפשית ראשונית, הקשבה, והכוונה. קיימים קווי סיוע שונים: ער\"ן (1201) - כללי, נט\"ל (*3362) - לטראומה, סהר - אונליין, ועוד. הקווים פועלים 24/7 או בשעות מסוימות. חלקם אנונימיים. חשובים במיוחד במצבי משבר, בדידות, וצורך מיידי בתמיכה. לא מחליפים טיפול מקצועי אך יכולים לסייע מאוד.",
                     category: "other",
                     phone: "1201",
@@ -4540,6 +4569,156 @@
                     text: "סיוע רגשי ונפשי הניתן על ידי מקצועיים או קהילה. כוללת: הקשבה, הבנה, עידוד, והכוונה. תמיכה נפשית יכולה להיות מקצועית (טיפול) או לא מקצועית (תמיכה עמיתים, משפחה, קהילה). חשובה מאוד בתהליך ההחלמה והשיקום. קיימות קבוצות תמיכה, קווי סיוע, ותמיכה משפחתית. תמיכה נפשית היא חלק חשוב מהטיפול וההחלמה.",
                     category: "other",
                     related: ["helpline", "therapy", "group_therapy"]
+                },
+                // Added 10.2026
+                day_treatment: {
+                    title: "טיפול יום",
+                    text: "מסגרת טיפולית אינטנסיבית שבה מגיעים בבוקר למחלקה, מקבלים טיפול במשך היום (שיחות אישיות וקבוצתיות, טיפול תרופתי, פעילות) וחוזרים הביתה אחר הצהריים. חלק מבתי החולים קוראים לזה «טיפול יום» וחלק «אשפוז יום», ולפעמים «טיפול יום» הוא מסגרת ארוכה ופחות אינטנסיבית. יש מחלקות נפרדות למבוגרים ולילדים ונוער. בדרך כלל צריך טופס 17 מקופת החולים, ולפעמים מגיעים אליו אחרי אשפוז מלא.",
+                    category: "hospitalization",
+                    related: ["day_hosp", "alternatives", "form17", "hmo"],
+                    aliases: ["טיפול יום", "טיפולי יום", "מחלקת טיפול יום"]
+                },
+                form17: {
+                    title: "טופס 17 (התחייבות)",
+                    text: "אישור של קופת החולים שהיא תשלם על שירות שניתן אצל גורם אחר, למשל בית חולים, מחלקת טיפול יום או מרפאה חיצונית. מבקשים אותו מהקופה (דרך הרופא, מוקד הקופה או האתר) לפני שמגיעים. בלי טופס 17 בתוקף, נותן השירות יכול לדרוש תשלום. לטופס יש תוקף מוגבל, והוא מתייחס לשירות ולמקום מסוימים.",
+                    category: "hmo",
+                    related: ["hmo", "day_treatment", "hospitalization"],
+                    aliases: ["טופס 17", "טופס התחייבות", "התחייבות מהקופה"]
+                },
+                btl: {
+                    title: "ביטוח לאומי",
+                    text: "המוסד לביטוח לאומי הוא הגוף הממלכתי שמשלם קצבאות וגמלאות, ובהן קצבת נכות כללית, שירותים מיוחדים (שר\"מ) וקצבת סיעוד. הזכאות לרוב הקצבאות בגלל מצב נפשי נקבעת בוועדה רפואית של המוסד. ביטוח לאומי מפעיל גם את «יד מכוונת», שמסייעת בהכנה לוועדה. מוקד: *6050.",
+                    category: "rights",
+                    phone: "*6050",
+                    related: ["disability", "sharam", "medical_committee", "guidance_service"],
+                    aliases: ["ביטוח לאומי", "הביטוח הלאומי", "המוסד לביטוח לאומי", "בל\"ל"]
+                },
+                moh: {
+                    title: "משרד הבריאות",
+                    text: "המשרד הממשלתי שאחראי על מערכת בריאות הנפש. הוא מפקח על בתי החולים הפסיכיאטריים ועל מרפאות בריאות הנפש, מפעיל את סל שיקום דרך ועדות סל שיקום, ואחראי על אשפוז כפוי דרך הפסיכיאטרים המחוזיים. מאז הרפורמה בבריאות הנפש ב-2015, הטיפול הנפשי בקהילה ניתן דרך קופות החולים. מוקד «קול הבריאות»: *5400.",
+                    category: "other",
+                    phone: "*5400",
+                    related: ["rehab_basket", "rehab_committee", "health_basket", "psychiatric_order"],
+                    aliases: ["משרד הבריאות"]
+                },
+                mod_rehab: {
+                    title: "אגף השיקום במשרד הביטחון",
+                    text: "האגף שמטפל בחיילים ובאנשי כוחות הביטחון שנפגעו בגוף או בנפש במהלך השירות, כולל פוסט טראומה. מי שהוכר מקבל טיפול נפשי, תגמולים, ליווי של קצין או קצינת שיקום ושירותים נוספים. במקרים מסוימים אפשר לקבל טיפול נפשי ראשוני עוד לפני שתהליך ההכרה הסתיים. מוקד אגף השיקום: *8150. קו התמיכה הנפשית «נפש אחת», 24 שעות ביממה: *8944.",
+                    category: "rights",
+                    phone: "*8150",
+                    phone2: "*8944",
+                    related: ["ptsd", "safe_house", "trauma"],
+                    aliases: ["אגף השיקום", "משרד הביטחון", "משרד הבטחון", "נכי צה\"ל", "נפש אחת"]
+                },
+                family_doctor: {
+                    title: "רופא משפחה",
+                    text: "הרופא הראשוני בקופת החולים. אפשר לפנות אליו עם קושי נפשי: הוא יכול לתת טיפול תרופתי ראשוני, להפנות לפסיכיאטר, לפסיכולוג או למרפאת בריאות הנפש, ולעזור בטפסים ובאישורים. לחלק משירותי בריאות הנפש צריך הפניה ממנו, ולחלקם אפשר לפנות ישירות.",
+                    category: "hmo",
+                    related: ["hmo", "mental_health_clinic", "psychiatrist", "form17"],
+                    aliases: ["רופא משפחה", "רופאת משפחה", "רופא המשפחה"]
+                },
+                rehab_committee: {
+                    title: "ועדת סל שיקום",
+                    text: "הוועדה של משרד הבריאות שמחליטה אם אדם זכאי לשירותי סל שיקום, ואילו שירותים יקבל. מגישים בקשה יחד עם גורם מטפל (פסיכיאטר, עובד סוציאלי או מטפל) ומצרפים מסמכים רפואיים. התנאי הרגיל הוא נכות נפשית של 40% לפחות שנקבעה בביטוח לאומי, מגיל 18. אחרי האישור מקבלים ליווי של רכז שיקום, שעוזר לבחור את השירותים.",
+                    category: "rehabilitation",
+                    related: ["rehab_basket", "rehabilitation", "btl", "moh"],
+                    aliases: ["ועדת סל", "ועדת סל שיקום", "ועדת שיקום", "ועדות סל שיקום"]
+                },
+                supported_employment: {
+                    title: "תעסוקה נתמכת",
+                    text: "עבודה בשכר במקום עבודה רגיל, עם ליווי של רכז תעסוקה מסל שיקום או מעמותה. הרכז עוזר למצוא עבודה, להשתלב בה ולפתור קשיים בדרך, וממשיך ללוות גם אחרי שמתחילים לעבוד. זה שונה ממפעל מוגן, שבו העבודה נעשית בתוך מסגרת שיקומית.",
+                    category: "rehabilitation",
+                    related: ["vocational_rehab", "rehab_basket", "rehab_club"],
+                    aliases: ["תעסוקה נתמכת", "השמה נתמכת"]
+                },
+                hostel: {
+                    title: "הוסטל",
+                    text: "מסגרת דיור שיקומית שבה יש צוות במקום כל שעות היממה. זו רמת התמיכה הגבוהה ביותר בדיור של סל שיקום, למי שעדיין לא יכול לגור לבד או בדירה מוגנת. בהוסטל יש ארוחות, פעילות ותמיכה יומיומית, והמטרה היא לעבור בהמשך לדיור עצמאי יותר. הזכאות נקבעת בוועדת סל שיקום. יש גם הוסטלים לבני נוער.",
+                    category: "rehabilitation",
+                    related: ["supported_housing", "rehab_basket", "rehab_committee"],
+                    aliases: ["הוסטל", "הוסטלים"]
+                },
+                open_closed_ward: {
+                    title: "מחלקה פתוחה ומחלקה סגורה",
+                    text: "במחלקה פסיכיאטרית פתוחה אפשר לצאת ולהיכנס לפי סדר היום ובתיאום עם הצוות, והאשפוז בה בדרך כלל רצוני. במחלקה סגורה הדלתות נעולות והיציאה רק באישור, כי חלק מהמאושפזים נמצאים בסכנה לעצמם או לאחרים, ויש בה גם מאושפזים באשפוז כפוי. מעבר ממחלקה סגורה לפתוחה הוא לרוב שלב בהחלמה.",
+                    category: "hospitalization",
+                    related: ["hospitalization", "voluntary_hosp", "involuntary_hosp"],
+                    aliases: ["מחלקה פתוחה", "מחלקה סגורה", "מחלקות פתוחות", "מחלקות סגורות"]
+                },
+                sexual_trauma: {
+                    title: "טראומה מינית",
+                    text: "פגיעה נפשית בעקבות פגיעה מינית, בכל גיל ובכל צורה. ההשפעות יכולות להופיע מיד או שנים אחר כך, וכוללות פוסט טראומה, דיכאון, חרדה, ניתוק, קשיים באמון ובאינטימיות, ופגיעה עצמית. מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית זמינים בקו 1202 (נשים) ו-1203 (גברים), ויש יחידות טיפול ייעודיות בבתי חולים ובקהילה.",
+                    category: "conditions",
+                    phone: "1202",
+                    phone2: "1203",
+                    related: ["trauma", "ptsd", "cptsd"],
+                    aliases: ["טראומה מינית", "פגיעה מינית", "פגיעות מיניות", "תקיפה מינית"]
+                },
+                medication: {
+                    title: "טיפול תרופתי",
+                    text: "טיפול בתרופות פסיכיאטריות שרושם פסיכיאטר או רופא משפחה: נוגדי דיכאון (כמו SSRI), מייצבי מצב רוח, תרופות אנטי-פסיכוטיות, תרופות להפרעת קשב, ותרופות הרגעה ושינה. ההשפעה של רוב נוגדי הדיכאון מורגשת אחרי כמה שבועות. לא מפסיקים תרופה בבת אחת בלי להתייעץ, כי הפסקה פתאומית עלולה לגרום לתסמינים. בהרבה מצבים, שילוב של תרופות ופסיכותרפיה עוזר יותר מכל אחד מהם לבד.",
+                    category: "treatment",
+                    related: ["psychiatrist", "depression", "anxiety", "therapy"],
+                    aliases: ["טיפול תרופתי", "תרופות פסיכיאטריות", "SSRI"]
+                },
+                natal: {
+                    title: "נט\"ל",
+                    text: "עמותה לטיפול ולתמיכה בנפגעי טראומה על רקע לאומי, כמו מלחמה ופיגועים, ובבני משפחותיהם. נט\"ל מפעילה קו סיוע, טיפול פרטני וקבוצתי, וקהילות תמיכה.",
+                    category: "other",
+                    phone: "*3362",
+                    related: ["ptsd", "trauma", "helpline"],
+                    aliases: ["נט\"ל", "נט״ל"]
+                },
+                eran: {
+                    title: "ער\"ן",
+                    text: "עזרה ראשונה נפשית: קו סיוע ארצי, אנונימי, 24 שעות ביממה, בטלפון 1201. אפשר לפנות גם בצ'אט ובוואטסאפ דרך האתר של ער\"ן. המתנדבים מקשיבים ותומכים בשיחה, ובמצב של סכנה מיידית יכולים להפנות לעזרה.",
+                    category: "other",
+                    phone: "1201",
+                    related: ["helpline", "mental_support"],
+                    aliases: ["ער\"ן", "ער״ן"]
+                },
+                postpartum_depression: {
+                    title: "דיכאון אחרי לידה",
+                    text: "דיכאון שמופיע בשנה הראשונה אחרי לידה, ולפעמים כבר בהריון. הוא שונה מ«בייבי בלוז», עצב ובכי בימים הראשונים שחולפים מעצמם תוך שבועיים. בדיכאון אחרי לידה יש עצב או חרדה שנמשכים, קושי ליהנות מהתינוק או להתחבר אליו, קשיי שינה גם כשהתינוק ישן, אשמה ומחשבות קשות. זה מצב שכיח ומטופל היטב בשיחות, בתרופות שמתאימות גם להנקה ובתמיכה. אפשר לפנות לטיפת חלב, לרופא המשפחה או למרפאת בריאות הנפש. מחשבות על פגיעה בעצמך או בתינוק מחייבות פנייה מיידית.",
+                    category: "conditions",
+                    related: ["depression", "family_doctor", "mental_health_clinic"],
+                    aliases: ["דיכאון אחרי לידה", "דיכאון לאחר לידה", "דיכאון פוסט פרטום", "postpartum depression"],
+                    readMoreUrl: "/postpartum-depression-guide"
+                },
+                health_basket: {
+                    title: "סל הבריאות",
+                    text: "רשימת השירותים והתרופות שכל קופות החולים חייבות לתת למבוטחים לפי חוק ביטוח בריאות ממלכתי. מאז 2015 גם טיפול נפשי, פסיכיאטרי ופסיכותרפיה, כלול בסל, ולכן הוא ניתן דרך הקופה. הסל מתעדכן כל שנה. לא לבלבל עם סל שיקום, שהוא שירותי שיקום של משרד הבריאות.",
+                    category: "hmo",
+                    related: ["hmo", "rehab_basket", "moh"],
+                    aliases: ["סל הבריאות", "סל שירותי הבריאות"]
+                },
+                kol_zchut: {
+                    title: "כל זכות",
+                    text: "אתר מידע ללא מטרות רווח שמסביר זכויות בשפה פשוטה: קצבאות, הטבות, שירותים ותהליכים מול גופי המדינה, כולל עמודים ייעודיים לבריאות הנפש. האתר לא מגיש בקשות בשמך, אבל עוזר להבין למה זכאים ואיך מבקשים.",
+                    category: "rights",
+                    related: ["rights_utilization", "btl"],
+                    aliases: ["כל זכות", "כל-זכות"]
+                },
+                trauma: {
+                    title: "טראומה",
+                    text: "פגיעה נפשית בעקבות אירוע מאיים או קשה מנשוא: מלחמה, פיגוע, תאונה, אלימות, פגיעה מינית או אובדן פתאומי. רוב האנשים חווים תגובות חזקות בימים ובשבועות שאחרי האירוע, ורובם מתאוששים. כשהתסמינים נמשכים יותר מחודש ופוגעים בתפקוד, זו יכולה להיות פוסט טראומה (PTSD). טיפולים שממוקדים בטראומה, כמו CBT ממוקד טראומה ו-EMDR, יעילים גם שנים אחרי האירוע.",
+                    category: "conditions",
+                    related: ["ptsd", "cptsd", "sexual_trauma", "emdr", "resilience_center"],
+                    aliases: ["טראומה", "טראומה נפשית", "אירוע טראומטי"]
+                },
+                family_support: {
+                    title: "תמיכה במשפחות",
+                    text: "בני משפחה של מי שמתמודד עם קושי נפשי זקוקים גם הם לתמיכה. יש להם זכות לקבל מידע (בהסכמת המטופל), הדרכה וליווי. בארץ פועלים מרכזי ייעוץ למשפחות של משרד הבריאות, בקהילה ובבתי החולים, וגם קבוצות תמיכה והדרכה של ארגוני משפחות. חלק מהשירותים ניתנים ללא עלות.",
+                    category: "other",
+                    related: ["family_therapy", "mental_support", "rights_utilization"],
+                    aliases: ["מרכז ייעוץ למשפחות", "מרכזי ייעוץ למשפחות", "בני משפחה", "תמיכה במשפחות"]
+                },
+                addictions: {
+                    title: "התמכרויות",
+                    text: "התמכרות היא שימוש כפייתי בחומר (אלכוהול, סמים, תרופות) או בהתנהגות (הימורים, מסכים) שנמשך למרות הנזק. היא מופיעה הרבה יחד עם דיכאון, חרדה ופוסט טראומה, ולעיתים משמשת כדי להקל עליהם, ואז מדברים על «תחלואה כפולה». הטיפול כולל גמילה גופנית כשצריך, טיפול נפשי, קבוצות כמו AA ו-NA, ומסגרות בקהילה ובקהילות טיפוליות.",
+                    category: "conditions",
+                    related: ["group_therapy", "depression", "anxiety"],
+                    aliases: ["התמכרות", "התמכרויות", "גמילה", "תחלואה כפולה"]
                 }
             };
 
@@ -5334,6 +5513,8 @@
 
             const openResourcePage = (page) => {
                 setShowTerms(false);
+                setFocusedTerm(null);
+                setTermUrl(null);
                 setShowIntro(false);
                 setSearchTerm('');
                 setSelectedCategoryGroup('information');
@@ -5676,6 +5857,26 @@
                                 {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes)}</div>}
                             </div>
                         )}
+                        {Array.isArray(s.cardTerms) && s.cardTerms.some((k) => terms[k]) && (
+                            <div className="mh-card-terms">
+                                <strong>{s.dir === 'ltr' ? 'Glossary:' : 'מונחים קשורים:'}</strong>
+                                {s.cardTerms.filter((k) => terms[k]).map((k) => (
+                                    <a
+                                        key={k}
+                                        href={`/?term=${k}`}
+                                        className="mh-card-term-chip"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            openTerm(k);
+                                            window.scrollTo(0, 0);
+                                        }}
+                                        data-tracking-name={`${s.trackingName || s.org}_term_${k}`}
+                                    >
+                                        <i className="fas fa-book" aria-hidden="true"></i> {terms[k].title}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
                         <div className="mh-card-actions">
                             {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
                             {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
@@ -5991,6 +6192,89 @@
                 );
             };
 
+            const setTermUrl = (key) => {
+                try {
+                    const url = new URL(window.location.href);
+                    if (key) url.searchParams.set('term', key);
+                    else url.searchParams.delete('term');
+                    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+                } catch (_) {}
+            };
+            const openTerm = (key) => {
+                setTermsSearch('');
+                setTermsCategory(null);
+                setSelectedLetter(null);
+                setTermsViewMode('categories');
+                setFocusedTerm(key);
+                setShowTerms(true);
+                setTermUrl(key);
+            };
+            const closeTerms = () => {
+                setShowTerms(false);
+                setTermsSearch('');
+                setTermsCategory(null);
+                setSelectedLetter(null);
+                setTermsViewMode('categories');
+                setFocusedTerm(null);
+                setTermUrl(null);
+            };
+            useEffect(() => {
+                if (!showTerms || !focusedTerm) return;
+                if (!terms[focusedTerm]) {
+                    setFocusedTerm(null);
+                    setTermUrl(null);
+                    return;
+                }
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    document.getElementById(`term-${focusedTerm}`)?.scrollIntoView({ block: 'center' });
+                }));
+            }, [showTerms, focusedTerm]);
+
+            // Approved glossary links arrive on each card (cardTerms). The reverse list, a term's
+            // services, is built from the same cards so the two directions cannot disagree.
+            const termCards = useMemo(() => {
+                const byTerm = {};
+                const seen = new Set();
+                const add = (svc, categoryKey) => {
+                    if (!svc || !Array.isArray(svc.cardTerms)) return;
+                    const id = `${svc.row}|||${svc.svc || ''}`;
+                    if (seen.has(id)) return;
+                    seen.add(id);
+                    svc.cardTerms.forEach((key) => {
+                        if (!byTerm[key]) byTerm[key] = [];
+                        byTerm[key].push({ row: svc.row, org: svc.org, svc: svc.svc, categoryKey });
+                    });
+                };
+                Object.entries(data).forEach(([categoryKey, cat]) => {
+                    (cat.services || []).forEach((svc) => add(svc, categoryKey));
+                    Object.values(cat.subsections || {}).forEach((sub) => (sub.services || []).forEach((svc) => add(svc, categoryKey)));
+                });
+                Object.values(byTerm).forEach((list) => list.sort((a, b) => String(a.org).localeCompare(String(b.org), 'he')));
+                return byTerm;
+            }, [data]);
+
+            const renderTermServices = (key, color) => {
+                const list = termCards[key];
+                if (!list || !list.length) return null;
+                return (
+                    <div className="mh-term-services" style={{ borderTopColor: 'var(--border)' }}>
+                        <strong style={{ color: 'var(--text-muted)' }}>שירותים במדריך: </strong>
+                        {list.map((item, idx) => (
+                            <span key={`${item.row}|${item.svc}`}>
+                                {idx > 0 && ' · '}
+                                <a
+                                    href={buildEntryLink({ entryId: String(item.row), categoryId: item.categoryKey, row: item.row })}
+                                    style={{ color: color || 'var(--primary)' }}
+                                    data-tracking-name={`terms_service_${key}_${item.row}`}
+                                >
+                                    {item.org}
+                                </a>
+                            </span>
+                        ))}
+                    </div>
+                );
+            };
+
 
             if (resourcePage) {
                 const backBtn = (
@@ -6221,13 +6505,7 @@
             if (showTerms) {
                 return (
                     <div className="mh-app" style={{ maxWidth: '1000px' }}>
-                        <button onClick={() => {
-                            setShowTerms(false);
-                            setTermsSearch('');
-                            setTermsCategory(null);
-                            setSelectedLetter(null);
-                            setTermsViewMode('categories');
-                        }} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
+                        <button onClick={closeTerms} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
                             ← חזרה
                         </button>
                         <div className="mh-modal mh-modal-terms-flow">
@@ -6408,7 +6686,7 @@
                                                     </h2>
                                                     <div className="mh-terms-grid">
                                                         {catTerms.map(([k, t]) => (
-                                                            <div key={k} className="mh-term-card" style={{
+                                                            <div key={k} id={`term-${k}`} className={`mh-term-card${focusedTerm === k ? ' mh-term-card-focused' : ''}`} style={{
                                                                 background: 'var(--bg-card)',
                                                                 border: `2px solid var(--border)`,
                                                                 borderRadius: 'var(--radius-md)',
@@ -6444,6 +6722,7 @@
                                                                     {t.text}
                                                                 </p>
                                                                 {renderTermReadMore(t)}
+                                                                {renderTermServices(k, cat?.color)}
                                                                 {(t.phone || t.phone2) && (
                                                                     <div style={{ 
                                                                         marginTop: 'var(--space-md)', 
@@ -6557,7 +6836,7 @@
                                                         {letterTerms.map(([k, t]) => {
                                                             const cat = TERM_CATEGORIES[t.category || 'other'];
                                                             return (
-                                                                <div key={k} id={`term-${k}`} className="mh-term-card" style={{
+                                                                <div key={k} id={`term-${k}`} className={`mh-term-card${focusedTerm === k ? ' mh-term-card-focused' : ''}`} style={{
                                                                     background: 'var(--bg-card)',
                                                                     border: `2px solid var(--border)`,
                                                                     borderRadius: 'var(--radius-md)',
@@ -6607,6 +6886,7 @@
                                                                         {t.text}
                                                                     </p>
                                                                     {renderTermReadMore(t)}
+                                                                {renderTermServices(k, cat?.color)}
                                                                     {(t.phone || t.phone2) && (
                                                                         <div style={{ 
                                                                             marginTop: 'var(--space-md)', 
