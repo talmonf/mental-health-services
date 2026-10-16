@@ -951,8 +951,9 @@ function assertEmergencyReachable(written) {
 /**
  * Structured data is machine-consumable, which means an error in it propagates further than
  * an error on the page. Three things are checked: it parses, every phone number in it also
- * appears on the visible page, and nothing is claimed free unless the source says so
- * unconditionally.
+ * appears on the visible page, and a free claim is one of the three honest cases in
+ * freeClaimIsHonest (a cost sentence that says only "free", an owner-set free funding
+ * channel that is not also paid, or an information-only page).
  */
 function assertJsonLdIsHonest(outRoot, written, data) {
   const pageTels = new Set();
@@ -994,10 +995,11 @@ function assertJsonLdIsHonest(outRoot, written, data) {
 
       if (node.isAccessibleForFree === true) {
         freeClaims++;
-        const described = node.offers?.description;
-        if (!described || !LD.isLiterallyFree(described)) {
+        if (!LD.freeClaimIsHonest(node)) {
+          const offers = LD.offerNodes(node.offers);
+          const described = offers.map((o) => o && o.description).filter(Boolean).join(' | ');
           problems.push(
-            `${rel}: claims isAccessibleForFree but cost is "${described ?? '(none)'}", which is not unconditionally free`
+            `${rel}: claims isAccessibleForFree but cost is "${described || '(none)'}", which is not unconditionally free`
           );
         }
       }
@@ -1112,7 +1114,7 @@ async function main() {
   console.log(`  ${referralKnown} entries carry a known referral_route code`);
   console.log(`  ${linkTargets} link targets, no dangling internal links`);
   console.log(`  ${ld.nodes} JSON-LD nodes across ${orgCount} organisations, all phones traced`);
-  console.log(`  ${ld.freeClaims} entries claim isAccessibleForFree (only where cost says so unconditionally)`);
+  console.log(`  ${ld.freeClaims} entries claim isAccessibleForFree (cost says so, funding is free, or the card is information only)`);
   console.log(`  card text: ${cardText.source} (${cardText.applied} of ${cardText.rows} database rows applied)`);
 
   if (data.collisions.length) {

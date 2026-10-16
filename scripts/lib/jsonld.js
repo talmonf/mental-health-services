@@ -80,6 +80,29 @@ function isLiterallyFree(cost) {
   return UNCONDITIONALLY_FREE.test(s);
 }
 
+function offerNodes(offers) {
+  if (!offers) return [];
+  return Array.isArray(offers) ? offers : [offers];
+}
+
+/**
+ * Matches what entryGraph is allowed to claim.
+ * An information-only card is a WebPage, free to read, and has no price.
+ * A service is free when its cost sentence is nothing but "free", or when the
+ * owner set the funding channel to free and did not also set it to paid.
+ * A funding offer sits beside the cost offer, so the cost sentence may be on
+ * one member of an array rather than on offers.description.
+ */
+function freeClaimIsHonest(node) {
+  if (!node || node.isAccessibleForFree !== true) return true;
+  const offers = offerNodes(node.offers);
+  if (node['@type'] === 'WebPage') return offers.length === 0;
+  if (offers.some((o) => o && isLiterallyFree(o.description))) return true;
+  const ownerFree = offers.some((o) => o && o.category === 'free' && o.price === 0);
+  const alsoPaid = offers.some((o) => o && o.category === 'private');
+  return ownerFree && !alsoPaid;
+}
+
 /**
  * areaServed from the free-text region field.
  * "כל הארץ" is the whole country. A comma-separated city list becomes an array of Place,
@@ -418,6 +441,8 @@ module.exports = {
   serviceId,
   providerType,
   isLiterallyFree,
+  freeClaimIsHonest,
+  offerNodes,
   areaServed,
   languageCodes,
   entryGraph,
