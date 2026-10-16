@@ -807,6 +807,8 @@
         .mh-term-card-focused { outline: 3px solid var(--accent); outline-offset: 2px; }
         .mh-term-services { margin: 0 0 var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); font-size: var(--text-sm); line-height: 1.8; }
         .mh-term-services a { text-decoration: underline; }
+        .mh-term-services .mh-section-link { font-weight: 600; }
+        .mh-term-more { background: none; border: none; padding: 0; color: var(--text-muted); font: inherit; cursor: pointer; text-decoration: underline; }
         .mh-card-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 var(--space-md); font-size: var(--text-sm); }
         .mh-card-terms strong { color: var(--primary); }
         .mh-card-term-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--primary); text-decoration: none; font: inherit; cursor: pointer; }
@@ -2113,7 +2115,9 @@
         
         ]},
          
-         "alternatives": {"icon": "🏠", "title": "חלופות אשפוז", "titleEn": "Hospitalization Alternatives", "desc": "אשפוז יום/בית", "services": [
+         "alternatives": {"icon": "🏠", "title": "חלופות אשפוז", "titleEn": "Hospitalization Alternatives", "desc": "אשפוז בית, בתים מאזנים, צוותי משבר ובית בטוח", "sectionLinks": [
+         {"label": "אשפוז יום פסיכיאטרי (טיפול יום)", "target": "day_care"}
+         ], "services": [
          {"row": 39, "org": "אגף השיקום, משרד הבטחון", "svc": "בית בטוח לטיפול מיידי - חלופת אשפוז", "phone": "*8944", "phoneLabel": "מוקד", "phoneShowNumber": false, "phone2": "052-4614896", "phoneLabel2": "באר שבע", "phoneShowNumber2": false, "phone3": "02-6551303", "phoneLabel3": "ירושלים", "phoneShowNumber3": false, "phone4": "052-6669512", "phoneLabel4": "טירת הכרמל", "phoneShowNumber4": false, "phone5": "052-6669512", "phoneLabel5": "תל השומר", "phoneShowNumber5": false, "web": "https://shikum.mod.gov.il/medical/mental-therapy/safe_housing", "target": "נכי ונכות צה\"ל שהוכרו עם פוסט טראומה, או למי שנמצאים בתהליך הכרה על פגיעה נפשית, ונמצאים במשבר נפשי הדורש מיון, חלופת אשפוז זמנית או השגחה", "region": "", "cost": "", "specialty": "", "notes": "הבתים הבטוחים מהווים חלופת אשפוז מיידית ונקודתית למתמודדים עם פוסט טראומה בזמן של משבר נפשי ואישי. ירושלים שלוחה 2815", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/hospitalization/safehouse#1"},
          {"row": 78, "org": "המרכז הירושלמי לבריאות הנפש (כפר שאול-איתנים)", "svc": "המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.", "phone": "", "web": "http://www.psjer.org.il/", "target": "", "region": "ירושלים, בית שמש, מעלה אדומים, מבשרת ציון, יישובי פרוזדור ירושלים", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 40, "org": "שרן רפואה עד הבית", "svc": "צוות משבר (חלופה לחדר מיון)", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "", "cost": "לאומית ומאוחדת", "specialty": "", "notes": "התערבות במשבר בבית המטופל", "languages": "", "diseases": "", "add": ""},
@@ -4366,15 +4370,17 @@
                 day_hosp: {
                     title: "אשפוז יום",
                     aliases: ["אשפוזי יום"],
-                    text: "חלופת אשפוז המאפשרת טיפול אינטנסיבי במהלך היום עם חזרה הביתה בלילה. המטופל מגיע לבית החולים בבוקר, מקבל טיפולים (פסיכותרפיה, תרופות, פעילויות), וחוזר הביתה בערב. מתאים למי שזקוק לטיפול אינטנסיבי אך יכול לתפקד בבית. מאפשר שמירה על קשרים משפחתיים ותפקוד חלקי. ניתן דרך קופות החולים או בתי חולים.",
+                    text: "השם «אשפוז יום» משמש בשתי דרכים. בחלק מבתי החולים זה שלב קצר אחרי אשפוז מלא, באותה מחלקה או במחלקה צמודה, כדי לחזור הביתה בהדרגה. במקומות אחרים זה שם נוסף ל«טיפול יום»: מגיעים בבוקר, מקבלים טיפול במשך היום (שיחות, טיפול תרופתי, פעילות) וחוזרים הביתה בערב, במקום אשפוז מלא. כדאי לשאול את המחלקה איזה מהשניים היא מציעה. ניתן דרך קופות החולים או בתי החולים.",
                     category: "hospitalization",
-                    related: ["hospitalization", "alternatives", "home_hosp"]
+                    related: ["day_treatment", "hospitalization", "alternatives", "home_hosp"],
+                    sections: ["day_care"]
                 },
                 home_hosp: {
                     title: "אשפוז בית",
                     text: "חלופת אשפוז בה צוות רב-מקצועי מגיע לבית המטופל ומספק טיפול אינטנסיבי. הצוות כולל פסיכיאטר, פסיכולוג, עובד סוציאלי, ואחיות. הטיפול נמשך בדרך כלל 6-8 שבועות ומאפשר טיפול בסביבה הטבעית. מתאים למי שזקוק לטיפול אינטנסיבי אך מעדיף להישאר בבית. ניתן דרך קופות החולים (כללית, מכבי, מאוחדת, לאומית) או משרד הבטחון.",
                     category: "hospitalization",
-                    related: ["hospitalization", "alternatives", "day_hosp"]
+                    related: ["hospitalization", "alternatives", "day_hosp"],
+                    sections: ["alternatives"]
                 },
                 balancing_homes: {
                     title: "בתים מאזנים",
@@ -4382,6 +4388,7 @@
                     text: "מסגרות דיור זמניות המהוות חלופת אשפוז. מספקות סביבה תומכת ומבנה יומיומי למתמודדים במשבר נפשי. השהות היא זמנית (מספר שבועות עד חודשים) ומטרתה לספק יציבות ותמיכה בתקופת משבר. כוללות צוות מקצועי, פעילויות שיקומיות, ותמיכה נפשית. חלק ממשרד הבריאות וחלק פרטיות.",
                     category: "hospitalization",
                     related: ["hospitalization", "alternatives", "safe_house"],
+                    sections: ["alternatives"],
                     readMoreUrl: "https://me.health.gov.il/mental-health/therapy-rehabilitation/public-care/community-treatment/balancing-homes/"
                 },
                 safe_house: {
@@ -4400,9 +4407,11 @@
                 },
                 alternatives: { 
                     title: "חלופות אשפוז", 
-                    text: "אפשרויות טיפול אינטנסיבי ללא אשפוז מלא בבית חולים. כוללות: אשפוז יום (טיפול ביום, לינה בבית), אשפוז בית (צוות מגיע הביתה), בתים מאזנים (דיור זמני תומך), ובית בטוח (משרד הבטחון - טיפול מיידי). חלופות האשפוז מאפשרות טיפול אינטנסיבי תוך שמירה על קשרים משפחתיים ותפקוד חלקי. מתאימות למי שזקוק לטיפול אך יכול לתפקד בסביבה הטבעית.",
+                    text: "אפשרויות טיפול אינטנסיבי בלי אשפוז מלא בבית חולים: אשפוז יום או טיפול יום (מגיעים למחלקה ביום וישנים בבית), אשפוז בית (צוות מגיע הביתה), בתים מאזנים (דיור זמני תומך), צוות משבר (התערבות בבית במצב חריף, במקום חדר מיון) ובית בטוח (משרד הבטחון, טיפול מיידי). חלופות האשפוז מאפשרות טיפול אינטנסיבי תוך שמירה על קשרים משפחתיים ותפקוד חלקי, ומתאימות למי שזקוק לטיפול אך יכול לתפקד בסביבה הטבעית.",
                     category: "hospitalization",
-                    related: ["day_hosp", "home_hosp", "balancing_homes", "safe_house", "crisis_team"]
+                    aliases: ["חלופת אשפוז"],
+                    related: ["day_hosp", "day_treatment", "home_hosp", "balancing_homes", "safe_house", "crisis_team"],
+                    sections: ["alternatives", "day_care"]
                 },
                 // Rehabilitation Services
                 supported_housing: {
@@ -4576,7 +4585,8 @@
                     text: "מסגרת טיפולית אינטנסיבית שבה מגיעים בבוקר למחלקה, מקבלים טיפול במשך היום (שיחות אישיות וקבוצתיות, טיפול תרופתי, פעילות) וחוזרים הביתה אחר הצהריים. חלק מבתי החולים קוראים לזה «טיפול יום» וחלק «אשפוז יום», ולפעמים «טיפול יום» הוא מסגרת ארוכה ופחות אינטנסיבית. יש מחלקות נפרדות למבוגרים ולילדים ונוער. בדרך כלל צריך טופס 17 מקופת החולים, ולפעמים מגיעים אליו אחרי אשפוז מלא.",
                     category: "hospitalization",
                     related: ["day_hosp", "alternatives", "form17", "hmo"],
-                    aliases: ["טיפול יום", "טיפולי יום", "מחלקת טיפול יום"]
+                    aliases: ["טיפול יום", "טיפולי יום", "מחלקת טיפול יום"],
+                    sections: ["day_care"]
                 },
                 form17: {
                     title: "טופס 17 (התחייבות)",
@@ -4745,7 +4755,7 @@
                 setExpandedSubsections(p => p.includes(key) ? p.filter(x => x !== key) : [...p, key]);
             };
             const scrollToTreatmentSubcategory = (catId) => {
-                setSelectedCategoryGroup('treatment');
+                setSelectedCategoryGroup(mhGetCategoryGroupForCategory(catId) || 'treatment');
                 setExpandedCats(p => (p.includes(catId) ? p : [...p, catId]));
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -6253,24 +6263,90 @@
                 return byTerm;
             }, [data]);
 
+            const TERM_SERVICES_VISIBLE = 8;
+            const [expandedTermGroups, setExpandedTermGroups] = useState([]);
+            const countSectionServices = (catId) => {
+                const cat = data[catId];
+                if (!cat) return 0;
+                return (cat.services || []).length
+                    + Object.values(cat.subsections || {}).reduce((n, sub) => n + (sub.services || []).length, 0);
+            };
+            const openSectionFromTerms = (catId) => {
+                closeTerms();
+                scrollToTreatmentSubcategory(catId);
+            };
+
             const renderTermServices = (key, color) => {
-                const list = termCards[key];
-                if (!list || !list.length) return null;
+                const list = termCards[key] || [];
+                const sectionIds = (terms[key]?.sections || []).filter((id) => data[id]);
+                if (!list.length && !sectionIds.length) return null;
+                const linkColor = color || 'var(--primary)';
+                const groups = [];
+                list.forEach((item) => {
+                    let g = groups.find((x) => x.categoryKey === item.categoryKey);
+                    if (!g) groups.push(g = { categoryKey: item.categoryKey, items: [] });
+                    g.items.push(item);
+                });
+                const orgCounts = {};
+                list.forEach((item) => { orgCounts[item.org] = (orgCounts[item.org] || 0) + 1; });
+                const shortSvc = (svc) => {
+                    const s = String(svc || '').trim();
+                    return s.length > 40 ? `${s.slice(0, 40).trim()}…` : s;
+                };
                 return (
                     <div className="mh-term-services" style={{ borderTopColor: 'var(--border)' }}>
-                        <strong style={{ color: 'var(--text-muted)' }}>שירותים במדריך: </strong>
-                        {list.map((item, idx) => (
-                            <span key={`${item.row}|${item.svc}`}>
-                                {idx > 0 && ' · '}
-                                <a
-                                    href={buildEntryLink({ entryId: String(item.row), categoryId: item.categoryKey, row: item.row })}
-                                    style={{ color: color || 'var(--primary)' }}
-                                    data-tracking-name={`terms_service_${key}_${item.row}`}
+                        {sectionIds.map((id) => (
+                            <div key={id} style={{ marginBottom: 'var(--space-xs)' }}>
+                                <button
+                                    type="button"
+                                    className="mh-section-link"
+                                    onClick={() => openSectionFromTerms(id)}
+                                    data-tracking-name={`terms_section_${key}_${id}`}
                                 >
-                                    {item.org}
-                                </a>
-                            </span>
+                                    לכל השירותים בקטגוריה: {data[id].title} ({countSectionServices(id)})
+                                </button>
+                            </div>
                         ))}
+                        {groups.map((g) => {
+                            const groupId = `${key}|${g.categoryKey}`;
+                            const expanded = expandedTermGroups.includes(groupId);
+                            const shown = expanded ? g.items : g.items.slice(0, TERM_SERVICES_VISIBLE);
+                            const hidden = g.items.length - shown.length;
+                            return (
+                                <div key={groupId}>
+                                    <strong style={{ color: 'var(--text-muted)' }}>
+                                        {groups.length > 1 ? `${data[g.categoryKey]?.title || 'שירותים במדריך'}: ` : 'שירותים במדריך: '}
+                                    </strong>
+                                    {shown.map((item, idx) => (
+                                        <span key={`${item.row}|${item.svc}`}>
+                                            {idx > 0 && ' · '}
+                                            <a
+                                                href={buildEntryLink({ entryId: String(item.row), categoryId: item.categoryKey, row: item.row })}
+                                                style={{ color: linkColor }}
+                                                data-tracking-name={`terms_service_${key}_${item.row}`}
+                                            >
+                                                {item.org}
+                                                {orgCounts[item.org] > 1 && item.svc ? ` (${shortSvc(item.svc)})` : ''}
+                                            </a>
+                                        </span>
+                                    ))}
+                                    {(hidden > 0 || expanded) && g.items.length > TERM_SERVICES_VISIBLE && (
+                                        <>
+                                            {' '}
+                                            <button
+                                                type="button"
+                                                className="mh-term-more"
+                                                onClick={() => setExpandedTermGroups((p) => (expanded ? p.filter((x) => x !== groupId) : [...p, groupId]))}
+                                                aria-expanded={expanded}
+                                                data-tracking-name={`terms_services_more_${key}`}
+                                            >
+                                                {expanded ? 'הצג פחות' : `הצג עוד (${hidden})`}
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 );
             };

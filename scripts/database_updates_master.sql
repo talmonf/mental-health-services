@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 075_glossary_link_suggestions_alternatives.sql
 [x] 074_site_audit_entries_card_review.sql
 [x] 073_directory_card_review_b6.sql
 [x] 072_directory_card_review_b5.sql

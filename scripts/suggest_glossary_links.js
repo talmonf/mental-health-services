@@ -6,6 +6,7 @@
  *   node scripts/suggest_glossary_links.js                  with DATABASE_URL: inserts suggested rows
  *   node scripts/suggest_glossary_links.js --sql FILE       writes the same inserts as a SQL migration
  *   node scripts/suggest_glossary_links.js --dry            prints counts per term only
+ *   ... --term KEY                                          limits suggestions to one glossary term
  *
  * Inserts use ON CONFLICT DO NOTHING, so a link that was approved or rejected is never reset.
  * With DATABASE_URL the text is the published text in directory_card_edits; without it the
@@ -89,7 +90,13 @@ async function main() {
   const sqlIdx = args.indexOf('--sql');
   const sqlFile = sqlIdx >= 0 ? args[sqlIdx + 1] : null;
   const dry = args.includes('--dry');
+  const termIdx = args.indexOf('--term');
+  const onlyTerm = termIdx >= 0 ? args[termIdx + 1] : null;
   const data = load();
+  if (onlyTerm && !data.terms[onlyTerm]) {
+    console.error(`Unknown term key: ${onlyTerm}`);
+    process.exit(1);
+  }
 
   let client = null;
   let cards;
@@ -102,7 +109,7 @@ async function main() {
     cards = data.entries.map((e) => ({ cardKey: e.key, fields: e.raw }));
   }
 
-  const found = suggest(data.terms, cards);
+  const found = suggest(onlyTerm ? { [onlyTerm]: data.terms[onlyTerm] } : data.terms, cards);
   const perTerm = new Map();
   found.forEach((f) => perTerm.set(f.termKey, (perTerm.get(f.termKey) || 0) + 1));
   const source = client ? 'directory_card_edits' : 'index.html (DATABASE_URL unset)';
