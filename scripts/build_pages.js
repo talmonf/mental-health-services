@@ -33,9 +33,10 @@ const { load, phonesOf, emailsOf, referralLabel } = require('./lib/extract_data'
 const { overlayDirectoryCards } = require('./lib/overlay_directory_cards');
 const T = require('./lib/page_template');
 const LD = require('./lib/jsonld');
+const PRIVACY = require('./lib/privacy_page');
 
 const ROOT = path.join(__dirname, '..');
-const GENERATED_DIRS = ['s', 'c', 'g', 'term', 'terms', 'directory', 'emergency', 'treatment', 'rights', 'support', 'information'];
+const GENERATED_DIRS = ['s', 'c', 'g', 'term', 'terms', 'directory', 'privacy', 'emergency', 'treatment', 'rights', 'support', 'information'];
 const GENERATED_FILES = ['sitemap.xml'];
 
 // ---------------------------------------------------------------- phone parsing
@@ -485,6 +486,19 @@ function renderTermsIndex(ctx, slugByKey) {
   });
 }
 
+function renderPrivacyPage() {
+  return T.renderPage({
+    title: 'מדיניות פרטיות | מדריך נפש',
+    description: 'איזה מידע האתר nefesh-il.org אוסף, למה, למי הוא מועבר, כמה זמן הוא נשמר ואיך מעיינים בו, מתקנים או מוחקים אותו.',
+    path: '/privacy',
+    ogType: 'website',
+    trail: [{ name: 'מדריך נפש', url: '/' }, { name: 'מדיניות פרטיות', url: '/privacy' }],
+    body: `${PRIVACY.HE}\n${PRIVACY.EN}`,
+    lastUpdated: PRIVACY.EFFECTIVE,
+    lastUpdatedIso: PRIVACY.EFFECTIVE_ISO,
+  });
+}
+
 function renderDirectoryHub(ctx) {
   const { DATA, CATEGORY_GROUPS, LAST_UPDATED, published } = ctx;
   const groups = Object.entries(CATEGORY_GROUPS)
@@ -762,6 +776,9 @@ function build(outRoot, data = load()) {
   writePage(outRoot, '/directory', renderDirectoryHub(ctx), written);
   urls.push({ path: '/directory', priority: '0.9' });
 
+  writePage(outRoot, '/privacy', renderPrivacyPage(), written);
+  urls.push({ path: '/privacy', priority: '0.2' });
+
   for (const groupId of Object.keys(data.CATEGORY_GROUPS)) {
     const slug = (data.MH_GROUP_SLUGS || {})[groupId];
     if (!slug) throw new Error(`MH_GROUP_SLUGS in index.html has no slug for group ${groupId}`);
@@ -814,7 +831,7 @@ function assertNoDanglingLinks(outRoot, written, groupPaths) {
     const html = fs.readFileSync(path.join(outRoot, rel), 'utf8');
     for (const m of html.matchAll(/href="(\/[^"#?]*)"/g)) {
       const target = m[1].replace(/\/$/, '') || '/';
-      if (!/^\/(s|c|g|term|terms|directory)(\/|$)/.test(target) && !groups.has(target)) continue;
+      if (!/^\/(s|c|g|term|terms|directory|privacy)(\/|$)/.test(target) && !groups.has(target)) continue;
       if (!pages.has(target)) dangling.push({ from: rel, to: target });
     }
   }

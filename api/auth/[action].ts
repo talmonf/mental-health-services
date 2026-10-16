@@ -45,6 +45,7 @@ import {
   newCodeVerifier,
   newOAuthState,
 } from '../../lib/google-oauth';
+import { deleteCiphertext } from '../../lib/s3';
 import { consumeUserTokens, findValidToken } from '../../lib/tokens';
 import {
   isAdminEmail,
@@ -594,9 +595,26 @@ async function handleDeleteAccount(req: VercelRequest, res: VercelResponse) {
         return res.status(401).json({ error: 'Invalid password' });
       }
     }
+    // The cascade removes the care file rows but not the S3 objects they point to.
+    const stored = await client.query(
+      `SELECT d.storage_key
+         FROM care_documents d
+         JOIN care_files f ON f.id = d.file_id
+        WHERE f.owner_id = $1 AND d.storage_key IS NOT NULL`,
+      [jwtUser.id]
+    );
     await client.query(`DELETE FROM users WHERE id = $1`, [jwtUser.id]);
     clearSessionCookie(res);
     clearCareStepupCookie(res);
+    for (const row of stored.rows) {
+      const key = typeof row.storage_key === 'string' ? row.storage_key.trim() : '';
+      if (!key) continue;
+      try {
+        await deleteCiphertext(key);
+      } catch (err) {
+        console.error('delete-account s3 delete failed', err);
+      }
+    }
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('delete-account error', err);

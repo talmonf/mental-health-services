@@ -210,7 +210,7 @@ ${o.body}
 <footer>
   <p>עודכן: <time datetime="${escapeHtml(o.lastUpdatedIso || '')}">${escapeHtml(o.lastUpdated || '')}</time></p>
   <p>המידע במדריך נאסף ממקורות ציבוריים ומתעדכן ידנית. הוא אינו ייעוץ רפואי ואינו תחליף לאבחון או לטיפול מקצועי. אנא ודאו פרטים מול הגורם עצמו לפני פנייה.</p>
-  <p><a href="/">${escapeHtml(siteName)}</a> · <a href="/directory">כל הקטגוריות</a> · <a href="/terms">מילון מונחים</a></p>
+  <p><a href="/">${escapeHtml(siteName)}</a> · <a href="/directory">כל הקטגוריות</a> · <a href="/terms">מילון מונחים</a> · <a href="/privacy">מדיניות פרטיות</a></p>
 </footer>
 </div>
 </body>
