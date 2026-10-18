@@ -1,4 +1,6 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[ ] 094_soulbird_jerusalem_site.sql
+[x] 093_site_audit_entries_glossary_page.sql
 [x] 092_site_audit_entries_glossary_share.sql
 [x] 091_multidisciplinary_mh_centers.sql
 [x] 090_directory_entries_missing_categories.sql
