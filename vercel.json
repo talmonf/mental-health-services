@@ -44,6 +44,10 @@
     {
       "source": "/s/:row(\\d+)/:slug*",
       "destination": "/s/:row"
+    },
+    {
+      "source": "/glossary",
+      "destination": "/index.html"
     }
   ],
   "redirects": [

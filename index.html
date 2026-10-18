@@ -804,7 +804,29 @@
         .mh-terms-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
         .mh-term-card { transition: all 0.2s ease; }
         .mh-term-card:hover { transform: translateY(-2px); }
-        .mh-term-card-focused { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .mh-term-card-focused, .mh-termcat-focused { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .mh-term-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-md); }
+        .mh-glossary-copy-link {
+            flex: 0 0 auto;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+        .mh-glossary-copy-link:hover,
+        .mh-glossary-copy-link:focus { color: var(--primary); background: rgba(45, 90, 123, 0.1); }
+        .mh-glossary-copy-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .mh-glossary-copy-link.mh-glossary-copy-link-copied { color: var(--accent); background: rgba(82, 183, 136, 0.12); }
+        .mh-termcards-banner { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm) var(--space-md); margin: 0 0 var(--space-lg); }
+        .mh-termcards-banner p { margin: 0; }
         .mh-term-services { margin: 0 0 var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border); font-size: var(--text-sm); line-height: 1.8; }
         .mh-term-services a { text-decoration: underline; }
         .mh-term-services .mh-section-link { font-weight: 600; }
@@ -1110,6 +1132,13 @@
             return Object.keys(MH_GROUP_SLUGS).find((g) => MH_GROUP_SLUGS[g] === slug) || '';
         };
         const mhGroupPath = (group) => (group && MH_GROUP_SLUGS[group] ? `/${MH_GROUP_SLUGS[group]}` : '/');
+        const MH_GLOSSARY_PATH = '/glossary';
+        const mhIsGlossaryPath = (pathname) => String(pathname || '').replace(/\/+$/, '') === MH_GLOSSARY_PATH;
+        // Glossary share values stay ASCII (term keys and category ids). Hebrew is never written into these URLs.
+        const mhGlossaryKey = (value) => {
+            const key = String(value || '').trim();
+            return /^[a-z0-9_]{1,80}$/.test(key) ? key : '';
+        };
         const MH_SITE_TITLE = 'מדריך בריאות הנפש בישראל';
 
         const mhGenerateId = () => {
@@ -1613,16 +1642,20 @@
                     section: (url.searchParams.get('section') || '').trim(),
                     subsection: (url.searchParams.get('subsection') || '').trim(),
                     page: MH_RESOURCE_PAGES.has(rawPage) ? rawPage : '',
-                    group: MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : ''
+                    group: MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : '',
+                    term: mhGlossaryKey(url.searchParams.get('term')),
+                    termcat: mhGlossaryKey(url.searchParams.get('termcat')),
+                    termcards: mhGlossaryKey(url.searchParams.get('termcards')),
+                    glossary: mhIsGlossaryPath(url.pathname)
                 };
             } catch {
-                return { q: '', entry: '', section: '', subsection: '', page: '', group: '' };
+                return { q: '', entry: '', section: '', subsection: '', page: '', group: '', term: '', termcat: '', termcards: '', glossary: false };
             }
         };
-        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group }, { push = false } = {}) => {
+        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group, term, termcat, termcards, glossary }, { push = false } = {}) => {
             try {
                 const url = new URL(window.location.href);
-                const fromPath = url.pathname;
+                const from = `${url.pathname}${url.search}`;
                 if (q) url.searchParams.set('q', q);
                 else url.searchParams.delete('q');
                 if (entry) url.searchParams.set('entry', entry);
@@ -1633,10 +1666,16 @@
                 else url.searchParams.delete('subsection');
                 if (page) url.searchParams.set('page', page);
                 else url.searchParams.delete('page');
-                url.pathname = mhGroupPath(group);
+                if (term) url.searchParams.set('term', term);
+                else url.searchParams.delete('term');
+                if (termcat) url.searchParams.set('termcat', termcat);
+                else url.searchParams.delete('termcat');
+                if (termcards) url.searchParams.set('termcards', termcards);
+                else url.searchParams.delete('termcards');
+                url.pathname = glossary ? MH_GLOSSARY_PATH : mhGroupPath(group);
                 url.hash = '';
                 const next = `${url.pathname}${url.search}`;
-                if (push && url.pathname !== fromPath) window.history.pushState(null, '', next);
+                if (push && next !== from) window.history.pushState(null, '', next);
                 else window.history.replaceState(null, '', next);
             } catch (_) {}
         };
@@ -1806,6 +1845,33 @@
                         element_text_short: ('copied_section:' + label).slice(0, 80),
                         search_location: 'section_link_copied'
                     }, { forceFetch: true });
+                    return;
+                }
+                if (kind === 'term' || kind === 'termcat' || kind === 'glossary') {
+                    mhArmShareCopy();
+                    const section = el.getAttribute('data-share-section') || 'glossary';
+                    const label = el.getAttribute('data-share-label') || section;
+                    const sectionName = kind === 'term' ? `term_${section}` : kind === 'termcat' ? `termcat_${section}` : 'glossary';
+                    mhTrackEvent('section_link_copied', {
+                        section: sectionName,
+                        element_id: kind === 'glossary' ? 'copy_glossary_link' : kind === 'term' ? 'copy_term_link' : 'copy_termcat_link',
+                        element_type: kind === 'glossary' ? 'glossary_link_copied' : kind === 'term' ? 'term_link_copied' : 'termcat_link_copied',
+                        element_text_short: (`copied_${kind}:` + label).slice(0, 80),
+                        search_location: kind === 'glossary' ? 'glossary_link_copied' : kind === 'term' ? 'term_link_copied' : 'termcat_link_copied'
+                    }, { forceFetch: true });
+                    return;
+                }
+                if (kind === 'termcards') {
+                    mhArmShareCopy();
+                    const key = (el.getAttribute('data-share-section') || '').trim();
+                    mhTrackEvent('search_link_copied', {
+                        section: 'deep_link',
+                        element_id: 'copy_termcards_link',
+                        element_type: 'termcards_link_copied',
+                        element_text_short: ('copied_termcards:' + key).slice(0, 80),
+                        search_query: mhSanitizeSearchQuery(key),
+                        search_location: 'termcards_link_copied'
+                    }, { forceFetch: true });
                 }
             }, true);
         };
@@ -1897,17 +1963,25 @@
                 let subsection = '';
                 let group = '';
                 let pathGroup = '';
+                let term = '';
+                let termcat = '';
+                let termcards = '';
+                let glossaryPage = false;
                 try {
                     const params = new URLSearchParams(window.location.search || '');
                     q = (params.get('q') || '').trim();
                     entry = (params.get('entry') || '').trim();
                     section = (params.get('section') || '').trim();
                     subsection = (params.get('subsection') || '').trim();
+                    termcards = mhGlossaryKey(params.get('termcards'));
+                    term = mhGlossaryKey(params.get('term'));
+                    termcat = mhGlossaryKey(params.get('termcat'));
                     // A legacy /#<group> link is a shared section link. A group page (/treatment)
                     // is an ordinary page view of that page, recorded below.
                     const rawGroup = (window.location.hash || '').replace(/^#/, '').trim();
                     group = MH_CATEGORY_GROUP_IDS.has(rawGroup) ? rawGroup : '';
                     pathGroup = mhGroupFromPath(window.location.pathname);
+                    glossaryPage = mhIsGlossaryPath(window.location.pathname);
                 } catch (_) {}
                 const base = {
                     element_id: 'landing',
@@ -1916,6 +1990,33 @@
                     entry_origin: origin,
                     entry_url: window.location.href
                 };
+                if (termcards) {
+                    window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), search: true };
+                    mhArmShareCopy();
+                    mhTrackEvent('search_link_opened', {
+                        ...base,
+                        section: 'deep_link',
+                        element_id: 'open_termcards_link',
+                        element_type: 'termcards_link_opened',
+                        element_text_short: termcards.slice(0, 80),
+                        search_query: mhSanitizeSearchQuery(termcards),
+                        search_location: 'termcards_link_opened'
+                    }, { forceFetch: true });
+                    return;
+                }
+                if (term || termcat) {
+                    window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), section: true };
+                    const sectionKey = term ? `term_${term}` : `termcat_${termcat}`;
+                    mhTrackEvent('section_link_opened', {
+                        ...base,
+                        section: sectionKey,
+                        element_id: term ? 'open_term_link' : 'open_termcat_link',
+                        element_type: term ? 'term_link_opened' : 'termcat_link_opened',
+                        element_text_short: sectionKey.slice(0, 80),
+                        search_location: term ? 'term_link_opened' : 'termcat_link_opened'
+                    }, { forceFetch: true });
+                    return;
+                }
                 if (q) {
                     window.__mhDeepLinkTracked = { ...(window.__mhDeepLinkTracked || {}), search: true };
                     // Avoid a blur→search duplicate right after landing on ?q=
@@ -1961,7 +2062,7 @@
                 }
                 mhTrackEvent('page_view', {
                     ...base,
-                    section: pathGroup ? `group_${pathGroup}` : 'landing'
+                    section: glossaryPage ? 'glossary' : (pathGroup ? `group_${pathGroup}` : 'landing')
                 });
             } catch (_) {
                 mhTrackEvent('page_view', { section: 'landing', element_id: 'landing' });
@@ -3639,15 +3740,10 @@
             const [copiedSectionKey, setCopiedSectionKey] = useState(null);
             const [showIntro, setShowIntro] = useState(() => !mhIntroHiddenLocal());
             const [showFullIntro, setShowFullIntro] = useState(false);
-            const [focusedTerm, setFocusedTerm] = useState(() => {
-                try {
-                    const key = (new URL(window.location.href).searchParams.get('term') || '').trim();
-                    return /^[a-z0-9_]{1,80}$/.test(key) ? key : null;
-                } catch {
-                    return null;
-                }
-            });
-            const [showTerms, setShowTerms] = useState(() => focusedTerm != null);
+            const [focusedTerm, setFocusedTerm] = useState(() => initialUrlState.term || null);
+            const [focusedTermCat, setFocusedTermCat] = useState(() => initialUrlState.termcat || null);
+            const [termCardsKey, setTermCardsKey] = useState(() => initialUrlState.termcards || null);
+            const [showTerms, setShowTerms] = useState(() => !!(initialUrlState.glossary || initialUrlState.term || initialUrlState.termcat));
             const [termsSearch, setTermsSearch] = useState('');
             const [termsCategory, setTermsCategory] = useState(null);
             const [termsViewMode, setTermsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
@@ -3655,6 +3751,7 @@
             const [haravotBarzelLaunchedFrom, setHaravotBarzelLaunchedFrom] = useState(null);
             const handledDeepLinkRef = useRef(null);
             const pushGroupNavRef = useRef(false);
+            const pushGlossaryNavRef = useRef(false);
             const highlightTimeoutRef = useRef(null);
             const toastTimeoutRef = useRef(null);
             const copiedEntryTimeoutRef = useRef(null);
@@ -3670,6 +3767,8 @@
             const emergencyCollapsed = !!selectedCategoryGroup && !emergencyOpen;
             const [copiedSearchLink, setCopiedSearchLink] = useState(false);
             const copiedSearchTimeoutRef = useRef(null);
+            const [copiedGlossaryKey, setCopiedGlossaryKey] = useState(null);
+            const copiedGlossaryTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
             const [cardEditMap, setCardEditMap] = useState(null);
             // 'loading' hides card text until directory_card_edits answers, so the copy
@@ -3753,25 +3852,34 @@
                 }
             };
 
-            // Sync URL state as search, entry target, or selected group changes.
-            // Only a group change the visitor asked for adds a history entry; a group resolved
+            // Sync URL state as search, entry target, glossary focus, or selected group changes.
+            // Only a change the visitor asked for adds a history entry; a target resolved
             // from a deep link replaces the URL, so browser back does not bounce between them.
             useEffect(() => {
-                const push = pushGroupNavRef.current;
+                const push = pushGroupNavRef.current || pushGlossaryNavRef.current;
                 pushGroupNavRef.current = false;
+                pushGlossaryNavRef.current = false;
                 mhReplaceUrlState({
                     q: searchTerm.trim(),
                     entry: requestedEntryId,
                     section: requestedSectionId,
                     subsection: requestedSubsectionId,
                     page: resourcePage,
-                    group: selectedCategoryGroup
+                    group: selectedCategoryGroup,
+                    term: showTerms && focusedTerm ? focusedTerm : '',
+                    termcat: showTerms && focusedTermCat && !focusedTerm ? focusedTermCat : '',
+                    termcards: !showTerms && termCardsKey ? termCardsKey : '',
+                    glossary: !!showTerms
                 }, { push });
-            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup]);
+            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup, showTerms, focusedTerm, focusedTermCat, termCardsKey]);
             useEffect(() => {
+                if (showTerms) {
+                    document.title = `מילון מונחים | ${MH_SITE_TITLE}`;
+                    return;
+                }
                 const group = selectedCategoryGroup && CATEGORY_GROUPS[selectedCategoryGroup];
                 document.title = group ? `${group.title} | ${MH_SITE_TITLE}` : MH_SITE_TITLE;
-            }, [selectedCategoryGroup]);
+            }, [selectedCategoryGroup, showTerms]);
             // Send the first-party session id to GA4 once, so the two systems can be joined later.
             useEffect(() => {
                 if (typeof gtag !== 'function') return;
@@ -3789,6 +3897,10 @@
                     setRequestedSubsectionId(prev => (prev !== (next.subsection || null) ? (next.subsection || null) : prev));
                     setResourcePage(prev => (prev !== (next.page || null) ? (next.page || null) : prev));
                     setSelectedCategoryGroup(prev => (prev !== (next.group || null) ? (next.group || null) : prev));
+                    setFocusedTerm(prev => (prev !== (next.term || null) ? (next.term || null) : prev));
+                    setFocusedTermCat(prev => (prev !== (next.termcat || null) ? (next.termcat || null) : prev));
+                    setTermCardsKey(prev => (prev !== (next.termcards || null) ? (next.termcards || null) : prev));
+                    setShowTerms(!!(next.glossary || next.term || next.termcat));
                 };
                 window.addEventListener('hashchange', syncFromUrl);
                 window.addEventListener('popstate', syncFromUrl);
@@ -4841,6 +4953,7 @@
                 setRequestedSectionId(null);
                 setRequestedSubsectionId(null);
                 setRequestedEntryId(null);
+                setTermCardsKey(null);
                 setResourcePage(null);
                 handledDeepLinkRef.current = null;
                 // On a phone the header and welcome box fill the first screen, so landing at the
@@ -5308,6 +5421,15 @@
                     copiedSearchTimeoutRef.current = null;
                 }, 2000);
             };
+            const markGlossaryLinkCopied = (copiedId) => {
+                if (!copiedId) return;
+                setCopiedGlossaryKey(copiedId);
+                if (copiedGlossaryTimeoutRef.current) window.clearTimeout(copiedGlossaryTimeoutRef.current);
+                copiedGlossaryTimeoutRef.current = window.setTimeout(() => {
+                    setCopiedGlossaryKey((current) => (current === copiedId ? null : current));
+                    copiedGlossaryTimeoutRef.current = null;
+                }, 2000);
+            };
             const copyText = async (text, { toastMessage: successToast = null, onSuccess = null } = {}) => {
                 try {
                     if (navigator.clipboard?.writeText) {
@@ -5338,6 +5460,60 @@
                 url.hash = '';
                 if (trimmed) url.searchParams.set('q', trimmed);
                 return url.toString();
+            };
+            const buildGlossaryShareLink = ({ term = '', termcat = '', termcards = '' } = {}) => {
+                const url = new URL(window.location.href);
+                url.pathname = termcards ? '/' : MH_GLOSSARY_PATH;
+                url.search = '';
+                url.hash = '';
+                if (term) url.searchParams.set('term', term);
+                if (termcat) url.searchParams.set('termcat', termcat);
+                if (termcards) url.searchParams.set('termcards', termcards);
+                return url.toString();
+            };
+            const GlossaryCopyButton = ({ kind, glossaryKey, label }) => {
+                if (!glossaryKey && kind !== 'glossary') return null;
+                const copiedId = `${kind}:${glossaryKey || 'page'}`;
+                const isCopied = copiedGlossaryKey === copiedId;
+                const link = kind === 'term'
+                    ? buildGlossaryShareLink({ term: glossaryKey })
+                    : kind === 'termcat'
+                        ? buildGlossaryShareLink({ termcat: glossaryKey })
+                        : kind === 'glossary'
+                            ? buildGlossaryShareLink()
+                            : buildGlossaryShareLink({ termcards: glossaryKey });
+                const idle = kind === 'termcards'
+                    ? 'העתקת קישור לרשימת השירותים'
+                    : kind === 'glossary'
+                        ? 'העתקת קישור למילון המונחים'
+                        : kind === 'termcat'
+                            ? 'העתקת קישור שפותח את הקטגוריה הזאת במילון'
+                            : 'העתקת קישור שפותח את המונח הזה במילון';
+                return (
+                    <button
+                        type="button"
+                        className={`mh-glossary-copy-link${isCopied ? ' mh-glossary-copy-link-copied' : ''}`}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            mhArmShareCopy();
+                        }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            copyText(link, { onSuccess: () => markGlossaryLinkCopied(copiedId) });
+                        }}
+                        title={isCopied ? 'הקישור הועתק' : idle}
+                        aria-label={isCopied ? 'הקישור הועתק' : idle}
+                        data-tracking-name={`copy_${kind}_link_${glossaryKey}`}
+                        data-analytics-type="share"
+                        data-share-kind={kind}
+                        data-share-section={glossaryKey}
+                        data-share-label={label || glossaryKey}
+                    >
+                        <i className={`fas ${isCopied ? 'fa-check' : 'fa-link'}`} aria-hidden="true"></i>
+                    </button>
+                );
             };
             const buildEntryLink = ({ entryId, categoryId, row }) => {
                 const groupId = mhGetCategoryGroupForCategory(categoryId);
@@ -5456,6 +5632,7 @@
             const applyHaravotBarzelSearch = (launchFrom = 'hero') => {
                 setHaravotBarzelLaunchedFrom(launchFrom);
                 setSearchTerm(HARAVOT_BARZEL_SEARCH);
+                setTermCardsKey(null);
                 setSelectedCategoryGroup(null);
                 setRequestedEntryId(null);
                 setRequestedSectionId(null);
@@ -5467,11 +5644,16 @@
                 });
             };
 
+            // A known glossary key lists every directory card that points at that term, across the whole directory.
+            const activeTermCardsKey = termCardsKey && terms[termCardsKey] ? termCardsKey : '';
             // On a group page the search covers only that group's categories; the home page covers everything.
             const filtered = useMemo(() => {
-                if (!searchTerm && !cardFilterOn) return data;
-                const scope = selectedCategoryGroup ? CATEGORY_GROUPS[selectedCategoryGroup]?.subcategories : null;
-                const matches = (s) => (!searchTerm || mhServiceMatchesSearch(s, searchTerm)) && mhServiceMatchesCardFilter(s, cardFilter);
+                if (!searchTerm && !cardFilterOn && !activeTermCardsKey) return data;
+                const scope = activeTermCardsKey ? null : (selectedCategoryGroup ? CATEGORY_GROUPS[selectedCategoryGroup]?.subcategories : null);
+                const matches = (s) => {
+                    if (activeTermCardsKey && !(Array.isArray(s.cardTerms) && s.cardTerms.includes(activeTermCardsKey))) return false;
+                    return (!searchTerm || mhServiceMatchesSearch(s, searchTerm)) && mhServiceMatchesCardFilter(s, cardFilter);
+                };
                 const r = {};
                 Object.entries(data).forEach(([id, cat]) => {
                     if (scope && !scope.includes(id)) return;
@@ -5490,7 +5672,7 @@
                     }
                 });
                 return r;
-            }, [searchTerm, data, selectedCategoryGroup, cardFilter, cardFilterOn]);
+            }, [searchTerm, data, selectedCategoryGroup, cardFilter, cardFilterOn, activeTermCardsKey]);
             const resolvedEntryTarget = useMemo(() => {
                 if (!requestedEntryId) return null;
                 const candidates = entryTargets[requestedEntryId] || [];
@@ -5510,7 +5692,7 @@
             // When 3+ sections match: expand only sections with ≤3 items (keeps long lists folded).
             // When 1–2 sections match: expand all (e.g. a single section with one hit).
             useEffect(() => {
-                if (!searchTerm && !cardFilterOn) return;
+                if (!searchTerm && !cardFilterOn && !activeTermCardsKey) return;
                 const entries = Object.entries(filtered);
                 const sectionCount = entries.length;
                 if (sectionCount === 0) {
@@ -5533,7 +5715,7 @@
                         });
                     });
                 }
-            }, [searchTerm, filtered, cardFilterOn]);
+            }, [searchTerm, filtered, cardFilterOn, activeTermCardsKey]);
             useEffect(() => {
                 if (!resolvedEntryTarget) return;
                 const { entryId, groupId, categoryId, subsectionId } = resolvedEntryTarget;
@@ -5626,7 +5808,8 @@
             const openResourcePage = (page) => {
                 setShowTerms(false);
                 setFocusedTerm(null);
-                setTermUrl(null);
+                setFocusedTermCat(null);
+                setTermCardsKey(null);
                 setShowIntro(false);
                 setSearchTerm('');
                 setSelectedCategoryGroup('information');
@@ -6034,7 +6217,7 @@
                                 {s.cardTerms.filter((k) => terms[k]).map((k) => (
                                     <a
                                         key={k}
-                                        href={`/?term=${k}`}
+                                        href={`/glossary?term=${k}`}
                                         className="mh-card-term-chip"
                                         onClick={(e) => {
                                             e.preventDefault();
@@ -6363,43 +6546,79 @@
                 );
             };
 
-            const setTermUrl = (key) => {
-                try {
-                    const url = new URL(window.location.href);
-                    if (key) url.searchParams.set('term', key);
-                    else url.searchParams.delete('term');
-                    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
-                } catch (_) {}
-            };
             const openTerm = (key) => {
+                pushGlossaryNavRef.current = true;
                 setTermsSearch('');
                 setTermsCategory(null);
                 setSelectedLetter(null);
                 setTermsViewMode('categories');
+                setFocusedTermCat(null);
+                setTermCardsKey(null);
                 setFocusedTerm(key);
                 setShowTerms(true);
-                setTermUrl(key);
+            };
+            const openTermCards = (key) => {
+                pushGlossaryNavRef.current = true;
+                setShowTerms(false);
+                setFocusedTerm(null);
+                setFocusedTermCat(null);
+                setTermsSearch('');
+                setTermsCategory(null);
+                setSelectedLetter(null);
+                setTermsViewMode('categories');
+                setSearchTerm('');
+                setHaravotBarzelLaunchedFrom(null);
+                setTermCardsKey(key);
+                setSelectedCategoryGroup(null);
+                setRequestedEntryId(null);
+                setRequestedSectionId(null);
+                setRequestedSubsectionId(null);
+                setResourcePage(null);
+                handledDeepLinkRef.current = null;
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    document.querySelector('.mh-termcards-banner')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }));
+            };
+            const clearTermCards = () => {
+                pushGlossaryNavRef.current = true;
+                setTermCardsKey(null);
             };
             const closeTerms = () => {
+                pushGlossaryNavRef.current = true;
                 setShowTerms(false);
                 setTermsSearch('');
                 setTermsCategory(null);
                 setSelectedLetter(null);
                 setTermsViewMode('categories');
                 setFocusedTerm(null);
-                setTermUrl(null);
+                setFocusedTermCat(null);
             };
             useEffect(() => {
-                if (!showTerms || !focusedTerm) return;
-                if (!terms[focusedTerm]) {
+                if (focusedTerm && !terms[focusedTerm]) {
                     setFocusedTerm(null);
-                    setTermUrl(null);
+                    if (!focusedTermCat) setShowTerms(false);
                     return;
                 }
+                if (!showTerms || !focusedTerm) return;
                 requestAnimationFrame(() => requestAnimationFrame(() => {
                     document.getElementById(`term-${focusedTerm}`)?.scrollIntoView({ block: 'center' });
                 }));
-            }, [showTerms, focusedTerm]);
+            }, [showTerms, focusedTerm, focusedTermCat]);
+            useEffect(() => {
+                if (!focusedTermCat) return;
+                if (!TERM_CATEGORIES[focusedTermCat]) {
+                    setFocusedTermCat(null);
+                    if (!focusedTerm) setShowTerms(false);
+                    return;
+                }
+                if (!showTerms || focusedTerm) return;
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    document.getElementById(`termcat-${focusedTermCat}`)?.scrollIntoView({ block: 'start' });
+                }));
+            }, [showTerms, focusedTermCat, focusedTerm]);
+            useEffect(() => {
+                if (termCardsKey && !terms[termCardsKey]) setTermCardsKey(null);
+            }, [termCardsKey]);
 
             // Approved glossary links arrive on each card (cardTerms). The reverse list, a term's
             // services, is built from the same cards so the two directions cannot disagree.
@@ -6468,6 +6687,18 @@
                                 </button>
                             </div>
                         ))}
+                        {list.length > 0 && (
+                            <div style={{ marginBottom: 'var(--space-xs)' }}>
+                                <button
+                                    type="button"
+                                    className="mh-section-link"
+                                    onClick={() => openTermCards(key)}
+                                    data-tracking-name={`terms_cards_${key}`}
+                                >
+                                    כל השירותים במדריך ({list.length})
+                                </button>
+                            </div>
+                        )}
                         {groups.map((g) => {
                             const groupId = `${key}|${g.categoryKey}`;
                             const expanded = expandedTermGroups.includes(groupId);
@@ -6748,10 +6979,13 @@
                         <div className="mh-modal mh-modal-terms-flow">
                             <div className="mh-terms-wrap">
                                 <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                                    <i className="fas fa-book"></i> מילון מונחים
+                                    <i className="fas fa-book"></i>
+                                    <span style={{ flex: 1 }}>מילון מונחים</span>
+                                    <GlossaryCopyButton kind="glossary" label="מילון מונחים" />
                                 </h1>
                                 <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-xl)', fontSize: 'var(--text-base)' }}>
                                     {Object.keys(terms).length} מונחים זמינים. חפשו לפי שם או קטגוריה, או עיינו לפי אותיות.
+                                    {' '}סמל הקישור ליד הכותרת, ליד כל קטגוריה או מונח — לשליחה ישירה לאותו מקום בדף.
                                 </p>
 
                                 {/* Search Box */}
@@ -6908,7 +7142,7 @@
                                             
                                             return (
                                                 <div key={catId} style={{ marginBottom: 'var(--space-2xl)' }}>
-                                                    <h2 style={{ 
+                                                    <h2 id={`termcat-${catId}`} className={focusedTermCat === catId ? 'mh-termcat-focused' : undefined} style={{ 
                                                         color: cat.color, 
                                                         marginBottom: 'var(--space-lg)', 
                                                         fontSize: 'var(--text-xl)',
@@ -6919,7 +7153,8 @@
                                                         borderBottom: `3px solid ${cat.color}`
                                                     }}>
                                                         <i className={`fas ${cat.icon}`}></i>
-                                                        {cat.title} ({catTerms.length})
+                                                        <span style={{ flex: 1 }}>{cat.title} ({catTerms.length})</span>
+                                                        <GlossaryCopyButton kind="termcat" glossaryKey={catId} label={cat.title} />
                                                     </h2>
                                                     <div className="mh-terms-grid">
                                                         {catTerms.map(([k, t]) => (
@@ -6942,14 +7177,18 @@
                                                                 e.currentTarget.style.boxShadow = 'var(--shadow-card)';
                                                             }}
                                                             >
-                                                                <h3 style={{ 
-                                                                    color: cat.color, 
-                                                                    marginBottom: 'var(--space-md)', 
-                                                                    fontSize: 'var(--text-lg)',
-                                                                    fontWeight: 700
-                                                                }}>
-                                                                    {t.title}
-                                                                </h3>
+                                                                <div className="mh-term-card-head">
+                                                                    <h3 style={{ 
+                                                                        color: cat.color, 
+                                                                        margin: 0,
+                                                                        fontSize: 'var(--text-lg)',
+                                                                        fontWeight: 700,
+                                                                        flex: 1
+                                                                    }}>
+                                                                        {t.title}
+                                                                    </h3>
+                                                                    <GlossaryCopyButton kind="term" glossaryKey={k} label={t.title} />
+                                                                </div>
                                                                 <p style={{ 
                                                                     lineHeight: 1.8, 
                                                                     fontSize: 'var(--text-base)',
@@ -7092,12 +7331,13 @@
                                                                     e.currentTarget.style.boxShadow = 'var(--shadow-card)';
                                                                 }}
                                                                 >
-                                                                    <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
+                                                                    <div className="mh-term-card-head">
                                                                         <h3 style={{ 
                                                                             color: cat?.color || 'var(--primary)', 
                                                                             margin: 0,
                                                                             fontSize: 'var(--text-lg)',
-                                                                            fontWeight: 700
+                                                                            fontWeight: 700,
+                                                                            flex: 1
                                                                         }}>
                                                                             {t.title}
                                                                         </h3>
@@ -7113,6 +7353,7 @@
                                                                                 {cat.title}
                                                                             </span>
                                                                         )}
+                                                                        <GlossaryCopyButton kind="term" glossaryKey={k} label={t.title} />
                                                                     </div>
                                                                     <p style={{ 
                                                                         lineHeight: 1.8, 
@@ -7298,7 +7539,13 @@
                                         <i className="fas fa-heart"></i> אתם לא לבד
                                     </button>
                                 )}
-                                <button type="button" onClick={() => setShowTerms(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="מילון מונחים">
+                                <button type="button" onClick={() => {
+                                    pushGlossaryNavRef.current = true;
+                                    setTermCardsKey(null);
+                                    setFocusedTerm(null);
+                                    setFocusedTermCat(null);
+                                    setShowTerms(true);
+                                }} className="mh-btn mh-hero-btn-ghost" data-tracking-name="מילון מונחים">
                                     <i className="fas fa-book"></i> מילון מונחים
                                 </button>
                                 <button type="button" onClick={openAsk} className="mh-btn mh-hero-btn-ghost" data-tracking-name="ask_open">
@@ -7979,6 +8226,7 @@
                                 onChange={(e) => {
                                     const v = e.target.value;
                                     setSearchTerm(v);
+                                    if (v.trim()) setTermCardsKey(null);
                                     if (v !== HARAVOT_BARZEL_SEARCH) setHaravotBarzelLaunchedFrom(null);
                                     if (requestedEntryId) {
                                         setRequestedEntryId(null);
@@ -8202,10 +8450,25 @@
                         )}
                     </div>
 
-                    {!searchTerm && !cardFilterOn && !selectedCategoryGroup && !nearbyOrigin && (
+                    {activeTermCardsKey && (
+                        <div className="mh-termcards-banner">
+                            <p className="mh-helper-text" style={{ margin: 0 }}>
+                                שירותים הקשורים ל«{terms[activeTermCardsKey].title}».
+                            </p>
+                            <GlossaryCopyButton kind="termcards" glossaryKey={activeTermCardsKey} label={terms[activeTermCardsKey].title} />
+                            <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
+                                חזרה למונח
+                            </button>
+                            <button type="button" className="mh-search-scope-all" onClick={clearTermCards} data-tracking-name="termcards_clear">
+                                הצגת כל המדריך
+                            </button>
+                        </div>
+                    )}
+
+                    {!searchTerm && !cardFilterOn && !activeTermCardsKey && !selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
                     )}
-                    {!searchTerm && selectedCategoryGroup && !nearbyOrigin && (
+                    {!searchTerm && !activeTermCardsKey && selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
                             סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף
                         </p>
@@ -8213,8 +8476,12 @@
 
                     {directorySource === 'loading' ? (
                         <p className="mh-helper-text" role="status">טוען את המדריך…</p>
-                    ) : (searchTerm || cardFilterOn) ? (
-                        Object.entries(filtered).length === 0 ? null : Object.entries(filtered).map(([id, cat]) => (
+                    ) : (searchTerm || cardFilterOn || activeTermCardsKey) ? (
+                        Object.entries(filtered).length === 0 ? (
+                            activeTermCardsKey && !searchTerm && !cardFilterOn ? (
+                                <p className="mh-helper-text">אין שירותים במדריך שמקושרים למונח הזה.</p>
+                            ) : null
+                        ) : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>

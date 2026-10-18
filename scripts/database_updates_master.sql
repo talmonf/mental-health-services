@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 092_site_audit_entries_glossary_share.sql
 [x] 091_multidisciplinary_mh_centers.sql
 [x] 090_directory_entries_missing_categories.sql
 [x] 089_directory_card_eligibility_e5.sql
