@@ -155,18 +155,29 @@ async function auditInput(client: Client, body: Record<string, unknown>): Promis
   };
 }
 
-const AUDIT_SELECT = `
+function auditSelect(withHidden: boolean): string {
+  const hiddenField = withHidden ? `, 'hidden', c.hidden` : '';
+  return `
   SELECT e.id, e.entry_key, e.happened_at::text AS happened_at, e.title, e.description, e.area,
          e.card_keys, e.term_keys, e.migration, e.created_at, e.updated_at,
          coalesce((
            SELECT json_agg(json_build_object(
                     'id', c.id, 'rowId', c.row_id, 'cardKey', c.card_key,
-                    'org', coalesce(c.public_fields->>'org', ''), 'svc', coalesce(c.public_fields->>'svc', ''))
+                    'org', coalesce(c.public_fields->>'org', ''), 'svc', coalesce(c.public_fields->>'svc', '')${hiddenField})
                   ORDER BY c.row_id, c.id)
              FROM directory_card_edits c
             WHERE c.card_key = ANY(e.card_keys)
          ), '[]'::json) AS cards
     FROM site_audit_entries e`;
+}
+
+async function hiddenColumnInstalled(client: Client): Promise<boolean> {
+  const { rows } = await client.query(
+    `SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'directory_card_edits' AND column_name = 'hidden'`
+  );
+  return rows.length > 0;
+}
 
 function auditFromRow(row: Record<string, unknown>) {
   return {
@@ -188,6 +199,7 @@ function auditFromRow(row: Record<string, unknown>) {
 export async function handleAudit(req: VercelRequest, res: VercelResponse) {
   if (!['GET', 'POST', 'PATCH'].includes(req.method || '')) return res.status(405).json({ error: 'Method not allowed' });
   return withAdmin(req, res, '062', async (client, user) => {
+    const select = auditSelect(await hiddenColumnInstalled(client));
     if (req.method === 'GET') {
       const params: unknown[] = [];
       const where: string[] = [];
@@ -212,7 +224,7 @@ export async function handleAudit(req: VercelRequest, res: VercelResponse) {
         where.push(`e.happened_at <= $${params.length}::date`);
       }
       const { rows } = await client.query(
-        `${AUDIT_SELECT} ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+        `${select} ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
           ORDER BY e.happened_at DESC, e.id DESC
           LIMIT 500`,
         params
@@ -230,7 +242,7 @@ export async function handleAudit(req: VercelRequest, res: VercelResponse) {
          RETURNING id`,
         [input.happenedAt, input.title, input.description, input.area, input.cardKeys, input.termKeys, input.migration, user.id]
       );
-      const { rows } = await client.query(`${AUDIT_SELECT} WHERE e.id = $1`, [inserted.rows[0].id]);
+      const { rows } = await client.query(`${select} WHERE e.id = $1`, [inserted.rows[0].id]);
       return res.status(201).json({ entry: auditFromRow(rows[0]) });
     }
     const id = positiveInt(body.id);
@@ -244,7 +256,7 @@ export async function handleAudit(req: VercelRequest, res: VercelResponse) {
       [id, input.happenedAt, input.title, input.description, input.area, input.cardKeys, input.termKeys, input.migration]
     );
     if (!updated.rows[0]) return res.status(404).json({ error: 'Not found' });
-    const { rows } = await client.query(`${AUDIT_SELECT} WHERE e.id = $1`, [id]);
+    const { rows } = await client.query(`${select} WHERE e.id = $1`, [id]);
     return res.status(200).json({ entry: auditFromRow(rows[0]) });
   });
 }

@@ -77,6 +77,7 @@ function isUuid(v: string): boolean {
 }
 
 const CONTACT_TYPES_SQL = `'phone', 'whatsapp', 'website', 'email', 'map', 'download'`;
+const GLOSSARY_CROSSING_TYPES_SQL = `'glossary_to_card', 'glossary_to_cards', 'card_to_glossary', 'cards_to_glossary'`;
 const SECTION_NAV_RE = '^(subcategory_|category_|subsection_|group_)';
 const EXCLUDE_USER_CAP = 20;
 
@@ -295,6 +296,7 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
             FROM events
            WHERE event_type = 'click'
              AND nullif(entry_id, '') IS NOT NULL
+             AND coalesce(element_type, '') NOT IN (${GLOSSARY_CROSSING_TYPES_SQL})
              AND ${filters.eventWhere}
            GROUP BY 1, 2
            ORDER BY n DESC
@@ -363,11 +365,40 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
         WHERE event_type = 'click'
           AND (entry_id IS NULL OR entry_id = '')
           AND element_type NOT IN (${CONTACT_TYPES_SQL})
+          AND element_type NOT IN (${GLOSSARY_CROSSING_TYPES_SQL})
           AND (element_id IS NULL OR element_id !~ '${SECTION_NAV_RE}')
           AND ${filters.eventWhere}
         GROUP BY 1, 2
         ORDER BY n DESC
         LIMIT 20`,
+      filters.eventParams
+    );
+
+    const glossaryCrossings = await client.query(
+      `WITH crossings AS (
+          SELECT coalesce(element_type, '') AS element_type,
+                 coalesce(search_query, '') AS term_key,
+                 coalesce(entry_id, '') AS entry_id,
+                 coalesce(max(element_text_short), '') AS element_text_short,
+                 count(*)::int AS n
+            FROM events
+           WHERE event_type = 'click'
+             AND element_type IN (${GLOSSARY_CROSSING_TYPES_SQL})
+             AND ${filters.eventWhere}
+           GROUP BY 1, 2, 3
+           ORDER BY n DESC
+           LIMIT 40
+        )
+        SELECT c.element_type,
+               c.term_key,
+               c.entry_id,
+               c.element_text_short,
+               c.n,
+               coalesce(nullif(d.display_name, ''), '') AS display_name,
+               substring(c.entry_id from '_([0-9]+)$') AS row
+          FROM crossings c
+          LEFT JOIN directory_entries d ON d.entry_id = c.entry_id
+         ORDER BY c.n DESC`,
       filters.eventParams
     );
 
@@ -494,6 +525,7 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       contactActions: contactActions.rows,
       sectionNavClicks: sectionNavClicks.rows,
       chromeClicks: chromeClicks.rows,
+      glossaryCrossings: glossaryCrossings.rows,
       topSearches: topSearches.rows,
       deepLinks: deepLinks.rows,
       signedIn,
@@ -889,6 +921,8 @@ function directoryCardDetail(row: Record<string, unknown>) {
     indicators: row.indicators && typeof row.indicators === 'object' ? row.indicators : {},
     orgMembers: Array.isArray(row.org_members) ? row.org_members : [],
     indicatorsInstalled: row.indicators !== undefined,
+    hidden: row.hidden === true,
+    hiddenInstalled: Object.prototype.hasOwnProperty.call(row, 'hidden'),
     hasEligibility: hasEligibility(row.eligibility),
     publicEditedAt: isoTime(row.public_edited_at),
     updatedAt: isoTime(row.updated_at),
@@ -903,6 +937,8 @@ function directoryCardSummary(row: Record<string, unknown>) {
     org: String(fields.org || ''),
     svc: String(fields.svc || ''),
     hasEligibility: hasEligibility(row.eligibility),
+    hidden: row.hidden === true,
+    hiddenInstalled: Object.prototype.hasOwnProperty.call(row, 'hidden'),
     publicEditedAt: isoTime(row.public_edited_at),
   };
 }
@@ -919,17 +955,27 @@ async function indicatorsInstalled(client: Client): Promise<boolean> {
   return rows.length > 0;
 }
 
-async function loadDirectoryCard(client: Client, id: number, withIndicators: boolean) {
+/** Migration 101 adds directory_card_edits.hidden. */
+async function hiddenInstalled(client: Client): Promise<boolean> {
   const { rows } = await client.query(
-    `SELECT ${DIRECTORY_CARD_COLUMNS}${withIndicators ? ', indicators' : ''}
+    `SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'directory_card_edits' AND column_name = 'hidden'`
+  );
+  return rows.length > 0;
+}
+
+async function loadDirectoryCard(client: Client, id: number, withIndicators: boolean, withHidden: boolean) {
+  const { rows } = await client.query(
+    `SELECT ${DIRECTORY_CARD_COLUMNS}${withIndicators ? ', indicators' : ''}${withHidden ? ', hidden' : ''}
        FROM directory_card_edits
       WHERE id = $1`,
     [id]
   );
   const row = rows[0];
-  if (!row || !withIndicators) return row || null;
+  if (!row) return null;
+  if (!withIndicators) return row;
   const members = await client.query(
-    `SELECT c.id, c.row_id, c.card_key, c.public_fields
+    `SELECT c.id, c.row_id, c.card_key, c.public_fields${withHidden ? ', c.hidden' : ''}
        FROM card_org_links l
        JOIN directory_card_edits c ON c.card_key = l.member_card_key
       WHERE l.org_card_key = $1
@@ -938,7 +984,13 @@ async function loadDirectoryCard(client: Client, id: number, withIndicators: boo
   );
   row.org_members = members.rows.map((m) => {
     const fields = m.public_fields && typeof m.public_fields === 'object' ? m.public_fields : {};
-    return { id: Number(m.id), rowId: Number(m.row_id), org: String(fields.org || ''), svc: String(fields.svc || '') };
+    return {
+      id: Number(m.id),
+      rowId: Number(m.row_id),
+      org: String(fields.org || ''),
+      svc: String(fields.svc || ''),
+      hidden: m.hidden === true,
+    };
   });
   return row;
 }
@@ -1020,17 +1072,18 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     if (!(await requireAdmin(req, res, client))) return;
 
     const withIndicators = await indicatorsInstalled(client);
+    const withHidden = await hiddenInstalled(client);
 
     if (req.method === 'GET') {
       const id = parseCardId(qstr(req.query, 'id'));
       if (qstr(req.query, 'id') && id == null) return res.status(400).json({ error: 'Invalid id' });
       if (id != null) {
-        const card = await loadDirectoryCard(client, id, withIndicators);
+        const card = await loadDirectoryCard(client, id, withIndicators, withHidden);
         if (!card) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
         return res.status(200).json({ card: directoryCardDetail(card) });
       }
       const { rows } = await client.query(
-        `SELECT id, row_id, public_fields, eligibility, public_edited_at
+        `SELECT id, row_id, public_fields, eligibility, public_edited_at${withHidden ? ', hidden' : ''}
            FROM directory_card_edits
           ORDER BY row_id, id`
       );
@@ -1058,7 +1111,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       throw err;
     }
 
-    const current = await loadDirectoryCard(client, id, withIndicators);
+    const current = await loadDirectoryCard(client, id, withIndicators, withHidden);
     if (!current) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
     const publicChanged = !publicFieldsEqual(current.public_fields, publicFields);
     const eligibilityChanged = !eligibilityEqual(current.eligibility, eligibility);
@@ -1075,7 +1128,13 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     if (!withIndicators && body.indicators && !indicatorsEqual({}, indicators)) {
       return res.status(500).json({ error: 'עמודת הסימונים עדיין לא הותקנה. הריצו את סקריפט 077.' });
     }
-    if (!publicChanged && !eligibilityChanged && !sitesChanged && !indicatorsChanged) {
+    // Hiding is not a change to the card's words, so public_edited_at stays put.
+    const hiddenWanted = typeof body.hidden === 'boolean' ? body.hidden : null;
+    if (hiddenWanted === true && !withHidden) {
+      return res.status(500).json({ error: 'עמודת ההסתרה עדיין לא הותקנה. הריצו את סקריפט 101.' });
+    }
+    const hiddenChanged = withHidden && hiddenWanted != null && (current.hidden === true) !== hiddenWanted;
+    if (!publicChanged && !eligibilityChanged && !sitesChanged && !indicatorsChanged && !hiddenChanged) {
       return res.status(200).json({ card: directoryCardDetail(current) });
     }
 
@@ -1093,6 +1152,9 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
           WHERE id = $1`,
         [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged, jwtUser ? jwtUser.id : null]
       );
+      if (withHidden && hiddenChanged) {
+        await client.query(`UPDATE directory_card_edits SET hidden = $2 WHERE id = $1`, [id, hiddenWanted]);
+      }
       if (withIndicators && indicatorsChanged) {
         await client.query(`UPDATE directory_card_edits SET indicators = $2::jsonb WHERE id = $1`, [
           id,
@@ -1115,7 +1177,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       await client.query('ROLLBACK').catch(() => {});
       throw err;
     }
-    const saved = await loadDirectoryCard(client, id, withIndicators);
+    const saved = await loadDirectoryCard(client, id, withIndicators, withHidden);
     return res.status(200).json({ card: directoryCardDetail(saved) });
   } catch (err) {
     const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';

@@ -67,13 +67,17 @@ async function fetchCardRows() {
   await client.connect();
   try {
     let rows;
-    try {
-      ({ rows } = await client.query(`SELECT card_key, public_fields, indicators, sites FROM directory_card_edits`));
-    } catch (err) {
-      // Migration 077 adds indicators; before it runs, cards publish without them.
-      if (!err || err.code !== '42703') throw err;
-      ({ rows } = await client.query(`SELECT card_key, public_fields, sites FROM directory_card_edits`));
-    }
+    const columns = await client.query(
+      `SELECT column_name FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'directory_card_edits'
+          AND column_name = ANY($1::text[])`,
+      [['indicators', 'sites', 'hidden']]
+    );
+    const names = new Set(columns.rows.map((r) => r.column_name));
+    const extra = ['indicators', 'sites', 'hidden'].filter((name) => names.has(name));
+    ({ rows } = await client.query(
+      `SELECT card_key, public_fields${extra.length ? `, ${extra.join(', ')}` : ''} FROM directory_card_edits`
+    ));
     let links = [];
     try {
       const result = await client.query(
@@ -123,6 +127,7 @@ async function overlayDirectoryCards(data) {
     // Approved glossary links (migration 064). Term pages list these cards; entry pages list the terms.
     svc.cardTerms = row.terms;
     if (Array.isArray(row.sites) && row.sites.length) svc.cardSites = row.sites;
+    if (Object.prototype.hasOwnProperty.call(row, 'hidden')) svc.hidden = row.hidden === true;
     if (row.indicators && typeof row.indicators === 'object') {
       svc.cardIndicators = row.indicators;
       // Referral codes set on the card replace the row-keyed codes from referral_codes.json.

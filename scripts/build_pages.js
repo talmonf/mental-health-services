@@ -430,7 +430,7 @@ function renderEntryPage(ctx, entry) {
     ${referralBadge}
     ${facts ? `<dl class="facts">${facts}</dl>` : ''}
     ${renderContact(entry, emitted, sites)}
-    ${entry.raw.notes && entry.raw.notes.trim() ? `<h2>הערות</h2><div class="notes"${ltrAttrs}>${paragraphs(entry.raw.notes)}</div>` : ''}
+    ${entry.raw.notes && entry.raw.notes.trim() ? `<h2>הערות</h2><div class="notes"${ltrAttrs}>${paragraphs(entry.raw.notes, ctx.hiddenLinkRows)}</div>` : ''}
     ${locations ? `<h2>מיקומים</h2><ul${valueDir}>${locations}</ul>` : ''}
   </div>
   <p><a class="btn" href="${esc(appUrl)}">פתחו את הכרטיס במדריך המלא</a></p>
@@ -541,7 +541,7 @@ function renderCategoryPage(ctx, categoryId, subsectionId) {
   const body = `
 <h1>${esc(title)}</h1>
 ${cat.desc ? `<p class="lede">${esc(cat.desc)}</p>` : ''}
-${cat.intro ? `<div class="notes">${paragraphs(cat.intro)}</div>` : ''}
+${cat.intro ? `<div class="notes">${paragraphs(cat.intro, ctx.hiddenLinkRows)}</div>` : ''}
 ${subsectionLinks}
 ${members.length || !mediaCount ? `<h2>שירותים <span class="count">(${members.length})</span></h2>
 <ul class="entry-list">${entryListHtml(members)}</ul>` : ''}
@@ -597,7 +597,7 @@ function renderTermPage(ctx, key, term, slugByKey) {
   const body = `
 <h1>${esc(term.title)}</h1>
 ${cat ? `<p class="lede">${esc(cat.title)}</p>` : ''}
-<div class="card">${paragraphs(term.text)}
+<div class="card">${paragraphs(term.text, ctx.hiddenLinkRows)}
 ${[[term.phone, term.phoneLabel], [term.phone2, term.phoneLabel2]].filter(([p]) => p).length ? `<p><strong>טלפון:</strong> ${[[term.phone, term.phoneLabel], [term.phone2, term.phoneLabel2]].filter(([p]) => p).map(([p, label]) => {
     const compact = String(p).replace(/[^\d*#]/g, '');
     const tel = /^\d{3,5}\*$/.test(compact) ? `*${compact.replace(/\D/g, '')}` : compact;
@@ -759,7 +759,7 @@ function renderStaticEntry(entry, ctx) {
   const ltr = entry.raw.dir === 'ltr' ? ' lang="en" dir="ltr"' : '';
   const meta = entryMetaLine(entry, ctx);
   return `<li><a href="${esc(entry.path)}"${ltr}>${esc(org)}</a><span class="svc"${ltr}>${esc(svc)}</span>${
-    notes ? `<p class="notes"${ltr}>${linkifyNotes(notes)}</p>` : ''
+    notes ? `<p class="notes"${ltr}>${linkifyNotes(notes, ctx.hiddenLinkRows)}</p>` : ''
   }${meta ? `<span class="svc">${starCodesHtml(meta)}</span>` : ''}</li>`;
 }
 
@@ -774,7 +774,7 @@ function renderStaticCategory(ctx, categoryId) {
   const cat = DATA[categoryId];
   const parts = [];
   if (cat.desc) parts.push(`<p class="svc">${esc(cat.desc)}</p>`);
-  if (cat.intro) parts.push(`<div class="notes">${paragraphs(cat.intro)}</div>`);
+  if (cat.intro) parts.push(`<div class="notes">${paragraphs(cat.intro, ctx.hiddenLinkRows)}</div>`);
   if (cat.sectionLinks && cat.sectionLinks.length) {
     const links = cat.sectionLinks
       .map((link) => {
@@ -826,7 +826,7 @@ function renderGroupStaticArticle(ctx, groupId) {
     .join('\n');
   return `<article id="mh-group-static">
 <h1>${esc(group.title)}</h1>
-<div class="mh-group-lede">${paragraphs(intro)}</div>
+<div class="mh-group-lede">${paragraphs(intro, ctx.hiddenLinkRows)}</div>
 ${sections}
 </article>`;
 }
@@ -915,16 +915,35 @@ function loadHoldout() {
   return { rows: (j.rows || []).map((r) => r.row), cycle: j.cycle };
 }
 
+/** A same-site card link uses the row number. Drop it only when every card on that row is hidden. */
+function rowsWithOnlyHiddenCards(entries) {
+  const byRow = new Map();
+  for (const entry of entries) {
+    const row = Number(entry.row);
+    if (!byRow.has(row)) byRow.set(row, { hidden: 0, visible: 0 });
+    const bucket = byRow.get(row);
+    if (entry.raw && entry.raw.hidden === true) bucket.hidden += 1;
+    else bucket.visible += 1;
+  }
+  const rows = new Set();
+  for (const [row, bucket] of byRow) {
+    if (bucket.hidden > 0 && bucket.visible === 0) rows.add(row);
+  }
+  return rows;
+}
+
 function build(outRoot, data = load()) {
   const holdout = loadHoldout();
   const holdoutRows = new Set(holdout.rows);
 
   // The holdout slice is the within-site control for the GEO experiment: excluded from
   // pages, sitemap and export for one cycle. See experiments/holdout.json.
-  const published = data.entries.filter((e) => !holdoutRows.has(e.row));
+  const published = data.entries.filter((e) => !holdoutRows.has(e.row) && !(e.raw && e.raw.hidden === true));
   const withheld = data.entries.filter((e) => holdoutRows.has(e.row));
+  const hidden = data.entries.filter((e) => e.raw && e.raw.hidden === true && !holdoutRows.has(e.row));
+  const hiddenLinkRows = rowsWithOnlyHiddenCards(data.entries);
 
-  const ctx = { ...data, published };
+  const ctx = { ...data, published, hiddenLinkRows };
   const written = [];
   const urls = [];
   const emittedPhones = [];
@@ -975,7 +994,7 @@ function build(outRoot, data = load()) {
   const lastmod = isoDate(data.LAST_UPDATED) || new Date().toISOString().slice(0, 10);
   fs.writeFileSync(path.join(outRoot, 'sitemap.xml'), renderSitemap(urls, lastmod), 'utf8');
 
-  return { data, written, urls, emittedPhones, withheld, holdout };
+  return { data, written, urls, emittedPhones, withheld, holdout, hidden };
 }
 
 // ---------------------------------------------------------------- assertions
@@ -1277,7 +1296,7 @@ async function main() {
   const t0 = Date.now();
   const catalog = load();
   const cardText = await overlayDirectoryCards(catalog);
-  const { data, written, urls, emittedPhones, withheld, holdout } = build(outRoot, catalog);
+  const { data, written, urls, emittedPhones, withheld, holdout, hidden } = build(outRoot, catalog);
 
   const phoneCount = assertPhonesCameFromData(data, emittedPhones);
   assertEmergencyReachable(written);
@@ -1292,7 +1311,7 @@ async function main() {
   const orgCount = assertOrgIdsUnique(data);
 
   console.log(`Built ${written.length} pages in ${Date.now() - t0}ms -> ${isCheck ? outRoot : 'repo root'}`);
-  console.log(`  entries ${data.entries.length - withheld.length} published, ${withheld.length} withheld (holdout cycle ${holdout.cycle})`);
+  console.log(`  entries ${data.entries.length - withheld.length - hidden.length} published, ${withheld.length} withheld (holdout cycle ${holdout.cycle}), ${hidden.length} hidden`);
   console.log(`  categories ${Object.keys(data.DATA).length}, groups ${Object.keys(data.CATEGORY_GROUPS).length}, terms ${Object.keys(data.terms).length}`);
   console.log(`  sitemap ${sitemapCount} urls, lastmod ${isoDate(data.LAST_UPDATED)}, declared in robots.txt`);
   console.log(`  ${phoneCount} tel: links, all traced back to DATA`);

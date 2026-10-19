@@ -39,9 +39,25 @@ function starCodesHtml(text) {
 /**
  * Notes may name another card as [בית משלך](https://nefesh-il.org/support?entry=289&section=youth),
  * or a single word followed by an address. The visible text is the name, not the URL.
- * A link to this site stays in the same tab.
+ * A link to this site stays in the same tab. A link whose row is only a hidden card
+ * is left as words.
  */
-function linkifyNotes(text) {
+function cardRowOnThisSite(url) {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  const host = parsed.hostname.replace(/^www\./i, '');
+  if (host !== 'nefesh-il.org') return null;
+  const entry = parsed.searchParams.get('entry');
+  if (entry && /^\d+$/.test(entry)) return Number(entry);
+  const pathMatch = parsed.pathname.match(/^\/s\/(\d+)(?:-|$)/);
+  return pathMatch ? Number(pathMatch[1]) : null;
+}
+
+function linkifyNotes(text, hiddenRows) {
   const raw = String(text || '');
   const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|([^\s]+)[ \t]+(https?:\/\/[^\s]+)/g;
   let out = '';
@@ -63,9 +79,15 @@ function linkifyNotes(text) {
     const label = prefix ? word.slice(1) : word;
     out += starCodesHtml(raw.slice(last, match.index));
     if (prefix) out += starCodesHtml(prefix);
-    const sameSite = /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
-    const attrs = sameSite ? '' : ' target="_blank" rel="noopener noreferrer"';
-    out += `<a href="${escapeHtml(url)}"${attrs}>${escapeHtml(label)}</a>`;
+    const row = hiddenRows && cardRowOnThisSite(url);
+    const hideLink = row != null && typeof hiddenRows.has === 'function' && hiddenRows.has(row);
+    if (hideLink) {
+      out += starCodesHtml(label);
+    } else {
+      const sameSite = /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
+      const attrs = sameSite ? '' : ' target="_blank" rel="noopener noreferrer"';
+      out += `<a href="${escapeHtml(url)}"${attrs}>${escapeHtml(label)}</a>`;
+    }
     if (trail) out += starCodesHtml(trail);
     last = match.index + match[0].length;
     if (!markdown && raw[last] === ' ' && /[.,;:]/.test(raw[last + 1] || '')) last += 1;
@@ -75,12 +97,12 @@ function linkifyNotes(text) {
 }
 
 /** Multi-line free text from DATA renders as paragraphs, not one run-on line. */
-function paragraphs(text) {
+function paragraphs(text, hiddenRows) {
   return String(text || '')
     .split(/\n+/)
     .map((t) => t.trim())
     .filter(Boolean)
-    .map((t) => `<p>${linkifyNotes(t)}</p>`)
+    .map((t) => `<p>${linkifyNotes(t, hiddenRows)}</p>`)
     .join('');
 }
 

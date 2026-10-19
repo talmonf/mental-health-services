@@ -1776,6 +1776,21 @@
         // is written [בית משלך](https://nefesh-il.org/support?entry=289&section=youth).
         // A link to this site opens here, in the section named in the URL.
         const mhNoteLinkSameSite = (url) => /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
+        // entry=356 and /s/356 name a card. A link is dropped only when every card on that
+        // row is hidden, so a shared row that still has a visible card keeps its link.
+        const mhSameSiteCardRow = (url) => {
+            try {
+                const parsed = new URL(url);
+                const host = parsed.hostname.replace(/^www\./i, '');
+                if (host !== 'nefesh-il.org') return null;
+                const entry = parsed.searchParams.get('entry');
+                if (entry && /^\d+$/.test(entry)) return Number(entry);
+                const pathMatch = parsed.pathname.match(/^\/s\/(\d+)(?:-|$)/);
+                return pathMatch ? Number(pathMatch[1]) : null;
+            } catch {
+                return null;
+            }
+        };
         // A leading * is direction-neutral, so in Hebrew it paints after the digits (*5400 → 5400*).
         // Isolate the short code and always show the star first. 9518* is the same code, stored backwards.
         const mhStarRe = () => /(\*\s*\d{2,5})|(\d{3,5}\s*\*)/g;
@@ -1810,7 +1825,7 @@
             return mhDialText(shown, keyPrefix);
         };
 
-        const mhRenderLinkedNotes = (notes) => {
+        const mhRenderLinkedNotes = (notes, hiddenRows) => {
             const text = String(notes || '');
             const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|([^\s]+)[ \t]+(https?:\/\/[^\s]+)/g;
             const out = [];
@@ -1840,16 +1855,25 @@
                 const label = prefix ? word.slice(1) : word;
                 if (match.index > last) pushPlain(text.slice(last, match.index));
                 if (prefix) pushPlain(prefix);
-                const sameSite = mhNoteLinkSameSite(url);
-                out.push(
-                    <a
-                        key={`note-link-${key++}`}
-                        href={url}
-                        target={sameSite ? undefined : '_blank'}
-                        rel={sameSite ? undefined : 'noopener noreferrer'}
-                        data-probe-external-link={sameSite ? undefined : 'true'}
-                    >{label}</a>
-                );
+                const linkedRow = mhSameSiteCardRow(url);
+                const dropLink = hiddenRows && linkedRow != null && hiddenRows.has(linkedRow);
+                if (dropLink) {
+                    const nodes = mhDialText(label, `note-${key}`);
+                    key += 1;
+                    if (Array.isArray(nodes)) out.push(...nodes);
+                    else out.push(nodes);
+                } else {
+                    const sameSite = mhNoteLinkSameSite(url);
+                    out.push(
+                        <a
+                            key={`note-link-${key++}`}
+                            href={url}
+                            target={sameSite ? undefined : '_blank'}
+                            rel={sameSite ? undefined : 'noopener noreferrer'}
+                            data-probe-external-link={sameSite ? undefined : 'true'}
+                        >{label}</a>
+                    );
+                }
                 if (trail) pushPlain(trail);
                 last = match.index + match[0].length;
                 if (!markdown && text[last] === ' ' && /[.,;:]/.test(text[last + 1] || '')) last += 1;
@@ -2132,19 +2156,28 @@
                 const tagName = el.tagName ? el.tagName.toLowerCase() : 'element';
                 const elementType = el.getAttribute('data-analytics-type') || tagName;
                 const entryIdEl = el.closest('[data-entry-id]');
-                const entryId = entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null;
+                // data-analytics-entry is the card when the control is not inside one,
+                // as with a glossary term's link to a single service.
+                const entryId = el.getAttribute('data-analytics-entry')
+                    || (entryIdEl ? entryIdEl.getAttribute('data-entry-id') : null);
                 const sectionEl = el.closest('[data-analytics-section]');
                 const section = sectionEl
                     ? sectionEl.getAttribute('data-analytics-section')
                     : (entryIdEl ? entryIdEl.getAttribute('data-entry-category') : null);
                 const textSource = el.getAttribute('data-analytics-text') || el.innerText || el.textContent || '';
                 const elementTextShort = textSource.trim().slice(0, 80) || null;
+                // data-analytics-term marks a move between a glossary term and the directory.
+                // search_query holds the term key; element_type names the direction.
+                const termKey = (el.getAttribute('data-analytics-term') || '').trim();
+                const searchQuery = termKey ? mhSanitizeSearchQuery(termKey) : null;
                 mhTrackEvent('click', {
                     element_id: elementId,
                     element_type: elementType,
                     element_text_short: elementTextShort,
                     section,
-                    entry_id: entryId
+                    entry_id: entryId,
+                    search_query: searchQuery,
+                    search_location: searchQuery ? elementType : null
                 });
             }, { capture: true });
         };
@@ -2364,7 +2397,7 @@
          {"row": 63, "org": "הדספייס", "svc": "תמיכה לנוער וצעירים", "phone": "050-9693460", "web": "https://headspace.org.il/", "target": "נוער וצעירים בגילאי 10-25", "region": "ערים שונות", "cost": "חינם", "specialty": "", "notes": "נוער וצעירים בגילאי 10-25, הצוות המקצועי שלנו ישמח לעזור לכם להתמודד עם תקופות מאתגרות בחיים בהתערבות רגשית ממוקדת וללא עלות.", "languages": "עברית, אנגלית", "diseases": "", "add": ""}]},
         
          "portals": {"icon": "🌐", "title": "פורטלים ומידע", "titleEn": "Information Portals", "desc": "אתרי מידע ואינדקסים", "services": [
-         {"row": 356, "org": "פורטל מידע פתוח — בריאות נפשית", "svc": "מאגרי נתונים פתוחים על בריאות הנפש בישראל", "phone": "", "web": "https://mental-data.datacity.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "אתר של הסדנא לידע ציבורי, בתמיכת רשות החדשנות. אפשר לחפש ולהוריד קבצי נתונים על בריאות הנפש, רווחה ומדיניות. אינו שירות טיפולי ואינו קו סיוע.", "languages": "", "diseases": "", "add": ""},
+         {"row": 356, "org": "פורטל מידע פתוח — בריאות נפשית", "svc": "מאגרי נתונים פתוחים על בריאות הנפש בישראל", "phone": "", "web": "https://mental-data.datacity.org.il/", "target": "", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "אתר של הסדנא לידע ציבורי, בתמיכת רשות החדשנות. אפשר לחפש ולהוריד קבצי נתונים על בריאות הנפש, רווחה ומדיניות. אינו שירות טיפולי ואינו קו סיוע.", "languages": "", "diseases": "", "add": "", "hidden": true},
          {"row": 16, "org": "פורטל בריאות הנפש בישראל", "svc": "שירותים למתמודד\nאינדקס מטפלים\nפורומים\nועוד ועוד", "phone": "", "web": "https://www.mh-israel.co.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 255, "org": "מפה לנפש", "svc": "מפה ומאגר מענים טיפוליים ונפשיים בישראל לילדים, נוער ומבוגרים", "phone": "", "web": "https://mapalanefesh.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "מפה גיאוגרפית של מרפאות, אשפוז, חינוך מיוחד, רווחה, מסגרות חוץ־ביתיות, עמותות וקווי סיוע. פרויקט קהילתי; אינו מהווה ייעוץ רפואי או המלצה על גורם מסוים.", "languages": "", "diseases": "", "add": ""},
          {"row": 244, "org": "סל שיקום", "svc": "מידע, זכויות ואיתור ספקי שירות בסל שיקום", "phone": "*5400", "email": "salshikum@outlook.com", "web": "https://salshikum.org/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "אתר עם שאלון התאמה לספקי שירות, מדריכי זכויות, ביטוח לאומי ומידע למשפחות", "languages": "עברית, ערבית, אנגלית", "diseases": "", "add": ""},
@@ -4401,7 +4434,10 @@
                     }
                     out[id] = { ...cat, services };
                 });
-                if (!cardEditMap) return out;
+                // A database row replaces the whole visible card. Fields the admin cleared
+                // stay empty; they are not filled back in from the copy in this file.
+                // A hidden card is left out. The database flag wins once it arrives;
+                // until then, or if the request fails, the copy in this file is used.
                 const publicKeys = new Set([
                     'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
                     'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
@@ -4415,11 +4451,11 @@
                     'phone5', 'phoneLabel5', 'phoneShowNumber5',
                     'phone6', 'phoneLabel6', 'phoneShowNumber6'
                 ]);
-                // A database row replaces the whole visible card. Fields the admin cleared
-                // stay empty; they are not filled back in from the copy in this file.
                 const applyCardEdit = (svc) => {
                     if (!svc) return svc;
-                    const edit = cardEditMap[`${svc.row}|||${svc.svc || ''}`];
+                    const edit = cardEditMap && cardEditMap[`${svc.row}|||${svc.svc || ''}`];
+                    const hidden = edit && typeof edit.hidden === 'boolean' ? edit.hidden : Boolean(svc.hidden);
+                    if (hidden) return null;
                     if (!edit) return svc;
                     const next = { ...svc, cardEditOriginalOrg: svc.org };
                     const fields = edit.publicFields && typeof edit.publicFields === 'object' ? edit.publicFields : {};
@@ -4439,15 +4475,41 @@
                 };
                 Object.keys(out).forEach((id) => {
                     const cat = out[id];
-                    if (Array.isArray(cat.services)) cat.services = cat.services.map(applyCardEdit);
+                    if (Array.isArray(cat.services)) cat.services = cat.services.map(applyCardEdit).filter(Boolean);
                     if (cat.subsections) {
                         Object.keys(cat.subsections).forEach((subId) => {
                             const sub = cat.subsections[subId];
-                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit) };
+                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit).filter(Boolean) };
                         });
                     }
                 });
                 return out;
+            }, [cardEditMap]);
+
+            // A row is link-hidden only when every card on it is hidden. A shared row that
+            // still has a visible card keeps links that use that row number.
+            const hiddenLinkRows = useMemo(() => {
+                const byRow = new Map();
+                const visit = (svc) => {
+                    if (!svc || svc.row == null || svc.row === '') return;
+                    const row = Number(svc.row);
+                    if (!Number.isFinite(row)) return;
+                    const edit = cardEditMap && cardEditMap[`${svc.row}|||${svc.svc || ''}`];
+                    const hidden = edit && typeof edit.hidden === 'boolean' ? edit.hidden : Boolean(svc.hidden);
+                    if (!byRow.has(row)) byRow.set(row, { hidden: 0, visible: 0 });
+                    const bucket = byRow.get(row);
+                    if (hidden) bucket.hidden += 1;
+                    else bucket.visible += 1;
+                };
+                Object.values(DATA).forEach((cat) => {
+                    (cat.services || []).forEach(visit);
+                    Object.values(cat.subsections || {}).forEach((sub) => (sub.services || []).forEach(visit));
+                });
+                const rows = new Set();
+                byRow.forEach((bucket, row) => {
+                    if (bucket.hidden > 0 && bucket.visible === 0) rows.add(row);
+                });
+                return rows;
             }, [cardEditMap]);
 
             // An organization's general card links to its member cards by directory_card_edits id.
@@ -6496,7 +6558,7 @@
                                 {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {mhDialText(s.specialty, `spec-${s.row}`)}</div>}
                                 {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {mhDialText(s.languages, `lang-${s.row}`)}</div>}
                                 {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {mhDialText(s.diseases, `dis-${s.row}`)}</div>}
-                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes)}</div>}
+                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes, hiddenLinkRows)}</div>}
                             </div>
                         )}
                         {Array.isArray(s.cardTerms) && s.cardTerms.some((k) => terms[k]) && (
@@ -6512,6 +6574,10 @@
                                             openTerm(k);
                                             window.scrollTo(0, 0);
                                         }}
+                                        data-analytics-id="card_to_glossary"
+                                        data-analytics-type="card_to_glossary"
+                                        data-analytics-term={k}
+                                        data-analytics-text={terms[k].title}
                                         data-tracking-name={`${s.trackingName || s.org}_term_${k}`}
                                     >
                                         <i className="fas fa-book" aria-hidden="true"></i> {terms[k].title}
@@ -7160,6 +7226,11 @@
                                     type="button"
                                     className="mh-section-link"
                                     onClick={() => openTermCards(key)}
+                                    data-analytics-id="glossary_to_cards"
+                                    data-analytics-type="glossary_to_cards"
+                                    data-analytics-term={key}
+                                    data-analytics-section="glossary"
+                                    data-analytics-text={terms[key].title}
                                     data-tracking-name={`terms_cards_${key}`}
                                 >
                                     כל השירותים במדריך ({list.length})
@@ -7182,6 +7253,12 @@
                                             <a
                                                 href={buildEntryLink({ entryId: String(item.row), categoryId: item.categoryKey, row: item.row })}
                                                 style={{ color: linkColor }}
+                                                data-analytics-id="glossary_to_card"
+                                                data-analytics-type="glossary_to_card"
+                                                data-analytics-term={key}
+                                                data-analytics-entry={mhGetEntryId({ org: item.org, svc: item.svc, row: item.row }, item.categoryKey)}
+                                                data-analytics-section={item.categoryKey}
+                                                data-analytics-text={terms[key].title}
                                                 data-tracking-name={`terms_service_${key}_${item.row}`}
                                             >
                                                 {item.org}
@@ -8829,7 +8906,7 @@
                                 שירותים הקשורים ל«{terms[activeTermCardsKey].title}».
                             </p>
                             <GlossaryCopyButton kind="termcards" glossaryKey={activeTermCardsKey} label={terms[activeTermCardsKey].title} />
-                            <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
+                            <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-analytics-id="cards_to_glossary" data-analytics-type="cards_to_glossary" data-analytics-term={activeTermCardsKey} data-analytics-section="glossary" data-analytics-text={terms[activeTermCardsKey].title} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
                                 חזרה למונח
                             </button>
                             <button type="button" className="mh-search-scope-all" onClick={clearTermCards} data-tracking-name="termcards_clear">

@@ -7,6 +7,7 @@
  * Eligibility is not painted on the card; the page publishes set values as JSON-LD.
  * Each card also lists its approved glossary term keys (glossary_card_links, migration 064),
  * its indicators, and for an organization's general card the ids of its member cards (077).
+ * A card with hidden = true (migration 101) is marked so the page can leave it out.
  *
  * Env: DATABASE_URL (same as /api/analytics)
  *
@@ -70,9 +71,18 @@ async function handlePublicCards(res: VercelResponse) {
   try {
     await client.connect();
     let rows: Array<Record<string, unknown>>;
+    let includeHidden = false;
     try {
+      const columns = await client.query(
+        `SELECT column_name FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'directory_card_edits'
+            AND column_name = ANY($1::text[])`,
+        [['sites', 'hidden']]
+      );
+      const names = new Set(columns.rows.map((r) => String(r.column_name)));
+      includeHidden = names.has('hidden');
       const result = await client.query(
-        `SELECT id, card_key, row_id, public_fields, eligibility, sites, public_edited_at
+        `SELECT id, card_key, row_id, public_fields, eligibility${names.has('sites') ? ', sites' : ''}, public_edited_at${includeHidden ? ', hidden' : ''}
            FROM directory_card_edits
           ORDER BY row_id, id`
       );
@@ -86,6 +96,7 @@ async function handlePublicCards(res: VercelResponse) {
           ORDER BY row_id, id`
       );
       rows = result.rows;
+      includeHidden = false;
     }
     const termsByCard = new Map<string, string[]>();
     try {
@@ -125,6 +136,9 @@ async function handlePublicCards(res: VercelResponse) {
       if (code !== '42P01' && code !== '42703') throw err;
     }
     res.setHeader('Cache-Control', 'no-cache');
+    const hiddenIds = new Set(
+      includeHidden ? rows.filter((row) => row.hidden === true).map((row) => Number(row.id)) : []
+    );
     return res.status(200).json({
       cards: rows.map((row) => ({
         id: Number(row.id),
@@ -136,8 +150,9 @@ async function handlePublicCards(res: VercelResponse) {
         sites: Array.isArray(row.sites) ? row.sites : [],
         terms: termsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],
         indicators: indicatorsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || null,
-        orgMembers: membersByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],
+        orgMembers: (membersByCard.get(String(row.card_key || '').replace(/\r/g, '')) || []).filter((id) => !hiddenIds.has(id)),
         publicEditedAt: isoTime(row.public_edited_at),
+        ...(includeHidden ? { hidden: row.hidden === true } : {}),
       })),
     });
   } catch (err) {

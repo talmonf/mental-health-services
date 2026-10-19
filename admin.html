@@ -174,7 +174,15 @@
     .picker-results .muted { font-size: 0.8rem; }
     .contact-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
     .contact-row .who { flex: 1 1 220px; }
+    .contact-row .role-view { flex: 0 1 auto; min-width: 0; max-width: 100%; }
     .contact-row input { flex: 1 1 200px; width: auto; }
+    .contact-row .role-saved { font-weight: 700; }
+    .contact-row .role-error { flex: 1 1 100%; margin: 0; }
+    .spin {
+      width: 14px; height: 14px; border: 2px solid currentColor; border-inline-end-color: transparent;
+      border-radius: 50%; flex: none; animation: contact-spin 0.7s linear infinite;
+    }
+    @keyframes contact-spin { to { transform: rotate(360deg); } }
     .gloss-term { margin-bottom: 16px; }
     .gloss-term h3 { display: flex; gap: 8px; align-items: center; }
     .gloss-term label.dir-check { font-weight: 400; }
@@ -229,7 +237,11 @@
       download: 'Download',
       button: 'Button',
       div: 'Click',
-      share: 'Share'
+      share: 'Share',
+      glossary_to_card: 'Glossary → one card',
+      glossary_to_cards: 'Glossary → its cards',
+      card_to_glossary: 'Card → glossary',
+      cards_to_glossary: 'Card list → glossary'
     };
     const CONTACT_NAMES = {
       contact_whatsapp: 'Site authors (WhatsApp)',
@@ -333,6 +345,11 @@
       directoryEligFilter: '',
       cardInternal: null,
       cardInternalMsg: '',
+      cardInternalAnchor: '',
+      contactDrafts: {},
+      contactEditing: null,
+      contactJustSaved: null,
+      contactError: null,
       audit: null,
       auditMsg: '',
       auditFilter: { area: '', card: '', from: '', to: '' },
@@ -817,6 +834,25 @@
             esc(actionLabel(r.element_type)),
             r.n
           ]
+        )}</div>
+        <h2>Glossary and directory</h2>
+        <p class="lede">A visitor moved from a glossary term to a card, or from a card back to a glossary term. The term and the card are stored separately.</p>
+        <div class="card">${table(
+          ['Direction', 'Term', 'Card', 'Count'],
+          d.glossaryCrossings,
+          (r) => {
+            const key = String(r.term_key || '').trim();
+            const title = String(r.element_text_short || '').trim();
+            const termLabel = title || key || '(unknown term)';
+            const termCell = key
+              ? openLink('/glossary?term=' + encodeURIComponent(key), termLabel, true)
+              : esc(termLabel);
+            const listMove = r.element_type === 'glossary_to_cards' || r.element_type === 'cards_to_glossary';
+            const cardCell = listMove
+              ? (key ? openLink('/?termcards=' + encodeURIComponent(key), 'All linked cards') : 'All linked cards')
+              : openLink(entryHref(r.row), r.display_name || r.entry_id || '—', true);
+            return [esc(actionLabel(r.element_type)), termCell, cardCell, r.n];
+          }
         )}</div>
         <h2>Contact actions</h2>
         <div class="card">${table(
@@ -1413,6 +1449,11 @@
       state.directoryMsg = '';
       state.directoryCard = data.card;
       state.cardInternalMsg = '';
+      state.cardInternalAnchor = '';
+      state.contactDrafts = {};
+      state.contactEditing = null;
+      state.contactJustSaved = null;
+      state.contactError = null;
       await loadCardInternal(data.card.id);
     }
 
@@ -1495,10 +1536,10 @@
         const indFunding = {};
         (Array.isArray(ind.funding) ? ind.funding : []).forEach((f) => { if (f && f.channel) indFunding[f.channel] = f.terms || ''; });
         const indReferral = Array.isArray(ind.referral) ? ind.referral : [];
-        const memberRow = (m) => `<li class="member-row" data-id="${esc(m.id)}">שורה ${esc(m.rowId)} · ${esc(m.org)}${m.svc ? ` — ${esc(String(m.svc).split('\n')[0])}` : ''} <button type="button" class="secondary" data-act="remove-member">הסרה</button></li>`;
+        const memberRow = (m) => `<li class="member-row" data-id="${esc(m.id)}">שורה ${esc(m.rowId)} · ${esc(m.org)}${m.svc ? ` — ${esc(String(m.svc).split('\n')[0])}` : ''}${m.hidden ? ' · מוסתר' : ''} <button type="button" class="secondary" data-act="remove-member">הסרה</button></li>`;
         const memberOptions = (state.directoryCards || [])
           .filter((c) => c.id !== card.id)
-          .map((c) => `<option value="${esc(c.id)}">שורה ${esc(c.rowId)} · ${esc(c.org)}${c.svc ? ` — ${esc(String(c.svc).split('\n')[0].slice(0, 60))}` : ''}</option>`)
+          .map((c) => `<option value="${esc(c.id)}">שורה ${esc(c.rowId)} · ${esc(c.org)}${c.svc ? ` — ${esc(String(c.svc).split('\n')[0].slice(0, 60))}` : ''}${c.hidden ? ' · מוסתר' : ''}</option>`)
           .join('');
         const indicatorsSection = card.indicatorsInstalled === false
           ? '<h2>סימונים בכרטיס</h2><p class="dir-help">הסימונים יופיעו כאן אחרי הרצת סקריפט 077.</p>'
@@ -1529,10 +1570,18 @@
                 <select id="d-member-pick" aria-label="הוספת כרטיס של הארגון"><option value="">הוספת כרטיס…</option>${memberOptions}</select>
               </div>
             </fieldset>`;
+        const hiddenControl = card.hiddenInstalled === false
+          ? '<p class="dir-help">ההסתרה תופיע כאן אחרי הרצת סקריפט 101.</p>'
+          : `<label class="dir-check"><input type="checkbox" name="hidden"${card.hidden ? ' checked' : ''}> הכרטיס מוסתר מהאתר</label>
+            <p class="dir-help">כרטיס מוסתר נשאר ברשימה, עם אנשי הקשר שלו, ולא מופיע באתר. קישורים אליו מוצגים כטקסט.</p>`;
+        const viewLine = card.hidden
+          ? `<p class="dir-help">שורה ${esc(card.rowId)}. הכרטיס מוסתר מהאתר.</p>`
+          : `<p class="dir-help">שורה ${esc(card.rowId)}. <a href="/?entry=${encodeURIComponent(card.rowId)}">צפייה בכרטיס</a></p>`;
         root.appendChild(el(`<div class="card he-panel">
           ${msg}
-          <p class="dir-help">שורה ${esc(card.rowId)}. <a href="/?entry=${encodeURIComponent(card.rowId)}">צפייה בכרטיס</a></p>
+          ${viewLine}
           <form id="dir-form">
+            ${hiddenControl}
             <h2>מוצג בכרטיס</h2>
             <div class="dir-grid">${textInputs}</div>
             <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
@@ -1678,6 +1727,10 @@
             };
             body.orgMembers = Array.from(form.querySelectorAll('.member-row')).map((li) => Number(li.dataset.id));
           }
+          if (card.hiddenInstalled !== false) {
+            const hiddenBox = form.querySelector('[name="hidden"]');
+            body.hidden = Boolean(hiddenBox && hiddenBox.checked);
+          }
           try {
             const r = await fetch('/api/admin/directory', {
               method: 'PATCH',
@@ -1697,6 +1750,8 @@
                 org: (data.card.publicFields && data.card.publicFields.org) || '',
                 svc: (data.card.publicFields && data.card.publicFields.svc) || '',
                 hasEligibility: data.card.hasEligibility,
+                hidden: data.card.hidden,
+                hiddenInstalled: data.card.hiddenInstalled,
                 publicEditedAt: data.card.publicEditedAt
               };
               if (idx >= 0) state.directoryCards[idx] = summary;
@@ -1730,7 +1785,7 @@
           : '<span class="elig-mark no" title="אין מידע פנימי" aria-label="אין מידע פנימי">✗</span>';
         return `<tr data-card-row data-hay="${esc(hay)}" data-elig="${elig}"${hidden ? ' hidden' : ''}>
           <td>${esc(card.rowId)}</td>
-          <td>${esc(card.org)}</td>
+          <td>${esc(card.org)}${card.hidden ? ' <span class="badge warn">מוסתר</span>' : ''}</td>
           <td>${esc(card.svc)}</td>
           <td>${mark}</td>
           <td><button type="button" data-open="${esc(card.id)}">עריכה</button></td>
@@ -2333,7 +2388,7 @@
               </div>
               <h3 dir="auto">${esc(e.title)}</h3>
               <p class="desc" dir="auto">${esc(e.description)}</p>
-              ${(e.cards || []).length ? `<div class="audit-links"><span class="muted">כרטיסים:</span>${e.cards.map((c) => `<span><a class="name-link" href="#directory/${esc(c.id)}">${esc(c.rowId)} · ${esc(c.org)}</a> <a class="open" href="/?entry=${esc(c.rowId)}" target="_blank" rel="noopener">באתר</a></span>`).join('')}</div>` : ''}
+              ${(e.cards || []).length ? `<div class="audit-links"><span class="muted">כרטיסים:</span>${e.cards.map((c) => `<span><a class="name-link" href="#directory/${esc(c.id)}">${esc(c.rowId)} · ${esc(c.org)}</a>${c.hidden ? '' : ` <a class="open" href="/?entry=${esc(c.rowId)}" target="_blank" rel="noopener">באתר</a>`}</span>`).join('')}</div>` : ''}
               ${(e.termKeys || []).length ? `<div class="audit-links"><span class="muted">מונחים:</span>${e.termKeys.map((k) => `<a class="name-link" href="/term/${esc(k.replace(/_/g, '-'))}" target="_blank" rel="noopener">${esc(termTitle(k))}</a>`).join('')}</div>` : ''}
             </article>`).join('');
       root.appendChild(el(`<div class="he-panel">
@@ -2615,14 +2670,43 @@
         .filter(([k]) => !links.some((l) => l.termKey === k))
         .sort((a, b) => a[1].localeCompare(b[1], 'he'))
         .map(([k, t]) => `<option value="${esc(k)}">${esc(t)}</option>`).join('');
+      const roleOf = (c) => {
+        const drafts = state.contactDrafts || {};
+        return Object.prototype.hasOwnProperty.call(drafts, c.linkId) ? drafts[c.linkId] : (c.roleNote || '');
+      };
+      const sameLink = (a, b) => Number(a) === Number(b);
+      const contactRowHtml = (c) => {
+        const editing = sameLink(state.contactEditing, c.linkId);
+        const role = roleOf(c);
+        const justSaved = !editing && sameLink(state.contactJustSaved, c.linkId);
+        const rowError = state.contactError && sameLink(state.contactError.linkId, c.linkId) ? state.contactError.message : '';
+        const roleView = role
+          ? `<div class="role-view" dir="auto">${esc(role)}</div>`
+          : '<div class="role-view muted">לא צוין תפקיד</div>';
+        const body = editing
+          ? `<input type="text" name="role" value="${esc(role)}" placeholder="תפקיד או הקשר" maxlength="500">
+              <button type="button" class="secondary" data-act="save-role">שמירה</button>
+              <button type="button" class="secondary" data-act="cancel-role">ביטול</button>`
+          : `${roleView}${justSaved ? '<span class="ok role-saved">נשמר</span>' : ''}
+              <button type="button" class="secondary" data-act="edit-role">עריכה</button>`;
+        return `<div class="contact-row" data-link="${esc(c.linkId)}">
+              <div class="who">${contactLink(c.contact.displayName, c.contact.contactUrl)}
+                <div class="muted" dir="auto">${esc([c.contact.organization, c.contact.email, c.contact.phone].filter(Boolean).join(' · '))}</div></div>
+              ${body}
+              <button type="button" class="secondary" data-act="remove-contact">הסרה</button>
+              ${rowError ? `<p class="err role-error">${esc(rowError)}</p>` : ''}
+            </div>`;
+      };
+      const sectionMsg = (anchor) => state.cardInternalAnchor === anchor ? msgHtml(state.cardInternalMsg) : '';
       root.appendChild(el(`<div class="card he-panel" id="card-internal">
         <h2>פנימי — לא מוצג באתר</h2>
-        ${msgHtml(state.cardInternalMsg)}
+        ${state.cardInternalAnchor ? '' : msgHtml(state.cardInternalMsg)}
         ${data.errors.length ? `<p class="err">${esc(data.errors.join(' · '))}</p>` : ''}
         ${comp ? `<p class="dir-help">שלמות הכרטיס: <b>${esc(comp.score)}%</b>${comp.gaps.length ? ` · חסר: ${comp.gaps.map((g) => esc(g.label + (g.detail ? ` (${g.detail})` : ''))).join(' · ')}` : ''}</p>` : ''}
 
-        <div class="internal-section">
+        <div class="internal-section" id="card-verif">
           <h3>אימות</h3>
+          ${sectionMsg('card-verif')}
           <p>${current ? `${levelBadge(current.level)} ${esc(LEVELS[current.level])} · ${esc(ymdToDmy(current.verifiedOn))} · ${contactLink(current.contact && current.contact.displayName, current.contact && current.contact.contactUrl)}` : `${levelBadge(0)} ${esc(LEVELS[0])}`}</p>
           <form id="verif-form" class="dir-grid">
             <div><label for="v-level">רמה</label><select id="v-level" name="level">${Object.entries(LEVELS).map(([n, t]) => `<option value="${n}"${Number(n) === (current ? current.level : 1) ? ' selected' : ''}>${n} — ${esc(t)}</option>`).join('')}</select></div>
@@ -2642,15 +2726,10 @@
           ])}</details>` : ''}
         </div>
 
-        <div class="internal-section">
+        <div class="internal-section" id="card-contacts">
           <h3>אנשי קשר שקשורים לכרטיס</h3>
-          ${contacts.length ? contacts.map((c) => `<div class="contact-row" data-link="${esc(c.linkId)}">
-              <div class="who">${contactLink(c.contact.displayName, c.contact.contactUrl)}
-                <div class="muted" dir="auto">${esc([c.contact.organization, c.contact.email, c.contact.phone].filter(Boolean).join(' · '))}</div></div>
-              <input type="text" name="role" value="${esc(c.roleNote)}" placeholder="תפקיד או הקשר" maxlength="500">
-              <button type="button" class="secondary" data-act="save-role">שמירה</button>
-              <button type="button" class="secondary" data-act="remove-contact">הסרה</button>
-            </div>`).join('') : '<p class="muted">אין אנשי קשר.</p>'}
+          ${sectionMsg('card-contacts')}
+          ${contacts.length ? contacts.map(contactRowHtml).join('') : '<p class="muted">אין אנשי קשר.</p>'}
           <div style="margin-top:12px">
             <label for="cc-role">תפקיד או הקשר של איש הקשר החדש</label>
             <input id="cc-role" type="text" maxlength="500">
@@ -2658,8 +2737,9 @@
           </div>
         </div>
 
-        <div class="internal-section">
+        <div class="internal-section" id="card-glossary">
           <h3>מונחים במילון</h3>
+          ${sectionMsg('card-glossary')}
           <p class="dir-help">מונח מאושר מופיע בכרטיס תחת «מונחים קשורים», והכרטיס מופיע בדף המונח תחת «שירותים במדריך».</p>
           <div class="chips">${links.length ? links.map((l) => `<span class="chip ${l.status === 'suggested' ? 'suggested' : ''}" title="${esc(l.matchedText)}">
               ${esc(termTitle(l.termKey))}${l.status === 'suggested' ? ' <span class="muted">(הצעה)</span>' : ''}
@@ -2671,12 +2751,24 @@
       </div>`));
 
       const panel = root.querySelector('#card-internal');
-      const refresh = async (text) => {
+      const reveal = (anchor) => {
+        const node = anchor && document.getElementById(anchor);
+        if (node) node.scrollIntoView({ block: 'start' });
+      };
+      const refresh = async (text, anchor) => {
         await loadCardInternal(card.id);
         state.cardInternalMsg = text || '';
+        state.cardInternalAnchor = anchor || '';
         render();
+        reveal(anchor);
       };
-      const fail = (e) => { state.cardInternalMsg = e.message; render(); };
+      const fail = (e, anchor, drafts) => {
+        if (drafts) state.contactDrafts = Object.assign({}, state.contactDrafts, drafts);
+        state.cardInternalMsg = e && e.message ? e.message : 'הבקשה נכשלה';
+        state.cardInternalAnchor = anchor || '';
+        render();
+        reveal(anchor);
+      };
 
       panel.querySelector('#verif-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
@@ -2693,26 +2785,78 @@
             }
           });
           state.verif = null;
-          await refresh('נשמר.');
-        } catch (e) { fail(e); }
+          await refresh('נשמר.', 'card-verif');
+        } catch (e) { fail(e, 'card-verif'); }
       });
 
+      const contactRowEl = (id) => document.querySelector(`#card-contacts [data-link="${id}"]`);
       panel.querySelectorAll('.contact-row').forEach((row) => {
         const linkId = Number(row.getAttribute('data-link'));
-        row.querySelector('[data-act=save-role]').addEventListener('click', async () => {
-          try {
-            await api('/api/admin/card-contacts', { method: 'PATCH', body: { linkId, roleNote: row.querySelector('[name=role]').value.trim() } });
-            await refresh('נשמר.');
-          } catch (e) { fail(e); }
+        const editBtn = row.querySelector('[data-act=edit-role]');
+        if (editBtn) editBtn.addEventListener('click', () => {
+          state.contactEditing = linkId;
+          if (state.contactError && sameLink(state.contactError.linkId, linkId)) state.contactError = null;
+          render();
+          const input = contactRowEl(linkId) && contactRowEl(linkId).querySelector('[name=role]');
+          if (input) input.focus();
         });
+        const cancelBtn = row.querySelector('[data-act=cancel-role]');
+        if (cancelBtn) cancelBtn.addEventListener('click', () => {
+          if (state.contactDrafts) delete state.contactDrafts[linkId];
+          if (sameLink(state.contactEditing, linkId)) state.contactEditing = null;
+          if (state.contactError && sameLink(state.contactError.linkId, linkId)) state.contactError = null;
+          render();
+        });
+        const roleInput = row.querySelector('[name=role]');
+        const saveRole = async () => {
+          const btn = row.querySelector('[data-act=save-role]');
+          if (!btn || btn.disabled) return;
+          const note = roleInput.value.trim();
+          btn.disabled = true;
+          btn.setAttribute('aria-busy', 'true');
+          btn.innerHTML = '<span class="spin" aria-hidden="true"></span> שומר…';
+          try {
+            if (!Number.isInteger(linkId) || linkId < 1) throw new Error('לא ניתן לשמור. רעננו את הדף ונסו שוב.');
+            await api('/api/admin/card-contacts', { method: 'PATCH', body: { linkId, roleNote: note } });
+            if (state.contactDrafts) delete state.contactDrafts[linkId];
+            state.contactEditing = null;
+            state.contactError = null;
+            state.contactJustSaved = linkId;
+            await loadCardInternal(card.id);
+            render();
+            const saved = contactRowEl(linkId);
+            if (saved) saved.scrollIntoView({ block: 'nearest' });
+          } catch (e) {
+            state.contactEditing = linkId;
+            if (sameLink(state.contactJustSaved, linkId)) state.contactJustSaved = null;
+            state.contactDrafts = Object.assign({}, state.contactDrafts, { [linkId]: note });
+            state.contactError = { linkId, message: e && e.message ? e.message : 'הבקשה נכשלה' };
+            render();
+            const failed = contactRowEl(linkId);
+            if (failed) failed.scrollIntoView({ block: 'nearest' });
+          }
+        };
+        if (roleInput) {
+          row.querySelector('[data-act=save-role]').addEventListener('click', saveRole);
+          roleInput.addEventListener('keydown', (ev) => {
+            if (ev.key !== 'Enter') return;
+            ev.preventDefault();
+            saveRole();
+          });
+        }
         row.querySelector('[data-act=remove-contact]').addEventListener('click', async () => {
           if (!confirm('להסיר את איש הקשר מהכרטיס? אימותים קודמים שרשומים על שמו יישמרו.')) return;
+          const btn = row.querySelector('[data-act=remove-contact]');
+          btn.disabled = true;
           try {
             await fetch(`/api/admin/card-contacts?id=${linkId}`, { method: 'DELETE', credentials: 'include' }).then(async (r) => {
               if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'ההסרה נכשלה');
             });
-            await refresh('עודכן.');
-          } catch (e) { fail(e); }
+            if (state.contactDrafts) delete state.contactDrafts[linkId];
+            if (sameLink(state.contactEditing, linkId)) state.contactEditing = null;
+            if (sameLink(state.contactJustSaved, linkId)) state.contactJustSaved = null;
+            await refresh('עודכן.', 'card-contacts');
+          } catch (e) { fail(e, 'card-contacts'); }
         });
       });
 
@@ -2723,16 +2867,16 @@
             body: Object.assign({ cardId: card.id, roleNote: panel.querySelector('#cc-role').value.trim() }, picked)
           });
           state.verif = null;
-          await refresh('נוסף.');
-        } catch (e) { fail(e); }
+          await refresh('נוסף.', 'card-contacts');
+        } catch (e) { fail(e, 'card-contacts'); }
       });
 
       panel.querySelectorAll('[data-link-status]').forEach((btn) => btn.addEventListener('click', async () => {
         try {
           await api('/api/admin/glossary-links', { method: 'PATCH', body: { id: Number(btn.getAttribute('data-link-id')), status: btn.getAttribute('data-link-status') } });
           state.glossLinks = null;
-          await refresh('עודכן.');
-        } catch (e) { fail(e); }
+          await refresh('עודכן.', 'card-glossary');
+        } catch (e) { fail(e, 'card-glossary'); }
       }));
       panel.querySelector('#term-add-btn').addEventListener('click', async () => {
         const termKey = panel.querySelector('#term-add').value;
@@ -2740,8 +2884,8 @@
         try {
           await api('/api/admin/glossary-links', { method: 'POST', body: { termKey, cardId: card.id } });
           state.glossLinks = null;
-          await refresh('נוסף.');
-        } catch (e) { fail(e); }
+          await refresh('נוסף.', 'card-glossary');
+        } catch (e) { fail(e, 'card-glossary'); }
       });
     }
 

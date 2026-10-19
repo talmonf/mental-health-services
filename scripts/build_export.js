@@ -48,7 +48,7 @@ function buildExport(data = load()) {
     fs.existsSync(holdoutPath) ? (JSON.parse(fs.readFileSync(holdoutPath, 'utf8')).rows || []).map((r) => r.row) : []
   );
 
-  const published = data.entries.filter((e) => !holdoutRows.has(e.row));
+  const published = data.entries.filter((e) => !holdoutRows.has(e.row) && !(e.raw && e.raw.hidden === true));
   const lastUpdated = isoDate(data.LAST_UPDATED);
 
   const groupOf = (categoryKey) =>
