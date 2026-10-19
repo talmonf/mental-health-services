@@ -1382,6 +1382,111 @@
       ],
       "source": "",
       "confidence": "none"
+    },
+    "755": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "curated"
+    },
+    "756": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "מצטרפים באפליקציה",
+      "confidence": "curated"
+    },
+    "757": {
+      "codes": [
+        "unknown"
+      ],
+      "source": "",
+      "confidence": "curated"
+    },
+    "758": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "פנייה לנפש אחת או לעובדת השיקום",
+      "confidence": "curated"
+    },
+    "759": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "פנייה למחלקת השיקום במחוז",
+      "confidence": "curated"
+    },
+    "760": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "הצטרפות דרך עובדת השיקום",
+      "confidence": "curated"
+    },
+    "761": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "התחייבות מעובדת השיקום",
+      "confidence": "curated"
+    },
+    "762": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "אישור הרופא המחוזי",
+      "confidence": "curated"
+    },
+    "763": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "רישום דרך יועצת הקבוצות במחוז",
+      "confidence": "curated"
+    },
+    "764": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "פנייה לעובדת השיקום",
+      "confidence": "curated"
+    },
+    "765": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "בחירת מטפל באפליקציה",
+      "confidence": "curated"
+    },
+    "766": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "פנייה עצמית למטפל מוסמך",
+      "confidence": "curated"
+    },
+    "767": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "התחייבות דרך האזור האישי או מרפאת המחוז",
+      "confidence": "curated"
+    },
+    "768": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "מימוש מול האגף",
+      "confidence": "curated"
+    },
+    "769": {
+      "codes": [
+        "mod_rehab_worker"
+      ],
+      "source": "התחייבות אחרי המלצת רופא מומחה",
+      "confidence": "curated"
     }
   }
 }
