@@ -1027,6 +1027,7 @@
             line-height: 1.35;
         }
         .mh-map-km, .mh-map-phone { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
+        .mh-dial { direction: ltr; unicode-bidi: isolate; }
         .mh-map-empty { margin: 0; padding: 8px; color: var(--text-muted); font-size: var(--text-sm); }
         .mh-card-actions .mh-map-backdrop { display: none; }
         @media (max-width: 640px) {
@@ -1115,8 +1116,8 @@
                 <h1 style="font-size:1.1rem;color:#c0392b;margin:0 0 8px">במצב משבר — עזרה מיידית</h1>
                 <ul style="margin:0;padding-inline-start:20px">
                     <li><strong>1201</strong> — ער"ן, עזרה ראשונה נפשית, 24/7</li>
-                    <li><strong>*2201</strong> — ער"ן, קו לחיילים ומילואים</li>
-                    <li><strong>*6690</strong> — מערך בריאות הנפש בצה"ל, לכלל המשרתים</li>
+                    <li><strong><bdi dir="ltr">*2201</bdi></strong> — ער"ן, קו לחיילים ומילואים</li>
+                    <li><strong><bdi dir="ltr">*6690</bdi></strong> — מערך בריאות הנפש בצה"ל, לכלל המשרתים</li>
                     <li><strong>118</strong> — מוקד משרד הרווחה, 24/7</li>
                     <li><strong>1202</strong> נשים / <strong>1203</strong> גברים — סיוע לנפגעות ונפגעי תקיפה מינית</li>
                     <li><strong>105</strong> — המטה הלאומי להגנה על ילדים ברשת</li>
@@ -1603,6 +1604,40 @@
         // is written [בית משלך](https://nefesh-il.org/support?entry=289&section=youth).
         // A link to this site opens here, in the section named in the URL.
         const mhNoteLinkSameSite = (url) => /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
+        // A leading * is direction-neutral, so in Hebrew it paints after the digits (*5400 → 5400*).
+        // Isolate the short code and always show the star first. 9518* is the same code, stored backwards.
+        const mhStarRe = () => /(\*\s*\d{2,5})|(\d{3,5}\s*\*)/g;
+        const mhStarDigits = (token) => String(token).replace(/\D/g, '');
+        const mhTelHref = (raw) => {
+            const compact = String(raw || '').replace(/[^\d*#]/g, '');
+            const trailing = compact.match(/^(\d{3,5})\*$/);
+            if (trailing) return `tel:*${trailing[1]}`;
+            return compact ? `tel:${compact}` : '';
+        };
+        const mhDialText = (text, keyPrefix) => {
+            const raw = String(text ?? '');
+            const re = mhStarRe();
+            if (!re.test(raw)) return raw;
+            re.lastIndex = 0;
+            const out = [];
+            let last = 0;
+            let n = 0;
+            let m;
+            while ((m = re.exec(raw))) {
+                if (m.index > last) out.push(raw.slice(last, m.index));
+                out.push(<bdi key={`${keyPrefix || 'd'}-${n++}`} dir="ltr" className="mh-dial">{`*${mhStarDigits(m[0])}`}</bdi>);
+                last = m.index + m[0].length;
+            }
+            if (last < raw.length) out.push(raw.slice(last));
+            return out;
+        };
+        const mhDialPlain = (text) => String(text ?? '').replace(mhStarRe(), (tok) => `\u200e*${mhStarDigits(tok)}`);
+        const mhPhoneFace = (num, label, showNumber, iconOnly, keyPrefix) => {
+            if (iconOnly) return label || '';
+            const shown = label ? (showNumber ? `${label}: ${num}` : label) : num;
+            return mhDialText(shown, keyPrefix);
+        };
+
         const mhRenderLinkedNotes = (notes) => {
             const text = String(notes || '');
             const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|([^\s]+)[ \t]+(https?:\/\/[^\s]+)/g;
@@ -1610,6 +1645,13 @@
             let last = 0;
             let key = 0;
             let match;
+            const pushPlain = (chunk) => {
+                if (!chunk) return;
+                const nodes = mhDialText(chunk, `note-${key}`);
+                key += 1;
+                if (Array.isArray(nodes)) out.push(...nodes);
+                else out.push(nodes);
+            };
             while ((match = re.exec(text))) {
                 const markdown = match[1] != null;
                 let url = markdown ? match[2] : match[4];
@@ -1624,8 +1666,8 @@
                 const word = markdown ? match[1] : match[3];
                 const prefix = !markdown && /^ו[א-ת]/.test(word) && word.length > 2 ? 'ו' : '';
                 const label = prefix ? word.slice(1) : word;
-                if (match.index > last) out.push(text.slice(last, match.index));
-                if (prefix) out.push(prefix);
+                if (match.index > last) pushPlain(text.slice(last, match.index));
+                if (prefix) pushPlain(prefix);
                 const sameSite = mhNoteLinkSameSite(url);
                 out.push(
                     <a
@@ -1636,11 +1678,11 @@
                         data-probe-external-link={sameSite ? undefined : 'true'}
                     >{label}</a>
                 );
-                if (trail) out.push(trail);
+                if (trail) pushPlain(trail);
                 last = match.index + match[0].length;
                 if (!markdown && text[last] === ' ' && /[.,;:]/.test(text[last + 1] || '')) last += 1;
             }
-            if (last < text.length) out.push(text.slice(last));
+            if (last < text.length) pushPlain(text.slice(last));
             return out.length ? out : text;
         };
 
@@ -4697,6 +4739,7 @@
                     category: "hmo",
                     phone: "*2700",
                     phone2: "*8703",
+                    web: "https://www.clalit.co.il/",
                     related: ["mental_health_clinic", "hmo"]
                 },
                 maccabi: {
@@ -4704,6 +4747,7 @@
                     text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אין צורך בהפניית רופא: פונים למרפאה בטופס מקוון. מוקד תמיכה נפשית, 24 שעות ביממה: *3555.",
                     category: "hmo",
                     phone: "*3555",
+                    web: "https://www.maccabi4u.co.il/",
                     related: ["mental_health_clinic", "hmo"]
                 },
                 meuhedet: {
@@ -4711,6 +4755,7 @@
                     text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אין צורך בהפניית רופא: קובעים פגישת מיון במוקד. מוקד תמיכה נפשית, 24 שעות ביממה: *3833.",
                     category: "hmo",
                     phone: "*3833",
+                    web: "https://www.meuhedet.co.il/",
                     related: ["mental_health_clinic", "hmo"]
                 },
                 leumit: {
@@ -4718,6 +4763,7 @@
                     text: "קופת חולים המספקת שירותי בריאות הנפש כולל: מרפאות בריאות הנפש, פסיכיאטרים, פסיכולוגים, וטיפולים פסיכותרפויטיים. אפשר בהפניית רופא, או בפנייה ישירה לתומך בריאות הנפש. מוקד תמיכה נפשית, 24 שעות ביממה: *507.",
                     category: "hmo",
                     phone: "*507",
+                    web: "https://www.leumit.co.il/",
                     related: ["mental_health_clinic", "hmo"]
                 },
                 // Conditions & Disorders
@@ -4843,6 +4889,7 @@
                     text: "המוסד לביטוח לאומי הוא הגוף הממלכתי שמשלם קצבאות וגמלאות, ובהן קצבת נכות כללית, שירותים מיוחדים (שר\"מ) וקצבת סיעוד. הזכאות לרוב הקצבאות בגלל מצב נפשי נקבעת בוועדה רפואית של המוסד. ביטוח לאומי מפעיל גם את «יד מכוונת», שמסייעת בהכנה לוועדה. מוקד: *6050.",
                     category: "rights",
                     phone: "*6050",
+                    web: "https://www.btl.gov.il/",
                     related: ["disability", "sharam", "medical_committee", "guidance_service"],
                     aliases: ["ביטוח לאומי", "הביטוח הלאומי", "המוסד לביטוח לאומי", "בל\"ל"]
                 },
@@ -4851,6 +4898,7 @@
                     text: "המשרד הממשלתי שאחראי על מערכת בריאות הנפש. הוא מפקח על בתי החולים הפסיכיאטריים ועל מרפאות בריאות הנפש, מפעיל את סל שיקום דרך ועדות סל שיקום, ואחראי על אשפוז כפוי דרך הפסיכיאטרים המחוזיים. מאז הרפורמה בבריאות הנפש ב-2015, הטיפול הנפשי בקהילה ניתן דרך קופות החולים. מוקד «קול הבריאות»: *5400.",
                     category: "other",
                     phone: "*5400",
+                    web: "https://www.gov.il/he/departments/ministry_of_health",
                     related: ["rehab_basket", "rehab_committee", "health_basket", "psychiatric_order"],
                     aliases: ["משרד הבריאות"]
                 },
@@ -4860,6 +4908,7 @@
                     category: "rights",
                     phone: "*8150",
                     phone2: "*8944",
+                    web: "https://shikum.mod.gov.il/",
                     related: ["ptsd", "safe_house", "trauma"],
                     aliases: ["אגף השיקום", "משרד הביטחון", "משרד הבטחון", "נכי צה\"ל", "נפש אחת"]
                 },
@@ -4919,6 +4968,7 @@
                     text: "עמותה לטיפול ולתמיכה בנפגעי טראומה על רקע לאומי, כמו מלחמה ופיגועים, ובבני משפחותיהם. נט\"ל מפעילה קו סיוע, טיפול פרטני וקבוצתי, וקהילות תמיכה.",
                     category: "other",
                     phone: "*3362",
+                    web: "https://www.natal.org.il/",
                     related: ["ptsd", "trauma", "helpline"],
                     aliases: ["נט\"ל", "נט״ל"]
                 },
@@ -4927,6 +4977,7 @@
                     text: "עזרה ראשונה נפשית: קו סיוע ארצי, אנונימי, 24 שעות ביממה, בטלפון 1201. אפשר לפנות גם בצ'אט ובוואטסאפ דרך האתר של ער\"ן. המתנדבים מקשיבים ותומכים בשיחה, ובמצב של סכנה מיידית יכולים להפנות לעזרה.",
                     category: "other",
                     phone: "1201",
+                    web: "https://www.eran.org.il/",
                     related: ["helpline", "mental_support"],
                     aliases: ["ער\"ן", "ער״ן"]
                 },
@@ -4949,6 +5000,7 @@
                     title: "כל זכות",
                     text: "אתר מידע ללא מטרות רווח שמסביר זכויות בשפה פשוטה: קצבאות, הטבות, שירותים ותהליכים מול גופי המדינה, כולל עמודים ייעודיים לבריאות הנפש. האתר לא מגיש בקשות בשמך, אבל עוזר להבין למה זכאים ואיך מבקשים.",
                     category: "rights",
+                    web: "https://www.kolzchut.org.il/",
                     related: ["rights_utilization", "btl"],
                     aliases: ["כל זכות", "כל-זכות"]
                 },
@@ -6178,7 +6230,7 @@
                                 <i className="fas fa-shield-halved"></i> הצגת כל המענים לחרבות ברזל
                             </button>
                         )}
-                        {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{s.svc}</p>}
+                        {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{mhDialText(s.svc, `svc-${s.row}`)}</p>}
                         {(() => {
                             const own = ind && ind.referral.length ? ind : null;
                             const rec = own ? null : mhReferralRecord(s.row);
@@ -6212,7 +6264,7 @@
                                     <summary><strong>{heading}</strong>{title}</summary>
                                     <p className="mh-referral-source">
                                         {ltr ? 'As published: ' : 'כפי שפורסם: '}
-                                        {source}
+                                        {mhDialText(source, `ref-${s.row}`)}
                                     </p>
                                 </details>
                             );
@@ -6234,18 +6286,18 @@
                         )}
                         {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length > 0) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
-                                {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {s.target}</div>}
-                                {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {s.region}</div>}
+                                {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {mhDialText(s.target, `for-${s.row}`)}</div>}
+                                {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
                                 {locs.length === 1 && locs[0].address && (
                                     <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {locs[0].address}</div>
                                 )}
                                 {locs.length > 1 && (
                                     <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Sites:' : 'סניפים:'}</strong> {locs.map(l => l.label).join(' · ')}</div>
                                 )}
-                                {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {s.cost}</div>}
-                                {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {s.specialty}</div>}
-                                {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {s.languages}</div>}
-                                {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {s.diseases}</div>}
+                                {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {mhDialText(s.cost, `cost-${s.row}`)}</div>}
+                                {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {mhDialText(s.specialty, `spec-${s.row}`)}</div>}
+                                {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {mhDialText(s.languages, `lang-${s.row}`)}</div>}
+                                {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {mhDialText(s.diseases, `dis-${s.row}`)}</div>}
                                 {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes)}</div>}
                             </div>
                         )}
@@ -6270,12 +6322,12 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {s.phone && (<a href={`tel:${s.phone.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? s.phone : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel || '') : (s.phoneLabel ? (s.phoneShowNumber ? `${s.phoneLabel}: ${s.phone}` : s.phoneLabel) : s.phone)}</a>)}
-                            {s.phone2 && (<a href={`tel:${s.phone2.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel2 || '') : (s.phoneLabel2 ? (s.phoneShowNumber2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phoneLabel2) : s.phone2)}</a>)}
-                            {s.phone3 && (<a href={`tel:${s.phone3.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel3 || '') : (s.phoneLabel3 ? (s.phoneShowNumber3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phoneLabel3) : s.phone3)}</a>)}
-                            {s.phone4 && (<a href={`tel:${s.phone4.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone4`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel4 || '') : (s.phoneLabel4 ? (s.phoneShowNumber4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phoneLabel4) : s.phone4)}</a>)}
-                            {s.phone5 && (<a href={`tel:${s.phone5.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone5`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel5 || '') : (s.phoneLabel5 ? (s.phoneShowNumber5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phoneLabel5) : s.phone5)}</a>)}
-                            {s.phone6 && (<a href={`tel:${s.phone6.replace(/[^\d*#]/g, '')}`} style={{background: 'var(--accent)'}} title={s.iconOnly ? (s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {s.iconOnly ? (s.phoneLabel6 || '') : (s.phoneLabel6 ? (s.phoneShowNumber6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phoneLabel6) : s.phone6)}</a>)}
+                            {s.phone && (<a href={mhTelHref(s.phone)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phone) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone, s.phoneLabel, s.phoneShowNumber, s.iconOnly, `p-${s.row}`)}</a>)}
+                            {s.phone2 && (<a href={mhTelHref(s.phone2)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone2, s.phoneLabel2, s.phoneShowNumber2, s.iconOnly, `p2-${s.row}`)}</a>)}
+                            {s.phone3 && (<a href={mhTelHref(s.phone3)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone3, s.phoneLabel3, s.phoneShowNumber3, s.iconOnly, `p3-${s.row}`)}</a>)}
+                            {s.phone4 && (<a href={mhTelHref(s.phone4)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone4`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone4, s.phoneLabel4, s.phoneShowNumber4, s.iconOnly, `p4-${s.row}`)}</a>)}
+                            {s.phone5 && (<a href={mhTelHref(s.phone5)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone5`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone5, s.phoneLabel5, s.phoneShowNumber5, s.iconOnly, `p5-${s.row}`)}</a>)}
+                            {s.phone6 && (<a href={mhTelHref(s.phone6)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone6, s.phoneLabel6, s.phoneShowNumber6, s.iconOnly, `p6-${s.row}`)}</a>)}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : (s.dir === 'ltr' ? `WhatsApp: ${s.whatsapp}` : `וואטסאפ: ${s.whatsapp}`)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : (s.whatsappLabel || '')}</a>)}
                             {['', '2', '3'].map((suffix) => {
                                 const mail = mhEmailButton(s, suffix);
@@ -6591,6 +6643,46 @@
                             קרא עוד
                         </a>
                     </p>
+                );
+            };
+
+            const renderTermActions = (t, k) => {
+                if (!t.phone && !t.phone2 && !t.web) return null;
+                const btn = {
+                    padding: 'var(--space-sm) var(--space-md)',
+                    borderRadius: 'var(--radius-sm)',
+                    textDecoration: 'none',
+                    fontSize: 'var(--text-sm)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-xs)',
+                    color: 'white'
+                };
+                return (
+                    <div style={{
+                        marginTop: 'var(--space-md)',
+                        paddingTop: 'var(--space-md)',
+                        borderTop: '1px solid var(--border)',
+                        display: 'flex',
+                        gap: 'var(--space-md)',
+                        flexWrap: 'wrap'
+                    }}>
+                        {t.phone && (
+                            <a href={mhTelHref(t.phone)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
+                                <i className="fas fa-phone"></i> {mhDialText(t.phone, `tp-${k}`)}
+                            </a>
+                        )}
+                        {t.phone2 && (
+                            <a href={mhTelHref(t.phone2)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
+                                <i className="fas fa-phone"></i> {mhDialText(t.phone2, `tp2-${k}`)}
+                            </a>
+                        )}
+                        {t.web && (
+                            <a href={t.web} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" style={{ ...btn, background: 'var(--primary)' }} data-tracking-name={`terms_web_${k}`} data-analytics-type="website">
+                                <i className="fas fa-external-link-alt"></i> לאתר
+                            </a>
+                        )}
+                    </div>
                 );
             };
 
@@ -7243,51 +7335,11 @@
                                                                     color: 'var(--text)',
                                                                     marginBottom: 'var(--space-md)'
                                                                 }}>
-                                                                    {t.text}
+                                                                    {mhDialText(t.text, `tt-${k}`)}
                                                                 </p>
                                                                 {renderTermReadMore(t)}
                                                                 {renderTermServices(k, cat?.color)}
-                                                                {(t.phone || t.phone2) && (
-                                                                    <div style={{ 
-                                                                        marginTop: 'var(--space-md)', 
-                                                                        paddingTop: 'var(--space-md)', 
-                                                                        borderTop: '1px solid var(--border)',
-                                                                        display: 'flex',
-                                                                        gap: 'var(--space-md)',
-                                                                        flexWrap: 'wrap'
-                                                                    }}>
-                                                                        {t.phone && (
-                                                                            <a href={`tel:${t.phone.replace(/[^\d*#]/g, '')}`} style={{
-                                                                                background: 'var(--accent)',
-                                                                                color: 'white',
-                                                                                padding: 'var(--space-sm) var(--space-md)',
-                                                                                borderRadius: 'var(--radius-sm)',
-                                                                                textDecoration: 'none',
-                                                                                fontSize: 'var(--text-sm)',
-                                                                                display: 'inline-flex',
-                                                                                alignItems: 'center',
-                                                                                gap: 'var(--space-xs)'
-                                                                            }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
-                                                                                <i className="fas fa-phone"></i> {t.phone}
-                                                                            </a>
-                                                                        )}
-                                                                        {t.phone2 && (
-                                                                            <a href={`tel:${t.phone2.replace(/[^\d*#]/g, '')}`} style={{
-                                                                                background: 'var(--accent)',
-                                                                                color: 'white',
-                                                                                padding: 'var(--space-sm) var(--space-md)',
-                                                                                borderRadius: 'var(--radius-sm)',
-                                                                                textDecoration: 'none',
-                                                                                fontSize: 'var(--text-sm)',
-                                                                                display: 'inline-flex',
-                                                                                alignItems: 'center',
-                                                                                gap: 'var(--space-xs)'
-                                                                            }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
-                                                                                <i className="fas fa-phone"></i> {t.phone2}
-                                                                            </a>
-                                                                        )}
-                                                                    </div>
-                                                                )}
+                                                                {renderTermActions(t, k)}
                                                                 {t.related && t.related.length > 0 && (
                                                                     <div style={{ 
                                                                         marginTop: 'var(--space-md)', 
@@ -7409,51 +7461,11 @@
                                                                         color: 'var(--text)',
                                                                         marginBottom: 'var(--space-md)'
                                                                     }}>
-                                                                        {t.text}
+                                                                        {mhDialText(t.text, `tt-${k}`)}
                                                                     </p>
                                                                     {renderTermReadMore(t)}
                                                                 {renderTermServices(k, cat?.color)}
-                                                                    {(t.phone || t.phone2) && (
-                                                                        <div style={{ 
-                                                                            marginTop: 'var(--space-md)', 
-                                                                            paddingTop: 'var(--space-md)', 
-                                                                            borderTop: '1px solid var(--border)',
-                                                                            display: 'flex',
-                                                                            gap: 'var(--space-md)',
-                                                                            flexWrap: 'wrap'
-                                                                        }}>
-                                                                            {t.phone && (
-                                                                                <a href={`tel:${t.phone.replace(/[^\d*#]/g, '')}`} style={{
-                                                                                    background: 'var(--accent)',
-                                                                                    color: 'white',
-                                                                                    padding: 'var(--space-sm) var(--space-md)',
-                                                                                    borderRadius: 'var(--radius-sm)',
-                                                                                    textDecoration: 'none',
-                                                                                    fontSize: 'var(--text-sm)',
-                                                                                    display: 'inline-flex',
-                                                                                    alignItems: 'center',
-                                                                                    gap: 'var(--space-xs)'
-                                                                                }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
-                                                                                    <i className="fas fa-phone"></i> {t.phone}
-                                                                                </a>
-                                                                            )}
-                                                                            {t.phone2 && (
-                                                                                <a href={`tel:${t.phone2.replace(/[^\d*#]/g, '')}`} style={{
-                                                                                    background: 'var(--accent)',
-                                                                                    color: 'white',
-                                                                                    padding: 'var(--space-sm) var(--space-md)',
-                                                                                    borderRadius: 'var(--radius-sm)',
-                                                                                    textDecoration: 'none',
-                                                                                    fontSize: 'var(--text-sm)',
-                                                                                    display: 'inline-flex',
-                                                                                    alignItems: 'center',
-                                                                                    gap: 'var(--space-xs)'
-                                                                                }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
-                                                                                    <i className="fas fa-phone"></i> {t.phone2}
-                                                                                </a>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
+                                                                    {renderTermActions(t, k)}
                                                                     {t.related && t.related.length > 0 && (
                                                                         <div style={{ 
                                                                             marginTop: 'var(--space-md)', 
@@ -8083,7 +8095,7 @@
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>זמין 24/7 | חינם | אנונימי לגמרי</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone">*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone"><bdi dir="ltr" className="mh-dial">*8944</bdi></a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>לחיילים וכוחות ביטחון | אנונימי</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -8100,7 +8112,7 @@
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>Available 24/7 | Free | Completely anonymous</p>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en" data-analytics-type="phone">*8944</a></strong>
+                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en" data-analytics-type="phone"><bdi dir="ltr" className="mh-dial">*8944</bdi></a></strong>
                                                 <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>For soldiers and security forces | Anonymous</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
@@ -8246,7 +8258,7 @@
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
                                 <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
-                                    <i className="fas fa-phone"></i> *8944
+                                    <i className="fas fa-phone"></i> <bdi dir="ltr" className="mh-dial">*8944</bdi>
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
                             </div>

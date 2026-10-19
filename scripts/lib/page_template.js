@@ -20,6 +20,22 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+/** Show a short code with the star first, isolated so Hebrew does not move the star. */
+function starCodesHtml(text) {
+  const raw = String(text ?? '');
+  const re = /(\*\s*\d{2,5})|(\d{3,5}\s*\*)/g;
+  let out = '';
+  let last = 0;
+  let match;
+  while ((match = re.exec(raw))) {
+    out += escapeHtml(raw.slice(last, match.index));
+    out += `<bdi dir="ltr" class="mh-dial">*${match[0].replace(/\D/g, '')}</bdi>`;
+    last = match.index + match[0].length;
+  }
+  out += escapeHtml(raw.slice(last));
+  return out;
+}
+
 /**
  * Notes may name another card as [בית משלך](https://nefesh-il.org/support?entry=289&section=youth),
  * or a single word followed by an address. The visible text is the name, not the URL.
@@ -45,16 +61,16 @@ function linkifyNotes(text) {
     const word = markdown ? match[1] : match[3];
     const prefix = !markdown && /^ו[א-ת]/.test(word) && word.length > 2 ? 'ו' : '';
     const label = prefix ? word.slice(1) : word;
-    out += escapeHtml(raw.slice(last, match.index));
-    if (prefix) out += escapeHtml(prefix);
+    out += starCodesHtml(raw.slice(last, match.index));
+    if (prefix) out += starCodesHtml(prefix);
     const sameSite = /^https?:\/\/(www\.)?nefesh-il\.org(\/|$)/i.test(url);
     const attrs = sameSite ? '' : ' target="_blank" rel="noopener noreferrer"';
     out += `<a href="${escapeHtml(url)}"${attrs}>${escapeHtml(label)}</a>`;
-    if (trail) out += escapeHtml(trail);
+    if (trail) out += starCodesHtml(trail);
     last = match.index + match[0].length;
     if (!markdown && raw[last] === ' ' && /[.,;:]/.test(raw[last + 1] || '')) last += 1;
   }
-  out += escapeHtml(raw.slice(last));
+  out += starCodesHtml(raw.slice(last));
   return out;
 }
 
@@ -112,6 +128,7 @@ h3{font-size:1rem;margin:16px 0 4px}
 .contact .label{color:var(--muted);font-size:.9rem}
 .tag{display:inline-block;background:#eef3f7;border-radius:999px;padding:3px 10px;margin:0 0 6px 6px;font-size:.85rem;text-decoration:none}
 .count{unicode-bidi:isolate;direction:ltr;display:inline-block}
+.mh-dial{direction:ltr;unicode-bidi:isolate}
 .badge-ref{margin:0 0 12px;padding:8px 12px;background:#eef6f1;border:1px solid #c5e4d4;border-radius:8px;font-size:.9rem}
 .badge-ref summary{cursor:pointer;font-weight:600;color:var(--primary-dark)}
 .badge-ref p{margin:8px 0 0;color:var(--muted)}
@@ -142,8 +159,8 @@ const EMERGENCY_HTML = `
   <h2>במצב משבר — עזרה מיידית</h2>
   <ul>
     <li><strong>1201</strong> — ער"ן, עזרה ראשונה נפשית, 24/7</li>
-    <li><strong>*2201</strong> — ער"ן, קו לחיילים ומילואים</li>
-    <li><strong>*6690</strong> — מערך בריאות הנפש בצה"ל, לכלל המשרתים</li>
+    <li><strong><bdi dir="ltr" class="mh-dial">*2201</bdi></strong> — ער"ן, קו לחיילים ומילואים</li>
+    <li><strong><bdi dir="ltr" class="mh-dial">*6690</bdi></strong> — מערך בריאות הנפש בצה"ל, לכלל המשרתים</li>
     <li><strong>118</strong> — מוקד משרד הרווחה, 24/7</li>
     <li><strong>1202</strong> נשים / <strong>1203</strong> גברים — סיוע לנפגעות ונפגעי תקיפה מינית</li>
     <li><strong>105</strong> — המטה הלאומי להגנה על ילדים ברשת</li>
@@ -227,6 +244,7 @@ module.exports = {
   CSS,
   EMERGENCY_HTML,
   escapeHtml,
+  starCodesHtml,
   linkifyNotes,
   paragraphs,
   startsWithLatin,

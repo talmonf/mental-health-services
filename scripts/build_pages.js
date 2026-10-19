@@ -68,7 +68,7 @@ const signature = (s) => String(s || '').replace(/[^\d*]/g, '');
 
 // ---------------------------------------------------------------- text helpers
 
-const { escapeHtml: esc, linkifyNotes, paragraphs, startsWithLatin, truncate } = T;
+const { escapeHtml: esc, starCodesHtml, linkifyNotes, paragraphs, startsWithLatin, truncate } = T;
 
 function isoDate(ddmmyyyy) {
   const m = String(ddmmyyyy || '').match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -148,15 +148,15 @@ function renderContact(entry, emitted) {
     // Record every tel: we emit, so the build can prove it came from DATA and so the
     // JSON-LD can only ever claim numbers the visible page actually renders.
     for (const tok of parsed.tokens) emitted.push({ entry, slot: p.slot, source: p.number, tel: tok.tel });
-    const links = parsed.tokens.map((t) => `<a href="tel:${esc(t.tel)}">${esc(t.display)}</a>`).join(' · ');
+    const links = parsed.tokens.map((t) => `<a href="tel:${esc(t.tel)}">${starCodesHtml(t.display)}</a>`).join(' · ');
     const label = p.label ? `<span class="label">${esc(p.label)}: </span>` : '';
-    // The source string is shown verbatim. Only when the field is nothing but the number
-    // itself is the bare link enough; anything else (a Hebrew qualifier, a second number)
-    // keeps the published wording and gets the links appended.
+    // The published wording stays. A short code is shown with the star first so Hebrew
+    // does not move it. Only when the field is nothing but the number itself is the bare
+    // link enough; anything else keeps the wording and gets the links appended.
     const isBareNumber = parsed.tokens.length === 1 && parsed.text === parsed.tokens[0].display;
     const body = isBareNumber
       ? links
-      : `${esc(parsed.text)}${links ? ` <span class="label">(${links})</span>` : ''}`;
+      : `${starCodesHtml(parsed.text)}${links ? ` <span class="label">(${links})</span>` : ''}`;
     items.push(`<li>${label}${body}</li>`);
   }
 
@@ -205,7 +205,7 @@ function renderReferralBadge(entry) {
   const source = codes.length ? entry.raw.referralSource : '';
   const sourceLabel = isLtr ? 'As published: ' : 'כפי שפורסם: ';
   if (!source) return `<p class="badge-ref"><strong>${esc(heading)}</strong>${esc(parts.join(' · '))}</p>`;
-  return `<details class="badge-ref"><summary>${esc(heading)}${esc(parts.join(' · '))}</summary><p>${esc(sourceLabel)}${esc(source)}</p></details>`;
+  return `<details class="badge-ref"><summary>${esc(heading)}${esc(parts.join(' · '))}</summary><p>${esc(sourceLabel)}${starCodesHtml(source)}</p></details>`;
 }
 
 function renderEntryPage(ctx, entry) {
@@ -439,7 +439,12 @@ function renderTermPage(ctx, key, term, slugByKey) {
 <h1>${esc(term.title)}</h1>
 ${cat ? `<p class="lede">${esc(cat.title)}</p>` : ''}
 <div class="card">${paragraphs(term.text)}
-${term.phone ? `<p><strong>טלפון:</strong> ${esc(term.phone)}</p>` : ''}</div>
+${[term.phone, term.phone2].filter(Boolean).length ? `<p><strong>טלפון:</strong> ${[term.phone, term.phone2].filter(Boolean).map((p) => {
+    const compact = String(p).replace(/[^\d*#]/g, '');
+    const tel = /^\d{3,5}\*$/.test(compact) ? `*${compact.replace(/\D/g, '')}` : compact;
+    return `<a href="tel:${esc(tel)}">${starCodesHtml(p)}</a>`;
+  }).join(' · ')}</p>` : ''}
+${term.web ? `<p><a class="btn" href="${esc(term.web)}" rel="nofollow noopener">לאתר</a></p>` : ''}</div>
 ${services ? `<h2>שירותים במדריך</h2><ul class="entry-list">${services}</ul>` : ''}
 ${related ? `<h2>מונחים קשורים</h2><ul class="entry-list">${related}</ul>` : ''}
 <p><a class="btn btn-secondary" href="/terms">כל המונחים</a></p>
@@ -591,7 +596,7 @@ function renderStaticEntry(entry) {
   const meta = entryMetaLine(entry);
   return `<li><a href="${esc(entry.path)}"${ltr}>${esc(org)}</a><span class="svc"${ltr}>${esc(svc)}</span>${
     notes ? `<p class="notes"${ltr}>${linkifyNotes(notes)}</p>` : ''
-  }${meta ? `<span class="svc">${esc(meta)}</span>` : ''}</li>`;
+  }${meta ? `<span class="svc">${starCodesHtml(meta)}</span>` : ''}</li>`;
 }
 
 function renderStaticServiceList(entries) {
