@@ -126,6 +126,15 @@ h3{font-size:1rem;margin:16px 0 4px}
 .contact{list-style:none;margin:0;padding:0}
 .contact li{padding:6px 0;border-top:1px solid var(--border)}
 .contact .label{color:var(--muted);font-size:.9rem}
+.email-option{display:flex;align-items:center;gap:10px}
+.email-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.email-address{display:block;width:fit-content;max-width:100%;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;color:var(--muted);font-size:.85rem}
+.email-actions{display:flex;flex:0 0 auto;align-items:center;gap:6px}
+.send-email,.send-phone,.send-map{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;color:#fff;text-decoration:none}
+.send-email{background:#e67e22}
+.send-phone{background:var(--accent)}
+.send-map{background:#1a73e8}
+.copy-email{min-width:44px;min-height:32px;padding:4px 8px;border:1px solid var(--border);background:transparent;border-radius:6px;font:inherit;font-size:.85rem;cursor:pointer;color:var(--text)}
 .tag{display:inline-block;background:#eef3f7;border-radius:999px;padding:3px 10px;margin:0 0 6px 6px;font-size:.85rem;text-decoration:none}
 .count{unicode-bidi:isolate;direction:ltr;display:inline-block}
 .mh-dial{direction:ltr;unicode-bidi:isolate}
@@ -232,6 +241,28 @@ ${o.body}
   <p><a href="/">${escapeHtml(siteName)}</a> · <a href="/directory">כל הקטגוריות</a> · <a href="/terms">מילון מונחים</a> · <a href="/privacy">מדיניות פרטיות</a></p>
 </footer>
 </div>
+<script>
+document.addEventListener('click', function (event) {
+  var button = event.target.closest('[data-copy-text]');
+  if (!button) return;
+  var value = button.getAttribute('data-copy-text');
+  if (!value) return;
+  var previous = button.getAttribute('aria-label');
+  var idle = button.getAttribute('data-copy-idle') || 'העתקה';
+  var done = button.getAttribute('data-copy-done') || 'הועתק';
+  var finish = function () {
+    button.setAttribute('aria-label', done);
+    button.textContent = done;
+    window.setTimeout(function () {
+      button.setAttribute('aria-label', previous);
+      button.textContent = idle;
+    }, 2000);
+  };
+  var failed = function () { window.prompt('העתיקו:', value); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(value).then(finish).catch(failed);
+  else failed();
+});
+</script>
 </body>
 </html>
 `;

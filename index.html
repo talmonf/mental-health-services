@@ -1026,6 +1026,95 @@
             font-size: 0.8rem;
             line-height: 1.35;
         }
+        .mh-card-actions .mh-pick-panel { width: min(420px, 92vw); }
+        .mh-card-actions .mh-pick-option {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin: 0;
+            padding: 6px 4px;
+            box-sizing: border-box;
+            border-radius: var(--radius-sm, 6px);
+        }
+        .mh-card-actions .mh-pick-option + .mh-pick-option { box-shadow: inset 0 1px 0 var(--border); }
+        .mh-card-actions .mh-pick-option:hover { background: rgba(45, 90, 123, 0.08); }
+        .mh-pick-text {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+        .mh-pick-title {
+            display: block;
+            max-width: 100%;
+            padding: 0;
+            font-weight: 600;
+            font-size: var(--text-sm);
+            line-height: 1.35;
+        }
+        .mh-pick-detail,
+        .mh-pick-note {
+            display: block;
+            width: fit-content;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+        .mh-pick-actions {
+            display: flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 4px;
+        }
+        .mh-card-actions .mh-map-panel a.mh-pick-mail,
+        .mh-card-actions .mh-map-panel a.mh-pick-phone,
+        .mh-card-actions .mh-map-panel a.mh-pick-map,
+        .mh-card-actions .mh-pick-copy {
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-sm, 6px);
+            font-size: 0.85rem;
+            font-weight: 400;
+            line-height: 1;
+            text-decoration: none;
+            box-shadow: none;
+        }
+        .mh-card-actions .mh-map-panel a.mh-pick-mail { background: #e67e22; color: #fff; }
+        .mh-card-actions .mh-map-panel a.mh-pick-phone { background: var(--accent); color: #fff; }
+        .mh-card-actions .mh-map-panel a.mh-pick-map { background: #1a73e8; color: #fff; }
+        .mh-card-actions .mh-map-panel a.mh-pick-mail:hover,
+        .mh-card-actions .mh-map-panel a.mh-pick-phone:hover,
+        .mh-card-actions .mh-map-panel a.mh-pick-map:hover {
+            filter: brightness(0.95);
+            color: #fff;
+            text-decoration: none;
+        }
+        .mh-card-actions .mh-pick-copy {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .mh-card-actions .mh-pick-copy:hover,
+        .mh-card-actions .mh-pick-copy:focus {
+            background: rgba(45, 90, 123, 0.1);
+            color: var(--primary);
+        }
         .mh-map-km, .mh-map-phone { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
         .mh-dial { direction: ltr; unicode-bidi: isolate; }
         .mh-map-empty { margin: 0; padding: 8px; color: var(--text-muted); font-size: var(--text-sm); }
@@ -5604,7 +5693,7 @@
                     copiedGlossaryTimeoutRef.current = null;
                 }, 2000);
             };
-            const copyText = async (text, { toastMessage: successToast = null, onSuccess = null } = {}) => {
+            const copyText = async (text, { toastMessage: successToast = null, onSuccess = null, fallbackPrompt = 'העתיקו את הקישור:' } = {}) => {
                 try {
                     if (navigator.clipboard?.writeText) {
                         await navigator.clipboard.writeText(text);
@@ -5622,7 +5711,7 @@
                     if (typeof onSuccess === 'function') onSuccess();
                     else if (successToast) showToast(successToast);
                 } catch (_) {
-                    window.prompt('העתיקו את הקישור:', text);
+                    window.prompt(fallbackPrompt, text);
                     if (typeof onSuccess === 'function') onSuccess();
                 }
             };
@@ -6190,6 +6279,16 @@
                 const [mapFilter, setMapFilter] = useState('');
                 const [contactOpen, setContactOpen] = useState(null);
                 const [contactFilter, setContactFilter] = useState('');
+                const [copiedKey, setCopiedKey] = useState('');
+                const copiedTimer = useRef(null);
+                const markCopied = (key) => {
+                    setCopiedKey(key);
+                    if (copiedTimer.current) window.clearTimeout(copiedTimer.current);
+                    copiedTimer.current = window.setTimeout(() => {
+                        setCopiedKey((current) => (current === key ? '' : current));
+                        copiedTimer.current = null;
+                    }, 2000);
+                };
                 useEffect(() => {
                     if (!mapOpen && !contactOpen) return undefined;
                     const onKey = (e) => {
@@ -6438,18 +6537,37 @@
                                         </button>
                                         {open && <button type="button" className="mh-map-backdrop" aria-label={s.dir === 'ltr' ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)} />}
                                         {open && (
-                                            <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a phone' : 'בחירת טלפון'}>
+                                            <div className="mh-map-panel mh-pick-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a phone' : 'בחירת טלפון'}>
                                                 <div className="mh-map-panel-bar">
                                                     {branchPhones.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={s.dir === 'ltr' ? 'Filter phones' : 'סינון טלפונים'} />}
                                                     <button type="button" className="mh-map-close" aria-label={s.dir === 'ltr' ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
                                                 </div>
                                                 <div className="mh-map-list">
-                                                    {rows.map((row, i) => (
-                                                        <a key={`${s.row}_phone_${i}`} href={mhTelHref(row.phone)} role="option" data-tracking-name={`${s.trackingName || s.org}_phone_site_${i + 1}`} data-analytics-type="phone">
-                                                            <span className="mh-map-option-label">{row.label}</span>
-                                                            <span className="mh-map-option-detail">{mhDialText(row.phone, `sp-${s.row}-${i}`)}</span>
-                                                        </a>
-                                                    ))}
+                                                    {rows.map((row, i) => {
+                                                        const plain = mhDialPlain(row.phone);
+                                                        const key = `phone:${s.row}:${i}:${row.phone}`;
+                                                        const copied = copiedKey === key;
+                                                        const copyLabel = copied
+                                                            ? (s.dir === 'ltr' ? 'Number copied' : 'המספר הועתק')
+                                                            : (s.dir === 'ltr' ? `Copy ${plain}` : `העתקת ${plain}`);
+                                                        const dialLabel = s.dir === 'ltr' ? `Call ${plain}` : `חיוג אל ${plain}`;
+                                                        return (
+                                                            <div key={`${s.row}_phone_${i}`} className="mh-pick-option" role="option">
+                                                                <span className="mh-pick-text">
+                                                                    <span className="mh-pick-title">{row.label}</span>
+                                                                    <span className="mh-pick-detail" dir="ltr">{mhDialText(row.phone, `sp-${s.row}-${i}`)}</span>
+                                                                </span>
+                                                                <span className="mh-pick-actions">
+                                                                    <a className="mh-pick-phone" href={mhTelHref(row.phone)} aria-label={dialLabel} title={dialLabel} data-tracking-name={`${s.trackingName || s.org}_phone_site_${i + 1}`} data-analytics-type="phone">
+                                                                        <i className="fas fa-phone" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <button type="button" className="mh-pick-copy" aria-label={copyLabel} title={copyLabel} onClick={() => copyText(plain, { onSuccess: () => markCopied(key), fallbackPrompt: s.dir === 'ltr' ? 'Copy this number:' : 'העתיקו את המספר:' })} data-tracking-name={`${s.trackingName || s.org}_phone_copy_${i + 1}`} data-analytics-type="phone">
+                                                                        <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                     {!rows.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching phone' : 'אין טלפון תואם'}</p>}
                                                 </div>
                                             </div>
@@ -6480,18 +6598,36 @@
                                         </button>
                                         {open && <button type="button" className="mh-map-backdrop" aria-label={s.dir === 'ltr' ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)} />}
                                         {open && (
-                                            <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose an email' : 'בחירת דוא״ל'}>
+                                            <div className="mh-map-panel mh-pick-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose an email' : 'בחירת דוא״ל'}>
                                                 <div className="mh-map-panel-bar">
                                                     {emailGroups.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={s.dir === 'ltr' ? 'Filter emails' : 'סינון דוא״ל'} />}
                                                     <button type="button" className="mh-map-close" aria-label={s.dir === 'ltr' ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
                                                 </div>
                                                 <div className="mh-map-list">
-                                                    {rows.map((g) => (
-                                                        <a key={`${s.row}_mail_${g.address}`} href={`mailto:${g.address}`} role="option" data-tracking-name={`${s.trackingName || s.org}_email_site`} data-analytics-type="email">
-                                                            <span className="mh-map-option-label">{g.labels.join(', ')}</span>
-                                                            <span className="mh-map-option-detail" dir="ltr">{g.address}</span>
-                                                        </a>
-                                                    ))}
+                                                    {rows.map((g) => {
+                                                        const key = `email:${s.row}:${g.address}`;
+                                                        const copied = copiedKey === key;
+                                                        const copyLabel = copied
+                                                            ? (s.dir === 'ltr' ? 'Email address copied' : 'הכתובת הועתקה')
+                                                            : (s.dir === 'ltr' ? `Copy ${g.address}` : `העתקת ${g.address}`);
+                                                        const sendLabel = s.dir === 'ltr' ? `Email ${g.address}` : `שליחת דוא״ל אל ${g.address}`;
+                                                        return (
+                                                            <div key={`${s.row}_mail_${g.address}`} className="mh-pick-option" role="option">
+                                                                <span className="mh-pick-text">
+                                                                    <span className="mh-pick-title">{g.labels.join(', ')}</span>
+                                                                    <span className="mh-pick-detail" dir="ltr">{g.address}</span>
+                                                                </span>
+                                                                <span className="mh-pick-actions">
+                                                                    <a className="mh-pick-mail" href={`mailto:${g.address}`} aria-label={sendLabel} title={sendLabel} data-tracking-name={`${s.trackingName || s.org}_email_site`} data-analytics-type="email">
+                                                                        <i className="fas fa-envelope" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <button type="button" className="mh-pick-copy" aria-label={copyLabel} title={copyLabel} onClick={() => copyText(g.address, { onSuccess: () => markCopied(key), fallbackPrompt: s.dir === 'ltr' ? 'Copy this email address:' : 'העתיקו את כתובת הדוא״ל:' })} data-tracking-name={`${s.trackingName || s.org}_email_copy`} data-analytics-type="email">
+                                                                        <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                     {!rows.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching email' : 'אין דוא״ל תואם'}</p>}
                                                 </div>
                                             </div>
@@ -6549,7 +6685,7 @@
                                         />
                                     )}
                                     {mapOpen && (
-                                        <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a site' : 'בחירת מרפאה'}>
+                                        <div className="mh-map-panel mh-pick-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a site' : 'בחירת מרפאה'}>
                                             <div className="mh-map-panel-bar">
                                                 {locs.length > 6 && (
                                                     <input
@@ -6581,28 +6717,37 @@
                                             <div className="mh-map-list">
                                                 {visibleLocs.map(({ loc, locIdx, km }) => {
                                                     const detail = loc.address && loc.address !== loc.label ? loc.address : '';
+                                                    const copyValue = detail || loc.label || '';
+                                                    const key = `map:${s.row}:${locIdx}:${copyValue}`;
+                                                    const copied = copiedKey === key;
                                                     const nearestMark = km != null && nearestKm != null && km === nearestKm
                                                         ? (s.dir === 'ltr' ? ' · nearest' : ' · הקרוב')
                                                         : '';
+                                                    const copyLabel = copied
+                                                        ? (s.dir === 'ltr' ? 'Address copied' : 'הכתובת הועתקה')
+                                                        : (s.dir === 'ltr' ? `Copy ${copyValue}` : `העתקת ${copyValue}`);
+                                                    const mapLabel = s.dir === 'ltr'
+                                                        ? `Open ${loc.label || copyValue} on the map`
+                                                        : `פתיחת ${loc.label || copyValue} במפה`;
                                                     return (
-                                                        <a
-                                                            key={`${s.row}_map_${locIdx}`}
-                                                            href={mhGoogleMapsUrl(loc)}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            role="option"
-                                                            data-skip-external-link-check="true"
-                                                            data-tracking-name={`${s.trackingName || s.org}_map_${locIdx + 1}`}
-                                                            data-analytics-type="map"
-                                                            title={detail || loc.label}
-                                                        >
-                                                            <span className="mh-map-option-row">
-                                                                <span className="mh-map-option-label">{loc.label}{nearestMark}</span>
-                                                                {km != null && <span className="mh-map-km">{mhFormatKm(km)} ק״מ</span>}
+                                                        <div key={`${s.row}_map_${locIdx}`} className="mh-pick-option" role="option">
+                                                            <span className="mh-pick-text">
+                                                                <span className="mh-pick-title">
+                                                                    {loc.label}{nearestMark}
+                                                                    {km != null && <span className="mh-map-km"> · {mhFormatKm(km)} ק״מ</span>}
+                                                                </span>
+                                                                {detail ? <span className="mh-pick-detail">{detail}</span> : null}
+                                                                {loc.note ? <span className="mh-pick-note">{loc.note}</span> : null}
                                                             </span>
-                                                            {detail ? <span className="mh-map-option-detail">{detail}</span> : null}
-                                                            {loc.note ? <span className="mh-map-option-detail">{loc.note}</span> : null}
-                                                        </a>
+                                                            <span className="mh-pick-actions">
+                                                                <a className="mh-pick-map" href={mhGoogleMapsUrl(loc)} target="_blank" rel="noopener noreferrer" data-skip-external-link-check="true" aria-label={mapLabel} title={mapLabel} data-tracking-name={`${s.trackingName || s.org}_map_${locIdx + 1}`} data-analytics-type="map">
+                                                                    <i className="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                                                </a>
+                                                                <button type="button" className="mh-pick-copy" aria-label={copyLabel} title={copyLabel} onClick={() => copyText(copyValue, { onSuccess: () => markCopied(key), fallbackPrompt: s.dir === 'ltr' ? 'Copy this address:' : 'העתיקו את הכתובת:' })} data-tracking-name={`${s.trackingName || s.org}_map_copy_${locIdx + 1}`} data-analytics-type="map">
+                                                                    <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true"></i>
+                                                                </button>
+                                                            </span>
+                                                        </div>
                                                     );
                                                 })}
                                                 {!visibleLocs.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching site' : 'אין מרפאה תואמת'}</p>}

@@ -238,6 +238,24 @@ const FIELD_LABELS = [
   ['languages', 'שפות'],
 ];
 
+function mapsUrl(loc) {
+  const lat = Number(loc && loc.lat);
+  const lng = Number(loc && loc.lng);
+  const name = String((loc && (loc.address || loc.label)) || '').trim();
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+  if (hasCoords && name) return `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng} (${name})`)}`;
+  if (hasCoords) return `https://www.google.com/maps?q=${lat},${lng}`;
+  if (!name) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+}
+
+const PHONE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .7-.3 1L6.6 10.8z"/></svg>';
+const MAP_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/></svg>';
+
+function copyButton(value, aria) {
+  return `<button type="button" class="copy-email" data-copy-text="${esc(value)}" data-copy-idle="העתקה" data-copy-done="הועתק" aria-label="${esc(aria)}">העתקה</button>`;
+}
+
 function renderContact(entry, emitted, sites) {
   const r = entry.raw;
   const locs = sites || [];
@@ -277,7 +295,10 @@ function renderContact(entry, emitted, sites) {
     items.push(`<li><span class="label">דוא"ל: </span><a href="mailto:${esc(emailGroups[0].address)}">${esc(emailGroups[0].address)}</a></li>`);
   }
   if (emailGroups.length > 1) {
-    const rows = emailGroups.map((g) => `<li><a href="mailto:${esc(g.address)}">${esc(g.labels.join(', '))}</a> <span class="label" dir="ltr">${esc(g.address)}</span></li>`).join('');
+    const rows = emailGroups.map((g) => {
+      const address = esc(g.address);
+      return `<li class="email-option"><span class="email-text"><span>${esc(g.labels.join(', '))}</span><span class="email-address" dir="ltr">${address}</span></span><span class="email-actions"><a class="send-email" href="mailto:${address}" aria-label="שליחת דוא״ל אל ${address}"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z"/></svg></a>${copyButton(g.address, `העתקת ${g.address}`)}</span></li>`;
+    }).join('');
     items.push(`<li><details><summary>דוא״ל</summary><ul>${rows}</ul></details></li>`);
   }
   const sitePhones = branchPhones(locs);
@@ -285,10 +306,10 @@ function renderContact(entry, emitted, sites) {
     const rows = sitePhones.map((row) => {
       const parsed = parsePhoneField(row.phone);
       for (const tok of parsed.tokens) emitted.push({ entry, slot: 'site', source: row.phone, tel: tok.tel });
-      const link = parsed.tokens[0]
-        ? `<a href="tel:${esc(parsed.tokens[0].tel)}">${starCodesHtml(parsed.tokens[0].display)}</a>`
-        : starCodesHtml(row.phone);
-      return `<li>${esc(row.label)} ${link}</li>`;
+      const shown = parsed.tokens[0] ? parsed.tokens[0].display : row.phone;
+      const tel = parsed.tokens[0] ? parsed.tokens[0].tel : '';
+      const dial = tel ? `<a class="send-phone" href="tel:${esc(tel)}" aria-label="חיוג אל ${esc(shown)}">${PHONE_ICON}</a>` : '';
+      return `<li class="email-option"><span class="email-text"><span>${esc(row.label)}</span><span class="email-address" dir="ltr">${starCodesHtml(shown)}</span></span><span class="email-actions">${dial}${copyButton(shown, `העתקת ${shown}`)}</span></li>`;
     }).join('');
     items.push(`<li><details><summary>טלפון</summary><ul>${rows}</ul></details></li>`);
   }
@@ -365,10 +386,17 @@ function renderEntryPage(ctx, entry) {
 
   const locations = sites
     .map((l) => {
-      const parts = [l.label];
-      if (l.address && l.address !== l.label) parts.push(l.address);
-      if (l.note) parts.push(l.note);
-      return `<li>${parts.map((part) => esc(part)).join(' — ')}</li>`;
+      const detail = l.address && l.address !== l.label ? l.address : '';
+      const copyValue = detail || l.label || '';
+      if (sites.length < 2) {
+        const parts = [l.label];
+        if (detail) parts.push(detail);
+        if (l.note) parts.push(l.note);
+        return `<li>${parts.map((part) => esc(part)).join(' — ')}</li>`;
+      }
+      const href = mapsUrl(l);
+      const mapLink = href ? `<a class="send-map" href="${esc(href)}" rel="noopener" aria-label="פתיחת ${esc(l.label || copyValue)} במפה">${MAP_ICON}</a>` : '';
+      return `<li class="email-option"><span class="email-text"><span>${esc(l.label || '')}</span>${detail ? `<span class="email-address">${esc(detail)}</span>` : ''}${l.note ? `<span>${esc(l.note)}</span>` : ''}</span><span class="email-actions">${mapLink}${copyButton(copyValue, `העתקת ${copyValue}`)}</span></li>`;
     })
     .join('');
 
