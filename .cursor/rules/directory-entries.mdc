@@ -17,6 +17,14 @@ When **adding** a card:
 
 Do not re-run `scripts/seed_directory_card_edits.js` to refresh existing cards. It rewrites the original seed. New cards get their own migration insert.
 
+**אזור** is the place a visitor uses to decide whether the service is relevant: a city, town, moshav, kibbutz, neighborhood, regional council, or broader region, plus coverage words such as כל הארץ, על-אזורית, אונליין, ארצי, and והסביבה. Several places stay as a list. A parenthetical qualifier is allowed only when it is still an area, as in `תל אביב (רמת אביב)`.
+
+אזור does not contain a street, house number, floor, building, wing, department, institution name, or a direction such as צומת or ליד. Those stay on the map address (כתובת when there is one site, each pin when there are several) or in הערות when there is no pin.
+
+If the only published place is a street and the locality is known, the stored אזור is that locality. A named neighborhood of a large city is kept with the city (`צהלה, תל אביב`). If the locality was never published, אזור is empty and the street stays in הערות.
+
+The card shows כתובת only when there is one site. If every place named in אזור already appears in that address, the אזור line is not rendered. The stored place name stays. The line stays when אזור names a place the address does not: כל הארץ, על-אזורית, אונליין, another city, or a wider catchment. Several branches have no single כתובת line, so their city list in אזור stays.
+
 **Card share links** use the numeric `row` in `?entry=` (ASCII-only). Do not put Hebrew in share/deep-link URLs — percent-encoded Hebrew makes links unreadable. The admin edit link is `/admin#directory/<id>` using the numeric `directory_card_edits.id`. Legacy Hebrew `entry_id` slugs still resolve for old links; DB `entry_id` may still follow the slugify convention.
 
 For any other published change to `index.html` (UI copy, layout, resources, etc.), update `LAST_UPDATED` the same way.

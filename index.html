@@ -1446,13 +1446,22 @@
             347: [{ label: "ראשון לציון", address: "יוסף לישנסקי 27, ראשון לציון", lat: 31.9954114, lng: 34.7668962, phone: "072-3341926" }],
             348: [{ label: "מבשרת ציון", address: "צור 1, מבשרת ציון", lat: 31.7874576, lng: 35.1374646, phone: "073-3214111" }],
             349: [{ label: "תל אביב", address: "המרכז הרפואי רעות, שדרות החייל 2, תל אביב", lat: 32.0562458, lng: 34.7903821, phone: "03-5081000" }],
-            351: [{ label: "רמת השרון", address: "סוקולוב 48, רמת השרון", lat: 32.1445961, lng: 34.8379308, phone: "054-9656545" }],
+            351: [{ label: "רמת השרון", address: "סוקולוב 48, קומה 4, רמת השרון", lat: 32.1445961, lng: 34.8379308, phone: "054-9656545" }],
             352: [{ label: "ירושלים", address: "דרך בית לחם 16, ירושלים", lat: 31.7513148, lng: 35.2182209, phone: "02-6252527" }],
             355: [{ label: "בני ברק", address: "הרב פוברסקי 17, בני ברק", lat: 32.0850714, lng: 34.8445708 }],
             307: [{ label: "ירושלים", address: "קרן היסוד 27, ירושלים", lat: 31.7733591, lng: 35.2200541, phone: "1599-502120", email: "soulbird@slavpro.co.il" }]
         
         };
         const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
+        // אזור is the place. When one address already names every place in it, the line is not shown.
+        const mhRegionCoveredByAddress = (region, address) => {
+            const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+            const place = norm(region);
+            const street = norm(address);
+            if (!place || !street) return false;
+            const parts = place.replace(/[()]/g, ' ').split(/[,;/]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+            return parts.length > 0 && parts.every((p) => street.includes(p));
+        };
         const mhEmailButton = (s, suffix) => {
             const address = s[`email${suffix}`];
             if (!address) return null;
@@ -6287,7 +6296,7 @@
                         {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length > 0) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {mhDialText(s.target, `for-${s.row}`)}</div>}
-                                {s.region && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
+                                {s.region && !(locs.length === 1 && locs[0].address && mhRegionCoveredByAddress(s.region, locs[0].address)) && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
                                 {locs.length === 1 && locs[0].address && (
                                     <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {locs[0].address}</div>
                                 )}

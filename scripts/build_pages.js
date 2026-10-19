@@ -130,6 +130,17 @@ function entryTitle(entry) {
 
 // ---------------------------------------------------------------- entry page
 
+// Same rule as mhRegionCoveredByAddress in index.html: one address that already
+// names every place in אזור means the line is not shown.
+function regionCoveredByAddress(region, address) {
+  const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+  const place = norm(region);
+  const street = norm(address);
+  if (!place || !street) return false;
+  const parts = place.replace(/[()]/g, ' ').split(/[,;/]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+  return parts.length > 0 && parts.every((p) => street.includes(p));
+}
+
 const FIELD_LABELS = [
   ['target', 'קהל יעד'],
   ['region', 'אזור'],
@@ -230,8 +241,11 @@ function renderEntryPage(ctx, entry) {
   const ltrAttrs = isLtr ? ' lang="en" dir="ltr" class="ltr-block"' : '';
   const valueDir = isLtr ? ' dir="ltr" class="ltr-block"' : '';
 
+  const sites = ENTRY_LOCATIONS[String(entry.row)] || [];
+  const soleAddress = sites.length === 1 ? sites[0].address : '';
   const facts = FIELD_LABELS
     .filter(([k]) => entry.raw[k] && String(entry.raw[k]).trim())
+    .filter(([k]) => !(k === 'region' && soleAddress && regionCoveredByAddress(entry.raw[k], soleAddress)))
     .map(([k, label]) => `<div><dt>${esc(label)}</dt><dd${valueDir}>${esc(String(entry.raw[k]).replace(/\s+/g, ' ').trim())}</dd></div>`)
     .join('');
 

@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 097_region_is_area_only.sql
 [x] 096_site_audit_entries_glossary_web_and_star_phones.sql
 [x] 095_multidisciplinary_centers_update.sql
 [x] 094_soulbird_jerusalem_site.sql
