@@ -1387,6 +1387,15 @@
     const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
     const DIR_EMAILS = ['', '2', '3'];
     const DIR_LTR = new Set(['whatsapp', 'web', 'web2', 'add']);
+    const DIR_OWNERSHIP = [
+      ['', 'לא סומן'],
+      ['private', 'פרטי'],
+      ['nonprofit', 'עמותה'],
+      ['hmo', 'קופת חולים'],
+      ['government', 'ממשלתי'],
+      ['hospital', 'בית חולים'],
+      ['unspecified', 'לא צוין']
+    ];
     const DIR_OFFERS = [
       ['info', 'מידע', 'הסברים לקריאה: זכויות, תנאים, איך תהליך עובד'],
       ['navigate', 'הכוונה ואיתור', 'מאגרים, אינדקסים וקווי הכוונה שמפנים למקום הנכון'],
@@ -1545,6 +1554,8 @@
           ? '<h2>סימונים בכרטיס</h2><p class="dir-help">הסימונים יופיעו כאן אחרי הרצת סקריפט 077.</p>'
           : `<h2>סימונים בכרטיס</h2>
             <p class="dir-help">מוצגים על הכרטיס ומשמשים לסינון. שינוי בסימונים לא משנה את תאריך העדכון בכרטיס. כשמסמנים רק «מידע», הכרטיס מוצג כ«מידע בלבד» ובלי מימון.</p>
+            ${select('ownership', 'סוג בעלות', ind.ownership || '', DIR_OWNERSHIP)}
+            <p class="dir-help">משמש לסינון במונח «מרכז רב-צוותי». לא מוצג כסימון על הכרטיס.</p>
             <fieldset class="dir-fieldset"><legend>מה יש בכרטיס</legend>
               ${DIR_OFFERS.map(([code, label, help]) => `<label class="dir-check" title="${esc(help)}"><input type="checkbox" name="offer_${code}"${indOffers.includes(code) ? ' checked' : ''}> ${esc(label)} <span class="dir-help">— ${esc(help)}</span></label>`).join('')}
             </fieldset>
@@ -1723,7 +1734,8 @@
               whole_org: checked('whole_org'),
               funding: DIR_FUNDING.filter(([code]) => checked(`fund_${code}`)).map(([code]) => ({ channel: code, terms: text(`fundterms_${code}`) })),
               referral: DIR_REFERRALS.map(([code]) => code).filter((code) => checked(`ref_${code}`)),
-              referral_source: text('referral_source')
+              referral_source: text('referral_source'),
+              ownership: text('ownership')
             };
             body.orgMembers = Array.from(form.querySelectorAll('.member-row')).map((li) => Number(li.dataset.id));
           }

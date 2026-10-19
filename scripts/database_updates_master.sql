@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 102_multidisciplinary_public_centers.sql
 [x] 101_hide_datacity_portal.sql
 [x] 100_yad_mehavenet_contacts.sql
 [x] 099_datacity_mental_data_portal.sql

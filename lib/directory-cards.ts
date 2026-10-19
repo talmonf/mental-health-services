@@ -329,16 +329,20 @@ export type FundingEntry = {
   terms: (typeof FUNDING_TERMS)[number];
 };
 
+export const OWNERSHIP_CODES = ['private', 'nonprofit', 'hmo', 'government', 'hospital', 'unspecified'] as const;
+
 export type Indicators = {
   offers: (typeof OFFER_CODES)[number][];
   whole_org: boolean;
   funding: FundingEntry[];
   referral: (typeof REFERRAL_CODES)[number][];
   referral_source: string;
+  /** Visitor filter on the multidisciplinary-center glossary term. Empty means unset. */
+  ownership: (typeof OWNERSHIP_CODES)[number] | '';
 };
 
 export function emptyIndicators(): Indicators {
-  return { offers: [], whole_org: false, funding: [], referral: [], referral_source: '' };
+  return { offers: [], whole_org: false, funding: [], referral: [], referral_source: '', ownership: '' };
 }
 
 function codeList<T extends string>(raw: unknown, allowed: readonly T[], label: string): T[] {
@@ -374,6 +378,7 @@ export function normalizeIndicators(raw: unknown): Indicators {
     funding,
     referral: codeList(src.referral, REFERRAL_CODES, 'דרך ההפניה'),
     referral_source: referralSource,
+    ownership: oneOf(src.ownership, ['', ...OWNERSHIP_CODES], 'סוג בעלות', ''),
   };
 }
 

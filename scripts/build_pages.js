@@ -362,7 +362,7 @@ function renderEntryPage(ctx, entry) {
   const trail = [
     { name: 'מדריך נפש', url: '/' },
     ...(group.title && groupPath(ctx, groupId) ? [{ name: group.title, url: groupPath(ctx, groupId) }] : []),
-    ...(cat.title ? [{ name: cat.title, url: `/c/${primaryCat}` }] : []),
+    ...(cat.title && !cat.unlisted ? [{ name: cat.title, url: `/c/${primaryCat}` }] : []),
     { name: entry.org, url: entry.path },
   ];
 
@@ -401,16 +401,19 @@ function renderEntryPage(ctx, entry) {
     .join('');
 
   const catTags = entry.categories
-    .filter((c) => DATA[c])
+    .filter((c) => DATA[c] && !DATA[c].unlisted)
     .map((c) => `<a class="tag" href="/c/${esc(c)}">${esc(DATA[c].title)}</a>`)
     .join('');
 
   // Siblings keep the page from being a dead end for a person who landed on the wrong entry.
-  const siblings = published
-    .filter((e) => e !== entry && e.categories.includes(primaryCat))
-    .slice(0, 8)
-    .map((e) => `<li><a href="${esc(e.path)}">${esc(e.org)}</a><span class="svc">${esc(truncate(e.svc, 90))}</span></li>`)
-    .join('');
+  // An unlisted category has no category page, so its cards do not point at one another here.
+  const siblings = cat.unlisted
+    ? ''
+    : published
+        .filter((e) => e !== entry && e.categories.includes(primaryCat))
+        .slice(0, 8)
+        .map((e) => `<li><a href="${esc(e.path)}">${esc(e.org)}</a><span class="svc">${esc(truncate(e.svc, 90))}</span></li>`)
+        .join('');
 
   const appUrl = `/?entry=${encodeURIComponent(entry.row)}&section=${encodeURIComponent(primaryCat)}`;
 
@@ -682,6 +685,8 @@ function renderPrivacyPage() {
 
 function renderDirectoryHub(ctx) {
   const { DATA, CATEGORY_GROUPS, LAST_UPDATED, published } = ctx;
+  const listed = published.filter((e) => !(DATA[e.categories[0]] && DATA[e.categories[0]].unlisted));
+  const categoryCount = Object.values(DATA).filter((cat) => !cat.unlisted).length;
   const groups = Object.entries(CATEGORY_GROUPS)
     .map(([gid, g]) => {
       const cats = g.subcategories
@@ -692,13 +697,13 @@ function renderDirectoryHub(ctx) {
     })
     .join('');
 
-  const all = [...published]
+  const all = [...listed]
     .sort((a, b) => a.org.localeCompare(b.org, 'he'))
     .map((e) => `<li><a href="${esc(e.path)}">${esc(e.org)}</a><span class="svc">${esc(truncate(e.svc, 90))}</span></li>`)
     .join('');
 
   const trail = [{ name: 'מדריך נפש', url: '/' }, { name: 'כל הקטגוריות', url: '/directory' }];
-  const description = truncate(`${published.length} שירותי בריאות נפש בישראל ב-${Object.keys(DATA).length} קטגוריות: עזרה דחופה, קווי סיוע, זכויות, טיפול, שיקום, משפחות ונוער.`, 155);
+  const description = truncate(`${listed.length} שירותי בריאות נפש בישראל ב-${categoryCount} קטגוריות: עזרה דחופה, קווי סיוע, זכויות, טיפול, שיקום, משפחות ונוער.`, 155);
 
   return T.renderPage({
     title: 'כל הקטגוריות והשירותים | מדריך נפש',
@@ -711,7 +716,7 @@ function renderDirectoryHub(ctx) {
         name: 'כל הקטגוריות והשירותים',
         description,
         path: '/directory',
-        members: published,
+        members: listed,
         trail,
         lastUpdatedIso: isoDate(LAST_UPDATED),
         // The hub is where the WebSite node lives for the pre-rendered surface, so the
@@ -720,9 +725,9 @@ function renderDirectoryHub(ctx) {
       })
     ),
     body: `<h1>כל הקטגוריות והשירותים</h1>
-<p class="lede">${published.length} שירותים ב-${Object.keys(DATA).length} קטגוריות.</p>
+<p class="lede">${listed.length} שירותים ב-${categoryCount} קטגוריות.</p>
 ${groups}
-<h2>כל השירותים לפי שם <span class="count">(${published.length})</span></h2>
+<h2>כל השירותים לפי שם <span class="count">(${listed.length})</span></h2>
 <ul class="entry-list">${all}</ul>`,
     lastUpdated: LAST_UPDATED,
     lastUpdatedIso: isoDate(LAST_UPDATED),
@@ -956,6 +961,7 @@ function build(outRoot, data = load()) {
   }
 
   for (const [categoryId, cat] of Object.entries(data.DATA)) {
+    if (cat.unlisted) continue;
     writePage(outRoot, `/c/${categoryId}`, renderCategoryPage(ctx, categoryId, null), written);
     urls.push({ path: `/c/${categoryId}`, priority: '0.7' });
     for (const subId of Object.keys(cat.subsections || {})) {
