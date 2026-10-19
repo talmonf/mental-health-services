@@ -272,6 +272,23 @@ function assignPaths(entries) {
 
 const LITERAL_NAMES = [
   'HARAVOT_BARZEL_SEARCH',
+  // Shared card objects. DATA and HARAVOT_BARZEL_NEW_ENTRIES both refer to them,
+  // and this list is evaluated in order in one sandbox.
+  'MOD_MT_357',
+  'MOD_MT_358',
+  'MOD_MT_359',
+  'MOD_MT_360',
+  'MOD_MT_361',
+  'MOD_MT_362',
+  'MOD_MT_363',
+  'MOD_MT_364',
+  'MOD_MT_365',
+  'MOD_MT_366',
+  'MOD_MT_367',
+  'MOD_MT_368',
+  'MOD_MT_369',
+  'MOD_MT_370',
+  'MOD_MT_371',
   'DATA',
   'HARAVOT_BARZEL_NEW_ENTRIES',
   'NATIONAL_NGO_ENTRIES',
