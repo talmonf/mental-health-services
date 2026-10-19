@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 100_yad_mehavenet_contacts.sql
 [x] 099_datacity_mental_data_portal.sql
 [x] 098_yad_mehavenet_sites.sql
 [x] 097_region_is_area_only.sql

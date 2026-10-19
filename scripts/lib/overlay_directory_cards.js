@@ -68,11 +68,11 @@ async function fetchCardRows() {
   try {
     let rows;
     try {
-      ({ rows } = await client.query(`SELECT card_key, public_fields, indicators FROM directory_card_edits`));
+      ({ rows } = await client.query(`SELECT card_key, public_fields, indicators, sites FROM directory_card_edits`));
     } catch (err) {
       // Migration 077 adds indicators; before it runs, cards publish without them.
       if (!err || err.code !== '42703') throw err;
-      ({ rows } = await client.query(`SELECT card_key, public_fields FROM directory_card_edits`));
+      ({ rows } = await client.query(`SELECT card_key, public_fields, sites FROM directory_card_edits`));
     }
     let links = [];
     try {
@@ -122,6 +122,7 @@ async function overlayDirectoryCards(data) {
     replacePublicFields(svc, row.public_fields);
     // Approved glossary links (migration 064). Term pages list these cards; entry pages list the terms.
     svc.cardTerms = row.terms;
+    if (Array.isArray(row.sites) && row.sites.length) svc.cardSites = row.sites;
     if (row.indicators && typeof row.indicators === 'object') {
       svc.cardIndicators = row.indicators;
       // Referral codes set on the card replace the row-keyed codes from referral_codes.json.

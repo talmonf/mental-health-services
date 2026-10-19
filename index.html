@@ -1458,24 +1458,83 @@
                 { label: "ירושלים", address: "יפו 97, בניין כלל, קומה 16, ירושלים", lat: 31.7841441, lng: 35.2146792, email: "merkazye@femi.com" },
                 { label: "נצרת", address: "יוחנן פאולוס השישי 53, קומה 4, נצרת", lat: 32.7030839, lng: 35.2995677, email: "ynazareth@femi.com" },
                 { label: "חדרה", address: "אחד העם 9, בניין קורן 2, קומה 4, חדרה", lat: 32.4359443, lng: 34.9159363, email: "yadmhadera@ors-siud.co.il" },
-                { label: "טבריה", address: "הגלבוע 1, טבריה", lat: 32.787859, lng: 35.5386177, email: "yadzefat@mediton.co.il" },
+                { label: "טבריה", address: "הגלבוע 1, טבריה", lat: 32.787859, lng: 35.5386177, email: "yadzefat@mediton.co.il", note: "בתיאום מראש, יום ראשון 9:00–12:30" },
                 { label: "פתח תקווה", address: "מוטה גור 5, פארק אולימפיה, קומה 3, פתח תקווה", lat: 32.0947753, lng: 34.8641768, email: "merkazym@femi.com" },
                 { label: "צפת", address: "החרמון 1, צפת", lat: 32.962478, lng: 35.5145941, email: "yadzefat@mediton.co.il" },
-                { label: "קריית שמונה", address: "שדרות תל חי, מרכז מסחרי, קריית שמונה", lat: 33.2236087, lng: 35.5757074, email: "yadzefat@mediton.co.il" },
-                { label: "כרמיאל", address: "הכבאי 3, כרמיאל", lat: 32.9227593, lng: 35.305666, email: "yadzefat@mediton.co.il" },
-                { label: "סכנין", address: "שכונה מערבית 42, סכנין", lat: 32.8638052, lng: 35.3023184, email: "m.7okok.sakhnin@gmail.com" }
+                { label: "קריית שמונה", address: "שדרות תל חי, מרכז מסחרי, קריית שמונה", lat: 33.2236087, lng: 35.5757074, email: "yadzefat@mediton.co.il", note: "בתיאום מראש, יום חמישי 9:00–12:30" },
+                { label: "כרמיאל", address: "הכבאי 3, כרמיאל", lat: 32.9227593, lng: 35.305666, email: "yadzefat@mediton.co.il", note: "בתיאום מראש, יום חמישי 9:00–13:00" },
+                { label: "סכנין", address: "שכונה מערבית 42, סכנין", lat: 32.8638052, lng: 35.3023184, email: "m.7okok.sakhnin@gmail.com", note: "יום שני 9:00–14:00. ליד בניין ההסתדרות" }
             ]
         
         };
         const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
+        const mhNormPlace = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+        const mhRegionPlaces = (region) => mhNormPlace(region).replace(/[()]/g, ' ').split(/[,;]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+        const mhContainsPlace = (haystack, place) => {
+            const text = mhNormPlace(haystack);
+            const needle = mhNormPlace(place);
+            if (!text || !needle) return false;
+            if (text === needle) return true;
+            const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return new RegExp('(^|[^א-תA-Za-z0-9])' + escaped + '($|[^א-תA-Za-z0-9])').test(text);
+        };
         // אזור is the place. When one address already names every place in it, the line is not shown.
         const mhRegionCoveredByAddress = (region, address) => {
-            const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-            const place = norm(region);
-            const street = norm(address);
+            const place = mhNormPlace(region);
+            const street = mhNormPlace(address);
             if (!place || !street) return false;
-            const parts = place.replace(/[()]/g, ' ').split(/[,;/]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+            const parts = mhRegionPlaces(region);
             return parts.length > 0 && parts.every((p) => street.includes(p));
+        };
+        // Several branches: hide אזור when it is exactly that branch list.
+        const mhRegionCoveredByBranches = (region, locs) => {
+            if (!Array.isArray(locs) || locs.length < 2) return false;
+            const places = mhRegionPlaces(region);
+            if (places.length < 2) return false;
+            const labels = locs.map((loc) => mhNormPlace(loc && loc.label)).filter(Boolean);
+            if (labels.length !== locs.length) return false;
+            const covered = new Set();
+            for (const label of labels) {
+                const hits = places.filter((place) => mhContainsPlace(label, place));
+                if (hits.length !== 1) return false;
+                covered.add(hits[0]);
+            }
+            return places.every((place) => covered.has(place));
+        };
+        const mhPhoneDigits = (s) => String(s || '').replace(/\D/g, '');
+        const mhPhoneRole = (label) => /מוקד|כללי|הנהלה|קו סיוע/.test(String(label || ''));
+        const mhPlaceHead = (label) => mhNormPlace(label).split(/[·•—–\-|:]/)[0].trim();
+        const mhCardPhoneHiddenByBranch = (label, number, locs) => {
+            if (!label || mhPhoneRole(label)) return false;
+            const head = mhPlaceHead(label);
+            const digits = mhPhoneDigits(number);
+            if (head.length < 2 || !digits) return false;
+            return (locs || []).some((loc) => mhPhoneDigits(loc && loc.phone) === digits && (mhContainsPlace(loc.label, head) || mhContainsPlace(head, loc.label)));
+        };
+        const mhBranchEmailGroups = (locs) => {
+            const groups = [];
+            const index = new Map();
+            (locs || []).forEach((loc) => {
+                const address = String(loc && loc.email || '').trim();
+                if (!address) return;
+                const key = address.toLowerCase();
+                if (!index.has(key)) {
+                    const row = { address, labels: [] };
+                    index.set(key, row);
+                    groups.push(row);
+                }
+                const label = mhNormPlace(loc.label);
+                if (label) index.get(key).labels.push(label);
+            });
+            return groups;
+        };
+        const mhBranchPhones = (locs) => (locs || [])
+            .map((loc) => ({ label: mhNormPlace(loc && loc.label), phone: String(loc && loc.phone || '').trim() }))
+            .filter((row) => row.phone);
+        const mhCardHasEmail = (s, address) => {
+            const want = String(address || '').trim().toLowerCase();
+            if (!want) return false;
+            return ['', '2', '3'].some((suffix) => String(s[`email${suffix}`] || '').trim().toLowerCase() === want);
         };
         const mhEmailButton = (s, suffix) => {
             const address = s[`email${suffix}`];
@@ -6129,14 +6188,18 @@
             const Card = ({ s, categoryKey, subsectionId, distanceLabel }) => {
                 const [mapOpen, setMapOpen] = useState(false);
                 const [mapFilter, setMapFilter] = useState('');
+                const [contactOpen, setContactOpen] = useState(null);
+                const [contactFilter, setContactFilter] = useState('');
                 useEffect(() => {
-                    if (!mapOpen) return undefined;
+                    if (!mapOpen && !contactOpen) return undefined;
                     const onKey = (e) => {
-                        if (e.key === 'Escape') setMapOpen(false);
+                        if (e.key !== 'Escape') return;
+                        setMapOpen(false);
+                        setContactOpen(null);
                     };
                     document.addEventListener('keydown', onKey);
                     return () => document.removeEventListener('keydown', onKey);
-                }, [mapOpen]);
+                }, [mapOpen, contactOpen]);
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
                 const entryTargetKey = `${mhGetCategoryGroupForCategory(categoryKey) || ''}:${categoryKey}:${subsectionId || ''}:${entryId || ''}`;
                 const isTargeted = entryId && highlightedEntryKey === entryTargetKey;
@@ -6149,6 +6212,9 @@
                 const showHbLaunchBanner = isHbBooklet && hbSearchActive && haravotBarzelLaunchedFrom != null;
                 const showHbLaunchCta = isHbBooklet && !showHbLaunchBanner;
                 const locs = (Array.isArray(s.cardSites) && s.cardSites.length) ? s.cardSites : mhGetLocationsForRow(s.row);
+                const emailGroups = mhBranchEmailGroups(locs);
+                const branchPhones = mhBranchPhones(locs);
+                const showCardPhone = (num, label) => Boolean(num) && !mhCardPhoneHiddenByBranch(label, num, locs);
                 const rankedLocs = locs.map((loc, locIdx) => ({
                     loc,
                     locIdx,
@@ -6320,7 +6386,7 @@
                         {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length > 0) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {mhDialText(s.target, `for-${s.row}`)}</div>}
-                                {s.region && !(locs.length === 1 && locs[0].address && mhRegionCoveredByAddress(s.region, locs[0].address)) && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
+                                {s.region && !((locs.length === 1 && locs[0].address && mhRegionCoveredByAddress(s.region, locs[0].address)) || mhRegionCoveredByBranches(s.region, locs)) && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
                                 {locs.length === 1 && locs[0].address && (
                                     <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Address:' : 'כתובת:'}</strong> {locs[0].address}</div>
                                 )}
@@ -6355,20 +6421,84 @@
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {s.phone && (<a href={mhTelHref(s.phone)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phone) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone, s.phoneLabel, s.phoneShowNumber, s.iconOnly, `p-${s.row}`)}</a>)}
-                            {s.phone2 && (<a href={mhTelHref(s.phone2)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone2, s.phoneLabel2, s.phoneShowNumber2, s.iconOnly, `p2-${s.row}`)}</a>)}
-                            {s.phone3 && (<a href={mhTelHref(s.phone3)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone3, s.phoneLabel3, s.phoneShowNumber3, s.iconOnly, `p3-${s.row}`)}</a>)}
-                            {s.phone4 && (<a href={mhTelHref(s.phone4)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone4`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone4, s.phoneLabel4, s.phoneShowNumber4, s.iconOnly, `p4-${s.row}`)}</a>)}
-                            {s.phone5 && (<a href={mhTelHref(s.phone5)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone5`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone5, s.phoneLabel5, s.phoneShowNumber5, s.iconOnly, `p5-${s.row}`)}</a>)}
-                            {s.phone6 && (<a href={mhTelHref(s.phone6)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone6, s.phoneLabel6, s.phoneShowNumber6, s.iconOnly, `p6-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone, s.phoneLabel) && (<a href={mhTelHref(s.phone)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phone) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone, s.phoneLabel, s.phoneShowNumber, s.iconOnly, `p-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone2, s.phoneLabel2) && (<a href={mhTelHref(s.phone2)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel2 ? `${s.phoneLabel2}: ${s.phone2}` : s.phone2) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone2`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone2, s.phoneLabel2, s.phoneShowNumber2, s.iconOnly, `p2-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone3, s.phoneLabel3) && (<a href={mhTelHref(s.phone3)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel3 ? `${s.phoneLabel3}: ${s.phone3}` : s.phone3) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone3`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone3, s.phoneLabel3, s.phoneShowNumber3, s.iconOnly, `p3-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone4, s.phoneLabel4) && (<a href={mhTelHref(s.phone4)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel4 ? `${s.phoneLabel4}: ${s.phone4}` : s.phone4) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone4`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone4, s.phoneLabel4, s.phoneShowNumber4, s.iconOnly, `p4-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone5, s.phoneLabel5) && (<a href={mhTelHref(s.phone5)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel5 ? `${s.phoneLabel5}: ${s.phone5}` : s.phone5) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone5`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone5, s.phoneLabel5, s.phoneShowNumber5, s.iconOnly, `p5-${s.row}`)}</a>)}
+                            {showCardPhone(s.phone6, s.phoneLabel6) && (<a href={mhTelHref(s.phone6)} style={{background: 'var(--accent)'}} title={s.iconOnly ? mhDialPlain(s.phoneLabel6 ? `${s.phoneLabel6}: ${s.phone6}` : s.phone6) : undefined} data-tracking-name={`${s.trackingName || s.org}_phone6`} data-analytics-type="phone"><i className="fas fa-phone"></i> {mhPhoneFace(s.phone6, s.phoneLabel6, s.phoneShowNumber6, s.iconOnly, `p6-${s.row}`)}</a>)}
+                            {branchPhones.length > 1 && (() => {
+                                const open = contactOpen === 'phone';
+                                const needle = contactFilter.trim();
+                                const rows = needle ? branchPhones.filter((row) => `${row.label} ${row.phone}`.includes(needle)) : branchPhones;
+                                return (
+                                    <div className="mh-map-picker">
+                                        <button type="button" style={{ background: 'var(--accent)' }} aria-expanded={open} aria-haspopup="listbox" onClick={() => { setContactFilter(''); setContactOpen(open ? null : 'phone'); setMapOpen(false); }} data-tracking-name={`${s.trackingName || s.org}_phones`} data-analytics-type="phone">
+                                            <i className="fas fa-phone"></i> {s.dir === 'ltr' ? 'Phones' : 'טלפון'}
+                                        </button>
+                                        {open && <button type="button" className="mh-map-backdrop" aria-label={s.dir === 'ltr' ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)} />}
+                                        {open && (
+                                            <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose a phone' : 'בחירת טלפון'}>
+                                                <div className="mh-map-panel-bar">
+                                                    {branchPhones.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={s.dir === 'ltr' ? 'Filter phones' : 'סינון טלפונים'} />}
+                                                    <button type="button" className="mh-map-close" aria-label={s.dir === 'ltr' ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
+                                                </div>
+                                                <div className="mh-map-list">
+                                                    {rows.map((row, i) => (
+                                                        <a key={`${s.row}_phone_${i}`} href={mhTelHref(row.phone)} role="option" data-tracking-name={`${s.trackingName || s.org}_phone_site_${i + 1}`} data-analytics-type="phone">
+                                                            <span className="mh-map-option-label">{row.label}</span>
+                                                            <span className="mh-map-option-detail">{mhDialText(row.phone, `sp-${s.row}-${i}`)}</span>
+                                                        </a>
+                                                    ))}
+                                                    {!rows.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching phone' : 'אין טלפון תואם'}</p>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                             {s.whatsapp && (<a href={`https://wa.me/${s.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={s.showContactText ? undefined : (s.dir === 'ltr' ? `WhatsApp: ${s.whatsapp}` : `וואטסאפ: ${s.whatsapp}`)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp"></i> {s.showContactText ? s.whatsapp : (s.whatsappLabel || '')}</a>)}
                             {['', '2', '3'].map((suffix) => {
                                 const mail = mhEmailButton(s, suffix);
                                 if (!mail) return null;
+                                if (emailGroups.length > 1 && emailGroups.some((g) => g.address.toLowerCase() === String(mail.address).trim().toLowerCase())) return null;
                                 return (
                                     <a key={`${s.row}_${mail.tracking}`} href={`mailto:${mail.address}`} style={{background: '#e67e22'}} title={mail.title} data-tracking-name={`${s.trackingName || s.org}_${mail.tracking}`} data-analytics-type="email"><i className="fas fa-envelope"></i> {mail.text}</a>
                                 );
                             })}
+                            {emailGroups.length === 1 && !mhCardHasEmail(s, emailGroups[0].address) && (
+                                <a href={`mailto:${emailGroups[0].address}`} style={{background: '#e67e22'}} title={emailGroups[0].address} data-tracking-name={`${s.trackingName || s.org}_email_site`} data-analytics-type="email"><i className="fas fa-envelope"></i> {s.dir === 'ltr' ? 'Email' : 'דוא״ל'}</a>
+                            )}
+                            {emailGroups.length > 1 && (() => {
+                                const open = contactOpen === 'email';
+                                const needle = contactFilter.trim().toLowerCase();
+                                const rows = needle ? emailGroups.filter((g) => `${g.labels.join(' ')} ${g.address}`.toLowerCase().includes(needle)) : emailGroups;
+                                return (
+                                    <div className="mh-map-picker">
+                                        <button type="button" style={{ background: '#e67e22' }} aria-expanded={open} aria-haspopup="listbox" onClick={() => { setContactFilter(''); setContactOpen(open ? null : 'email'); setMapOpen(false); }} data-tracking-name={`${s.trackingName || s.org}_emails`} data-analytics-type="email">
+                                            <i className="fas fa-envelope"></i> {s.dir === 'ltr' ? 'Email' : 'דוא״ל'}
+                                        </button>
+                                        {open && <button type="button" className="mh-map-backdrop" aria-label={s.dir === 'ltr' ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)} />}
+                                        {open && (
+                                            <div className="mh-map-panel" role="listbox" aria-label={s.dir === 'ltr' ? 'Choose an email' : 'בחירת דוא״ל'}>
+                                                <div className="mh-map-panel-bar">
+                                                    {emailGroups.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={s.dir === 'ltr' ? 'Filter emails' : 'סינון דוא״ל'} />}
+                                                    <button type="button" className="mh-map-close" aria-label={s.dir === 'ltr' ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
+                                                </div>
+                                                <div className="mh-map-list">
+                                                    {rows.map((g) => (
+                                                        <a key={`${s.row}_mail_${g.address}`} href={`mailto:${g.address}`} role="option" data-tracking-name={`${s.trackingName || s.org}_email_site`} data-analytics-type="email">
+                                                            <span className="mh-map-option-label">{g.labels.join(', ')}</span>
+                                                            <span className="mh-map-option-detail" dir="ltr">{g.address}</span>
+                                                        </a>
+                                                    ))}
+                                                    {!rows.length && <p className="mh-map-empty">{s.dir === 'ltr' ? 'No matching email' : 'אין דוא״ל תואם'}</p>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                             {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" data-tracking-name={s.webTrackingName || `${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
                             {s.web2 && (<a href={s.web2} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" data-tracking-name={s.webTrackingName2 || `${s.trackingName || s.org}_website2`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.webLabel2 || (s.dir === 'ltr' ? 'Website' : 'לאתר')}</a>)}
                             {s.add && (() => {
@@ -6404,7 +6534,7 @@
                                         className="mh-map-btn"
                                         aria-expanded={mapOpen}
                                         aria-haspopup="listbox"
-                                        onClick={() => setMapOpen((open) => !open)}
+                                        onClick={() => { setContactOpen(null); setMapOpen((open) => !open); }}
                                         data-tracking-name={`${s.trackingName || s.org}_map`}
                                         data-analytics-type="map"
                                     >
@@ -6469,9 +6599,9 @@
                                                             <span className="mh-map-option-row">
                                                                 <span className="mh-map-option-label">{loc.label}{nearestMark}</span>
                                                                 {km != null && <span className="mh-map-km">{mhFormatKm(km)} ק״מ</span>}
-                                                                {loc.phone ? <span className="mh-map-phone">{loc.phone}</span> : null}
                                                             </span>
                                                             {detail ? <span className="mh-map-option-detail">{detail}</span> : null}
+                                                            {loc.note ? <span className="mh-map-option-detail">{loc.note}</span> : null}
                                                         </a>
                                                     );
                                                 })}

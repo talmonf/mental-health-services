@@ -132,13 +132,101 @@ function entryTitle(entry) {
 
 // Same rule as mhRegionCoveredByAddress in index.html: one address that already
 // names every place in אזור means the line is not shown.
+function normPlace(s) {
+  return String(s || '').replace(/\s+/g, ' ').trim();
+}
+
+function regionPlaces(region) {
+  return normPlace(region).replace(/[()]/g, ' ').split(/[,;]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+}
+
+function containsPlace(haystack, place) {
+  const text = normPlace(haystack);
+  const needle = normPlace(place);
+  if (!text || !needle) return false;
+  if (text === needle) return true;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[^א-תA-Za-z0-9])${escaped}($|[^א-תA-Za-z0-9])`).test(text);
+}
+
 function regionCoveredByAddress(region, address) {
-  const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-  const place = norm(region);
-  const street = norm(address);
+  const place = normPlace(region);
+  const street = normPlace(address);
   if (!place || !street) return false;
-  const parts = place.replace(/[()]/g, ' ').split(/[,;/]| ו-|\sו/).map((t) => t.trim()).filter((t) => t.length > 1);
+  const parts = regionPlaces(region);
   return parts.length > 0 && parts.every((p) => street.includes(p));
+}
+
+function regionCoveredByBranches(region, locs) {
+  if (!Array.isArray(locs) || locs.length < 2) return false;
+  const places = regionPlaces(region);
+  if (places.length < 2) return false;
+  const labels = locs.map((loc) => normPlace(loc && loc.label)).filter(Boolean);
+  if (labels.length !== locs.length) return false;
+  const covered = new Set();
+  for (const label of labels) {
+    const hits = places.filter((place) => containsPlace(label, place));
+    if (hits.length !== 1) return false;
+    covered.add(hits[0]);
+  }
+  return places.every((place) => covered.has(place));
+}
+
+function sitesFor(entry, ctx) {
+  const raw = (entry && entry.raw) || {};
+  if (Array.isArray(raw.cardSites) && raw.cardSites.length) return raw.cardSites;
+  const table = (ctx && ctx.ENTRY_LOCATIONS) || {};
+  return table[String(entry.row)] || table[entry.row] || [];
+}
+
+function phoneDigits(s) {
+  return String(s || '').replace(/\D/g, '');
+}
+
+function phoneRole(label) {
+  return /מוקד|כללי|הנהלה|קו סיוע/.test(String(label || ''));
+}
+
+function placeHead(label) {
+  return normPlace(label).split(/[·•—–\-|:]/)[0].trim();
+}
+
+function cardPhoneHiddenByBranch(label, number, locs) {
+  if (!label || phoneRole(label)) return false;
+  const head = placeHead(label);
+  const digits = phoneDigits(number);
+  if (head.length < 2 || !digits) return false;
+  return (locs || []).some((loc) => phoneDigits(loc && loc.phone) === digits && (containsPlace(loc.label, head) || containsPlace(head, loc.label)));
+}
+
+function branchEmailGroups(locs) {
+  const groups = [];
+  const index = new Map();
+  (locs || []).forEach((loc) => {
+    const address = String((loc && loc.email) || '').trim();
+    if (!address) return;
+    const key = address.toLowerCase();
+    if (!index.has(key)) {
+      const row = { address, labels: [] };
+      index.set(key, row);
+      groups.push(row);
+    }
+    const label = normPlace(loc.label);
+    if (label) index.get(key).labels.push(label);
+  });
+  return groups;
+}
+
+function branchPhones(locs) {
+  return (locs || [])
+    .map((loc) => ({ label: normPlace(loc && loc.label), phone: String((loc && loc.phone) || '').trim() }))
+    .filter((row) => row.phone);
+}
+
+function cardHasEmail(raw, address) {
+  const want = String(address || '').trim().toLowerCase();
+  if (!want) return false;
+  return ['', '2', '3'].some((suffix) => String(raw[`email${suffix}`] || '').trim().toLowerCase() === want);
 }
 
 const FIELD_LABELS = [
@@ -150,11 +238,13 @@ const FIELD_LABELS = [
   ['languages', 'שפות'],
 ];
 
-function renderContact(entry, emitted) {
+function renderContact(entry, emitted, sites) {
   const r = entry.raw;
+  const locs = sites || [];
   const items = [];
 
   for (const p of phonesOf(entry.raw)) {
+    if (cardPhoneHiddenByBranch(p.label, p.number, locs)) continue;
     const parsed = parsePhoneField(p.number);
     // Record every tel: we emit, so the build can prove it came from DATA and so the
     // JSON-LD can only ever claim numbers the visible page actually renders.
@@ -176,10 +266,31 @@ function renderContact(entry, emitted) {
     const label = r.whatsappLabel ? esc(r.whatsappLabel) : 'WhatsApp';
     items.push(`<li><span class="label">WhatsApp: </span><a href="https://wa.me/${esc(digits)}" rel="nofollow">${label}</a></li>`);
   }
+  const emailGroups = branchEmailGroups(locs);
   for (const mail of emailsOf(r)) {
+    if (emailGroups.length > 1 && emailGroups.some((g) => g.address.toLowerCase() === mail.address.toLowerCase())) continue;
     const linkText = mail.label || mail.address;
     const prefix = mail.label ? '' : '<span class="label">דוא"ל: </span>';
     items.push(`<li>${prefix}<a href="mailto:${esc(mail.address)}">${esc(linkText)}</a></li>`);
+  }
+  if (emailGroups.length === 1 && !cardHasEmail(r, emailGroups[0].address)) {
+    items.push(`<li><span class="label">דוא"ל: </span><a href="mailto:${esc(emailGroups[0].address)}">${esc(emailGroups[0].address)}</a></li>`);
+  }
+  if (emailGroups.length > 1) {
+    const rows = emailGroups.map((g) => `<li><a href="mailto:${esc(g.address)}">${esc(g.labels.join(', '))}</a> <span class="label" dir="ltr">${esc(g.address)}</span></li>`).join('');
+    items.push(`<li><details><summary>דוא״ל</summary><ul>${rows}</ul></details></li>`);
+  }
+  const sitePhones = branchPhones(locs);
+  if (sitePhones.length > 1) {
+    const rows = sitePhones.map((row) => {
+      const parsed = parsePhoneField(row.phone);
+      for (const tok of parsed.tokens) emitted.push({ entry, slot: 'site', source: row.phone, tel: tok.tel });
+      const link = parsed.tokens[0]
+        ? `<a href="tel:${esc(parsed.tokens[0].tel)}">${starCodesHtml(parsed.tokens[0].display)}</a>`
+        : starCodesHtml(row.phone);
+      return `<li>${esc(row.label)} ${link}</li>`;
+    }).join('');
+    items.push(`<li><details><summary>טלפון</summary><ul>${rows}</ul></details></li>`);
   }
   for (const [urlKey, labelKey, fallback] of [['web', 'webLabel', 'אתר הארגון'], ['web2', 'webLabel2', 'קישור נוסף'], ['add', 'addLabel', 'מידע נוסף']]) {
     const url = r[urlKey];
@@ -220,7 +331,7 @@ function renderReferralBadge(entry) {
 }
 
 function renderEntryPage(ctx, entry) {
-  const { DATA, CATEGORY_GROUPS, ENTRY_LOCATIONS, LAST_UPDATED, published } = ctx;
+  const { DATA, CATEGORY_GROUPS, LAST_UPDATED, published } = ctx;
   const primaryCat = entry.categories[0];
   const cat = DATA[primaryCat] || {};
   const groupId = Object.keys(CATEGORY_GROUPS).find((g) => CATEGORY_GROUPS[g].subcategories.includes(primaryCat));
@@ -241,18 +352,24 @@ function renderEntryPage(ctx, entry) {
   const ltrAttrs = isLtr ? ' lang="en" dir="ltr" class="ltr-block"' : '';
   const valueDir = isLtr ? ' dir="ltr" class="ltr-block"' : '';
 
-  const sites = ENTRY_LOCATIONS[String(entry.row)] || [];
+  const sites = sitesFor(entry, ctx);
   const soleAddress = sites.length === 1 ? sites[0].address : '';
+  const hideRegion = (soleAddress && regionCoveredByAddress(entry.raw.region, soleAddress)) || regionCoveredByBranches(entry.raw.region, sites);
   const facts = FIELD_LABELS
     .filter(([k]) => entry.raw[k] && String(entry.raw[k]).trim())
-    .filter(([k]) => !(k === 'region' && soleAddress && regionCoveredByAddress(entry.raw[k], soleAddress)))
+    .filter(([k]) => !(k === 'region' && hideRegion))
     .map(([k, label]) => `<div><dt>${esc(label)}</dt><dd${valueDir}>${esc(String(entry.raw[k]).replace(/\s+/g, ' ').trim())}</dd></div>`)
     .join('');
 
   const referralBadge = renderReferralBadge(entry);
 
-  const locations = (ENTRY_LOCATIONS[String(entry.row)] || [])
-    .map((l) => `<li>${esc(l.label)}${l.address && l.address !== l.label ? ` — ${esc(l.address)}` : ''}</li>`)
+  const locations = sites
+    .map((l) => {
+      const parts = [l.label];
+      if (l.address && l.address !== l.label) parts.push(l.address);
+      if (l.note) parts.push(l.note);
+      return `<li>${parts.map((part) => esc(part)).join(' — ')}</li>`;
+    })
     .join('');
 
   const catTags = entry.categories
@@ -284,7 +401,7 @@ function renderEntryPage(ctx, entry) {
   <div class="card">
     ${referralBadge}
     ${facts ? `<dl class="facts">${facts}</dl>` : ''}
-    ${renderContact(entry, emitted)}
+    ${renderContact(entry, emitted, sites)}
     ${entry.raw.notes && entry.raw.notes.trim() ? `<h2>הערות</h2><div class="notes"${ltrAttrs}>${paragraphs(entry.raw.notes)}</div>` : ''}
     ${locations ? `<h2>מיקומים</h2><ul${valueDir}>${locations}</ul>` : ''}
   </div>
@@ -590,11 +707,14 @@ function wordCount(text) {
   return String(text || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
-function entryMetaLine(entry) {
+function entryMetaLine(entry, ctx) {
   const r = entry.raw;
+  const sites = sitesFor(entry, ctx);
+  const soleAddress = sites.length === 1 ? sites[0].address : '';
+  const hideRegion = (soleAddress && regionCoveredByAddress(r.region, soleAddress)) || regionCoveredByBranches(r.region, sites);
   const bits = [];
   if (r.target && String(r.target).trim()) bits.push(`מיועד ל: ${String(r.target).trim()}`);
-  if (r.region && String(r.region).trim()) bits.push(String(r.region).trim());
+  if (r.region && String(r.region).trim() && !hideRegion) bits.push(String(r.region).trim());
   if (r.cost && String(r.cost).trim()) bits.push(`עלות: ${String(r.cost).trim()}`);
   if (r.specialty && String(r.specialty).trim()) bits.push(String(r.specialty).trim());
   const phones = phonesOf(r).map((p) => (p.label ? `${p.label}: ${p.number}` : p.number));
@@ -604,20 +724,20 @@ function entryMetaLine(entry) {
   return bits.join(' · ').replace(/\s+/g, ' ').trim();
 }
 
-function renderStaticEntry(entry) {
+function renderStaticEntry(entry, ctx) {
   const org = entry.org.replace(/\s+/g, ' ').trim();
   const svc = entry.svc.replace(/\s+/g, ' ').trim();
   const notes = String(entry.raw.notes || '').replace(/\s+/g, ' ').trim();
   const ltr = entry.raw.dir === 'ltr' ? ' lang="en" dir="ltr"' : '';
-  const meta = entryMetaLine(entry);
+  const meta = entryMetaLine(entry, ctx);
   return `<li><a href="${esc(entry.path)}"${ltr}>${esc(org)}</a><span class="svc"${ltr}>${esc(svc)}</span>${
     notes ? `<p class="notes"${ltr}>${linkifyNotes(notes)}</p>` : ''
   }${meta ? `<span class="svc">${starCodesHtml(meta)}</span>` : ''}</li>`;
 }
 
-function renderStaticServiceList(entries) {
+function renderStaticServiceList(entries, ctx) {
   if (!entries.length) return '';
-  return `<ul class="entry-list">${entries.map(renderStaticEntry).join('')}</ul>`;
+  return `<ul class="entry-list">${entries.map((entry) => renderStaticEntry(entry, ctx)).join('')}</ul>`;
 }
 
 /** One category inside a group page: its heading, then every service as HTML, not as a script. */
@@ -641,12 +761,12 @@ function renderStaticCategory(ctx, categoryId) {
     for (const [sid, sub] of Object.entries(cat.subsections)) {
       const members = published.filter((e) => e.subsections.includes(`${categoryId}/${sid}`));
       parts.push(
-        `<h3><a href="/c/${esc(categoryId)}/${esc(sid)}">${esc(sub.title)}</a> <span class="count">(${members.length})</span></h3>${renderStaticServiceList(members)}`
+        `<h3><a href="/c/${esc(categoryId)}/${esc(sid)}">${esc(sub.title)}</a> <span class="count">(${members.length})</span></h3>${renderStaticServiceList(members, ctx)}`
       );
     }
   } else if (!cat.resourceHub) {
     const members = published.filter((e) => e.categories.includes(categoryId));
-    parts.push(renderStaticServiceList(members));
+    parts.push(renderStaticServiceList(members, ctx));
   }
 
   if (cat.resourceHub) {

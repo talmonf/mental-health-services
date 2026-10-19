@@ -1447,6 +1447,7 @@
             <div class="full"><label>כתובת</label><input name="site_address" type="text" value="${esc(s.address || '')}"></div>
             <div><label>טלפון</label><input name="site_phone" type="text" dir="ltr" value="${esc(s.phone || '')}"></div>
             <div><label>דוא״ל</label><input name="site_email" type="text" dir="ltr" value="${esc(s.email || '')}"></div>
+            <div class="full"><label>הערה</label><input name="site_note" type="text" value="${esc(s.note || '')}"></div>
             <div><label>קו רוחב</label><input name="site_lat" type="text" dir="ltr" value="${s.lat == null ? '' : esc(s.lat)}"></div>
             <div><label>קו אורך</label><input name="site_lng" type="text" dir="ltr" value="${s.lng == null ? '' : esc(s.lng)}"></div>
             <div><button type="button" class="secondary" data-act="remove-site">הסרה</button></div>
@@ -1559,8 +1560,8 @@
               ${select('rec_rehab', 'סל שיקום', rec.rehab_basket || 'any', anyReq)}
               <div class="full"><label for="d-internal_notes">הערות פנימיות (במקור הדף, לא על הכרטיס)</label><textarea id="d-internal_notes" name="internal_notes">${esc(elig.internal_notes || '')}</textarea></div>
             </div>
-            <h2>מרפאות — לא מוצג בכרטיס</h2>
-            <p class="dir-help">רשימת מקומות לכפתור המפה ולחיפוש לפי מרחק. שם המקום מוצג בבורר. קואורדינטות ריקות ימולאו בשמירה לפי הכתובת.</p>
+            <h2>מרפאות</h2>
+            <p class="dir-help">שם המקום מופיע ברשימת הסניפים ובכפתור המפה. טלפון ודוא״ל של כמה מרפאות נפתחים מכפתור אחד. הערה קצרה מופיעה מתחת לכתובת במפה, למשל שעות או סימן דרך. קואורדינטות ריקות ימולאו בשמירה לפי הכתובת.</p>
             <div id="d-sites">${(Array.isArray(card.sites) ? card.sites : []).map((site) => siteRow(site)).join('')}</div>
             <p><button type="button" class="secondary" id="d-add-site">הוספת מרפאה</button></p>
             <div class="dir-actions">
@@ -1659,6 +1660,7 @@
                 address: val('site_address'),
                 phone: val('site_phone'),
                 email: val('site_email'),
+                note: val('site_note'),
                 lat: val('site_lat'),
                 lng: val('site_lng'),
                 sort_order: index

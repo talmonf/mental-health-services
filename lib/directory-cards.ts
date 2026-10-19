@@ -74,6 +74,7 @@ const SITE_LABEL_MAX = 120;
 const SITE_ADDRESS_MAX = 300;
 const SITE_PHONE_MAX = 80;
 const SITE_EMAIL_MAX = 200;
+const SITE_NOTE_MAX = 200;
 
 export type PublicFields = Record<string, string | boolean>;
 
@@ -91,7 +92,7 @@ export type Eligibility = {
   internal_notes: string;
 };
 
-/** A physical site. Not an eligibility rule and not painted on the card face. */
+/** A physical site. The name, phone, email, and note are shown on the card. */
 export type CardSite = {
   label: string;
   address: string;
@@ -99,6 +100,7 @@ export type CardSite = {
   lng: number;
   phone: string;
   email: string;
+  note: string;
   sort_order: number;
 };
 
@@ -262,12 +264,14 @@ export function normalizeSites(raw: unknown): CardSite[] {
     const address = textField(src.address);
     const phone = textField(src.phone);
     const email = textField(src.email);
+    const note = textField(src.note);
     if (!label) throw new DirectoryCardError('לכל מקום צריך שם');
     if (label.length > SITE_LABEL_MAX || address.length > SITE_ADDRESS_MAX) {
       throw new DirectoryCardError('שם המקום או הכתובת ארוכים מדי');
     }
     if (phone.length > SITE_PHONE_MAX) throw new DirectoryCardError('טלפון של מקום ארוך מדי');
     if (email.length > SITE_EMAIL_MAX) throw new DirectoryCardError('דוא״ל של מקום ארוך מדי');
+    if (note.length > SITE_NOTE_MAX) throw new DirectoryCardError('ההערה על המקום ארוכה מדי');
     if (email && !/^[^\s@]+@[^\s@]+$/.test(email)) throw new DirectoryCardError('דוא״ל של מקום אינו תקין');
     const sortRaw = src.sort_order;
     const sort =
@@ -286,6 +290,7 @@ export function normalizeSites(raw: unknown): CardSite[] {
       lng: finiteCoord(src.lng, 'קו אורך', -180, 180),
       phone,
       email,
+      note,
       sort_order: sort,
     });
   });
