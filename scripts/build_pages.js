@@ -453,12 +453,14 @@ function renderTermPage(ctx, key, term, slugByKey) {
 <h1>${esc(term.title)}</h1>
 ${cat ? `<p class="lede">${esc(cat.title)}</p>` : ''}
 <div class="card">${paragraphs(term.text)}
-${[term.phone, term.phone2].filter(Boolean).length ? `<p><strong>טלפון:</strong> ${[term.phone, term.phone2].filter(Boolean).map((p) => {
+${[[term.phone, term.phoneLabel], [term.phone2, term.phoneLabel2]].filter(([p]) => p).length ? `<p><strong>טלפון:</strong> ${[[term.phone, term.phoneLabel], [term.phone2, term.phoneLabel2]].filter(([p]) => p).map(([p, label]) => {
     const compact = String(p).replace(/[^\d*#]/g, '');
     const tel = /^\d{3,5}\*$/.test(compact) ? `*${compact.replace(/\D/g, '')}` : compact;
-    return `<a href="tel:${esc(tel)}">${starCodesHtml(p)}</a>`;
+    const face = label ? `${label}: ${p}` : String(p);
+    return `<a href="tel:${esc(tel)}">${starCodesHtml(face)}</a>`;
   }).join(' · ')}</p>` : ''}
-${term.web ? `<p><a class="btn" href="${esc(term.web)}" rel="nofollow noopener">לאתר</a></p>` : ''}</div>
+${term.web ? `<p><a class="btn" href="${esc(term.web)}" rel="nofollow noopener">${esc(term.webLabel || 'לאתר')}</a></p>` : ''}
+${term.web2 ? `<p><a class="btn" href="${esc(term.web2)}" rel="nofollow noopener">${esc(term.webLabel2 || 'לאתר')}</a></p>` : ''}</div>
 ${services ? `<h2>שירותים במדריך</h2><ul class="entry-list">${services}</ul>` : ''}
 ${related ? `<h2>מונחים קשורים</h2><ul class="entry-list">${related}</ul>` : ''}
 <p><a class="btn btn-secondary" href="/terms">כל המונחים</a></p>
