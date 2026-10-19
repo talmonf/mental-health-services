@@ -47,7 +47,7 @@
     },
     {
       "source": "/glossary",
-      "destination": "/index.html"
+      "destination": "/index"
     }
   ],
   "redirects": [

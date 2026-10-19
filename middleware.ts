@@ -34,7 +34,7 @@ export const config = {
   /** HTML routes only. Static assets and /api must not match, or logging would log itself. */
   matcher: [
     '/', '/emergency', '/treatment', '/rights', '/support', '/information',
-    '/directory', '/terms', '/s/:path*', '/c/:path*', '/g/:path*', '/term/:path*',
+    '/directory', '/terms', '/glossary', '/s/:path*', '/c/:path*', '/g/:path*', '/term/:path*',
   ],
 };
 

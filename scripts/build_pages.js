@@ -883,6 +883,21 @@ function assertGroupRedirects(data, urls) {
   if (problems.length) throw new Error(`Group redirects:\n  ${problems.join('\n  ')}`);
 }
 
+/**
+ * /glossary is the in-app glossary, served by a rewrite of the root app. cleanUrls
+ * strips .html before rewrites run, so a destination of /index.html is not a file
+ * at the edge and Vercel answers with its own 404.
+ */
+function assertGlossaryRewrite() {
+  const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
+  const hit = (vercel.rewrites || []).find((r) => r.source === '/glossary');
+  const expected = vercel.cleanUrls ? '/index' : '/index.html';
+  if (!hit) throw new Error(`missing rewrite /glossary -> ${expected}`);
+  if (hit.destination !== expected) {
+    throw new Error(`/glossary rewrites to ${hit.destination}; expected ${expected}`);
+  }
+}
+
 function assertReferralCodesValid(data) {
   const vocabPath = path.join(__dirname, 'vocabularies.json');
   const vocab = JSON.parse(fs.readFileSync(vocabPath, 'utf8'));
@@ -1101,6 +1116,7 @@ async function main() {
   const referralKnown = assertReferralCodesValid(data);
   const groupPaths = Object.values(data.MH_GROUP_SLUGS || {}).map((slug) => `/${slug}`);
   assertGroupRedirects(data, urls);
+  assertGlossaryRewrite();
   const linkTargets = assertNoDanglingLinks(outRoot, written, groupPaths);
   const sitemapCount = assertRobotsAgrees(outRoot, urls.length);
   const ld = assertJsonLdIsHonest(outRoot, written, data);
