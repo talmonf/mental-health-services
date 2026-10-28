@@ -1487,6 +1487,20 @@
       ],
       "source": "התחייבות אחרי המלצת רופא מומחה",
       "confidence": "curated"
+    },
+    "771": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "",
+      "confidence": "curated"
+    },
+    "772": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "פנייה באימייל; הקבוצות לפי יחידה",
+      "confidence": "curated"
     }
   }
 }

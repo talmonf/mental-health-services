@@ -160,6 +160,8 @@ const CURATED = {
   303: { codes: ['gp_referral'], source: 'בהפניית רופא.' },
   306: { codes: ['self_referral', 'rehab_basket_committee'], source: 'סל שיקום, דיור, תעסוקה וסיוע להורים מתמודדים. מוקד 1599-504949.' },
   307: { codes: ['rehab_basket_committee'], source: 'ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.' },
+  771: { codes: ['self_referral'], source: '' },
+  772: { codes: ['self_referral'], source: 'פנייה באימייל; הקבוצות לפי יחידה' },
 };
 
 function blob(entry) {
