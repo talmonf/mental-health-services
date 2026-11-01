@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 107_or_lev_drop_meeting_time.sql
 [x] 106_or_lev_contact_buttons.sql
 [x] 105_or_lev_ocd_groups.sql
 [x] 104_geerz_and_healing_in_nature.sql
