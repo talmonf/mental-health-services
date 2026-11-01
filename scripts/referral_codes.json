@@ -1501,6 +1501,13 @@
       ],
       "source": "פנייה באימייל; הקבוצות לפי יחידה",
       "confidence": "curated"
+    },
+    "773": {
+      "codes": [
+        "self_referral"
+      ],
+      "source": "",
+      "confidence": "curated"
     }
   }
 }

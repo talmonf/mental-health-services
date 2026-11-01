@@ -162,6 +162,7 @@ const CURATED = {
   307: { codes: ['rehab_basket_committee'], source: 'ניתן אל מול אישור ועדת סל שיקום לדיור מוגן.' },
   771: { codes: ['self_referral'], source: '' },
   772: { codes: ['self_referral'], source: 'פנייה באימייל; הקבוצות לפי יחידה' },
+  773: { codes: ['self_referral'], source: '' },
 };
 
 function blob(entry) {
