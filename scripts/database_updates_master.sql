@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 106_or_lev_contact_buttons.sql
 [x] 105_or_lev_ocd_groups.sql
 [x] 104_geerz_and_healing_in_nature.sql
 [x] 103_mod_mental_therapy.sql
