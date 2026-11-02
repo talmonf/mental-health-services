@@ -313,10 +313,14 @@ function renderContact(entry, emitted, sites) {
     }).join('');
     items.push(`<li><details><summary>טלפון</summary><ul>${rows}</ul></details></li>`);
   }
-  for (const [urlKey, labelKey, fallback] of [['web', 'webLabel', 'אתר הארגון'], ['web2', 'webLabel2', 'קישור נוסף'], ['add', 'addLabel', 'מידע נוסף']]) {
+  for (const [urlKey, labelKey, fallback] of [['web', 'webLabel', 'אתר הארגון'], ['web2', 'webLabel2', 'קישור נוסף'], ['add', 'addLabel', 'מידע נוסף'], ['add2', 'addLabel2', 'מידע נוסף'], ['add3', 'addLabel3', 'מידע נוסף']]) {
     const url = r[urlKey];
     if (!url || !/^https?:\/\//.test(url)) continue;
-    const label = r[labelKey] ? esc(r[labelKey]) : fallback;
+    const social = /facebook\.com|fb\.com|fb\.watch/i.test(url) ? 'פייסבוק'
+      : /instagram\.com/i.test(url) ? 'אינסטגרם'
+      : /linkedin\.com/i.test(url) ? 'לינקדאין'
+      : '';
+    const label = r[labelKey] ? esc(r[labelKey]) : (social || fallback);
     items.push(`<li><span class="label">${fallback === 'אתר הארגון' ? 'אתר' : 'קישור'}: </span><a href="${esc(url)}" rel="nofollow noopener">${label}</a></li>`);
   }
 

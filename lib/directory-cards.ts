@@ -31,6 +31,10 @@ export const PUBLIC_TEXT_KEYS = [
   'webLabel2',
   'add',
   'addLabel',
+  'add2',
+  'addLabel2',
+  'add3',
+  'addLabel3',
 ] as const;
 
 const TEXT_MAX: Record<(typeof PUBLIC_TEXT_KEYS)[number], number> = {
@@ -52,6 +56,10 @@ const TEXT_MAX: Record<(typeof PUBLIC_TEXT_KEYS)[number], number> = {
   webLabel2: 120,
   add: 2000,
   addLabel: 120,
+  add2: 2000,
+  addLabel2: 120,
+  add3: 2000,
+  addLabel3: 120,
 };
 
 export const PHONE_SUFFIXES = ['', '2', '3', '4', '5', '6'] as const;

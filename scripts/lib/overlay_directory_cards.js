@@ -13,7 +13,7 @@ const { Client } = require('pg');
 
 const PUBLIC_KEYS = [
   'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
-  'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
+  'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3',
   'email', 'emailLabel', 'emailShowAddress',
   'email2', 'emailLabel2', 'emailShowAddress2',
   'email3', 'emailLabel3', 'emailShowAddress3',

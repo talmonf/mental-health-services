@@ -1824,7 +1824,17 @@
             731: [{"label":"אשפוז פסיכיאטרי – המרכזי בעמק","address":"שד' יצחק רבין 21, עפולה","lat":32.6235598,"lng":35.3175601,"phone":"04-6494141"}],
             733: [{"label":"אשפוז פסיכיאטרי – הדסה הר הצופים","address":"הר הצופים, ירושלים","lat":31.7922556,"lng":35.2461739,"phone":"02-5844111"}],
             746: [{"label":"אשפוז פסיכיאטרי – מעלה הכרמל","address":"האלה 17, טירת כרמל","lat":32.7550477,"lng":34.9746007,"phone":"04-8559222"}],
-            752: [{"label":"אשפוז פסיכיאטרי – הרצוג","address":"גבעת שאול, ירושלים","lat":31.7911185,"lng":35.1931023,"phone":"02-5316999"}]
+            752: [{"label":"אשפוז פסיכיאטרי – הרצוג","address":"גבעת שאול, ירושלים","lat":31.7911185,"lng":35.1931023,"phone":"02-5316999"}],
+            770: [{ label: "בית שמש", address: "נחל מטה 14/2, בית שמש 9963215", lat: 31.711288, lng: 34.9982753 }],
+            771: [
+                { label: "בית שמש", address: "נחל מטה 14/2, בית שמש 9963215", lat: 31.711288, lng: 34.9982753 },
+                { label: "מעלה אדומים", address: "מעלה אדומים", lat: 31.7706181, lng: 35.2984501 },
+                { label: "גוש עציון", address: "גוש עציון", lat: 31.689983, lng: 35.2298049 },
+                { label: "אבן שמואל", address: "אבן שמואל", lat: 31.5748942, lng: 34.7643312 },
+                { label: "גוש טלמונים", address: "גוש טלמונים", lat: 31.9393963, lng: 35.1323035 },
+                { label: "חוף הכרמל", address: "חוף הכרמל", lat: 32.6239104, lng: 34.9853969 },
+                { label: "מועצה אזורית שומרון", address: "מועצה אזורית שומרון", lat: 32.4207007, lng: 35.1722266 }
+            ]
         };
         const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
         const mhNormPlace = (s) => String(s || '').replace(/\s+/g, ' ').trim();
@@ -3015,7 +3025,7 @@
          {"row":340,"org":"שער מנשה — טראומה מינית","svc":"אשפוז ממוקד, מרפאה וטיפול יום לנפגעי ולנפגעות טראומה מינית","phone":"04-6278723","phoneLabel":"רכזת המערך","phoneShowNumber":true,"phone2":"04-6278112","phoneShowNumber2":true,"phoneLabel2":"טיפול יום","email":"rotemk@sm.health.gov.il","emailLabel":"אשפוז ממוקד","email2":"liron@sm.haelth.gov.il","emailLabel2":"טיפול יום","web":"https://www.shaar-menashe.org/?ArticleID=267&CategoryID=156","web2":"https://www.kolzchut.org.il/he/מרכזי_יום_ומרפאות_לטיפול_נפש_בנפגעות_תקיפה_מינית","webLabel2":"כל זכות · טיפול יום","add":"https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית","addLabel":"כל זכות · אשפוז","target":"נשים וגברים מגיל 18, שנמצאים בטיפול בקהילה","region":"שער מנשה; מקבל מכל הארץ","cost":"","specialty":"טראומה מינית","notes":"רצף אחד: אשפוז ממוקד של עד שבועיים במחלקה פתוחה מעורבת, מרפאה ב[מרפאת עירון](https://nefesh-il.org/treatment?entry=338&section=mh_clinics), וטיפול יום (לפחות שלושה ימים, 08:00–14:00) בתוך [מחלקת האשפוז-יום](https://nefesh-il.org/treatment?entry=339&section=day_care). אשפוז ממוקד: עו״ס רתם קציר, פקס 04-6278005, ואחר כך בדיקה במיון. טיפול יום: עו״ס לירון שפינדלר, 04-6278111 או 04-6278112, טופס 17. כל זכות מונה גם מיטות לנפגעות טראומה מינית ברמב״ם, בברזילי, בזיו, בבאר שבע ובכפר שאול, בלי דף יחידה עדכני. [הרשימה](https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית). גם [לצידך](https://nefesh-il.org/treatment?entry=293&section=hospitalization).","languages":"","diseases":""},
          {"row":341,"org":"לב השרון — טראומה מינית","svc":"אשפוז ממוקד ל-16 יום, וטיפול יום במרכז עוגן","phone":"09-8980429","phoneLabel":"מערך","phoneShowNumber":true,"phone2":"09-8980427","phoneShowNumber2":true,"phoneLabel2":"טלפקס","web":"https://www.lev-hasharon.co.il/?ward=%D7%9E%D7%A2%D7%A8%D7%9A-%D7%9C%D7%98%D7%99%D7%A4%D7%95%D7%9C-%D7%91%D7%98%D7%A8%D7%90%D7%95%D7%9E%D7%94-%D7%9E%D7%99%D7%A0%D7%99%D7%AA","webLabel":"המערך","web2":"https://www.lev-hasharon.co.il/?clinic=%D7%90%D7%A9%D7%A4%D7%95%D7%96-%D7%9E%D7%9E%D7%95%D7%A7%D7%93-%D7%9C%D7%A0%D7%A4%D7%92%D7%A2%D7%95%D7%AA-%D7%98%D7%A8%D7%90%D7%95%D7%9E%D7%94-%D7%9E%D7%99%D7%A0%D7%99%D7%AA","webLabel2":"אשפוז ממוקד","add":"https://www.kolzchut.org.il/he/מרכזי_יום_ומרפאות_לטיפול_נפש_בנפגעות_תקיפה_מינית","addLabel":"כל זכות · טיפול יום","target":"מגיל 18, בטיפול פרטני בקהילה","region":"לב השרון","cost":"","specialty":"טראומה מינית","notes":"אשפוז ממוקד ומתוכנן ל-16 יום, במחלקת נשים פתוחה או במחלקה פתוחה מעורבת, לייצוב במשבר. מנהל התכנית: ד״ר עדיאל דורון. מנהלת המערך: עו״ס עמליה בן משה. טיפול היום של עוגן, וטיפול יום להפרעות אכילה וטראומה במרפאת המבוגרים בנתניה, רשומים בכל זכות בלי כתובת נפרדת, ולכן סיכה אחת. נפרד מ[התכנית לשורדי מסיבות](https://nefesh-il.org/treatment?entry=235&section=trauma). כל זכות מונה גם מיטות לנפגעות טראומה מינית ברמב״ם, בברזילי, בזיו, בבאר שבע ובכפר שאול, בלי דף יחידה עדכני. [הרשימה](https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית).","languages":"","diseases":""},
          {"row":342,"org":"מגן (איכילוב)","svc":"יחידת אשפוז לנשים אחרי פגיעה מינית","web":"https://www.tasmc.org.il/health/psychiatry/magen/","add":"https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית","addLabel":"כל זכות","target":"נשים מגיל 18, מכל הארץ, שנמצאות בטיפול","region":"תל אביב","cost":"","specialty":"טראומה מינית","notes":"ארבע מיטות בתוך המחלקה הפסיכיאטרית הפתוחה. שהות עד שלושה שבועות, מרצון, עם מקום מגורים קבוע לחזור אליו. לא לשימוש לרעה בחומרים, לא להפרעת אכילה שדורשת מחלקה ייעודית, ולא למצב שדורש מחלקה סגורה. יצירת קשר דרך הטופס בדף היחידה. כל זכות מונה גם מיטות לנפגעות טראומה מינית ברמב״ם, בברזילי, בזיו, בבאר שבע ובכפר שאול, בלי דף יחידה עדכני. [הרשימה](https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית). גם [לצידך](https://nefesh-il.org/treatment?entry=293&section=hospitalization).","languages":"","diseases":""},
-         {"row": 771, "org": "גירז (Geerz)", "svc": "רכיבת הרים טיפולית ללוחמים ומילואימניקים", "phone": "058-766-2212", "phoneLabel": "מרים, רכזת התוכנית", "phoneShowNumber": true, "phone2": "052-772-3500", "phoneLabel2": "משרד", "phoneShowNumber2": true, "phone3": "052-452-2891", "phoneLabel3": "משרד", "phoneShowNumber3": true, "email": "admin@geerz.org", "emailLabel": "משרד", "web": "https://www.geerz.org/en/veterans.php", "target": "לוחמים ומילואימניקים קרביים, גם בלי אבחנה, במעבר לשגרה", "region": "", "cost": "600 ₪ ל-16 מפגשים; ניתן לשלם ממענק הטיפולים האישי", "specialty": "", "notes": "16 מפגשים שבועיים של שעתיים. בחלק מהקבוצות אין צורך בניסיון, והאופניים ניתנים למשך התוכנית. פיילוט בשבי דרום, מרץ 2025. קבוצה נוספת נפתחת לפי בקשה בקהילה. קבוצות הילדים והנוער: [גירז לנוער](https://nefesh-il.org/support?entry=770&section=youth).", "languages": "", "diseases": "", "add": ""},
+         {"row": 771, "org": "גירז (Geerz)", "svc": "רכיבת הרים טיפולית ללוחמים ומילואימניקים", "phone": "058-766-2212", "phoneLabel": "מרים, רכזת התוכנית", "phoneShowNumber": false, "phone2": "052-772-3500", "phoneLabel2": "משרד", "phoneShowNumber2": false, "email": "admin@geerz.org", "emailLabel": "משרד", "web": "https://www.geerz.org/en/veterans.php", "target": "לוחמים ומילואימניקים קרביים, גם בלי אבחנה, במעבר לשגרה", "region": "בית שמש, מעלה אדומים, גוש עציון, אבן שמואל, גוש טלמונים, חוף הכרמל, מועצה אזורית שומרון", "cost": "600 ₪ ל-16 מפגשים; ניתן לשלם ממענק הטיפולים האישי", "specialty": "", "notes": "16 מפגשים שבועיים של שעתיים. בחלק מהקבוצות אין צורך בניסיון, והאופניים ניתנים למשך התוכנית. פיילוט בשבי דרום, מרץ 2025. קבוצה נוספת נפתחת לפי בקשה בקהילה. קבוצות הילדים והנוער: [גירז לנוער](https://nefesh-il.org/support?entry=770&section=youth).", "languages": "", "diseases": "", "add": "https://www.facebook.com/GeerzIsrael/", "add2": "https://www.linkedin.com/company/geerz/home/", "add3": "https://www.instagram.com/geerz_il/"},
          {"row": 772, "org": "Healing in Nature (HiN)", "svc": "ריטריט בטבע ללוחמים קרביים", "phone": "054-203-0339", "phoneShowNumber": true, "email": "contact@hin-group.org", "emailLabel": "פניות", "web": "https://www.hin-group.org/", "target": "לוחמים קרביים, בקבוצה מהיחידה", "region": "", "cost": "לא צוין מחיר למשתתף; שבוע הריטריט מתואר כממומן בתרומות", "specialty": "", "notes": "שבוע בטבע, כולל רכיבה טיפולית, ואחר כך קהילת בוגרים. הערכה לפני ואחרי, כולל באוניברסיטת תל אביב. צוות עם פסיכיאטר ופסיכולוגים קליניים. פנייה באימייל; הקבוצות לפי יחידה. משרד העמותה: חוט השני 1, מודיעין. הריטריט שפורסם באתר ובעיתונות (2024) היה במונטנה, לא במשרד.", "languages": "", "diseases": "", "add": ""}
         ]}, 
          
@@ -3059,7 +3069,7 @@
          {"row":328,"org":"שיבא — אשפוז יום","svc":"אשפוז יום במחלקת ילדים","phone":"03-5302466","phoneShowNumber":true,"web":"http://rehabilitation.sheba.co.il/Psychiatric_Division/","web2":"https://www.mh-israel.co.il/Article/48/מרכזים_לטיפול_יום_פסיכיאטרי_-_במחוז_תל_אביב","webLabel2":"פורטל בריאות הנפש","target":"כל הגילאים, לפי הפורטל; המיקום הרשום הוא בניין הילדים","region":"תל השומר","cost":"","specialty":"","notes":"הפרטים מפורטל בריאות הנפש, בלי תאריך. לאמת בטלפון.","languages":"","diseases":"","add":""},
          {"row":329,"org":"בית דניאלה","svc":"טיפול יום לנוער, בשיבולים ובצור הדסה","phone":"055-5515788","phoneShowNumber":true,"email":"kupot@beitdaniella.org","web":"https://www.maccabi4u.co.il/eligibilites/64533/","webLabel":"מכבי","target":"נוער, גילאי 14–18","region":"מושב שיבולים וצור הדסה","cost":"בלי עלות למבוטחי מכבי, לפי דף הזכאות","specialty":"","notes":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות. אותו מפעיל בשני יישובים. שיבולים: הגפן 27. צור הדסה: השמורה 1. הרחובות לא נמצאו במפה, ולכן אין סיכה.","languages":"","diseases":"","add":""},
          {"row":337,"org":"קרני שמש","svc":"טיפול יום לילדים ולנוער","web":"https://www.maccabi4u.co.il/eligibilites/64533/","webLabel":"מכבי","target":"ילדים ונוער, גילאי 12–18","region":"ארז 11; היישוב לא צוין","cost":"בלי עלות למבוטחי מכבי, לפי דף הזכאות","specialty":"","notes":"לפי דף הזכאות של מכבי לטיפול יום. הדף אינו מציין אם קופות אחרות מתקבלות. בדף לא צוינו היישוב והטלפון, ולכן אין סיכה במפה.","languages":"","diseases":"","add":""},
-         {"row": 770, "org": "גירז (Geerz)", "svc": "רכיבת הרים טיפולית לילדים ונוער, גילאי 7–16", "phone": "058-766-2212", "phoneLabel": "מרים, רכזת התוכנית", "phoneShowNumber": true, "phone2": "052-772-3500", "phoneLabel2": "משרד", "phoneShowNumber2": true, "phone3": "052-452-2891", "phoneLabel3": "משרד", "phoneShowNumber3": true, "email": "miriam@geerz.org", "emailLabel": "מרים", "email2": "admin@geerz.org", "emailLabel2": "משרד", "web": "https://www.geerz.org/", "web2": "https://www.geerz.org/en/page/registration/", "webLabel2": "הרשמה", "target": "ילדים ונוער בגילאי 7–16, בנים ובנות בקבוצות נפרדות", "region": "בית שמש, רמת בית שמש א', רמת בית שמש ג', קיבוץ סעד, נירים, שבי דרום, אבן שמואל, כפר חסידים, אלוני יצחק", "cost": "ברוב הערים 1,800 ₪ לעונה; הנחה מוקדמת, הנחת אחים ומלגה", "specialty": "", "notes": "מפגש שבועי של 90 דקות בשנת הלימודים: רכיבה, מיומנויות, ושיחה באמצע המסלול. בין השאר ל-ADHD, חרדה, קשיים חברתיים או התנהגותיים ודימוי עצמי. הפניה עצמית. מפגש ניסיון בפיקדון של 100 ₪. משרד: נחל מטה 14/2, בית שמש, ואינו נקודת המפגש. תוכנית ללוחמים ומילואימניקים: [גירז ללוחמים](https://nefesh-il.org/treatment?entry=771&section=trauma).", "languages": "עברית, אנגלית", "diseases": "", "add": ""}
+         {"row": 770, "org": "גירז (Geerz)", "svc": "רכיבת הרים טיפולית לילדים ונוער, גילאי 7–16", "phone": "058-766-2212", "phoneLabel": "מרים, רכזת התוכנית", "phoneShowNumber": false, "phone2": "052-772-3500", "phoneLabel2": "משרד", "phoneShowNumber2": false, "email": "miriam@geerz.org", "emailLabel": "מרים", "email2": "admin@geerz.org", "emailLabel2": "משרד", "web": "https://www.geerz.org/", "web2": "https://www.geerz.org/en/page/registration/", "webLabel2": "הרשמה", "target": "ילדים ונוער בגילאי 7–16, בנים ובנות בקבוצות נפרדות", "region": "בית שמש, רמת בית שמש א', רמת בית שמש ג', קיבוץ סעד, נירים, שבי דרום, אבן שמואל, כפר חסידים, אלוני יצחק", "cost": "ברוב הערים 1,800 ₪ לעונה; הנחה מוקדמת, הנחת אחים ומלגה", "specialty": "", "notes": "מפגש שבועי של 90 דקות בשנת הלימודים: רכיבה, מיומנויות, ושיחה באמצע המסלול. בין השאר ל-ADHD, חרדה, קשיים חברתיים או התנהגותיים ודימוי עצמי. הפניה עצמית. מפגש ניסיון בפיקדון של 100 ₪. המשרד אינו נקודת המפגש. תוכנית ללוחמים ומילואימניקים: [גירז ללוחמים](https://nefesh-il.org/treatment?entry=771&section=trauma).", "languages": "עברית, אנגלית", "diseases": "", "add": "https://www.facebook.com/GeerzIsrael/", "add2": "https://www.linkedin.com/company/geerz/home/", "add3": "https://www.instagram.com/geerz_il/"}
         ]}, 
 
          "populations": {"icon": "👥", "title": "אוכלוסיות מיוחדות", "titleEn": "Special Populations", "desc": "דתי, חרדי, אנגלית, וכו'", "services": [
@@ -5150,7 +5160,7 @@
                 // until then, or if the request fails, the copy in this file is used.
                 const publicKeys = new Set([
                     'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
-                    'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel',
+                    'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3',
                     'email', 'emailLabel', 'emailShowAddress',
                     'email2', 'emailLabel2', 'emailShowAddress2',
                     'email3', 'emailLabel3', 'emailShowAddress3',
@@ -5338,7 +5348,7 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "01.11.2026"; 
+            const LAST_UPDATED = "02.11.2026"; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -7084,10 +7094,14 @@
                 const entryId = categoryKey ? mhGetEntryId(s, categoryKey) : null;
                 const entryTargetKey = `${mhGetCategoryGroupForCategory(categoryKey) || ''}:${categoryKey}:${subsectionId || ''}:${entryId || ''}`;
                 const isTargeted = entryId && highlightedEntryKey === entryTargetKey;
-                const isFacebookUrl = (url) => url && /facebook\.com|fb\.com|fb\.watch/i.test(url);
-                const webIsFacebook = isFacebookUrl(s.web);
-                const addIsFacebook = isFacebookUrl(s.add);
-                const fbTitle = s.dir === 'ltr' ? 'Facebook' : 'פייסבוק';
+                const socialLink = (url) => {
+                    const u = String(url || '');
+                    const ltr = s.dir === 'ltr';
+                    if (/facebook\.com|fb\.com|fb\.watch/i.test(u)) return { icon: 'fab fa-facebook-f', name: ltr ? 'Facebook' : 'פייסבוק' };
+                    if (/instagram\.com/i.test(u)) return { icon: 'fab fa-instagram', name: ltr ? 'Instagram' : 'אינסטגרם' };
+                    if (/linkedin\.com/i.test(u)) return { icon: 'fab fa-linkedin-in', name: ltr ? 'LinkedIn' : 'לינקדאין' };
+                    return null;
+                };
                 const isHbBooklet = Number(s.row) === 209;
                 const hbSearchActive = searchTerm === HARAVOT_BARZEL_SEARCH;
                 const showHbLaunchBanner = isHbBooklet && hbSearchActive && haravotBarzelLaunchedFrom != null;
@@ -7421,19 +7435,34 @@
                                     </div>
                                 );
                             })()}
-                            {s.web && (<a href={s.web} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" data-tracking-name={s.webTrackingName || `${s.trackingName || s.org}_website`} data-analytics-type="website" style={{background: 'var(--primary)'}} title={webIsFacebook ? (s.webLabel || fbTitle) : undefined}><i className={webIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt'}></i> {webIsFacebook ? '' : (s.webLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (s.dir === 'ltr' ? 'Website' : 'לאתר')))}</a>)}
-                            {s.web2 && (<a href={s.web2} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" data-tracking-name={s.webTrackingName2 || `${s.trackingName || s.org}_website2`} data-analytics-type="website" style={{background: 'var(--primary)'}}><i className="fas fa-external-link-alt"></i> {s.webLabel2 || (s.dir === 'ltr' ? 'Website' : 'לאתר')}</a>)}
-                            {s.add && (() => {
-                                const isPdfDownload = /\.pdf(\?|$)/i.test(s.add) || s.addDownload;
-                                const addProps = isPdfDownload
-                                    ? { download: s.addDownloadName || 'haravot-barzel-maanaim.pdf', 'data-skip-external-link-check': true }
-                                    : { target: '_blank', rel: 'noopener noreferrer' };
-                                return (
-                                    <a href={s.add} {...addProps} style={{ background: isPdfDownload ? '#c0392b' : 'var(--primary)' }} data-probe-external-link={isPdfDownload ? undefined : 'true'} data-tracking-name={s.addTrackingName || `${s.trackingName || s.org}_add`} data-analytics-type={isPdfDownload ? 'download' : 'website'} title={addIsFacebook ? (s.addLabel || fbTitle) : undefined}>
-                                        <i className={isPdfDownload ? 'fas fa-file-pdf' : (addIsFacebook ? 'fab fa-facebook-f' : 'fas fa-external-link-alt')}></i>
-                                        {addIsFacebook ? '' : (s.addLabel || (s.org && s.org.startsWith("Kav L'Noar") ? (s.dir === 'ltr' ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (s.dir === 'ltr' ? 'Website' : 'לאתר נוסף')))}
-                                    </a>
-                                );
+                            {(() => {
+                                const ltr = s.dir === 'ltr';
+                                const kav = s.org && s.org.startsWith("Kav L'Noar");
+                                const slots = [
+                                    { key: 'web', labelKey: 'webLabel', track: s.webTrackingName || `${s.trackingName || s.org}_website`, fallback: kav ? (ltr ? 'Jerusalem clinic' : 'מרפאת ירושלים') : (ltr ? 'Website' : 'לאתר') },
+                                    { key: 'web2', labelKey: 'webLabel2', track: s.webTrackingName2 || `${s.trackingName || s.org}_website2`, fallback: ltr ? 'Website' : 'לאתר' },
+                                    { key: 'add', labelKey: 'addLabel', track: s.addTrackingName || `${s.trackingName || s.org}_add`, fallback: kav ? (ltr ? 'Beit Shemesh clinic' : 'מרפאת בית שמש') : (ltr ? 'Website' : 'לאתר נוסף'), pdf: true },
+                                    { key: 'add2', labelKey: 'addLabel2', track: s.addTrackingName2 || `${s.trackingName || s.org}_add2`, fallback: ltr ? 'Website' : 'לאתר נוסף' },
+                                    { key: 'add3', labelKey: 'addLabel3', track: s.addTrackingName3 || `${s.trackingName || s.org}_add3`, fallback: ltr ? 'Website' : 'לאתר נוסף' },
+                                ];
+                                return slots.map((slot) => {
+                                    const url = s[slot.key];
+                                    if (!url) return null;
+                                    const social = socialLink(url);
+                                    const isPdfDownload = Boolean(slot.pdf && (/\.pdf(\?|$)/i.test(url) || s.addDownload));
+                                    const label = s[slot.labelKey];
+                                    const text = social ? '' : (label || slot.fallback);
+                                    const title = social ? (label || social.name) : undefined;
+                                    const icon = isPdfDownload ? 'fas fa-file-pdf' : (social ? social.icon : 'fas fa-external-link-alt');
+                                    const linkProps = isPdfDownload
+                                        ? { download: s.addDownloadName || 'haravot-barzel-maanaim.pdf', 'data-skip-external-link-check': true }
+                                        : { target: '_blank', rel: 'noopener noreferrer' };
+                                    return (
+                                        <a key={`${s.row}_${slot.key}`} href={url} {...linkProps} style={{ background: isPdfDownload ? '#c0392b' : 'var(--primary)' }} data-probe-external-link={isPdfDownload ? undefined : 'true'} data-tracking-name={slot.track} data-analytics-type={isPdfDownload ? 'download' : 'website'} title={title} aria-label={social ? title : undefined}>
+                                            <i className={icon} aria-hidden="true"></i>{text ? ` ${text}` : ''}
+                                        </a>
+                                    );
+                                });
                             })()}
                             {locs.length === 1 && (
                                 <a

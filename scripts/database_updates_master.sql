@@ -1,4 +1,7 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 110_geerz_addresses.sql
+[x] 109_geerz_social_links.sql
+[x] 108_geerz_drop_phone.sql
 [x] 107_or_lev_drop_meeting_time.sql
 [x] 106_or_lev_contact_buttons.sql
 [x] 105_or_lev_ocd_groups.sql

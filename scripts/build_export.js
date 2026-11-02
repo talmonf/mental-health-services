@@ -108,6 +108,8 @@ function buildExport(data = load()) {
       additional_links: [
         ...(/^https?:\/\//.test(r.web2 || '') ? [{ url: r.web2, label: clean(r.webLabel2) }] : []),
         ...(/^https?:\/\//.test(r.add || '') ? [{ url: r.add, label: clean(r.addLabel) }] : []),
+        ...(/^https?:\/\//.test(r.add2 || '') ? [{ url: r.add2, label: clean(r.addLabel2) }] : []),
+        ...(/^https?:\/\//.test(r.add3 || '') ? [{ url: r.add3, label: clean(r.addLabel3) }] : []),
       ],
       locations: (data.ENTRY_LOCATIONS[String(entry.row)] || []).map((l) => ({
         label: clean(l.label),
