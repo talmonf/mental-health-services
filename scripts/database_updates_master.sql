@@ -1,4 +1,7 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 114_language_chrome.sql
+[x] 113_english_entry.sql
+[x] 112_card_translations.sql
 [x] 111_jerusalem_therapy_center.sql
 [x] 110_geerz_addresses.sql
 [x] 109_geerz_social_links.sql

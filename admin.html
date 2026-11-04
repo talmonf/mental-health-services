@@ -342,6 +342,9 @@
       directoryCards: null,
       directoryCard: null,
       directoryMsg: '',
+      directoryLang: 'he',
+      directoryLangCardId: null,
+      cardTextDraft: null,
       directoryEligFilter: '',
       cardInternal: null,
       cardInternalMsg: '',
@@ -823,6 +826,14 @@
               (d.bySection || []).map((r) => ({ key: sectionLabel(r.key), n: r.n, sectionKey: r.key })),
               (r) => sectionHref(r.sectionKey)
             )}</div>
+          </div>
+          <div>
+            <h2>Site language</h2>
+            <div class="card">${hbars((d.byUiLang || []).map((r) => ({ key: r.key === 'he' ? 'Hebrew' : r.key === 'en' ? 'English' : r.key, n: r.n })))}</div>
+          </div>
+          <div>
+            <h2>Every card shown</h2>
+            <div class="card">${hbars((d.byShowAll || []).map((r) => ({ key: r.key === 'yes' ? 'On' : r.key === 'no' ? 'Off' : r.key, n: r.n })))}</div>
           </div>
         </div>
         <h2>Directory cards</h2>
@@ -1388,6 +1399,30 @@
       ['add3', 'קישור נוסף 3', false],
       ['addLabel3', 'תווית קישור נוסף 3', false]
     ];
+    const DIR_TEXT_EN = {
+      org: 'Organization',
+      svc: 'Short description',
+      target: 'Who it is for',
+      region: 'Area',
+      cost: 'Cost',
+      specialty: 'Specialty',
+      languages: 'Languages of service',
+      diseases: 'Conditions',
+      notes: 'Notes',
+      tags: 'Search words (not shown as a field)',
+      whatsapp: 'WhatsApp',
+      whatsappLabel: 'WhatsApp label',
+      web: 'Website',
+      webLabel: 'Website label',
+      web2: 'Second website',
+      webLabel2: 'Second website label',
+      add: 'Extra link',
+      addLabel: 'Extra link label',
+      add2: 'Extra link 2',
+      addLabel2: 'Extra link 2 label',
+      add3: 'Extra link 3',
+      addLabel3: 'Extra link 3 label'
+    };
     const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
     const DIR_EMAILS = ['', '2', '3'];
     const DIR_LTR = new Set(['whatsapp', 'web', 'web2', 'add', 'add2', 'add3']);
@@ -1493,6 +1528,22 @@
           return;
         }
         const fields = card.publicFields || {};
+        if (state.directoryLangCardId !== card.id) {
+          state.directoryLang = 'he';
+          state.directoryLangCardId = card.id;
+        }
+        if (!state.cardTextDraft || state.cardTextDraft.id !== card.id) {
+          const he = {};
+          const en = {};
+          const enSrc = (card.translations && card.translations.en) || {};
+          DIR_TEXT.forEach(([name]) => {
+            he[name] = fields[name] == null ? '' : String(fields[name]);
+            en[name] = enSrc[name] == null ? '' : String(enSrc[name]);
+          });
+          state.cardTextDraft = { id: card.id, he, en };
+        }
+        const cardLang = state.directoryLang === 'en' ? 'en' : 'he';
+        const shown = state.cardTextDraft[cardLang] || {};
         const elig = card.eligibility || {};
         const siteRow = (site) => {
           const s = site || {};
@@ -1509,12 +1560,13 @@
         };
         const rec = elig.recognition || {};
         const textInputs = DIR_TEXT.map(([name, label, area]) => {
-          const value = fields[name] == null ? '' : String(fields[name]);
-          const ltr = DIR_LTR.has(name) ? ' dir="ltr"' : '';
+          const value = shown[name] == null ? '' : String(shown[name]);
+          const displayLabel = cardLang === 'en' ? (DIR_TEXT_EN[name] || label) : label;
+          const ltr = cardLang === 'en' || DIR_LTR.has(name) ? ' dir="ltr"' : '';
           if (area) {
-            return `<div class="full"><label for="d-${name}">${esc(label)}</label><textarea id="d-${name}" name="${name}"${ltr}>${esc(value)}</textarea></div>`;
+            return `<div class="full"><label for="d-${name}">${esc(displayLabel)}</label><textarea id="d-${name}" name="${name}"${ltr}>${esc(value)}</textarea></div>`;
           }
-          return `<div class="${name === 'org' || name === 'svc' ? 'full' : ''}"><label for="d-${name}">${esc(label)}</label><input id="d-${name}" name="${name}" type="text" value="${esc(value)}"${ltr}></div>`;
+          return `<div class="${name === 'org' || name === 'svc' ? 'full' : ''}"><label for="d-${name}">${esc(displayLabel)}</label><input id="d-${name}" name="${name}" type="text" value="${esc(value)}"${ltr}></div>`;
         }).join('');
         const phones = DIR_PHONES.map((suffix, index) => {
           const num = fields[`phone${suffix}`] == null ? '' : String(fields[`phone${suffix}`]);
@@ -1597,8 +1649,17 @@
           ${viewLine}
           <form id="dir-form">
             ${hiddenControl}
-            <h2>מוצג בכרטיס</h2>
-            <div class="dir-grid">${textInputs}</div>
+            <h2>${cardLang === 'en' ? 'English text' : 'מוצג בכרטיס'}</h2>
+            <div class="dir-actions">
+              <button type="button" data-act="card-lang" data-lang="he" class="${cardLang === 'he' ? '' : 'secondary'}">עברית</button>
+              <button type="button" data-act="card-lang" data-lang="en" class="${cardLang === 'en' ? '' : 'secondary'}">English</button>
+            </div>
+            <p class="dir-help">${cardLang === 'en'
+              ? 'An empty field shows the Hebrew. Phones, email, places, and eligibility stay shared.'
+              : 'הנוסח העברי הוא המקור. באנגלית, שדה ריק מציג את העברית. טלפון, דוא״ל, מרפאות והתאמה נשארים משותפים.'}</p>
+            ${card.translationsInstalled === false ? '<p class="dir-help">שמירת נוסח אנגלי תתאפשר אחרי הרצת סקריפט 112.</p>' : ''}
+            <div class="dir-grid"${cardLang === 'en' ? ' lang="en" dir="ltr"' : ''}>${textInputs}</div>
+            <div${cardLang === 'en' ? ' hidden' : ''}>
             <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
               <summary>טלפונים</summary>
               <div class="dir-grid">${phones}</div>
@@ -1628,6 +1689,7 @@
             <p class="dir-help">שם המקום מופיע ברשימת הסניפים ובכפתור המפה. טלפון ודוא״ל של כמה מרפאות נפתחים מכפתור אחד. הערה קצרה מופיעה מתחת לכתובת במפה, למשל שעות או סימן דרך. קואורדינטות ריקות ימולאו בשמירה לפי הכתובת.</p>
             <div id="d-sites">${(Array.isArray(card.sites) ? card.sites : []).map((site) => siteRow(site)).join('')}</div>
             <p><button type="button" class="secondary" id="d-add-site">הוספת מרפאה</button></p>
+            </div>
             <div class="dir-actions">
               <button type="submit">שמירה</button>
               <button type="button" class="secondary" data-act="back">חזרה לרשימה</button>
@@ -1643,9 +1705,24 @@
         form.querySelector('[data-act=back]').addEventListener('click', () => {
           state.directoryId = null;
           state.directoryCard = null;
+          state.cardTextDraft = null;
+          state.directoryLangCardId = null;
           state.directoryMsg = '';
           location.hash = 'directory';
           render();
+        });
+        form.querySelectorAll('[data-act=card-lang]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const current = state.directoryLang === 'en' ? 'en' : 'he';
+            const next = btn.getAttribute('data-lang') === 'en' ? 'en' : 'he';
+            if (!state.cardTextDraft) return;
+            const data = new FormData(form);
+            const captured = {};
+            DIR_TEXT.forEach(([name]) => { captured[name] = String(data.get(name) || '').trim(); });
+            state.cardTextDraft[current] = captured;
+            state.directoryLang = next;
+            render();
+          });
         });
         const wholeOrg = form.querySelector('[name=whole_org]');
         const membersWrap = form.querySelector('#d-members-wrap');
@@ -1682,8 +1759,19 @@
           const btn = form.querySelector('[type=submit]');
           btn.disabled = true;
           const text = (name) => String(new FormData(form).get(name) || '').trim();
+          const currentLang = state.directoryLang === 'en' ? 'en' : 'he';
+          const captured = {};
+          DIR_TEXT.forEach(([name]) => { captured[name] = text(name); });
+          if (state.cardTextDraft) state.cardTextDraft[currentLang] = captured;
+          const heDraft = (state.cardTextDraft && state.cardTextDraft.he) || {};
+          const enDraft = (state.cardTextDraft && state.cardTextDraft.en) || {};
           const publicFields = {};
-          DIR_TEXT.forEach(([name]) => { publicFields[name] = text(name); });
+          DIR_TEXT.forEach(([name]) => { publicFields[name] = String(heDraft[name] || '').trim(); });
+          const en = {};
+          DIR_TEXT.forEach(([name]) => {
+            const value = String(enDraft[name] || '').trim();
+            if (value) en[name] = value;
+          });
           DIR_PHONES.forEach((suffix) => {
             publicFields[`phone${suffix}`] = text(`phone${suffix}`);
             publicFields[`phoneLabel${suffix}`] = text(`phoneLabel${suffix}`);
@@ -1701,6 +1789,7 @@
           const body = {
             id: card.id,
             publicFields,
+            translations: { en },
             eligibility: {
               age_min: age('age_min'),
               age_max: age('age_max'),
@@ -1757,6 +1846,7 @@
             const data = await r.json().catch(() => ({}));
             if (!r.ok) throw new Error(data.error || 'שמירת הכרטיס נכשלה');
             state.directoryCard = data.card;
+            state.cardTextDraft = null;
             state.directoryMsg = 'נשמר.';
             if (state.directoryCards && data.card) {
               const idx = state.directoryCards.findIndex((c) => c.id === data.card.id);

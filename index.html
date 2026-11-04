@@ -6,6 +6,19 @@
     <!-- Marks that JavaScript started, so the pre-rendered group article can stay in the
          source for crawlers and still not sit on top of the app. -->
     <script>document.documentElement.classList.add('mh-js');</script>
+    <script>
+    (function () {
+        try {
+            var path = (location.pathname || '').replace(/\/+$/, '');
+            var q = (new URLSearchParams(location.search).get('lang') || '').trim().toLowerCase();
+            var stored = '';
+            try { stored = (localStorage.getItem('mh-lang') || '').trim().toLowerCase(); } catch (e) {}
+            var code = path === '/en' ? 'en' : ((q === 'he' || q === 'en') ? q : ((stored === 'he' || stored === 'en') ? stored : 'he'));
+            document.documentElement.lang = code === 'en' ? 'en' : 'he';
+            document.documentElement.dir = code === 'en' ? 'ltr' : 'rtl';
+        } catch (e) {}
+    })();
+    </script>
     <title>מדריך נפש | מדריך בריאות הנפש בישראל</title>
     <meta name="description" content="הסבר על שירותי בריאות הנפש בישראל, וקישורים לארגונים השונים. מידע מקיף למתמודדי נפש ומשפחותיהם.">
     <!-- Consolidates every ?entry= / ?q= / ?section= variant onto the root, so the shared
@@ -143,7 +156,42 @@
             justify-content: flex-end;
             padding: var(--space-sm) var(--space-lg) 0;
         }
+        .mh-hero-account-cluster {
+            display: flex;
+            direction: ltr;
+            align-items: flex-start;
+            gap: 8px;
+        }
         .mh-account { position: relative; }
+        .mh-lang { position: relative; }
+        .mh-lang-btn { min-height: 40px; min-width: 40px; padding: 6px 12px; font-size: 1.15rem; }
+        .mh-lang-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 148px;
+            background: #fff;
+            color: var(--text);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated);
+            z-index: 40;
+            padding: 6px 0;
+        }
+        .mh-lang-menu button {
+            display: block;
+            width: 100%;
+            text-align: start;
+            background: none;
+            border: none;
+            padding: 8px 14px;
+            font: inherit;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            color: var(--text);
+        }
+        .mh-lang-menu button.mh-lang-current { font-weight: 700; }
+        .mh-lang-menu button:hover,
+        .mh-lang-menu button:focus { background: var(--bg); outline: none; }
         .mh-account > .mh-btn { min-height: 40px; padding: 6px 12px; font-size: var(--text-sm); }
         .mh-account-menu {
             position: absolute;
@@ -420,7 +468,16 @@
         .mh-card-actions a:focus, .mh-card-actions button:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-search-wrap { background: var(--bg-card); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); }
         .mh-search-field { position: relative; }
+        .mh-show-all { display: flex; align-items: center; gap: 8px; margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--text); cursor: pointer; }
+        .mh-show-all input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--primary); }
         .mh-search-input { width: 100%; min-height: var(--touch-min); padding: var(--space-md) 44px var(--space-md) var(--space-lg); font-size: var(--text-base); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; }
+        .mh-search-icon { position: absolute; right: var(--space-lg); top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 1.1rem; pointer-events: none; }
+        html[dir="ltr"] .mh-search-input { padding: var(--space-md) var(--space-lg) var(--space-md) 44px; }
+        html[dir="ltr"] .mh-search-input-with-clear { padding-right: var(--space-lg); padding-left: 48px; }
+        html[dir="ltr"] .mh-search-input-with-share { padding-right: var(--space-lg); padding-left: 88px; }
+        html[dir="ltr"] .mh-search-icon { right: auto; left: var(--space-lg); }
+        html[dir="ltr"] .mh-search-copy-link { left: auto; right: 44px; }
+        html[dir="ltr"] .mh-search-clear { left: auto; right: 4px; }
         .mh-search-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
         .mh-search-input-with-clear { padding-left: 48px; }
         .mh-search-input-with-share { padding-left: 88px; }
@@ -1260,6 +1317,291 @@
         };
         const MH_SITE_TITLE = 'מדריך בריאות הנפש בישראל';
 
+        // A later language is another entry here and in MH_UI. Hebrew is the fallback for a missing string.
+        const MH_LOCALES = [
+            { code: 'he', label: 'עברית' },
+            { code: 'en', label: 'English' }
+        ];
+        const MH_LANG_KEY = 'mh-lang';
+        const mhNormalizeLocale = (value) => {
+            const code = String(value || '').trim().toLowerCase();
+            return MH_LOCALES.some((item) => item.code === code) ? code : '';
+        };
+        const mhIsEnglishPath = (pathname) => String(pathname || '').replace(/\/+$/, '') === '/en';
+        // /en is the link sent to English speakers. It wins over a saved Hebrew choice.
+        // A query language wins on every other path. An unknown code is ignored.
+        const mhReadLocale = () => {
+            try {
+                const url = new URL(window.location.href);
+                if (mhIsEnglishPath(url.pathname)) return 'en';
+                const fromQuery = mhNormalizeLocale(url.searchParams.get('lang'));
+                if (fromQuery) return fromQuery;
+            } catch (_) {}
+            try {
+                const stored = mhNormalizeLocale(localStorage.getItem(MH_LANG_KEY));
+                if (stored) return stored;
+            } catch (_) {}
+            return 'he';
+        };
+        const mhLocaleFromLocation = () => {
+            try {
+                const url = new URL(window.location.href);
+                if (mhIsEnglishPath(url.pathname)) return 'en';
+                return mhNormalizeLocale(url.searchParams.get('lang')) || 'he';
+            } catch (_) {
+                return 'he';
+            }
+        };
+        const mhPersistLocale = (code) => {
+            const locale = mhNormalizeLocale(code) || 'he';
+            try { localStorage.setItem(MH_LANG_KEY, locale); } catch (_) {}
+            try {
+                const url = new URL(window.location.href);
+                const onEnglishPath = mhIsEnglishPath(url.pathname);
+                if (locale === 'he') {
+                    url.searchParams.delete('lang');
+                    if (onEnglishPath) url.pathname = '/';
+                } else if (onEnglishPath) {
+                    url.searchParams.delete('lang');
+                } else {
+                    url.searchParams.set('lang', locale);
+                }
+                const next = `${url.pathname}${url.search}${url.hash}`;
+                const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+                if (next !== current) window.history.replaceState(null, '', next);
+            } catch (_) {}
+            document.documentElement.lang = locale === 'he' ? 'he' : locale;
+            document.documentElement.dir = locale === 'he' ? 'rtl' : 'ltr';
+        };
+        const MH_UI = {
+            he: {
+                language: 'שפה',
+                signIn: 'כניסה / הרשמה',
+                myAccount: 'החשבון שלי',
+                editProfile: 'עדכון פרטים',
+                myFile: 'התיק שלי',
+                admin: 'אדמין',
+                signOut: 'יציאה',
+                siteTitle: 'מדריך בריאות הנפש בישראל',
+                tagline: 'מידע מקיף למתמודדי נפש ומשפחותיהם',
+                ironSwords: 'חרבות ברזל',
+                ironSwordsLabel: 'חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים',
+                ironSwordsTip1: 'לחיצה מפעילה חיפוש לכל המענים הרלוונטיים לחרבות ברזל.',
+                ironSwordsTip2: 'הרחיבו את המקטעים בתוצאות כדי לראות את כל השירותים.',
+                notAlone: 'אתם לא לבד',
+                glossary: 'מילון מונחים',
+                ask: 'שאלה?',
+                emergency: 'עזרה דחופה',
+                showLines: 'הצגת כל הקווים ▼',
+                hideLines: 'הסתרה ▲',
+                eranQuick: 'ער"ן 1201',
+                emergencyIntro: 'קווי חירום וקווי תמיכה. השירותים המפורטים זמינים בישראל. מחוץ לישראל יש לפנות לשירותי החירום והתמיכה המקומיים.',
+                tapToCall: 'לחצו על המספר לחיוג',
+                eranName: 'ער"ן',
+                hotline: 'קו חירום',
+                freeAnon: '24/7 | חינם | אנונימי',
+                assaultTitle: 'איגוד מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית',
+                helplines: 'קווי מענה',
+                answeredByWomen: 'מענה על ידי נשים',
+                answeredByMen: 'מענה על ידי גברים',
+                alwaysOn: '24/7',
+                nefeshAchat: 'נפש אחת',
+                supportLine: 'קו תמיכה',
+                soldiers: 'חיילים וכוחות ביטחון',
+                sahar: 'סה"ר - צ\'אט',
+                toChat: 'לצ\'אט →',
+                whatsappAnon: 'ווואטסאפ | אנונימי',
+                searchIn: 'חיפוש ב{title}',
+                searchPlaceholder: 'חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)',
+                searchLabel: 'חיפוש שירותים',
+                clearSearch: 'ניקוי החיפוש',
+                linkCopied: 'הקישור הועתק',
+                copySearchLink: 'העתק קישור לחיפוש',
+                copySectionLink: 'העתק קישור למקטע',
+                copySectionTip: 'העתקת קישור שפותח את המקטע הזה בדף',
+                searchCopiedToast: 'קישור לחיפוש הועתק',
+                noResultsIn: 'לא נמצאו שירותים התואמים לחיפוש ב{title}.',
+                noResults: 'לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.',
+                searchingOnly: 'מחפשים רק ב{title}.',
+                searchAll: 'חיפוש בכל המדריך',
+                filterSummary: 'סינון לפי סוג הכרטיס והמימון',
+                onTheCard: 'מה יש בכרטיס:',
+                onTheCardLabel: 'מה יש בכרטיס',
+                hideInfo: 'הסתרת «מידע בלבד»',
+                funding: 'מימון:',
+                fundingLabel: 'מימון',
+                unmarkedAlways: 'כרטיסים שעוד לא סומנו מוצגים תמיד.',
+                clearFilter: 'ניקוי הסינון',
+                nearby: 'שירותים קרובים אלי',
+                nearbyHint: 'הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן',
+                addressPlaceholder: 'כתובת או יישוב',
+                searchAddress: 'חפש כתובת',
+                searching: 'מחפש…',
+                or: 'או',
+                searchMyLocation: 'חפש לפי המיקום שלי',
+                locating: 'מאתר מיקום…',
+                searchMyLocationLabel: 'חפש לפי המיקום שזיהה הדפדפן',
+                showingGps: 'מציג לפי המיקום שזיהה הדפדפן',
+                radius: 'רדיוס חיפוש',
+                km: 'ק״מ',
+                clear: 'נקה',
+                nearbyNeedAddress: 'נא להזין כתובת או יישוב',
+                nearbySearching: 'מחפש כתובת…',
+                nearbyNotFound: 'לא נמצאה כתובת בישראל. נסו יישוב או רחוב אחר.',
+                nearbyError: 'שגיאה בחיפוש הכתובת. נסו שוב.',
+                nearbyNoGeo: 'הדפדפן אינו תומך במיקום.',
+                nearbyLocating: 'מאתר מיקום…',
+                nearbyDenied: 'לא ניתן לקבל מיקום. בדקו הרשאות או הזינו כתובת.',
+                relatedServices: 'שירותים הקשורים ל«{title}».',
+                backToTerm: 'חזרה למונח',
+                showAll: 'הצגת כל המדריך',
+                chooseCategory: 'בחרו קטגוריה כדי לצפות בשירותים הזמינים',
+                showEveryLanguage: 'הצג כרטיסים בכל השפות',
+                welcomeTitle: 'ברוכים הבאים',
+                welcomeLead: 'אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.',
+                readMore: 'קרא עוד',
+                creditsCreated: 'אתר זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר',
+                creditsContact: 'להערות, תיקונים והוספות, נא ליצור קשר בוואטסאפ',
+                linkHint: 'סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף',
+                loading: 'טוען את המדריך…',
+                noLinked: 'אין שירותים במדריך שמקושרים למונח הזה.',
+                nearbyCount: 'מציג {count} מענים בתוך {km} ק״מ מ־{place}. רק ארגונים עם כתובת פיזית במאגר.',
+                nearbyNone: 'לא נמצאו מענים עם כתובת פיזית ברדיוס הזה. נסו להגדיל את הרדיוס, או חפשו לפי קטגוריה — רוב קווי הסיוע הם ארציים.',
+                chosenPoint: 'הנקודה שנבחרה',
+                backToCategories: '← חזרה לכל הקטגוריות',
+                service: 'שירות',
+                services: 'שירותים',
+                urgent: 'דחוף',
+                clickToView: 'לחצו לצפייה',
+                records: 'רשומות',
+                disclaimer: 'הצהרת אחריות',
+                disclaimerBody: 'המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי',
+                updated: 'עודכן:',
+                privacy: 'מדיניות פרטיות',
+                introDismiss: 'הסתרת הודעת הפתיחה',
+                introDismissTitle: 'הסתרה. אפשר לפתוח שוב מאתם לא לבד.',
+                hbBanner: 'החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.',
+                hbCta: 'הצגת כל המענים לחרבות ברזל'
+            },
+            en: {
+                language: 'Language',
+                signIn: 'Sign in / Register',
+                myAccount: 'My account',
+                editProfile: 'Update details',
+                myFile: 'My file',
+                admin: 'Admin',
+                signOut: 'Sign out',
+                siteTitle: 'Mental health services in Israel',
+                tagline: 'Information for people living with mental illness, and their families',
+                ironSwords: 'Iron Swords',
+                ironSwordsLabel: 'Iron Swords — search for every related service',
+                ironSwordsTip1: 'This searches for every service related to the Iron Swords war.',
+                ironSwordsTip2: 'Open the sections in the results to see all of them.',
+                notAlone: 'You are not alone',
+                glossary: 'Glossary',
+                ask: 'A question?',
+                emergency: 'Emergency help',
+                showLines: 'Show all lines ▼',
+                hideLines: 'Hide ▲',
+                eranQuick: 'ERAN 1201',
+                emergencyIntro: 'Crisis and support lines. The services listed here are in Israel. Outside Israel, contact local emergency or mental health services.',
+                tapToCall: 'Tap a number to call',
+                eranName: 'ERAN',
+                hotline: 'crisis line',
+                freeAnon: '24/7 | Free | Anonymous',
+                assaultTitle: 'Association of Rape Crisis Centers in Israel',
+                helplines: 'helplines',
+                answeredByWomen: 'Answered by women',
+                answeredByMen: 'Answered by men',
+                alwaysOn: '24/7',
+                nefeshAchat: 'Nefesh Achat',
+                supportLine: 'support line',
+                soldiers: 'Soldiers and security forces',
+                sahar: 'SAHAR chat',
+                toChat: 'Chat →',
+                whatsappAnon: 'WhatsApp | Anonymous',
+                searchIn: 'Search in {title}',
+                searchPlaceholder: 'Search by organization, topic, or who it is for (for example: trauma, youth)',
+                searchLabel: 'Search services',
+                clearSearch: 'Clear search',
+                linkCopied: 'Link copied',
+                copySearchLink: 'Copy a link to this search',
+                copySectionLink: 'Copy a link to this section',
+                copySectionTip: 'Copy a link that opens this section',
+                searchCopiedToast: 'Search link copied',
+                noResultsIn: 'No services match this search in {title}.',
+                noResults: 'No services match this search. Try other words.',
+                searchingOnly: 'Searching only in {title}.',
+                searchAll: 'Search the whole directory',
+                filterSummary: 'Filter by what the card offers and how it is funded',
+                onTheCard: 'On the card:',
+                onTheCardLabel: 'On the card',
+                hideInfo: 'Hide “information only”',
+                funding: 'Funding:',
+                fundingLabel: 'Funding',
+                unmarkedAlways: 'Cards that are not marked yet are always shown.',
+                clearFilter: 'Clear filter',
+                nearby: 'Services near me',
+                nearbyHint: 'Enter an address, or use the location the browser detected',
+                addressPlaceholder: 'Address or locality',
+                searchAddress: 'Search address',
+                searching: 'Searching…',
+                or: 'or',
+                searchMyLocation: 'Use my location',
+                locating: 'Locating…',
+                searchMyLocationLabel: 'Search using the location the browser detected',
+                showingGps: 'Showing results for the location the browser detected',
+                radius: 'Search radius',
+                km: 'km',
+                clear: 'Clear',
+                nearbyNeedAddress: 'Enter an address or a locality',
+                nearbySearching: 'Searching for the address…',
+                nearbyNotFound: 'No address in Israel was found. Try another locality or street.',
+                nearbyError: 'The address search failed. Try again.',
+                nearbyNoGeo: 'This browser cannot share a location.',
+                nearbyLocating: 'Finding your location…',
+                nearbyDenied: 'Location is unavailable. Check the permission, or enter an address.',
+                relatedServices: 'Services linked to “{title}”.',
+                backToTerm: 'Back to the term',
+                showAll: 'Show the whole directory',
+                chooseCategory: 'Select a category to view available services',
+                showEveryLanguage: 'Show cards in every language',
+                welcomeTitle: 'Welcome',
+                welcomeLead: 'If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.',
+                readMore: 'Read more',
+                creditsCreated: 'This site was created by Yossi Shimonovitz and Talmon Friedlander.',
+                creditsContact: 'For comments, corrections, and additions, contact us on WhatsApp',
+                linkHint: 'The link icon beside a section or a card copies a link that opens that place on the page',
+                loading: 'Loading the directory…',
+                noLinked: 'No services in the directory are linked to this term.',
+                nearbyCount: 'Showing {count} services within {km} km of {place}. Only organizations with a street address on file.',
+                nearbyNone: 'No services with a street address are inside this radius. Try a larger radius, or browse by category — most helplines are nationwide.',
+                chosenPoint: 'the chosen point',
+                backToCategories: '← Back to all categories',
+                service: 'service',
+                services: 'services',
+                urgent: 'Urgent',
+                clickToView: 'Select to view',
+                records: 'entries',
+                disclaimer: 'Disclaimer',
+                disclaimerBody: 'This information is for orientation only. It is not medical or legal advice.',
+                updated: 'Updated:',
+                privacy: 'Privacy policy',
+                introDismiss: 'Hide the welcome note',
+                introDismissTitle: 'Hide. You can open it again from You are not alone.',
+                hbBanner: 'The Iron Swords search is on. Open the sections below, especially Emergency and Trauma, to see every related service.',
+                hbCta: 'Show every Iron Swords service'
+            }
+        };
+        const mhUi = (locale, key) => {
+            const table = MH_UI[locale] || MH_UI.he;
+            if (table && table[key]) return table[key];
+            return (MH_UI.he && MH_UI.he[key]) || key;
+        };
+        const mhFill = (template, values) => String(template || '').replace(/\{(\w+)\}/g, (_, name) => (
+            values && values[name] != null ? String(values[name]) : ''
+        ));
+
         const mhGenerateId = () => {
             if (window.crypto?.randomUUID) return window.crypto.randomUUID();
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -1959,6 +2301,7 @@
         const MH_FUNDING_TERMS_EN = { full: 'fully covered', partial: 'co-payment', eligible: 'if eligible' };
         const MH_OWNERSHIP_ORDER = ['private', 'nonprofit', 'hmo', 'government', 'hospital', 'unspecified'];
         const MH_OWNERSHIP_LABELS_HE = { private: 'פרטי', nonprofit: 'עמותה', hmo: 'קופת חולים', government: 'ממשלתי', hospital: 'בית חולים', unspecified: 'לא צוין' };
+        const MH_OWNERSHIP_LABELS_EN = { private: 'Private', nonprofit: 'Nonprofit', hmo: 'Health fund', government: 'Government', hospital: 'Hospital', unspecified: 'Not stated' };
         const mhOwnership = (s) => {
             const ind = s && s.cardIndicators;
             if (ind && Object.prototype.hasOwnProperty.call(ind, 'ownership')) return ind.ownership || '';
@@ -2028,9 +2371,46 @@
         // יה״ל, יה"ל, and יהל are the same search.
         const MH_SEARCH_QUOTE_RE = /["'\u05F3\u05F4\u2018-\u201F\u2032\u2033\u0060\u00B4\u02B9\u02BA\u02BC]/g;
         const mhNormalizeSearchText = (value) => String(value || '').toLowerCase().replace(MH_SEARCH_QUOTE_RE, '');
+        const MH_HEBREW_LETTER = /[\u0590-\u05FF]/;
+        const MH_LATIN_LETTER = /[A-Za-z]/;
+        const MH_CARD_TEXT_KEYS = ['org', 'svc', 'target', 'region', 'cost', 'specialty', 'notes', 'languages', 'diseases', 'tags'];
+        // A card written only in English stays out of the Hebrew lists. A Hebrew letter anywhere in the
+        // visible wording keeps it, including a dir:ltr card such as Hakshiva or Hevlei Kesher.
+        const mhCardIsEnglishOnly = (svc) => {
+            if (!svc) return false;
+            const text = MH_CARD_TEXT_KEYS.map((key) => svc[key] || '').join('\n');
+            if (MH_HEBREW_LETTER.test(text)) return false;
+            return MH_LATIN_LETTER.test(`${svc.org || ''} ${svc.svc || ''}`);
+        };
+        const MH_TRANSLATION_KEYS = [
+            'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
+            'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3'
+        ];
+        // Hebrew stays on the card. A non-empty key in translations[locale] replaces it for that language.
+        // The replaced Hebrew stays in cardSearchFallback so a Hebrew query still finds the card.
+        const mhLocaleOverlay = (svc, locale) => {
+            if (!svc || !locale || locale === 'he' || svc.dir === 'ltr') return svc;
+            const block = svc.cardTranslations && svc.cardTranslations[locale];
+            if (!block || typeof block !== 'object') return svc;
+            const next = { ...svc };
+            const hebrew = [];
+            let used = false;
+            MH_TRANSLATION_KEYS.forEach((key) => {
+                if (!Object.prototype.hasOwnProperty.call(block, key)) return;
+                const value = block[key];
+                if (value == null || String(value).trim() === '') return;
+                hebrew.push(svc[key] || '');
+                next[key] = value;
+                used = true;
+            });
+            if (!used) return svc;
+            next.cardSearchFallback = hebrew.join(' ');
+            next.dir = 'ltr';
+            return next;
+        };
         const mhServiceSearchText = (s) => {
             const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
-            return mhNormalizeSearchText(`${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${tagPart}`);
+            return mhNormalizeSearchText(`${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${s.region || ''} ${s.cost || ''} ${tagPart} ${s.cardSearchFallback || ''}`);
         };
 
         // טיפול יום and אשפוז יום name the same service. A query that uses either phrase
@@ -2208,7 +2588,7 @@
                 return { q: '', entry: '', section: '', subsection: '', page: '', group: '', term: '', termcat: '', termcards: '', glossary: false };
             }
         };
-        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group, term, termcat, termcards, glossary }, { push = false } = {}) => {
+        const mhReplaceUrlState = ({ q, entry, section, subsection, page, group, term, termcat, termcards, glossary }, { push = false, locale = 'he' } = {}) => {
             try {
                 const url = new URL(window.location.href);
                 const from = `${url.pathname}${url.search}`;
@@ -2228,7 +2608,16 @@
                 else url.searchParams.delete('termcat');
                 if (termcards) url.searchParams.set('termcards', termcards);
                 else url.searchParams.delete('termcards');
-                url.pathname = glossary ? MH_GLOSSARY_PATH : mhGroupPath(group);
+                const lang = mhNormalizeLocale(locale) || 'he';
+                const bareHome = !glossary && !group && !q && !entry && !section && !subsection && !page && !term && !termcat && !termcards;
+                if (lang === 'en' && bareHome) {
+                    url.pathname = '/en';
+                    url.searchParams.delete('lang');
+                } else {
+                    url.pathname = glossary ? MH_GLOSSARY_PATH : mhGroupPath(group);
+                    if (lang === 'en') url.searchParams.set('lang', 'en');
+                    else url.searchParams.delete('lang');
+                }
                 url.hash = '';
                 const next = `${url.pathname}${url.search}`;
                 if (push && next !== from) window.history.pushState(null, '', next);
@@ -2289,7 +2678,13 @@
                     entry_url: props.entry_url ?? null,
                     error: props.error ?? null,
                     error_details: props.error_details ?? null,
-                    ga_client_id: window.__mhGaClientId || null
+                    ga_client_id: window.__mhGaClientId || null,
+                    ui_lang: window.__mhUiLang === 'en' || window.__mhUiLang === 'he'
+                        ? window.__mhUiLang
+                        : (document.documentElement.lang === 'en' ? 'en' : 'he'),
+                    show_all_cards: typeof window.__mhShowAllCards === 'boolean'
+                        ? window.__mhShowAllCards
+                        : (function () { try { return localStorage.getItem('mh-show-all') === '1'; } catch (e) { return false; } })()
                 };
 
                 const body = JSON.stringify(payload);
@@ -4779,6 +5174,20 @@
             const [directoryEditedOn, setDirectoryEditedOn] = useState(null);
             const [accountMenuOpen, setAccountMenuOpen] = useState(false);
             const accountMenuRef = useRef(null);
+            const [locale, setLocale] = useState(() => mhReadLocale());
+            const [showAllCards, setShowAllCards] = useState(() => {
+                try { return localStorage.getItem('mh-show-all') === '1'; } catch (_) { return false; }
+            });
+            const [langMenuOpen, setLangMenuOpen] = useState(false);
+            const langMenuRef = useRef(null);
+            const t = (key) => mhUi(locale, key);
+            const shownTitle = (node) => (locale !== 'he' && node && node.titleEn ? node.titleEn : (node && node.title) || '');
+            useEffect(() => { mhPersistLocale(locale); }, [locale]);
+            useEffect(() => {
+                window.__mhUiLang = locale === 'en' ? 'en' : 'he';
+                window.__mhShowAllCards = !!showAllCards;
+                try { localStorage.setItem('mh-show-all', showAllCards ? '1' : '0'); } catch (_) {}
+            }, [locale, showAllCards]);
             const [showAuth, setShowAuth] = useState(false);
             const [authTab, setAuthTab] = useState('login');
             const [authBusy, setAuthBusy] = useState(false);
@@ -4871,16 +5280,18 @@
                     termcat: showTerms && focusedTermCat && !focusedTerm ? focusedTermCat : '',
                     termcards: !showTerms && termCardsKey ? termCardsKey : '',
                     glossary: !!showTerms
-                }, { push });
-            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup, showTerms, focusedTerm, focusedTermCat, termCardsKey]);
+                }, { push, locale });
+            }, [searchTerm, requestedEntryId, requestedSectionId, requestedSubsectionId, resourcePage, selectedCategoryGroup, showTerms, focusedTerm, focusedTermCat, termCardsKey, locale]);
             useEffect(() => {
+                const siteTitle = mhUi(locale, 'siteTitle');
                 if (showTerms) {
-                    document.title = `מילון מונחים | ${MH_SITE_TITLE}`;
+                    document.title = `${mhUi(locale, 'glossary')} | ${siteTitle}`;
                     return;
                 }
                 const group = selectedCategoryGroup && CATEGORY_GROUPS[selectedCategoryGroup];
-                document.title = group ? `${group.title} | ${MH_SITE_TITLE}` : MH_SITE_TITLE;
-            }, [selectedCategoryGroup, showTerms]);
+                const title = group ? ((locale !== 'he' && group.titleEn) ? group.titleEn : group.title) : siteTitle;
+                document.title = group ? `${title} | ${siteTitle}` : siteTitle;
+            }, [selectedCategoryGroup, showTerms, locale]);
             // Send the first-party session id to GA4 once, so the two systems can be joined later.
             useEffect(() => {
                 if (typeof gtag !== 'function') return;
@@ -4902,6 +5313,8 @@
                     setFocusedTermCat(prev => (prev !== (next.termcat || null) ? (next.termcat || null) : prev));
                     setTermCardsKey(prev => (prev !== (next.termcards || null) ? (next.termcards || null) : prev));
                     setShowTerms(!!(next.glossary || next.term || next.termcat));
+                    const code = mhLocaleFromLocation();
+                    setLocale((prev) => (prev === code ? prev : code));
                 };
                 window.addEventListener('hashchange', syncFromUrl);
                 window.addEventListener('popstate', syncFromUrl);
@@ -5179,7 +5592,7 @@
                     const edit = cardEditMap && cardEditMap[`${svc.row}|||${svc.svc || ''}`];
                     const hidden = edit && typeof edit.hidden === 'boolean' ? edit.hidden : Boolean(svc.hidden);
                     if (hidden) return null;
-                    if (!edit) return svc;
+                    if (!edit) return mhLocaleOverlay(svc, locale);
                     const next = { ...svc, cardEditOriginalOrg: svc.org };
                     const fields = edit.publicFields && typeof edit.publicFields === 'object' ? edit.publicFields : {};
                     publicKeys.forEach((key) => {
@@ -5194,20 +5607,30 @@
                     if (edit.indicators && typeof edit.indicators === 'object') next.cardIndicators = edit.indicators;
                     if (Array.isArray(edit.orgMembers) && edit.orgMembers.length) next.cardOrgMembers = edit.orgMembers;
                     if (edit.id) next.cardEditId = edit.id;
-                    return next;
+                    if (edit.translations && typeof edit.translations === 'object') next.cardTranslations = edit.translations;
+                    return mhLocaleOverlay(next, locale);
+                };
+                const requested = requestedEntryId ? String(requestedEntryId) : '';
+                const visibleInHebrew = (svc, categoryId) => {
+                    if (locale !== 'he' || showAllCards || !mhCardIsEnglishOnly(svc)) return true;
+                    if (!requested) return false;
+                    if (String(svc.row) === requested) return true;
+                    return mhGetEntryId(svc, categoryId) === requested;
                 };
                 Object.keys(out).forEach((id) => {
                     const cat = out[id];
-                    if (Array.isArray(cat.services)) cat.services = cat.services.map(applyCardEdit).filter(Boolean);
+                    if (Array.isArray(cat.services)) {
+                        cat.services = cat.services.map(applyCardEdit).filter((svc) => svc && visibleInHebrew(svc, id));
+                    }
                     if (cat.subsections) {
                         Object.keys(cat.subsections).forEach((subId) => {
                             const sub = cat.subsections[subId];
-                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit).filter(Boolean) };
+                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit).filter((svc) => svc && visibleInHebrew(svc, id)) };
                         });
                     }
                 });
                 return out;
-            }, [cardEditMap]);
+            }, [cardEditMap, locale, requestedEntryId, showAllCards]);
 
             // A row is link-hidden only when every card on it is hidden. A shared row that
             // still has a visible card keeps links that use that row number.
@@ -6058,14 +6481,19 @@
                 } catch (_) {}
             }, []);
             useEffect(() => {
-                if (!accountMenuOpen) return;
+                if (!accountMenuOpen && !langMenuOpen) return;
                 const onDoc = (e) => {
                     if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
                         setAccountMenuOpen(false);
                     }
+                    if (langMenuRef.current && !langMenuRef.current.contains(e.target)) {
+                        setLangMenuOpen(false);
+                    }
                 };
                 const onKey = (e) => {
-                    if (e.key === 'Escape') setAccountMenuOpen(false);
+                    if (e.key !== 'Escape') return;
+                    setAccountMenuOpen(false);
+                    setLangMenuOpen(false);
                 };
                 document.addEventListener('mousedown', onDoc);
                 document.addEventListener('keydown', onKey);
@@ -6073,7 +6501,12 @@
                     document.removeEventListener('mousedown', onDoc);
                     document.removeEventListener('keydown', onKey);
                 };
-            }, [accountMenuOpen]);
+            }, [accountMenuOpen, langMenuOpen]);
+            const chooseLocale = (code) => {
+                const next = mhNormalizeLocale(code) || 'he';
+                setLangMenuOpen(false);
+                setLocale(next);
+            };
             const openAuth = (tab) => {
                 setAccountMenuOpen(false);
                 setAuthError('');
@@ -6507,6 +6940,7 @@
                 url.search = '';
                 url.hash = '';
                 if (trimmed) url.searchParams.set('q', trimmed);
+                if (locale !== 'he') url.searchParams.set('lang', locale);
                 return url.toString();
             };
             const buildGlossaryShareLink = ({ term = '', termcat = '', termcards = '' } = {}) => {
@@ -6517,6 +6951,7 @@
                 if (term) url.searchParams.set('term', term);
                 if (termcat) url.searchParams.set('termcat', termcat);
                 if (termcards) url.searchParams.set('termcards', termcards);
+                if (locale !== 'he') url.searchParams.set('lang', locale);
                 return url.toString();
             };
             const GlossaryCopyButton = ({ kind, glossaryKey, label }) => {
@@ -6573,6 +7008,7 @@
                 const shareEntry = (row != null && row !== '') ? String(row) : entryId;
                 url.searchParams.set('entry', shareEntry);
                 url.searchParams.set('section', categoryId);
+                if (locale !== 'he') url.searchParams.set('lang', locale);
                 return url.toString();
             };
             const buildSectionLink = ({ categoryId = null, subsectionId = null, groupId = null } = {}) => {
@@ -6586,6 +7022,7 @@
                 } else {
                     url.pathname = mhGroupPath(groupId);
                 }
+                if (locale !== 'he') url.searchParams.set('lang', locale);
                 return url.toString();
             };
             const sectionShareKey = ({ categoryId = null, subsectionId = null, groupId = null } = {}) => {
@@ -6621,8 +7058,8 @@
                                 onSuccess: () => markSectionLinkCopied(shareKey)
                             });
                         }}
-                        title={isCopied ? 'הקישור הועתק' : 'העתקת קישור שפותח את המקטע הזה בדף'}
-                        aria-label={isCopied ? 'הקישור הועתק' : `העתק קישור למקטע ${label || shareKey}`}
+                        title={isCopied ? t('linkCopied') : t('copySectionTip')}
+                        aria-label={isCopied ? t('linkCopied') : `${t('copySectionLink')} ${label || shareKey}`}
                         data-tracking-name={`copy_section_link_${shareKey}`}
                         data-analytics-type="share"
                         data-share-kind="section"
@@ -6636,7 +7073,7 @@
             const CategoryIntro = ({ cat, showSectionLinks }) => {
                 if (!cat.intro && !cat.desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
                 return (
-                    <div className="mh-cat-desc">
+                    <div className="mh-cat-desc" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
                         {cat.intro && <p style={{ margin: '0 0 var(--space-md)' }}>{cat.intro}</p>}
                         {showSectionLinks && cat.sectionLinks?.length > 0 && (
                             <ul style={{ margin: '0 0 var(--space-md)', paddingRight: 'var(--space-lg)' }}>
@@ -7041,16 +7478,15 @@
                                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--space-sm)', cursor: 'pointer' }}
                             >
                                 <div>
-                                    <strong style={{ color: 'var(--primary)', fontSize: 'var(--text-base)' }}>{expandedSubsections.includes(`${id}_${subId}`) ? '▼ ' : '▶ '} {sub.title}</strong>
-                                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{sub.titleEn}</div>
+                                    <strong style={{ color: 'var(--primary)', fontSize: 'var(--text-base)' }}>{expandedSubsections.includes(`${id}_${subId}`) ? '▼ ' : '▶ '} {shownTitle(sub)}</strong>
                                     <span style={{ display: 'inline-block', marginTop: '4px', background: 'rgba(45, 90, 123, 0.12)', color: 'var(--primary)', borderRadius: '999px', padding: '2px 8px', fontSize: 'var(--text-sm)' }}>
-                                        {(sub.services || []).length} רשומות
+                                        {(sub.services || []).length} {t('records')}
                                     </span>
                                 </div>
                                 <SectionCopyButton
                                     categoryId={id}
                                     subsectionId={subId}
-                                    label={sub.title}
+                                    label={shownTitle(sub)}
                                     variant="subsection"
                                 />
                             </div>
@@ -7142,7 +7578,7 @@
                     data-entry-subsection={subsectionId || undefined}
                     data-tracking-name={s.trackingName || s.org}
                 >
-                    <div className="mh-card-inner" style={{ direction: s.dir || 'rtl', textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
+                    <div className="mh-card-inner" lang={s.dir === 'ltr' ? 'en' : 'he'} dir={s.dir === 'ltr' ? 'ltr' : 'rtl'} style={{ textAlign: s.dir === 'ltr' ? 'left' : 'right' }}>
                         {entryId && (
                             <button
                                 type="button"
@@ -7214,7 +7650,7 @@
                         {distanceLabel && <p className="mh-nearby-distance">{distanceLabel}</p>}
                         {showHbLaunchBanner && (
                             <div className="mh-hb-launch-banner" role="status">
-                                החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.
+                                {t('hbBanner')}
                             </div>
                         )}
                         {showHbLaunchCta && (
@@ -7224,7 +7660,7 @@
                                 onClick={() => applyHaravotBarzelSearch('card')}
                                 data-tracking-name="haravot_barzel_filter_from_booklet"
                             >
-                                <i className="fas fa-shield-halved"></i> הצגת כל המענים לחרבות ברזל
+                                <i className="fas fa-shield-halved"></i> {t('hbCta')}
                             </button>
                         )}
                         {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{mhDialText(s.svc, `svc-${s.row}`)}</p>}
@@ -7552,7 +7988,7 @@
                                                             <span className="mh-pick-text">
                                                                 <span className="mh-pick-title">
                                                                     {loc.label}{nearestMark}
-                                                                    {km != null && <span className="mh-map-km"> · {mhFormatKm(km)} ק״מ</span>}
+                                                                    {km != null && <span className="mh-map-km"> · {mhFormatKm(km)} {t('km')}</span>}
                                                                 </span>
                                                                 {detail ? <span className="mh-pick-detail">{detail}</span> : null}
                                                                 {loc.note ? <span className="mh-pick-note">{loc.note}</span> : null}
@@ -7594,22 +8030,21 @@
                         role="link"
                         tabIndex={0}
                         onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && goToGroup(groupId)}
-                        aria-label={`${group.title} - ${group.titleEn}. ${count} שירותים. לחצו לצפייה`}
+                        aria-label={`${shownTitle(group)}. ${count} ${count === 1 ? t('service') : t('services')}. ${t('clickToView')}`}
                     >
-                        <SectionCopyButton groupId={groupId} label={group.title} variant="group" />
+                        <SectionCopyButton groupId={groupId} label={shownTitle(group)} variant="group" />
                         <div className="mh-category-card-icon">
                             <i className={`fas ${isUrgent ? 'fa-exclamation-triangle' : group.icon}`}></i>
                         </div>
                         <div>
-                            <div className="mh-category-card-title">{group.title}</div>
-                            <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>{group.titleEn}</div>
+                            <div className="mh-category-card-title">{shownTitle(group)}</div>
                         </div>
-                        {group.desc && <p className="mh-category-card-desc">{group.desc}</p>}
+                        {group.desc && <p className="mh-category-card-desc" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>{group.desc}</p>}
                         <div className="mh-category-card-meta">
                             <span className="mh-category-card-badge">
-                                {count} {count === 1 ? 'שירות' : 'שירותים'}
+                                {count} {count === 1 ? t('service') : t('services')}
                             </span>
-                            {isUrgent && <span className="mh-category-card-badge">דחוף</span>}
+                            {isUrgent && <span className="mh-category-card-badge">{t('urgent')}</span>}
                         </div>
                     </div>
                 );
@@ -7645,35 +8080,35 @@
             const runNearbyGeocode = async (addr) => {
                 const q = String(addr || '').trim();
                 if (q.length < 2) {
-                    setNearbyStatus('נא להזין כתובת או יישוב');
+                    setNearbyStatus(t('nearbyNeedAddress'));
                     return;
                 }
                 setNearbyBusy(true);
-                setNearbyStatus('מחפש כתובת…');
+                setNearbyStatus(t('nearbySearching'));
                 try {
                     const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
                     const body = await res.json();
                     if (!res.ok || !body.found) {
                         setNearbyOrigin(null);
-                        setNearbyStatus('לא נמצאה כתובת בישראל. נסו יישוב או רחוב אחר.');
+                        setNearbyStatus(t('nearbyNotFound'));
                         return;
                     }
                     setNearbyOrigin({ lat: body.lat, lng: body.lng, label: body.display_name, via: 'address' });
                     setNearbyStatus('');
                 } catch {
                     setNearbyOrigin(null);
-                    setNearbyStatus('שגיאה בחיפוש הכתובת. נסו שוב.');
+                    setNearbyStatus(t('nearbyError'));
                 } finally {
                     setNearbyBusy(false);
                 }
             };
             const runNearbyGps = () => {
                 if (!navigator.geolocation) {
-                    setNearbyStatus('הדפדפן אינו תומך במיקום.');
+                    setNearbyStatus(t('nearbyNoGeo'));
                     return;
                 }
                 setNearbyBusy(true);
-                setNearbyStatus('מאתר מיקום…');
+                setNearbyStatus(t('nearbyLocating'));
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         setNearbyOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'המיקום הנוכחי', via: 'gps' });
@@ -7683,7 +8118,7 @@
                     },
                     () => {
                         setNearbyBusy(false);
-                        setNearbyStatus('לא ניתן לקבל מיקום. בדקו הרשאות או הזינו כתובת.');
+                        setNearbyStatus(t('nearbyDenied'));
                     },
                     { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 }
                 );
@@ -8111,16 +8546,55 @@
             };
 
 
+            const languageControl = (onHero) => (
+                <div className="mh-lang" ref={langMenuRef}>
+                    <button
+                        type="button"
+                        className={`mh-btn mh-lang-btn${onHero ? ' mh-hero-btn-ghost' : ''}`}
+                        style={onHero ? undefined : { background: 'var(--primary)', color: 'white' }}
+                        aria-expanded={langMenuOpen}
+                        aria-haspopup="menu"
+                        aria-controls="mh-lang-menu"
+                        aria-label={t('language')}
+                        title={t('language')}
+                        onClick={() => { setLangMenuOpen((v) => !v); setAccountMenuOpen(false); }}
+                        data-tracking-name="language_menu"
+                    >
+                        <i className="fas fa-language" aria-hidden="true"></i>
+                    </button>
+                    {langMenuOpen && (
+                        <div id="mh-lang-menu" className="mh-lang-menu" role="menu" aria-label={t('language')}>
+                            {MH_LOCALES.map((item) => (
+                                <button
+                                    key={item.code}
+                                    type="button"
+                                    role="menuitemradio"
+                                    aria-checked={locale === item.code}
+                                    className={locale === item.code ? 'mh-lang-current' : ''}
+                                    onClick={() => chooseLocale(item.code)}
+                                    data-tracking-name={`language_${item.code}`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+
             if (resourcePage) {
                 const backBtn = (
-                    <button
-                        onClick={closeResourcePage}
-                        className="mh-btn"
-                        style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }}
-                        data-tracking-name={`resource_back_${resourcePage}`}
-                    >
-                        ← חזרה לספרים, סרטים ו-TED
-                    </button>
+                    <div className="mh-hero-account-cluster" style={{ marginBottom: 'var(--space-xl)' }}>
+                        <button
+                            onClick={closeResourcePage}
+                            className="mh-btn"
+                            style={{ background: 'var(--primary)', color: 'white' }}
+                            data-tracking-name={`resource_back_${resourcePage}`}
+                        >
+                            {locale === 'en' ? '← Back to books, films and TED' : '← חזרה לספרים, סרטים ו-TED'}
+                        </button>
+                        {languageControl(false)}
+                    </div>
                 );
 
                 if (resourcePage === 'books') {
@@ -8340,10 +8814,13 @@
             if (showTerms) {
                 return (
                     <div className="mh-app" style={{ maxWidth: '1000px' }}>
-                        <button onClick={closeTerms} className="mh-btn" style={{ background: 'var(--primary)', color: 'white', marginBottom: 'var(--space-xl)' }} data-tracking-name="terms_back">
-                            ← חזרה
-                        </button>
-                        <div className="mh-modal mh-modal-terms-flow">
+                        <div className="mh-hero-account-cluster" style={{ marginBottom: 'var(--space-xl)' }}>
+                            <button onClick={closeTerms} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="terms_back">
+                                {locale === 'en' ? '← Back' : '← חזרה'}
+                            </button>
+                            {languageControl(false)}
+                        </div>
+                        <div className="mh-modal mh-modal-terms-flow" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
                             <div className="mh-terms-wrap">
                                 <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                                     <i className="fas fa-book"></i>
@@ -8741,6 +9218,7 @@
                 <div className="mh-app">
                     <div className="mh-hero" style={{ background: 'var(--primary)' }}>
                         <div className="mh-hero-account-bar">
+                            <div className="mh-hero-account-cluster">
                             <div className="mh-account" ref={accountMenuRef}>
                                 {authUser ? (
                                     <>
@@ -8750,38 +9228,40 @@
                                             aria-expanded={accountMenuOpen}
                                             aria-haspopup="menu"
                                             aria-controls="mh-account-menu"
-                                            onClick={() => setAccountMenuOpen((v) => !v)}
+                                            onClick={() => { setAccountMenuOpen((v) => !v); setLangMenuOpen(false); }}
                                             data-tracking-name="auth_account_menu"
                                         >
-                                            <i className="fas fa-user"></i> החשבון שלי
+                                            <i className="fas fa-user"></i> {t('myAccount')}
                                         </button>
                                         {accountMenuOpen && (
                                             <div id="mh-account-menu" className="mh-account-menu" role="menu">
                                                 <div className="mh-account-email">{authUser.email}</div>
-                                                <button type="button" role="menuitem" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">עדכון פרטים</button>
-                                                <a role="menuitem" href="/care" data-tracking-name="auth_care">התיק שלי</a>
+                                                <button type="button" role="menuitem" onClick={() => openAuth('profile')} data-tracking-name="auth_edit_profile">{t('editProfile')}</button>
+                                                <a role="menuitem" href="/care" data-tracking-name="auth_care">{t('myFile')}</a>
                                                 {authUser.isAdmin && (
-                                                    <a role="menuitem" href="/admin" data-tracking-name="auth_admin">אדמין</a>
+                                                    <a role="menuitem" href="/admin" data-tracking-name="auth_admin">{t('admin')}</a>
                                                 )}
-                                                <button type="button" role="menuitem" onClick={logout} data-tracking-name="auth_logout">יציאה</button>
+                                                <button type="button" role="menuitem" onClick={logout} data-tracking-name="auth_logout">{t('signOut')}</button>
                                             </div>
                                         )}
                                     </>
                                 ) : (
                                     <button type="button" className="mh-btn mh-hero-btn-ghost" onClick={() => openAuth('login')} data-tracking-name="auth_open">
-                                        <i className="fas fa-user"></i> כניסה / הרשמה
+                                        <i className="fas fa-user"></i> {t('signIn')}
                                     </button>
                                 )}
+                            </div>
+                            {languageControl(true)}
                             </div>
                         </div>
                         <div className="mh-hero-inner">
                             <div className="mh-hero-text">
                                 {selectedCategoryGroup ? (
-                                    <p className="mh-hero-site">{MH_SITE_TITLE}</p>
+                                    <p className="mh-hero-site">{t('siteTitle')}</p>
                                 ) : (
-                                    <h1>{MH_SITE_TITLE}</h1>
+                                    <h1>{t('siteTitle')}</h1>
                                 )}
-                                <p>מידע מקיף למתמודדי נפש ומשפחותיהם</p>
+                                <p>{t('tagline')}</p>
                             </div>
                             <div className="mh-hero-actions">
                                 <span className="mh-hb-tooltip-wrap">
@@ -8797,19 +9277,19 @@
                                             boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
                                         }}
                                         aria-describedby="mh-hb-tooltip-text"
-                                        aria-label="חרבות ברזל — לחיצה מפעילה חיפוש לכל המענים הרלוונטיים"
+                                        aria-label={t('ironSwordsLabel')}
                                         data-tracking-name="haravot_barzel_filter"
                                     >
-                                        <i className="fas fa-shield-halved"></i> חרבות ברזל
+                                        <i className="fas fa-shield-halved"></i> {t('ironSwords')}
                                     </button>
                                     <span id="mh-hb-tooltip-text" className="mh-hb-tooltip" role="tooltip">
-                                        לחיצה מפעילה חיפוש לכל המענים הרלוונטיים לחרבות ברזל.<br />
-                                        הרחיבו את המקטעים בתוצאות כדי לראות את כל השירותים.
+                                        {t('ironSwordsTip1')}<br />
+                                        {t('ironSwordsTip2')}
                                     </span>
                                 </span>
                                 {!showIntro && (
                                     <button type="button" onClick={() => setIntroVisible(true)} className="mh-btn mh-hero-btn-ghost" data-tracking-name="אתם לא לבד">
-                                        <i className="fas fa-heart"></i> אתם לא לבד
+                                        <i className="fas fa-heart"></i> {t('notAlone')}
                                     </button>
                                 )}
                                 <button type="button" onClick={() => {
@@ -8819,10 +9299,10 @@
                                     setFocusedTermCat(null);
                                     setShowTerms(true);
                                 }} className="mh-btn mh-hero-btn-ghost" data-tracking-name="מילון מונחים">
-                                    <i className="fas fa-book"></i> מילון מונחים
+                                    <i className="fas fa-book"></i> {t('glossary')}
                                 </button>
                                 <button type="button" onClick={openAsk} className="mh-btn mh-hero-btn-ghost" data-tracking-name="ask_open">
-                                    <i className="fas fa-comments"></i> שאלה?
+                                    <i className="fas fa-comments"></i> {t('ask')}
                                 </button>
                             </div>
                         </div>
@@ -8837,11 +9317,11 @@
                         </div>
                     )}
 
-                    <div className="mh-credits">
-                        <p>דף זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר</p>
+                    <div className="mh-credits" lang={locale === 'en' ? 'en' : 'he'} dir={locale === 'en' ? 'ltr' : 'rtl'}>
+                        <p>{t('creditsCreated')}</p>
                         {' '}
                         <p>
-                            להערות, תיקונים והוספות, נא ליצור קשר בוואטסאפ{' '}
+                            {t('creditsContact')}{' '}
                             <a
                                 href="https://wa.me/972544787720"
                                 target="_blank"
@@ -8864,7 +9344,7 @@
 
                     {showAuth && (
                         <div className="mh-auth-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) closeAuth(); }}>
-                            <div className="mh-auth-modal" role="dialog" aria-modal="true" aria-labelledby="mh-auth-title">
+                            <div className="mh-auth-modal" role="dialog" aria-modal="true" aria-labelledby="mh-auth-title" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
                                 <button type="button" className="mh-modal-close" onClick={closeAuth} aria-label="סגור" data-tracking-name="auth_close"><i className="fas fa-times"></i></button>
                                 {(authTab === 'login' || authTab === 'register' || authTab === 'forgot') && (
                                     <div className="mh-auth-tabs">
@@ -9261,32 +9741,26 @@
 
                     {showIntro && (
                         <div className="mh-modal mh-intro-card" style={{ lineHeight: 1.6 }}>
-                            <button type="button" className="mh-intro-dismiss" onClick={() => setIntroVisible(false)} aria-label="הסתרת הודעת הפתיחה" title="הסתרה. אפשר לפתוח שוב מאתם לא לבד." data-tracking-name="intro_dismiss">
+                            <button type="button" className="mh-intro-dismiss" onClick={() => setIntroVisible(false)} aria-label={t('introDismiss')} title={t('introDismissTitle')} data-tracking-name="intro_dismiss">
                                 <i className="fas fa-times"></i>
                             </button>
-                            <div className="mh-intro-wrap" style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
-                                <p className="mh-intro-title">ברוכים הבאים</p>
+                            <div className="mh-intro-wrap" lang={locale === 'en' ? 'en' : 'he'} dir={locale === 'en' ? 'ltr' : 'rtl'} style={{ fontSize: 'var(--text-base)', color: 'var(--text)' }}>
+                                <p className="mh-intro-title">{t('welcomeTitle')}</p>
                                 <div className="mh-intro-preview">
                                     <p style={{ margin: 0 }}>
-                                        אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.
-                                        {!showFullIntro && (
-                                            <button type="button" className="mh-intro-more mh-intro-more-split" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_he">קרא עוד</button>
-                                        )}
-                                    </p>
-                                    <p style={{ margin: 0, direction: 'ltr', textAlign: 'left', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-                                        If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.
-                                        {!showFullIntro && (
-                                            <button type="button" className="mh-intro-more mh-intro-more-split" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_en">Read More</button>
+                                        {t('welcomeLead')}
+                                        {locale === 'he' && !showFullIntro && (
+                                            <button type="button" className="mh-intro-more mh-intro-more-split" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_he">{t('readMore')}</button>
                                         )}
                                     </p>
                                 </div>
-                                {!showFullIntro && (
+                                {locale === 'he' && !showFullIntro && (
                                     <p className="mh-intro-more-end">
-                                        <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_mobile">קרא עוד | Read More</button>
+                                        <button type="button" className="mh-intro-more" onClick={() => setShowFullIntro(true)} data-tracking-name="intro_read_more_mobile">{t('readMore')}</button>
                                     </p>
                                 )}
 
-                                {showFullIntro && (
+                                {locale === 'he' && showFullIntro && (
                                     <>
                                         <p style={{ marginBottom: '10px', color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
                                             בעמוד זה: מידע, קישורים לשירותים וקווי סיוע — ללא הבטחה לזמינות השירותים.
@@ -9313,26 +9787,6 @@
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
                                                 <strong>אנחנו מבינים - לפעמים קשה לדבר.</strong> יש בושה, יש חשש, יש פחד מה יגידו או מה יחשבו. אז חשוב שתדעו: השיחות האלה <strong>אנונימיות לחלוטין</strong>. אתם לא צריכים לומר את השם שלכם, לא צריכים להסביר יותר ממה שנוח לכם. ואם קשה לדבר בטלפון - <strong>יש גם צ'אט ווואטסאפ אנונימי</strong> (סה"ר - סיוע והקשבה ברשת). המתנדבים והמטפלים האלה כאן בשביל זה, הם שומעים והם מבינים. זה בסדר לבקש עזרה.
-                                            </p>
-                                        </div>
-
-                                        <div style={{ background: 'var(--danger-bg)', color: 'white', padding: 'var(--space-xl)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-xl)', boxShadow: 'var(--shadow-elevated)', direction: 'ltr', textAlign: 'left' }}>
-                                            <p style={{ fontWeight: 'bold', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-xl)' }}>
-                                                <i className="fas fa-exclamation-triangle"></i> If you are in a crisis situation or immediate danger - don't search. Just call now:
-                                            </p>
-                                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ERAN: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201_en" data-analytics-type="phone">1201</a></strong>
-                                                <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>Available 24/7 | Free | Completely anonymous</p>
-                                            </div>
-                                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>Nefesh Achat (One Soul): <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944_en" data-analytics-type="phone"><bdi dir="ltr" className="mh-dial">*8944</bdi></a></strong>
-                                                <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>For soldiers and security forces | Anonymous</p>
-                                            </div>
-                                            <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
-                                                <strong>We understand - sometimes it's hard to talk.</strong> There's shame, there's concern, there's fear of what they'll say or what they'll think. So it's important you know: these calls are <strong>completely anonymous</strong>. You don't need to give your name, you don't need to explain more than what's comfortable for you. And if it's hard to talk on the phone - <strong>there's also an anonymous WhatsApp chat</strong> (SAHAR - Online Support and Listening). These volunteers and therapists are here for this, they listen and they understand. It's okay to ask for help.
-                                            </p>
-                                            <p style={{ marginTop: '15px', fontStyle: 'italic', fontSize: '0.95rem' }}>
-                                                <strong>To search for resources for English-speakers, type "English" in the search bar</strong>.
                                             </p>
                                         </div>
 
@@ -9391,10 +9845,10 @@
                                         </p>
                                         <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
 <button type="button" onClick={() => setIntroVisible(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
-                                            סגור | Close
+                                            סגור
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
-                                                ניתן לפתוח שוב מהכפתור "אתם לא לבד" למעלה | Can be reopened from button above
+                                                ניתן לפתוח שוב מהכפתור "אתם לא לבד" למעלה
                                             </p>
                                         </div>
                                     </>
@@ -9414,73 +9868,70 @@
                                     data-tracking-name={emergencyCollapsed ? 'emergency_expand' : 'emergency_collapse'}
                                 >
                                     <h2 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>
-                                        <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
+                                        <i className="fas fa-exclamation-triangle"></i> {t('emergency')}
                                     </h2>
                                     <span className="mh-emergency-toggle-label">
-                                        {emergencyCollapsed ? 'הצגת כל הקווים ▼' : 'הסתרה ▲'}
+                                        {emergencyCollapsed ? t('showLines') : t('hideLines')}
                                     </span>
                                 </button>
                                 {emergencyCollapsed && (
                                     <a href="tel:1201" className="mh-emergency-call mh-emergency-quick" data-tracking-name="emergency_eran_1201_collapsed" data-analytics-type="phone">
-                                        <i className="fas fa-phone"></i> ער"ן 1201
+                                        <i className="fas fa-phone"></i> {t('eranQuick')}
                                     </a>
                                 )}
                             </div>
                         ) : (
                             <h2 style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-xl)' }}>
-                                <i className="fas fa-exclamation-triangle"></i> עזרה דחופה
+                                <i className="fas fa-exclamation-triangle"></i> {t('emergency')}
                             </h2>
                         )}
                         {!emergencyCollapsed && (
                         <div id="mh-emergency-body" style={selectedCategoryGroup ? { marginTop: 'var(--space-md)' } : undefined}>
                         <p style={{ margin: '0 0 var(--space-sm)', fontSize: 'var(--text-sm)', opacity: 0.95 }}>
-                            קווי חירום וקווי תמיכה. השירותים המפורטים זמינים בישראל. מחוץ לישראל יש לפנות לשירותי החירום והתמיכה המקומיים.
-                        </p>
-                        <p style={{ margin: '0 0 var(--space-lg)', fontSize: 'var(--text-sm)', opacity: 0.95, direction: 'ltr', textAlign: 'left' }}>
-                            Services listed are available in Israel. If you are outside Israel, please contact your local emergency or mental health services.
+                            {t('emergencyIntro')}
                         </p>
                         <p style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', opacity: 0.9 }}>
-                            לחצו על המספר לחיוג
+                            {t('tapToCall')}
                         </p>
                         <div className="mh-emergency-grid">
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>ער"ן <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו חירום</span></h3>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('eranName')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('hotline')}</span></h3>
                                 <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> 1201
                                 </a>
-                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7 | חינם | אנונימי</p>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('freeAnon')}</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)', lineHeight: 1.3 }}>איגוד מרכזי הסיוע לנפגעות ולנפגעי תקיפה מינית <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קווי מענה</span></h3>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)', lineHeight: 1.3 }}>{t('assaultTitle')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('helplines')}</span></h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
                                         <a href="tel:1202" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-lg)', fontWeight: 'bold', textDecoration: 'none', minHeight: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', flexShrink: 0 }} data-tracking-name="emergency_igud_1202_women" data-analytics-type="phone">
                                             <i className="fas fa-phone"></i> 1202
                                         </a>
-                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>מענה על ידי נשים</span>
+                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>{t('answeredByWomen')}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
                                         <a href="tel:1203" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-lg)', fontWeight: 'bold', textDecoration: 'none', minHeight: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', flexShrink: 0 }} data-tracking-name="emergency_igud_1203_men" data-analytics-type="phone">
                                             <i className="fas fa-phone"></i> 1203
                                         </a>
-                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>מענה על ידי גברים</span>
+                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>{t('answeredByMen')}</span>
                                     </div>
                                 </div>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', opacity: 0.9 }}>24/7</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>נפש אחת <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('nefeshAchat')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('supportLine')}</span></h3>
                                 <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> <bdi dir="ltr" className="mh-dial">*8944</bdi>
                                 </a>
-                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>חיילים וכוחות ביטחון</p>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('soldiers')}</p>
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
-                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>סה"ר - צ'אט <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— קו תמיכה</span></h3>
+                                <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('sahar')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('supportLine')}</span></h3>
                                 <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
-                                    <i className="fas fa-comment"></i> לצ'אט →
+                                    <i className="fas fa-comment"></i> {t('toChat')}
                                 </a>
-                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>ווואטסאפ | אנונימי</p>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('whatsappAnon')}</p>
                             </div>
                         </div>
                         </div>
@@ -9489,12 +9940,12 @@
 
                     <div className="mh-search-wrap">
                         <div className="mh-search-field">
-                            <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-lg)', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '1.1rem' }}></i>
+                            <i className="fas fa-search mh-search-icon" aria-hidden="true"></i>
                             <input
                                 type="text"
                                 placeholder={selectedCategoryGroup
-                                    ? `חיפוש ב${CATEGORY_GROUPS[selectedCategoryGroup].title}`
-                                    : 'חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)'}
+                                    ? mhFill(t('searchIn'), { title: shownTitle(CATEGORY_GROUPS[selectedCategoryGroup]) })
+                                    : t('searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={(e) => {
                                     const v = e.target.value;
@@ -9514,7 +9965,7 @@
                                     window.mhAnalytics?.trackSearch('services_main', e.target.value, { results_count: resultsCount });
                                 }}
                                 className={`mh-search-input${searchTerm.trim() ? ' mh-search-input-with-share' : searchTerm ? ' mh-search-input-with-clear' : ''}`}
-                                aria-label="חיפוש שירותים"
+                                aria-label={t('searchLabel')}
                             />
                             {searchTerm ? (
                                 <button
@@ -9526,8 +9977,8 @@
                                         setHaravotBarzelLaunchedFrom(null);
                                         e.currentTarget.parentElement.querySelector('.mh-search-input')?.focus();
                                     }}
-                                    title="ניקוי החיפוש"
-                                    aria-label="ניקוי החיפוש"
+                                    title={t('clearSearch')}
+                                    aria-label={t('clearSearch')}
                                     data-tracking-name="search_clear"
                                 >
                                     <i className="fas fa-times" aria-hidden="true"></i>
@@ -9544,12 +9995,12 @@
                                     onClick={() => copyText(
                                         buildSearchLink(searchTerm),
                                         {
-                                            toastMessage: 'קישור לחיפוש הועתק',
+                                            toastMessage: t('searchCopiedToast'),
                                             onSuccess: markSearchLinkCopied
                                         }
                                     )}
-                                    title={copiedSearchLink ? 'הקישור הועתק' : 'העתק קישור לחיפוש'}
-                                    aria-label={copiedSearchLink ? 'הקישור הועתק' : 'העתק קישור לחיפוש'}
+                                    title={copiedSearchLink ? t('linkCopied') : t('copySearchLink')}
+                                    aria-label={copiedSearchLink ? t('linkCopied') : t('copySearchLink')}
                                     data-tracking-name="copy_search_link"
                                     data-analytics-type="share"
                                     data-share-kind="search"
@@ -9559,28 +10010,46 @@
                                 </button>
                             ) : null}
                         </div>
+                        <label className="mh-show-all">
+                            <input
+                                type="checkbox"
+                                checked={showAllCards}
+                                onChange={(e) => {
+                                    const next = e.target.checked;
+                                    window.__mhShowAllCards = next;
+                                    setShowAllCards(next);
+                                    mhTrackEvent('click', {
+                                        element_id: 'show_all_cards',
+                                        element_type: 'toggle',
+                                        element_text_short: next ? 'on' : 'off',
+                                        section: 'search'
+                                    });
+                                }}
+                            />
+                            {t('showEveryLanguage')}
+                        </label>
                         {(searchTerm || cardFilterOn) && Object.entries(filtered).length === 0 && (
                             <p className="mh-helper-text mh-search-empty">
                                 {selectedCategoryGroup
-                                    ? `לא נמצאו שירותים התואמים לחיפוש ב${CATEGORY_GROUPS[selectedCategoryGroup].title}.`
-                                    : 'לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.'}
+                                    ? mhFill(t('noResultsIn'), { title: shownTitle(CATEGORY_GROUPS[selectedCategoryGroup]) })
+                                    : t('noResults')}
                             </p>
                         )}
                         {searchTerm.trim() && selectedCategoryGroup && (
                             <p className="mh-helper-text mh-search-scope">
-                                מחפשים רק ב{CATEGORY_GROUPS[selectedCategoryGroup].title}.{' '}
+                                {mhFill(t('searchingOnly'), { title: shownTitle(CATEGORY_GROUPS[selectedCategoryGroup]) })}{' '}
                                 <button type="button" className="mh-search-scope-all" onClick={() => goToGroup(null)} data-tracking-name="search_whole_directory">
-                                    חיפוש בכל המדריך
+                                    {t('searchAll')}
                                 </button>
                             </p>
                         )}
                         {directorySource === 'database' && (
                             <details className="mh-card-filter">
                                 <summary data-tracking-name="card_filter_toggle">
-                                    <i className="fas fa-filter" aria-hidden="true"></i> סינון לפי סוג הכרטיס והמימון
+                                    <i className="fas fa-filter" aria-hidden="true"></i> {t('filterSummary')}
                                 </summary>
-                                <div className="mh-card-filter-group" role="group" aria-label="מה יש בכרטיס">
-                                    <span className="mh-card-filter-label">מה יש בכרטיס:</span>
+                                <div className="mh-card-filter-group" role="group" aria-label={t('onTheCardLabel')}>
+                                    <span className="mh-card-filter-label">{t('onTheCard')}</span>
                                     {MH_OFFER_ORDER.map((code) => (
                                         <button
                                             key={code}
@@ -9590,7 +10059,7 @@
                                             onClick={() => setCardFilter((f) => ({ ...f, offer: f.offer === code ? '' : code }))}
                                             data-tracking-name={`card_filter_offer_${code}`}
                                         >
-                                            {MH_OFFER_LABELS_HE[code]}
+                                            {(locale === 'en' ? MH_OFFER_LABELS_EN : MH_OFFER_LABELS_HE)[code]}
                                         </button>
                                     ))}
                                     <button
@@ -9600,11 +10069,11 @@
                                         onClick={() => setCardFilter((f) => ({ ...f, hideInfoOnly: !f.hideInfoOnly }))}
                                         data-tracking-name="card_filter_hide_info_only"
                                     >
-                                        הסתרת «מידע בלבד»
+                                        {t('hideInfo')}
                                     </button>
                                 </div>
-                                <div className="mh-card-filter-group" role="group" aria-label="מימון">
-                                    <span className="mh-card-filter-label">מימון:</span>
+                                <div className="mh-card-filter-group" role="group" aria-label={t('fundingLabel')}>
+                                    <span className="mh-card-filter-label">{t('funding')}</span>
                                     {MH_FUNDING_ORDER.map((code) => (
                                         <button
                                             key={code}
@@ -9614,17 +10083,17 @@
                                             onClick={() => setCardFilter((f) => ({ ...f, funding: f.funding === code ? '' : code }))}
                                             data-tracking-name={`card_filter_funding_${code}`}
                                         >
-                                            {MH_FUNDING_LABELS_HE[code]}
+                                            {(locale === 'en' ? MH_FUNDING_LABELS_EN : MH_FUNDING_LABELS_HE)[code]}
                                         </button>
                                     ))}
                                 </div>
                                 <p className="mh-helper-text mh-card-filter-note">
-                                    כרטיסים שעוד לא סומנו מוצגים תמיד.
+                                    {t('unmarkedAlways')}
                                     {cardFilterOn && (
                                         <>
                                             {' '}
                                             <button type="button" className="mh-search-scope-all" onClick={() => setCardFilter(MH_CARD_FILTER_EMPTY)} data-tracking-name="card_filter_clear">
-                                                ניקוי הסינון
+                                                {t('clearFilter')}
                                             </button>
                                         </>
                                     )}
@@ -9641,11 +10110,11 @@
                             data-tracking-name="nearby_toggle"
                         >
                             <i className="fas fa-map-location-dot" aria-hidden="true"></i>
-                            שירותים קרובים אלי
+                            {t('nearby')}
                         </button>
                         {nearbyExpanded && (
                             <div className="mh-nearby-panel" id="mh-nearby-panel">
-                                <p className="mh-nearby-bar-hint">הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן</p>
+                                <p className="mh-nearby-bar-hint">{t('nearbyHint')}</p>
                                 <form
                                     className="mh-nearby-bar"
                                     onSubmit={(e) => {
@@ -9658,7 +10127,7 @@
                                     {nearbyOrigin?.via === 'gps' ? (
                                         <span className="mh-nearby-gps-chip" role="status">
                                             <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
-                                            מציג לפי המיקום שזיהה הדפדפן
+                                            {t('showingGps')}
                                         </span>
                                     ) : (
                                         <>
@@ -9667,14 +10136,14 @@
                                                 type="text"
                                                 value={nearbyAddress}
                                                 onChange={(e) => setNearbyAddress(e.target.value)}
-                                                placeholder="כתובת או יישוב"
+                                                placeholder={t('addressPlaceholder')}
                                                 autoComplete="street-address"
                                                 aria-labelledby="mh-nearby-bar-label"
                                             />
                                             <button type="submit" className="mh-nearby-bar-btn" style={{ background: 'var(--primary)', color: 'white', border: 'none' }} disabled={nearbyBusy} data-tracking-name="nearby_search">
-                                                {nearbyBusy ? 'מחפש…' : 'חפש כתובת'}
+                                                {nearbyBusy ? t('searching') : t('searchAddress')}
                                             </button>
-                                            <span className="mh-nearby-or" aria-hidden="true">או</span>
+                                            <span className="mh-nearby-or" aria-hidden="true">{t('or')}</span>
                                             <button
                                                 type="button"
                                                 className="mh-nearby-bar-btn mh-nearby-bar-btn-gps"
@@ -9684,10 +10153,10 @@
                                                 }}
                                                 disabled={nearbyBusy}
                                                 data-tracking-name="nearby_gps"
-                                                aria-label="חפש לפי המיקום שזיהה הדפדפן"
+                                                aria-label={t('searchMyLocationLabel')}
                                             >
                                                 <i className="fas fa-location-crosshairs" aria-hidden="true"></i>
-                                                {nearbyBusy ? 'מאתר מיקום…' : 'חפש לפי המיקום שלי'}
+                                                {nearbyBusy ? t('locating') : t('searchMyLocation')}
                                             </button>
                                         </>
                                     )}
@@ -9695,13 +10164,13 @@
                                         id="mh-nearby-radius"
                                         value={nearbyRadiusKm}
                                         onChange={(e) => setNearbyRadiusKm(Number(e.target.value))}
-                                        aria-label="רדיוס חיפוש"
+                                        aria-label={t('radius')}
                                     >
-                                        <option value={5}>5 ק״מ</option>
-                                        <option value={10}>10 ק״מ</option>
-                                        <option value={25}>25 ק״מ</option>
-                                        <option value={50}>50 ק״מ</option>
-                                        <option value={100}>100 ק״מ</option>
+                                        <option value={5}>{`5 ${t('km')}`}</option>
+                                        <option value={10}>{`10 ${t('km')}`}</option>
+                                        <option value={25}>{`25 ${t('km')}`}</option>
+                                        <option value={50}>{`50 ${t('km')}`}</option>
+                                        <option value={100}>{`100 ${t('km')}`}</option>
                                     </select>
                                     {(nearbyOrigin || nearbyAddress) && (
                                         <button
@@ -9714,7 +10183,7 @@
                                             }}
                                             data-tracking-name="nearby_clear"
                                         >
-                                            נקה
+                                            {t('clear')}
                                         </button>
                                     )}
                                 </form>
@@ -9726,7 +10195,7 @@
                     {activeTermCardsKey && (
                         <div className="mh-termcards-banner">
                             <p className="mh-helper-text" style={{ margin: 0 }}>
-                                שירותים הקשורים ל«{terms[activeTermCardsKey].title}».
+                                {mhFill(t('relatedServices'), { title: terms[activeTermCardsKey].title })}
                             </p>
                             {activeTermCardsKey === 'multidisciplinary_center' && (
                                 <div className="mh-card-filter">
@@ -9739,49 +10208,48 @@
                                             onClick={() => setOwnershipFilter((cur) => (cur === code ? '' : code))}
                                             data-tracking-name={`termcards_ownership_${code}`}
                                         >
-                                            {MH_OWNERSHIP_LABELS_HE[code]}
+                                            {(locale === 'en' ? MH_OWNERSHIP_LABELS_EN : MH_OWNERSHIP_LABELS_HE)[code]}
                                         </button>
                                     ))}
                                 </div>
                             )}
                             <GlossaryCopyButton kind="termcards" glossaryKey={activeTermCardsKey} label={terms[activeTermCardsKey].title} />
                             <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-analytics-id="cards_to_glossary" data-analytics-type="cards_to_glossary" data-analytics-term={activeTermCardsKey} data-analytics-section="glossary" data-analytics-text={terms[activeTermCardsKey].title} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
-                                חזרה למונח
+                                {t('backToTerm')}
                             </button>
                             <button type="button" className="mh-search-scope-all" onClick={clearTermCards} data-tracking-name="termcards_clear">
-                                הצגת כל המדריך
+                                {t('showAll')}
                             </button>
                         </div>
                     )}
 
                     {!searchTerm && !cardFilterOn && !activeTermCardsKey && !selectedCategoryGroup && !nearbyOrigin && (
-                        <p className="mh-helper-text">בחרו קטגוריה כדי לצפות בשירותים הזמינים | Select a category to view available services</p>
+                        <p className="mh-helper-text">{t('chooseCategory')}</p>
                     )}
                     {!searchTerm && !activeTermCardsKey && selectedCategoryGroup && !nearbyOrigin && (
                         <p className="mh-helper-text" style={{ marginTop: 0 }}>
-                            סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף
+                            {t('linkHint')}
                         </p>
                     )}
 
                     {directorySource === 'loading' ? (
-                        <p className="mh-helper-text" role="status">טוען את המדריך…</p>
+                        <p className="mh-helper-text" role="status">{t('loading')}</p>
                     ) : (searchTerm || cardFilterOn || activeTermCardsKey) ? (
                         Object.entries(filtered).length === 0 ? (
                             activeTermCardsKey && !searchTerm && !cardFilterOn ? (
-                                <p className="mh-helper-text">אין שירותים במדריך שמקושרים למונח הזה.</p>
+                                <p className="mh-helper-text">{t('noLinked')}</p>
                             ) : null
                         ) : Object.entries(filtered).map(([id, cat]) => (
                             <div key={id} style={{ background: 'var(--bg-card)', marginBottom: 'var(--space-xl)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                                 <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="search_results">
                                     <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                     <div className="mh-cat-title">
-                                        <span className="mh-cat-title-he">{cat.title}</span>
+                                        <span className="mh-cat-title-he" lang={locale !== 'he' && !cat.titleEn ? 'he' : undefined} dir={locale !== 'he' && !cat.titleEn ? 'rtl' : undefined}>{shownTitle(cat)}</span>
                                         <span className="mh-cat-meta">
-                                            <SectionCopyButton categoryId={id} label={cat.title} />
+                                            <SectionCopyButton categoryId={id} label={shownTitle(cat)} />
                                             <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
                                             <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{getCatServiceCount(cat)}</span>
                                         </span>
-                                        <span className="mh-cat-title-en">{cat.titleEn}</span>
                                     </div>
                                 </div>
                                 {expandedCats.includes(id) && (
@@ -9795,10 +10263,10 @@
                     ) : nearbyOrigin ? (
                         <div data-section-anchor="nearby_results">
                             <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-lg)' }}>
-                                מציג {nearbyMatches.length} מענים בתוך {nearbyRadiusKm} ק״מ מ־{nearbyOrigin.label || 'הנקודה שנבחרה'}. רק ארגונים עם כתובת פיזית במאגר.
+                                {mhFill(t('nearbyCount'), { count: nearbyMatches.length, km: nearbyRadiusKm, place: nearbyOrigin.label || t('chosenPoint') })}
                             </p>
                             {nearbyMatches.length === 0 && !nearbyBusy && (
-                                <p className="mh-helper-text">לא נמצאו מענים עם כתובת פיזית ברדיוס הזה. נסו להגדיל את הרדיוס, או חפשו לפי קטגוריה — רוב קווי הסיוע הם ארציים.</p>
+                                <p className="mh-helper-text">{t('nearbyNone')}</p>
                             )}
                             {nearbyMatches.length > 0 && (
                                 <div className="mh-cat-grid" style={{ padding: 0 }}>
@@ -9808,7 +10276,7 @@
                                             s={s}
                                             categoryKey={categoryKey}
                                             subsectionId={null}
-                                            distanceLabel={`${mhFormatKm(nearest.km)} ק״מ · ${nearest.loc.label}`}
+                                            distanceLabel={`${mhFormatKm(nearest.km)} ${t('km')} · ${nearest.loc.label}`}
                                         />
                                     ))}
                                 </div>
@@ -9817,13 +10285,13 @@
                     ) : selectedCategoryGroup ? (
                         <div data-section-anchor={`group_${selectedCategoryGroup}`}>
                             <button onClick={() => goToGroup(null)} className="mh-btn mh-subcategory-back" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="back_to_categories">
-                                ← חזרה לכל הקטגוריות
+                                {t('backToCategories')}
                             </button>
                             <h1 style={{ margin: '0 0 var(--space-md)', color: 'var(--primary-dark)', fontSize: 'var(--text-2xl)' }}>
-                                {CATEGORY_GROUPS[selectedCategoryGroup].title}
+                                {shownTitle(CATEGORY_GROUPS[selectedCategoryGroup])}
                             </h1>
                             {CATEGORY_GROUPS[selectedCategoryGroup].intro && (
-                                <div className="mh-group-lede">
+                                <div className="mh-group-lede" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
                                     {CATEGORY_GROUPS[selectedCategoryGroup].intro.split(/\n\n+/).filter(Boolean).map((para, i) => (
                                         <p key={i}>{para}</p>
                                     ))}
@@ -9836,13 +10304,12 @@
                                         <div onClick={() => toggleCat(id)} className="mh-cat-header" style={{ background: id === 'emergency' ? 'var(--danger-bg)' : 'var(--primary)' }} role="button" tabIndex={0} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCat(id)} aria-expanded={expandedCats.includes(id)} data-analytics-id={`subcategory_${id}`} data-analytics-section="category_group">
                                             <span style={{ flexShrink: 0 }}>{expandedCats.includes(id) ? '▲' : '▼'}</span>
                                             <div className="mh-cat-title">
-                                                <span className="mh-cat-title-he">{cat.title}</span>
+                                                <span className="mh-cat-title-he" lang={locale !== 'he' && !cat.titleEn ? 'he' : undefined} dir={locale !== 'he' && !cat.titleEn ? 'rtl' : undefined}>{shownTitle(cat)}</span>
                                                 <span className="mh-cat-meta">
-                                                    <SectionCopyButton categoryId={id} label={cat.title} />
+                                                    <SectionCopyButton categoryId={id} label={shownTitle(cat)} />
                                                     <i className={`fas ${CAT_ICONS[id] || 'fa-folder'}`} style={{ fontSize: '1.25rem' }}></i>
                                                     <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>{getCatServiceCount(cat)}</span>
                                                 </span>
-                                                <span className="mh-cat-title-en">{cat.titleEn}</span>
                                             </div>
                                         </div>
                                         {expandedCats.includes(id) && (
@@ -9864,14 +10331,14 @@
                     )}
 
                     <div className="mh-footer mh-disclaimer">
-                        <p style={{ margin: '0 0 var(--space-md)', fontWeight: 'bold', fontSize: 'var(--text-lg)' }}><i className="fas fa-info-circle"></i> הצהרת אחריות | Disclaimer</p>
+                        <p style={{ margin: '0 0 var(--space-md)', fontWeight: 'bold', fontSize: 'var(--text-lg)' }}><i className="fas fa-info-circle"></i> {t('disclaimer')}</p>
                         <p style={{ margin: '0 0 var(--space-xl)', opacity: 0.9 }}>
-                            המידע לצורכי הכוונה בלבד ואינו מהווה ייעוץ רפואי או משפטי
+                            {t('disclaimerBody')}
                         </p>
                         <p style={{ margin: 0, fontSize: 'var(--text-sm)', opacity: 0.7 }}>
-                            {`עודכן: ${directoryEditedOn || LAST_UPDATED}`}
+                            {`${t('updated')} ${directoryEditedOn || LAST_UPDATED}`}
                             {' · '}
-                            <a href="/privacy" style={{ color: 'inherit' }}>מדיניות פרטיות</a>
+                            <a href="/privacy" style={{ color: 'inherit' }}>{t('privacy')}</a>
                         </p>
                     </div>
                     <div id="mh-link-toast" className={toastMessage ? 'mh-link-toast-visible' : ''} role="status" aria-live="polite">

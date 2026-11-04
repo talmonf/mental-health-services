@@ -39,6 +39,23 @@ const ROOT = path.join(__dirname, '..');
 const GENERATED_DIRS = ['s', 'c', 'g', 'term', 'terms', 'directory', 'privacy', 'emergency', 'treatment', 'rights', 'support', 'information'];
 const GENERATED_FILES = ['sitemap.xml'];
 
+const HEBREW_LETTER = /[\u0590-\u05FF]/;
+const LATIN_LETTER = /[A-Za-z]/;
+const CARD_TEXT_KEYS = ['org', 'svc', 'target', 'region', 'cost', 'specialty', 'notes', 'languages', 'diseases', 'tags'];
+
+// Same rule as mhCardIsEnglishOnly in index.html. Hebrew lists omit these cards.
+// Their own /s/<row> page stays, so an English link to the service still works.
+function cardIsEnglishOnly(raw) {
+  if (!raw) return false;
+  const text = CARD_TEXT_KEYS.map((key) => raw[key] || '').join('\n');
+  if (HEBREW_LETTER.test(text)) return false;
+  return LATIN_LETTER.test(`${raw.org || ''} ${raw.svc || ''}`);
+}
+
+function hebrewListed(entries) {
+  return entries.filter((entry) => !cardIsEnglishOnly(entry.raw));
+}
+
 // ---------------------------------------------------------------- phone parsing
 
 // Phone fields in DATA are free text: "*6690", "כללי: 1599-510-550", "מוקד 'קשובים' 9518*",
@@ -521,13 +538,13 @@ function renderCategoryPage(ctx, categoryId, subsectionId) {
   const title = sub ? `${sub.title} — ${cat.title}` : cat.title;
 
   const members = subsectionId
-    ? published.filter((e) => e.subsections.includes(`${categoryId}/${subsectionId}`))
-    : published.filter((e) => e.categories.includes(categoryId));
+    ? hebrewListed(published).filter((e) => e.subsections.includes(`${categoryId}/${subsectionId}`))
+    : hebrewListed(published).filter((e) => e.categories.includes(categoryId));
 
   const subsectionLinks = !subsectionId && cat.subsections
     ? `<h2>תתי-קטגוריות</h2><ul class="entry-list">${Object.entries(cat.subsections)
         .map(([sid, s]) => {
-          const n = published.filter((e) => e.subsections.includes(`${categoryId}/${sid}`)).length;
+          const n = hebrewListed(published).filter((e) => e.subsections.includes(`${categoryId}/${sid}`)).length;
           return `<li><a href="/c/${esc(categoryId)}/${esc(sid)}">${esc(s.title)}</a> <span class="count">(${n})</span></li>`;
         })
         .join('')}</ul>`
@@ -595,7 +612,7 @@ function renderTermPage(ctx, key, term, slugByKey) {
     .filter((k) => slugByKey[k])
     .map((k) => `<li><a href="/term/${esc(slugByKey[k])}">${esc(ctx.terms[k].title)}</a></li>`)
     .join('');
-  const services = ctx.published
+  const services = hebrewListed(ctx.published)
     .filter((e) => (e.raw.cardTerms || []).includes(key))
     .sort((a, b) => a.org.localeCompare(b.org, 'he'))
     .map((e) => `<li><a href="${esc(e.path)}">${esc(e.org)}</a><span class="svc">${esc(truncate(e.svc, 90))}</span></li>`)
@@ -689,13 +706,13 @@ function renderPrivacyPage() {
 
 function renderDirectoryHub(ctx) {
   const { DATA, CATEGORY_GROUPS, LAST_UPDATED, published } = ctx;
-  const listed = published.filter((e) => !(DATA[e.categories[0]] && DATA[e.categories[0]].unlisted));
+  const listed = hebrewListed(published).filter((e) => !(DATA[e.categories[0]] && DATA[e.categories[0]].unlisted));
   const categoryCount = Object.values(DATA).filter((cat) => !cat.unlisted).length;
   const groups = Object.entries(CATEGORY_GROUPS)
     .map(([gid, g]) => {
       const cats = g.subcategories
         .filter((c) => DATA[c])
-        .map((c) => `<li><a href="/c/${esc(c)}">${esc(DATA[c].title)}</a> <span class="count">(${published.filter((e) => e.categories.includes(c)).length})</span></li>`)
+        .map((c) => `<li><a href="/c/${esc(c)}">${esc(DATA[c].title)}</a> <span class="count">(${hebrewListed(published).filter((e) => e.categories.includes(c)).length})</span></li>`)
         .join('');
       return `<h2><a href="${esc(groupPath(ctx, gid))}">${esc(g.title)}</a></h2><ul class="entry-list">${cats}</ul>`;
     })
@@ -796,13 +813,13 @@ function renderStaticCategory(ctx, categoryId) {
 
   if (cat.subsections) {
     for (const [sid, sub] of Object.entries(cat.subsections)) {
-      const members = published.filter((e) => e.subsections.includes(`${categoryId}/${sid}`));
+      const members = hebrewListed(published).filter((e) => e.subsections.includes(`${categoryId}/${sid}`));
       parts.push(
         `<h3><a href="/c/${esc(categoryId)}/${esc(sid)}">${esc(sub.title)}</a> <span class="count">(${members.length})</span></h3>${renderStaticServiceList(members, ctx)}`
       );
     }
   } else if (!cat.resourceHub) {
-    const members = published.filter((e) => e.categories.includes(categoryId));
+    const members = hebrewListed(published).filter((e) => e.categories.includes(categoryId));
     parts.push(renderStaticServiceList(members, ctx));
   }
 
@@ -852,7 +869,7 @@ function renderGroupAppPage(ctx, groupId, slug) {
   const url = `${T.SITE}/${slug}`;
   const siteTitle = 'מדריך בריאות הנפש בישראל';
   const title = `${group.title} | ${siteTitle}`;
-  const n = published.filter((e) => e.categories.some((c) => group.subcategories.includes(c))).length;
+  const n = hebrewListed(published).filter((e) => e.categories.some((c) => group.subcategories.includes(c))).length;
   const description = truncate(`${group.title}: ${group.desc}. ${n} שירותים ב${siteTitle}.`, 155);
 
   const subs = [
@@ -1088,11 +1105,13 @@ function assertGroupRedirects(data, urls) {
  */
 function assertGlossaryRewrite() {
   const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
-  const hit = (vercel.rewrites || []).find((r) => r.source === '/glossary');
   const expected = vercel.cleanUrls ? '/index' : '/index.html';
-  if (!hit) throw new Error(`missing rewrite /glossary -> ${expected}`);
-  if (hit.destination !== expected) {
-    throw new Error(`/glossary rewrites to ${hit.destination}; expected ${expected}`);
+  for (const source of ['/glossary', '/en']) {
+    const hit = (vercel.rewrites || []).find((r) => r.source === source);
+    if (!hit) throw new Error(`missing rewrite ${source} -> ${expected}`);
+    if (hit.destination !== expected) {
+      throw new Error(`${source} rewrites to ${hit.destination}; expected ${expected}`);
+    }
   }
 }
 

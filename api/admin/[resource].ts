@@ -26,8 +26,10 @@ import {
   normalizeIndicators,
   normalizePublicFields,
   normalizeSites,
+  normalizeTranslations,
   publicFieldsEqual,
   sitesEqual,
+  translationsEqual,
 } from '../../lib/directory-cards';
 import { enqueueImmediateEmails, processOutbox } from '../../lib/email';
 import {
@@ -454,6 +456,27 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
         LIMIT 20`,
       filters.eventParams
     );
+    const byUiLang = await client.query(
+      `SELECT coalesce(nullif(extra->>'ui_lang', ''), '(not recorded)') AS key, count(*)::int AS n
+         FROM events
+        WHERE ${filters.eventWhere}
+        GROUP BY 1
+        ORDER BY n DESC`,
+      filters.eventParams
+    );
+    const byShowAll = await client.query(
+      `SELECT CASE
+                WHEN extra->>'show_all_cards' = 'true' THEN 'yes'
+                WHEN extra->>'show_all_cards' = 'false' THEN 'no'
+                ELSE '(not recorded)'
+              END AS key,
+              count(*)::int AS n
+         FROM events
+        WHERE ${filters.eventWhere}
+        GROUP BY 1
+        ORDER BY n DESC`,
+      filters.eventParams
+    );
 
     const optionCountries = await client.query(
       `SELECT DISTINCT country AS key
@@ -532,6 +555,8 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
       byDevice: byDevice.rows,
       byCountry: byCountry.rows,
       bySection: bySection.rows,
+      byUiLang: byUiLang.rows,
+      byShowAll: byShowAll.rows,
       filterOptions: {
         countries: optionCountries.rows.map((r: { key: string }) => r.key),
         sections: optionSections.rows.map((r: { key: string }) => r.key),
@@ -924,6 +949,8 @@ function directoryCardDetail(row: Record<string, unknown>) {
     hidden: row.hidden === true,
     hiddenInstalled: Object.prototype.hasOwnProperty.call(row, 'hidden'),
     hasEligibility: hasEligibility(row.eligibility),
+    translations: row.translations && typeof row.translations === 'object' && !Array.isArray(row.translations) ? row.translations : {},
+    translationsInstalled: Object.prototype.hasOwnProperty.call(row, 'translations'),
     publicEditedAt: isoTime(row.public_edited_at),
     updatedAt: isoTime(row.updated_at),
   };
@@ -955,6 +982,15 @@ async function indicatorsInstalled(client: Client): Promise<boolean> {
   return rows.length > 0;
 }
 
+/** Migration 112 adds directory_card_edits.translations. */
+async function translationsInstalled(client: Client): Promise<boolean> {
+  const { rows } = await client.query(
+    `SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'directory_card_edits' AND column_name = 'translations'`
+  );
+  return rows.length > 0;
+}
+
 /** Migration 101 adds directory_card_edits.hidden. */
 async function hiddenInstalled(client: Client): Promise<boolean> {
   const { rows } = await client.query(
@@ -964,9 +1000,9 @@ async function hiddenInstalled(client: Client): Promise<boolean> {
   return rows.length > 0;
 }
 
-async function loadDirectoryCard(client: Client, id: number, withIndicators: boolean, withHidden: boolean) {
+async function loadDirectoryCard(client: Client, id: number, withIndicators: boolean, withHidden: boolean, withTranslations: boolean) {
   const { rows } = await client.query(
-    `SELECT ${DIRECTORY_CARD_COLUMNS}${withIndicators ? ', indicators' : ''}${withHidden ? ', hidden' : ''}
+    `SELECT ${DIRECTORY_CARD_COLUMNS}${withIndicators ? ', indicators' : ''}${withHidden ? ', hidden' : ''}${withTranslations ? ', translations' : ''}
        FROM directory_card_edits
       WHERE id = $1`,
     [id]
@@ -1073,12 +1109,13 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
 
     const withIndicators = await indicatorsInstalled(client);
     const withHidden = await hiddenInstalled(client);
+    const withTranslations = await translationsInstalled(client);
 
     if (req.method === 'GET') {
       const id = parseCardId(qstr(req.query, 'id'));
       if (qstr(req.query, 'id') && id == null) return res.status(400).json({ error: 'Invalid id' });
       if (id != null) {
-        const card = await loadDirectoryCard(client, id, withIndicators, withHidden);
+        const card = await loadDirectoryCard(client, id, withIndicators, withHidden, withTranslations);
         if (!card) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
         return res.status(200).json({ card: directoryCardDetail(card) });
       }
@@ -1099,6 +1136,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
     let eligibility;
     let sites;
     let indicators;
+    let translations: Record<string, Record<string, string>> | undefined;
     let memberIds: number[] = [];
     try {
       publicFields = normalizePublicFields(body.publicFields);
@@ -1106,14 +1144,19 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       sites = normalizeSites(await fillMissingSiteCoordinates(body.sites));
       indicators = normalizeIndicators(body.indicators);
       memberIds = indicators.whole_org ? parseMemberIds(body.orgMembers, id) : [];
+      if (body.translations !== undefined) translations = normalizeTranslations(body.translations);
     } catch (err) {
       if (err instanceof DirectoryCardError) return res.status(400).json({ error: err.message });
       throw err;
     }
 
-    const current = await loadDirectoryCard(client, id, withIndicators, withHidden);
+    const current = await loadDirectoryCard(client, id, withIndicators, withHidden, withTranslations);
     if (!current) return res.status(404).json({ error: 'הכרטיס לא נמצא' });
     const publicChanged = !publicFieldsEqual(current.public_fields, publicFields);
+    const translationsChanged = translations !== undefined && !translationsEqual(current.translations, translations);
+    if (!withTranslations && translationsChanged && translations && Object.keys(translations).length) {
+      return res.status(500).json({ error: 'עמודת התרגום עדיין לא הותקנה. הריצו את סקריפט 112.' });
+    }
     const eligibilityChanged = !eligibilityEqual(current.eligibility, eligibility);
     const sitesChanged = !sitesEqual(current.sites, sites);
     const currentMemberIds = Array.isArray(current.org_members)
@@ -1134,7 +1177,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'עמודת ההסתרה עדיין לא הותקנה. הריצו את סקריפט 101.' });
     }
     const hiddenChanged = withHidden && hiddenWanted != null && (current.hidden === true) !== hiddenWanted;
-    if (!publicChanged && !eligibilityChanged && !sitesChanged && !indicatorsChanged && !hiddenChanged) {
+    if (!publicChanged && !eligibilityChanged && !sitesChanged && !indicatorsChanged && !hiddenChanged && !(withTranslations && translationsChanged)) {
       return res.status(200).json({ card: directoryCardDetail(current) });
     }
 
@@ -1150,8 +1193,14 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
                 updated_at = now(),
                 updated_by = $6::uuid
           WHERE id = $1`,
-        [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged, jwtUser ? jwtUser.id : null]
+        [id, JSON.stringify(publicFields), JSON.stringify(eligibility), JSON.stringify(sites), publicChanged || (withTranslations && translationsChanged), jwtUser ? jwtUser.id : null]
       );
+      if (withTranslations && translations !== undefined && translationsChanged) {
+        await client.query(`UPDATE directory_card_edits SET translations = $2::jsonb WHERE id = $1`, [
+          id,
+          JSON.stringify(translations),
+        ]);
+      }
       if (withHidden && hiddenChanged) {
         await client.query(`UPDATE directory_card_edits SET hidden = $2 WHERE id = $1`, [id, hiddenWanted]);
       }
@@ -1177,7 +1226,7 @@ async function handleDirectory(req: VercelRequest, res: VercelResponse) {
       await client.query('ROLLBACK').catch(() => {});
       throw err;
     }
-    const saved = await loadDirectoryCard(client, id, withIndicators, withHidden);
+    const saved = await loadDirectoryCard(client, id, withIndicators, withHidden, withTranslations);
     return res.status(200).json({ card: directoryCardDetail(saved) });
   } catch (err) {
     const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';

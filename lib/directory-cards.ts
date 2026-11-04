@@ -425,6 +425,34 @@ export function publicFieldsEqual(a: unknown, b: unknown): boolean {
   return stable(normalizePublicFields(a)) === stable(normalizePublicFields(b));
 }
 
+const TRANSLATION_LOCALE = /^[a-z]{2}$/;
+
+/** Locale overlays. Hebrew stays in public_fields. An empty value is omitted, so the Hebrew shows. */
+export function normalizeTranslations(raw: unknown): Record<string, Record<string, string>> {
+  const src = asObject(raw);
+  const out: Record<string, Record<string, string>> = {};
+  for (const locale of Object.keys(src)) {
+    if (!TRANSLATION_LOCALE.test(locale) || locale === 'he') continue;
+    const block = asObject(src[locale]);
+    const fields: Record<string, string> = {};
+    for (const key of PUBLIC_TEXT_KEYS) {
+      if (!Object.prototype.hasOwnProperty.call(block, key)) continue;
+      const value = textField(block[key]);
+      if (!value) continue;
+      if (value.length > TEXT_MAX[key]) {
+        throw new DirectoryCardError(`השדה ${key} ארוך מדי`);
+      }
+      fields[key] = value;
+    }
+    if (Object.keys(fields).length) out[locale] = fields;
+  }
+  return out;
+}
+
+export function translationsEqual(a: unknown, b: unknown): boolean {
+  return stable(normalizeTranslations(a)) === stable(normalizeTranslations(b));
+}
+
 export function eligibilityEqual(a: unknown, b: unknown): boolean {
   return stable(normalizeEligibility(a)) === stable(normalizeEligibility(b));
 }

@@ -389,6 +389,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         entry_origin: (e?.entry_origin as string) || null,
         entry_url: (e?.entry_url as string) || null,
       };
+      if (e?.ui_lang === 'he' || e?.ui_lang === 'en') extra.ui_lang = e.ui_lang;
+      if (typeof e?.show_all_cards === 'boolean') extra.show_all_cards = e.show_all_cards;
       const { error: errorCol, error_details: errorDetailsCol } = normalizeErrorFields(e);
 
       const requestedType = ((e?.event_type as string) || 'unknown').trim() || 'unknown';

@@ -48,6 +48,10 @@
     {
       "source": "/glossary",
       "destination": "/index"
+    },
+    {
+      "source": "/en",
+      "destination": "/index"
     }
   ],
   "redirects": [

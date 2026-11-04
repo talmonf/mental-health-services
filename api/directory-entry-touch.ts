@@ -77,12 +77,12 @@ async function handlePublicCards(res: VercelResponse) {
         `SELECT column_name FROM information_schema.columns
           WHERE table_schema = 'public' AND table_name = 'directory_card_edits'
             AND column_name = ANY($1::text[])`,
-        [['sites', 'hidden']]
+        [['sites', 'hidden', 'translations']]
       );
       const names = new Set(columns.rows.map((r) => String(r.column_name)));
       includeHidden = names.has('hidden');
       const result = await client.query(
-        `SELECT id, card_key, row_id, public_fields, eligibility${names.has('sites') ? ', sites' : ''}, public_edited_at${includeHidden ? ', hidden' : ''}
+        `SELECT id, card_key, row_id, public_fields, eligibility${names.has('sites') ? ', sites' : ''}, public_edited_at${includeHidden ? ', hidden' : ''}${names.has('translations') ? ', translations' : ''}
            FROM directory_card_edits
           ORDER BY row_id, id`
       );
@@ -146,6 +146,7 @@ async function handlePublicCards(res: VercelResponse) {
         cardKey: String(row.card_key || '').replace(/\r/g, ''),
         rowId: Number(row.row_id),
         publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
+        translations: row.translations && typeof row.translations === 'object' && !Array.isArray(row.translations) ? row.translations : {},
         eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
         sites: Array.isArray(row.sites) ? row.sites : [],
         terms: termsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],

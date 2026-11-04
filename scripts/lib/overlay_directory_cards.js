@@ -71,10 +71,10 @@ async function fetchCardRows() {
       `SELECT column_name FROM information_schema.columns
         WHERE table_schema = 'public' AND table_name = 'directory_card_edits'
           AND column_name = ANY($1::text[])`,
-      [['indicators', 'sites', 'hidden']]
+      [['indicators', 'sites', 'hidden', 'translations']]
     );
     const names = new Set(columns.rows.map((r) => r.column_name));
-    const extra = ['indicators', 'sites', 'hidden'].filter((name) => names.has(name));
+    const extra = ['indicators', 'sites', 'hidden', 'translations'].filter((name) => names.has(name));
     ({ rows } = await client.query(
       `SELECT card_key, public_fields${extra.length ? `, ${extra.join(', ')}` : ''} FROM directory_card_edits`
     ));
@@ -128,6 +128,7 @@ async function overlayDirectoryCards(data) {
     svc.cardTerms = row.terms;
     if (Array.isArray(row.sites) && row.sites.length) svc.cardSites = row.sites;
     if (Object.prototype.hasOwnProperty.call(row, 'hidden')) svc.hidden = row.hidden === true;
+    if (row.translations && typeof row.translations === 'object') svc.translations = row.translations;
     if (row.indicators && typeof row.indicators === 'object') {
       svc.cardIndicators = row.indicators;
       // Referral codes set on the card replace the row-keyed codes from referral_codes.json.
