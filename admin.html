@@ -398,6 +398,10 @@
       filterUserId: '',
       excludeAdmins: true,
       excludeUserIds: [],
+      guideVisitor: '',
+      guidePath: null,
+      guidePathError: '',
+      guidePathLoading: false,
       userQ: '',
       userSort: 'created_at',
       userDir: 'desc',
@@ -579,6 +583,67 @@
       p.set('exclude_admins', state.excludeAdmins ? '1' : '0');
       (state.excludeUserIds || []).forEach((id) => p.append('exclude_user', id));
       return p.toString();
+    }
+
+    function sourceText(source, detail) {
+      const label = source || 'unknown';
+      if (detail && (label === 'another article' || label === 'the directory')) return `${label} (${detail})`;
+      return label;
+    }
+    function countList(pairs) {
+      if (!pairs || !pairs.length) return '—';
+      return pairs.map((p) => `${esc(p.label)} ${Number(p.n) || 0}`).join(', ');
+    }
+    function guideWhat(r) {
+      if (r.event_type === 'page_view') return 'Opened';
+      if (DEEP[r.event_type]) return DEEP[r.event_type];
+      if (r.event_type === 'search') {
+        const q = String(r.search_query || '').trim();
+        return q ? `Search: ${q}` : 'Search';
+      }
+      if (r.event_type === 'click') {
+        if (r.element_type === 'guide_nav') {
+          const id = String(r.element_id || '');
+          if (id.charAt(0) === '/') {
+            const onSite = id === '/' || id === '/en' || id === '/glossary' || id === '/directory' || id === '/terms' || id === '/privacy'
+              || id === '/emergency' || id === '/treatment' || id === '/rights' || id === '/support' || id === '/information'
+              || id.startsWith('/s/') || id.startsWith('/c/') || id.startsWith('/term/');
+            if (onSite) return 'Went to the directory';
+            return `Went to ${r.element_text_short || id}`;
+          }
+          return `Went to ${id || r.element_text_short || 'outside'}`;
+        }
+        return `Click: ${r.element_text_short || r.element_id || actionLabel(r.element_type)}`;
+      }
+      return String(r.event_type || '');
+    }
+    function guideShowsSource(r) {
+      return r.event_type === 'page_view' || String(r.event_type || '').endsWith('_opened');
+    }
+
+    async function loadGuideVisitor(id) {
+      state.guideVisitor = id || '';
+      state.guidePathError = '';
+      if (!state.guideVisitor) {
+        state.guidePath = null;
+        state.guidePathLoading = false;
+        return;
+      }
+      state.guidePathLoading = true;
+      try {
+        const r = await fetch(
+          '/api/admin/analytics?' + analyticsQuery() + '&visitor=' + encodeURIComponent(state.guideVisitor),
+          { credentials: 'include' }
+        );
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Failed to load this visitor.');
+        state.guidePath = data.path || [];
+      } catch (e) {
+        state.guidePath = [];
+        state.guidePathError = e.message || 'Failed to load this visitor.';
+      } finally {
+        state.guidePathLoading = false;
+      }
     }
 
     async function loadAnalytics() {
@@ -811,6 +876,60 @@
         </div>
         <h2>Daily volume</h2>
         <div class="card" id="volume">${barChart(d.volume)}</div>
+        <h2>Search articles</h2>
+        <p class="lede">Openings of the search articles, where the visitor came from, and where they went next. The path of one visitor continues into the directory. An empty referrer stays unknown. These counts follow the date, device, country, and audience filters.</p>
+        <div class="card">${table(
+          ['Article', 'Openings', 'Visitors', 'From', 'Went on to', 'Last opened'],
+          (d.guidePages && d.guidePages.articles) || [],
+          (r) => [
+            openLink(r.path, r.title, true),
+            r.openings,
+            r.visitors,
+            countList(r.sources),
+            countList(r.next),
+            esc(fmtDate(r.last_opened))
+          ],
+          'No search articles in this window.'
+        )}</div>
+        <h2>Recent article openings</h2>
+        <div class="card">${table(
+          ['When', 'Article', 'From', 'Device', 'Path'],
+          (d.guidePages && d.guidePages.recent) || [],
+          (r) => [
+            esc(fmtDate(r.occurred_at)),
+            openLink(r.path, r.title, true),
+            `<span dir="auto">${esc(sourceText(r.source, r.source_detail))}</span>`,
+            esc(DEVICE[r.device_type] || r.device_type || '—'),
+            r.visitor_id
+              ? `<button type="button" class="secondary" data-guide-visitor="${esc(r.visitor_id)}" style="min-height:30px;padding:2px 10px">Path</button>`
+              : '—'
+          ]
+        )}</div>
+        <div id="guide-path">${state.guideVisitor ? `
+          <h2>This visitor</h2>
+          <p class="lede">What this browser did in the current window, oldest first, including the directory afterwards. A new visit number is a new tab or a later visit.</p>
+          ${state.guidePathError ? `<p class="err">${esc(state.guidePathError)}</p>` : ''}
+          ${state.guidePathLoading ? '<p class="lede">Loading this visitor…</p>' : (state.guidePath ? table(
+            ['When', 'Visit', 'Page', 'What', 'From'],
+            (function () {
+              let prev = '';
+              let n = 0;
+              return state.guidePath.map((r) => {
+                if (r.session_id !== prev) { n += 1; prev = r.session_id; }
+                return Object.assign({}, r, { visit: n });
+              });
+            })(),
+            (r) => [
+              esc(fmtDate(r.occurred_at)),
+              r.visit,
+              `<span dir="auto">${esc(r.page_label === '/' ? 'the directory' : (r.page_label === '/en' ? 'the directory (English)' : (r.page_label || r.page_route || '')))}</span>`,
+              `<span dir="auto">${esc(guideWhat(r))}</span>`,
+              guideShowsSource(r) ? `<span dir="auto">${esc(sourceText(r.source, r.source_detail))}</span>` : '—'
+            ],
+            'No events for this visitor in this window.'
+          ) : '')}
+          <p><button type="button" class="secondary" id="guide-path-clear">Hide path</button></p>
+        ` : ''}</div>
         <div class="split">
           <div>
             <h2>Device</h2>
@@ -960,6 +1079,7 @@
         const excluded = root.querySelector('#excludeUsers').value;
         state.excludeUserIds = excluded ? [excluded] : [];
         await loadAnalytics();
+        if (state.guideVisitor) await loadGuideVisitor(state.guideVisitor);
         render();
       });
       root.querySelector('#days').addEventListener('change', async () => {
@@ -967,8 +1087,32 @@
         state.from = '';
         state.to = '';
         await loadAnalytics();
+        if (state.guideVisitor) await loadGuideVisitor(state.guideVisitor);
         render();
       });
+      root.querySelectorAll('[data-guide-visitor]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-guide-visitor');
+          if (!id) return;
+          state.guideVisitor = id;
+          state.guidePath = null;
+          state.guidePathError = '';
+          state.guidePathLoading = true;
+          render();
+          await loadGuideVisitor(id);
+          render();
+        });
+      });
+      const clearPath = root.querySelector('#guide-path-clear');
+      if (clearPath) {
+        clearPath.addEventListener('click', () => {
+          state.guideVisitor = '';
+          state.guidePath = null;
+          state.guidePathError = '';
+          state.guidePathLoading = false;
+          render();
+        });
+      }
     }
 
     function renderUpdates(root) {

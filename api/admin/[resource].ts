@@ -33,6 +33,15 @@ import {
 } from '../../lib/directory-cards';
 import { enqueueImmediateEmails, processOutbox } from '../../lib/email';
 import {
+  classifyDestination,
+  classifySource,
+  GUIDE_PAGES,
+  normalizePath,
+  pageLabel,
+  sourceDetail,
+  tallyCounts,
+} from '../../lib/guide-pages';
+import {
   ADMIN_USER_COLUMNS,
   adminUserFromRow,
   USER_PUBLIC_COLUMNS,
@@ -88,6 +97,8 @@ type SqlFilter = {
   dateParams: unknown[];
   eventWhere: string;
   eventParams: unknown[];
+  scopeWhere: string;
+  scopeParams: unknown[];
   days: number;
   from: string | null;
   to: string | null;
@@ -155,9 +166,19 @@ function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
 
   const extra: string[] = [];
   const eventParams = [...dateParams];
+  const scopeExtra: string[] = [];
+  const scopeParams = [...dateParams];
   const add = (sql: string, value: unknown) => {
     eventParams.push(value);
     extra.push(sql.replace('?', `$${eventParams.length}`));
+  };
+  const addScope = (sql: string, value: unknown) => {
+    scopeParams.push(value);
+    scopeExtra.push(sql.replace('?', `$${scopeParams.length}`));
+  };
+  const addBoth = (sql: string, value: unknown) => {
+    add(sql, value);
+    addScope(sql, value);
   };
 
   if (eventType === 'deep-link') {
@@ -165,31 +186,44 @@ function parseAnalyticsFilters(query: VercelRequest['query']): SqlFilter {
   } else if (eventType) {
     add('event_type = ?', eventType);
   }
-  if (device) add('device_type = ?', device);
-  if (audience === 'signed-in') extra.push('user_id IS NOT NULL');
-  if (audience === 'anonymous') extra.push('user_id IS NULL');
-  if (country) add('country = ?', country);
+  if (device) addBoth('device_type = ?', device);
+  if (audience === 'signed-in') {
+    extra.push('user_id IS NOT NULL');
+    scopeExtra.push('user_id IS NOT NULL');
+  }
+  if (audience === 'anonymous') {
+    extra.push('user_id IS NULL');
+    scopeExtra.push('user_id IS NULL');
+  }
+  if (country) addBoth('country = ?', country);
   if (section) add('section = ?', section);
 
   if (userId) {
-    add('user_id = ?', userId);
+    addBoth('user_id = ?', userId);
   } else {
     if (excludeAdmins) {
-      extra.push(`(user_id IS NULL OR user_id NOT IN (SELECT id FROM users WHERE is_admin))`);
+      const hideAdmins = `(user_id IS NULL OR user_id NOT IN (SELECT id FROM users WHERE is_admin))`;
+      extra.push(hideAdmins);
+      scopeExtra.push(hideAdmins);
     }
     if (excludeUserIds.length) {
       eventParams.push(excludeUserIds);
       extra.push(`(user_id IS NULL OR user_id <> ALL($${eventParams.length}::uuid[]))`);
+      scopeParams.push(excludeUserIds);
+      scopeExtra.push(`(user_id IS NULL OR user_id <> ALL($${scopeParams.length}::uuid[]))`);
     }
   }
 
   const eventWhere = extra.length ? `${dateWhere} AND ${extra.join(' AND ')}` : dateWhere;
+  const scopeWhere = scopeExtra.length ? `${dateWhere} AND ${scopeExtra.join(' AND ')}` : dateWhere;
 
   return {
     dateWhere,
     dateParams,
     eventWhere,
     eventParams,
+    scopeWhere,
+    scopeParams,
     days,
     from: fromOut,
     to: toOut,
@@ -217,6 +251,171 @@ async function requireAdmin(req: VercelRequest, res: VercelResponse, client: Cli
   return true;
 }
 
+type GuideEventRow = {
+  occurred_at: Date | string;
+  event_type: string;
+  page_route: string;
+  section: string;
+  element_type: string;
+  element_id: string;
+  element_text_short: string;
+  search_query: string;
+  entry_id: string;
+  session_id: string;
+  referrer_domain: string;
+  referrer_path: string;
+  device_type: string;
+  country: string;
+};
+
+async function loadGuidePages(client: Client, filters: SqlFilter) {
+  const views = await client.query(
+    `SELECT coalesce(page_route, '') AS page_route,
+            count(*)::int AS openings,
+            count(DISTINCT coalesce(nullif(extra->>'user_pseudo_id', ''), session_id))::int AS visitors,
+            max(occurred_at) AS last_opened
+       FROM events
+      WHERE section = 'guide'
+        AND event_type = 'page_view'
+        AND ${filters.scopeWhere}
+      GROUP BY 1`,
+    filters.scopeParams
+  );
+  const sources = await client.query(
+    `SELECT coalesce(page_route, '') AS page_route,
+            coalesce(referrer_domain, '') AS referrer_domain,
+            coalesce(extra->>'referrer_path', '') AS referrer_path,
+            count(*)::int AS n
+       FROM events
+      WHERE section = 'guide'
+        AND event_type = 'page_view'
+        AND ${filters.scopeWhere}
+      GROUP BY 1, 2, 3`,
+    filters.scopeParams
+  );
+  const clicks = await client.query(
+    `SELECT coalesce(page_route, '') AS page_route,
+            coalesce(element_id, '') AS element_id,
+            count(*)::int AS n
+       FROM events
+      WHERE section = 'guide'
+        AND event_type = 'click'
+        AND element_type = 'guide_nav'
+        AND ${filters.scopeWhere}
+      GROUP BY 1, 2`,
+    filters.scopeParams
+  );
+  const recent = await client.query(
+    `SELECT occurred_at,
+            coalesce(page_route, '') AS page_route,
+            coalesce(referrer_domain, '') AS referrer_domain,
+            coalesce(extra->>'referrer_path', '') AS referrer_path,
+            coalesce(extra->>'user_pseudo_id', '') AS visitor_id,
+            coalesce(device_type, '') AS device_type,
+            coalesce(country, '') AS country
+       FROM events
+      WHERE section = 'guide'
+        AND event_type = 'page_view'
+        AND ${filters.scopeWhere}
+      ORDER BY occurred_at DESC
+      LIMIT 40`,
+    filters.scopeParams
+  );
+
+  type Slot = {
+    path: string;
+    title: string;
+    openings: number;
+    visitors: number;
+    last_opened: Date | string | null;
+    sourcePairs: { label: string; n: number }[];
+    destPairs: { label: string; n: number }[];
+  };
+  const slots = new Map<string, Slot>();
+  for (const page of GUIDE_PAGES) {
+    slots.set(page.path, {
+      path: page.path,
+      title: page.title,
+      openings: 0,
+      visitors: 0,
+      last_opened: null,
+      sourcePairs: [],
+      destPairs: [],
+    });
+  }
+  const slotFor = (route: string): Slot => {
+    const path = normalizePath(route);
+    let slot = slots.get(path);
+    if (!slot) {
+      slot = {
+        path,
+        title: pageLabel(path),
+        openings: 0,
+        visitors: 0,
+        last_opened: null,
+        sourcePairs: [],
+        destPairs: [],
+      };
+      slots.set(path, slot);
+    }
+    return slot;
+  };
+  for (const row of views.rows as { page_route: string; openings: number; visitors: number; last_opened: Date | string | null }[]) {
+    const slot = slotFor(row.page_route);
+    slot.openings += Number(row.openings) || 0;
+    slot.visitors += Number(row.visitors) || 0;
+    if (row.last_opened && (!slot.last_opened || new Date(row.last_opened).getTime() > new Date(slot.last_opened).getTime())) {
+      slot.last_opened = row.last_opened;
+    }
+  }
+  for (const row of sources.rows as { page_route: string; referrer_domain: string; referrer_path: string; n: number }[]) {
+    slotFor(row.page_route).sourcePairs.push({
+      label: classifySource(row.referrer_domain, row.referrer_path),
+      n: Number(row.n) || 0,
+    });
+  }
+  for (const row of clicks.rows as { page_route: string; element_id: string; n: number }[]) {
+    slotFor(row.page_route).destPairs.push({
+      label: classifyDestination(row.element_id),
+      n: Number(row.n) || 0,
+    });
+  }
+
+  const articles = [...slots.values()]
+    .map((slot) => ({
+      path: slot.path,
+      title: slot.title,
+      openings: slot.openings,
+      visitors: slot.visitors,
+      last_opened: slot.last_opened,
+      sources: tallyCounts(slot.sourcePairs),
+      next: tallyCounts(slot.destPairs),
+    }))
+    .sort((a, b) => b.openings - a.openings || a.path.localeCompare(b.path));
+
+  return {
+    articles,
+    recent: (recent.rows as {
+      occurred_at: Date | string;
+      page_route: string;
+      referrer_domain: string;
+      referrer_path: string;
+      visitor_id: string;
+      device_type: string;
+      country: string;
+    }[]).map((row) => ({
+      occurred_at: row.occurred_at,
+      path: normalizePath(row.page_route),
+      title: pageLabel(row.page_route),
+      source: classifySource(row.referrer_domain, row.referrer_path),
+      source_detail: sourceDetail(row.referrer_domain, row.referrer_path),
+      visitor_id: isUuid(row.visitor_id) ? row.visitor_id : '',
+      device_type: row.device_type,
+      country: row.country,
+    })),
+  };
+}
+
 async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -230,6 +429,56 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
     await client.connect();
     if (!(await userIsAdmin(client, jwtUser.id))) {
       return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const visitorRaw = qstr(req.query, 'visitor');
+    if (visitorRaw) {
+      if (!isUuid(visitorRaw)) return res.status(400).json({ error: 'Unknown visitor' });
+      const visitorParam = filters.scopeParams.length + 1;
+      const pathRows = await client.query(
+        `SELECT occurred_at,
+                event_type,
+                coalesce(page_route, '') AS page_route,
+                coalesce(section, '') AS section,
+                coalesce(element_type, '') AS element_type,
+                coalesce(element_id, '') AS element_id,
+                coalesce(element_text_short, '') AS element_text_short,
+                coalesce(search_query, '') AS search_query,
+                coalesce(entry_id, '') AS entry_id,
+                session_id,
+                coalesce(referrer_domain, '') AS referrer_domain,
+                coalesce(extra->>'referrer_path', '') AS referrer_path,
+                coalesce(device_type, '') AS device_type,
+                coalesce(country, '') AS country
+           FROM events
+          WHERE session_id IN (
+                  SELECT session_id FROM sessions WHERE user_pseudo_id = $${visitorParam}
+                )
+            AND ${filters.scopeWhere}
+          ORDER BY occurred_at ASC
+          LIMIT 300`,
+        [...filters.scopeParams, visitorRaw]
+      );
+      return res.status(200).json({
+        visitor: visitorRaw,
+        path: pathRows.rows.map((row: GuideEventRow) => ({
+          occurred_at: row.occurred_at,
+          event_type: row.event_type,
+          page_route: normalizePath(row.page_route),
+          page_label: pageLabel(row.page_route),
+          section: row.section,
+          element_type: row.element_type,
+          element_id: row.element_id,
+          element_text_short: row.element_text_short,
+          search_query: row.search_query,
+          entry_id: row.entry_id,
+          session_id: row.session_id,
+          source: classifySource(row.referrer_domain, row.referrer_path),
+          source_detail: sourceDetail(row.referrer_domain, row.referrer_path),
+          device_type: row.device_type,
+          country: row.country,
+        })),
+      });
     }
 
     const volume = await client.query(
@@ -368,6 +617,8 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
           AND (entry_id IS NULL OR entry_id = '')
           AND element_type NOT IN (${CONTACT_TYPES_SQL})
           AND element_type NOT IN (${GLOSSARY_CROSSING_TYPES_SQL})
+          AND coalesce(element_type, '') <> 'guide_nav'
+          AND coalesce(section, '') <> 'guide'
           AND (element_id IS NULL OR element_id !~ '${SECTION_NAV_RE}')
           AND ${filters.eventWhere}
         GROUP BY 1, 2
@@ -521,6 +772,8 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
         LIMIT 10`
     );
 
+    const guidePages = await loadGuidePages(client, filters);
+
     return res.status(200).json({
       days: filters.days,
       from: filters.from,
@@ -543,6 +796,7 @@ async function handleAnalytics(req: VercelRequest, res: VercelResponse) {
         total: kpis.rows[0]?.total ?? 0,
       },
       volume: volume.rows,
+      guidePages,
       requestLog,
       cardClicks: cardClicks.rows,
       contactActions: contactActions.rows,

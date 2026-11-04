@@ -2641,11 +2641,15 @@
                 if (!MH_ANALYTICS_CONFIG.enabled || !MH_ANALYTICS_CONFIG.endpoint) return;
                 const url = window.location.href;
                 let referrerDomain = null;
+                let referrerPath = null;
                 if (document.referrer) {
                     try {
-                        referrerDomain = new URL(document.referrer).hostname;
+                        const refUrl = new URL(document.referrer);
+                        referrerDomain = refUrl.hostname;
+                        referrerPath = (refUrl.pathname || '/').slice(0, 500);
                     } catch {
                         referrerDomain = null;
+                        referrerPath = null;
                     }
                 }
                 const utm = mhParseUtmParams();
@@ -2657,6 +2661,7 @@
                     page_url: url,
                     page_title: document.title || null,
                     referrer_domain: referrerDomain,
+                    referrer_path: referrerPath,
                     utm_source: utm.utm_source,
                     utm_medium: utm.utm_medium,
                     utm_campaign: utm.utm_campaign,

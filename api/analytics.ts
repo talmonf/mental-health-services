@@ -67,6 +67,23 @@ function corsHeaders(origin: string | undefined): Record<string, string> {
   };
 }
 
+/** Pathname of the previous page. Query strings are dropped so a search is not stored. */
+function referrerPath(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    if (/^https?:\/\//i.test(trimmed)) {
+      return (new URL(trimmed).pathname || '/').slice(0, 500);
+    }
+  } catch {
+    return null;
+  }
+  if (!trimmed.startsWith('/')) return null;
+  const pathOnly = trimmed.split('?')[0].split('#')[0];
+  return pathOnly.slice(0, 500) || null;
+}
+
 function deviceType(ua: string | undefined): string {
   if (!ua) return 'unknown';
   const u = ua.toLowerCase();
@@ -388,6 +405,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         entry_hostname: (e?.entry_hostname as string) || null,
         entry_origin: (e?.entry_origin as string) || null,
         entry_url: (e?.entry_url as string) || null,
+        referrer_path: referrerPath(e?.referrer_path),
       };
       if (e?.ui_lang === 'he' || e?.ui_lang === 'en') extra.ui_lang = e.ui_lang;
       if (typeof e?.show_all_cards === 'boolean') extra.show_all_cards = e.show_all_cards;

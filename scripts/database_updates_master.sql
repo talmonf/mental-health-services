@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 115_guide_visit_audit.sql
 [x] 114_language_chrome.sql
 [x] 113_english_entry.sql
 [x] 112_card_translations.sql
