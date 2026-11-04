@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 111_jerusalem_therapy_center.sql
 [x] 110_geerz_addresses.sql
 [x] 109_geerz_social_links.sql
 [x] 108_geerz_drop_phone.sql

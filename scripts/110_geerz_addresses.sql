@@ -83,4 +83,20 @@ ON CONFLICT (row_id, label) DO UPDATE SET
   lng = EXCLUDED.lng,
   sort_order = EXCLUDED.sort_order;
 
+INSERT INTO site_audit_entries (entry_key, happened_at, title, description, area, card_keys, term_keys, migration)
+VALUES (
+  '2026-11-02-geerz-address',
+  DATE '2026-11-02',
+  'נוספה כתובת לכרטיסי גירז',
+  'בשני הכרטיסים מופיעה כתובת המשרד, נחל מטה 14/2 בבית שמש. בכרטיס הנוער זו נקודת המפה היחידה, והמשרד אינו נקודת המפגש. בכרטיס הלוחמים המפה כוללת גם את מעלה אדומים, גוש עציון, אבן שמואל, גוש טלמונים, חוף הכרמל ומועצה אזורית שומרון.',
+  'cards',
+  ARRAY[
+    '770|||רכיבת הרים טיפולית לילדים ונוער, גילאי 7–16',
+    '771|||רכיבת הרים טיפולית ללוחמים ומילואימניקים'
+  ],
+  '{}',
+  '110_geerz_addresses.sql'
+)
+ON CONFLICT (entry_key) DO NOTHING;
+
 COMMIT;
