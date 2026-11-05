@@ -1,5 +1,5 @@
 ---
-description: Every published website change gets an owner-approved audit entry
+description: Owner-approved audit entries for published changes, not for bug fixes or same-day card edits
 alwaysApply: true
 ---
 
@@ -7,7 +7,14 @@ alwaysApply: true
 
 `site_audit_entries` (migration 062, shown newest first in `/admin#audit`) is the internal log of changes to the website. Every entry's wording is approved by the site owner before it is recorded.
 
-For every change that affects what visitors or admins see (cards, glossary, UI copy, admin pages, data fixes):
+For a change that affects what visitors or admins see (a new card, glossary wording, UI copy, an admin page, or a data change):
+
+Do **not** write an audit entry for:
+
+- A bug fix. Correcting something that was wrong, including a date, a label, or layout that did not behave as intended, is not logged.
+- A change to a card that was added the same day. The day's card stands as added; a same-day correction to its wording, address, or links does not get a second entry.
+
+When an entry is required:
 
 1. **Propose the entry first.** Before writing any audit insert, show the user the proposed `title`, `description`, `area` (`cards` | `glossary` | `ui` | `admin` | `data`), `happened_at` date, and which cards (row numbers) and glossary term keys it touches. Use the `AskQuestion` tool or ask in plain text, and wait for approval or corrections.
 2. **Write the wording for the owner, not for a reviewer.** Say what changed on the site in plain Hebrew or English, as the owner would describe it later. No file names, no implementation detail, no "fixed bug in X".

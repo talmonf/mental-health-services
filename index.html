@@ -159,39 +159,41 @@
         .mh-hero-account-cluster {
             display: flex;
             direction: ltr;
-            align-items: flex-start;
+            align-items: center;
             gap: 8px;
         }
         .mh-account { position: relative; }
-        .mh-lang { position: relative; }
-        .mh-lang-btn { min-height: 40px; min-width: 40px; padding: 6px 12px; font-size: 1.15rem; }
-        .mh-lang-menu {
-            position: absolute;
-            top: calc(100% + 6px);
-            right: 0;
-            min-width: 148px;
+        .mh-lang {
+            display: inline-flex;
+            align-items: stretch;
+            direction: ltr;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            color: var(--primary);
             background: #fff;
-            color: var(--text);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-elevated);
-            z-index: 40;
-            padding: 6px 0;
         }
-        .mh-lang-menu button {
-            display: block;
-            width: 100%;
-            text-align: start;
-            background: none;
+        .mh-lang-hero { border-color: rgba(255,255,255,0.75); color: #fff; background: transparent; }
+        .mh-lang-opt {
+            display: inline-flex;
+            align-items: center;
+            background: transparent;
             border: none;
-            padding: 8px 14px;
+            color: inherit;
             font: inherit;
-            font-size: var(--text-sm);
+            font-size: 0.8rem;
+            line-height: 1.2;
+            min-height: 28px;
+            padding: 2px 8px;
             cursor: pointer;
-            color: var(--text);
         }
-        .mh-lang-menu button.mh-lang-current { font-weight: 700; }
-        .mh-lang-menu button:hover,
-        .mh-lang-menu button:focus { background: var(--bg); outline: none; }
+        .mh-lang-opt + .mh-lang-opt { box-shadow: inset 1px 0 0 currentColor; }
+        .mh-lang-opt[aria-current="true"] { font-weight: 700; background: var(--primary); color: #fff; cursor: default; }
+        .mh-lang-hero .mh-lang-opt[aria-current="true"] { background: #fff; color: var(--primary); }
+        .mh-lang-opt:not([aria-current="true"]):hover,
+        .mh-lang-opt:not([aria-current="true"]):focus { background: rgba(45, 90, 123, 0.08); outline: none; }
+        .mh-lang-hero .mh-lang-opt:not([aria-current="true"]):hover,
+        .mh-lang-hero .mh-lang-opt:not([aria-current="true"]):focus { background: rgba(255,255,255,0.12); outline: 2px solid #fff; outline-offset: -2px; }
         .mh-account > .mh-btn { min-height: 40px; padding: 6px 12px; font-size: var(--text-sm); }
         .mh-account-menu {
             position: absolute;
@@ -4932,6 +4934,7 @@
                 title: "עזרה דחופה ותמיכה במשבר",
                 titleEn: "Emergency & Crisis Support",
                 desc: "קווי חירום ותמיכה מיידית במצבי משבר",
+                descEn: "Crisis lines and immediate support",
                 intro: `הדף הזה מיועד לרגע שבו אי אפשר לחכות לתור במרפאה. אם אתם או מישהו לידכם בסכנה מיידית, השאירו את הדף והתקשרו. בראש כל עמוד באתר מופיעים קווי החירום הקבועים, ובראשם ער״ן 1201 לעזרה ראשונה נפשית, *2201 לחיילים ולמילואים, *6690 למערך בריאות הנפש בצה״ל, 1202 ו־1203 לנפגעות ולנפגעי תקיפה מינית. מתחת לפסקה הזו מופיעות הקטגוריות של העמוד, וכל שירות מקושר לעמוד משלו.
 
 בקטגוריה עזרה דחופה מרוכזים מענים למצב חריף, לא לטיפול מתמשך. כאן מופיעים קו נפש אחת של אגף השיקום, למי שמתמודד עם פוסט־טראומה בעקבות שירות צבאי, מרכזי החוסן ברחבי הארץ, ובתים בטוחים שמשמשים חלופת אשפוז קצרה למי שהוכר עם פגיעה נפשית ונמצא במשבר. לידם צוות משבר שמגיע לבית המטופל דרך חלק מקופות החולים, כחלופה לפנייה לחדר מיון. לכל שירות רשומים הקהל, הטלפון אם פורסם, וההערות כפי שהופיעו במקור.
@@ -4947,6 +4950,7 @@
                 title: "טיפול וטיפולים",
                 titleEn: "Treatment & Therapy",
                 desc: "מטפלים, סוגי טיפולים, קופות חולים, אשפוז וחלופות",
+                descEn: "Practitioners, treatments, health funds, hospital care and alternatives",
                 intro: `הדף הזה מרכז את הדרך אל טיפול נפשי בישראל, מהפניה הראשונה ועד אשפוז וחלופותיו. הוא אינו המלצה על שיטה או על מטפל. הוא מפה של הגופים שמופיעים במדריך: איפה מתחילים בקופת החולים, איך מאתרים מטפל, אילו סוגי טיפול רשומים כאן, ומה קיים כשמרפאה בקהילה כבר לא מספיקה. הפרטים בכל כרטיס — עלות, אזור, הפניה נדרשת — הם כפי שפורסמו, ויש לבדוק אותם מול הגוף עצמו.
 
 איתור מטפלים הוא אינדקס, לא תור. לצידו קטגוריית טיפולים, שמחולקת לפסיכיאטריה, לטיפולים רפואיים, לטיפול רגשי ולטיפולים נוספים. בטיפולים הרפואיים מופיעים בין השאר גרייה מגנטית, נזעי חשמל, אסקטמין וטיפולים ממוקדים לפוסט־טראומה, כל אחד עם תנאי הפניה ומימון משלו. בטיפול הרגשי יש אינדקסים לגישות כגון CBT וטיפול סומטי, לצד מרכזים שפונים לנוער או לציבור דתי וחרדי. לא כל טיפול בסל, ולא כל טיפול פרטי.
@@ -4962,6 +4966,7 @@
                 title: "זכויות ושירותים ממשלתיים",
                 titleEn: "Rights & Government Services",
                 desc: "מיצוי זכויות, ביטוח לאומי, משרד הבריאות והביטחון, שיקום",
+                descEn: "Benefits, National Insurance, the Health and Defense ministries, rehabilitation",
                 intro: `הדף הזה עוסק בזכויות ובשירותים שמדינת ישראל מפעילה או מממנת בתחום בריאות הנפש. הוא לא טופס ולא החלטה של ועדה. הוא מסביר אילו דלתות קיימות במדריך, ומי בדרך כלל הכתובת לכל אחת: מיצוי זכויות לפני ועדה, משרד הבריאות וסל השיקום, אגף השיקום במשרד הביטחון, ומסגרות השיקום עצמן. זכאות היא אישית. מה שכתוב בכרטיס הוא תיאור השירות, לא אישור שאתם זכאים.
 
 מיצוי זכויות מרכז גופים שעוזרים להתכונן לוועדה רפואית, להבין קצבה, או לסדר מסמכים. זה השלב שלפני שמבקשים סל או הכרה, כשהשפה של הטפסים זרה והפגישה קצרה. כדאי להגיע עם אבחנה כתובה ועם רשימת תפקוד ביומיום, ולשאול את הגוף המלווה מה הוא מכסה ומה לא. המדריך אינו מחליף ייעוץ משפטי.
@@ -4977,6 +4982,7 @@
                 title: "תמיכה וקהילה",
                 titleEn: "Support & Community",
                 desc: "תמיכה למשפחות, נוער, אוכלוסיות מיוחדות וקהילות תמיכה",
+                descEn: "Family support, youth, specific communities and support groups",
                 intro: `הדף הזה מיועד למי שמחפש אנשים, לא רק תור. טיפול וזכויות יושבים בעמודים אחרים. כאן נמצאת התמיכה שמסביב: משפחה שצריכה לדעת מה לומר בבית, נער או צעיר שצריך מענה בגילו, קהילה עם שפה או אורח חיים משלה, וקבוצה שאפשר להצטרף אליה בלי לקבוע פגישה. אף אחד מהשירותים האלה אינו קו חירום. במצב משבר חוזרים לעמוד עזרה דחופה או לער״ן 1201.
 
 תמיכה למשפחות פונה לבני זוג, להורים, לאחים ולילדים של מתמודדים. החיים לצד משבר נפשי מייצרים שאלות שאין להן מקום בתוך הפגישה של בן המשפחה: איך מדברים בבית, מתי פונים למיון, ואיך שומרים על שגרה. חלק מהשירותים הם שיחה או קבוצה, וחלקם ליווי מתמשך. בדקו בכרטיס אם המענה למשפחה בלבד או גם למתמודד עצמו.
@@ -4992,6 +4998,7 @@
                 title: "מידע ושירותים מעשיים",
                 titleEn: "Information & Practical Services",
                 desc: "פורטלי מידע, שירותים מקומיים, הסעות, ספרים, סרטים ו-TED",
+                descEn: "Information sites, local services, transport, books, films and TED",
                 intro: `הדף הזה הוא שכבת ההתמצאות שמסביב לשירותים עצמם. הוא לא קו, לא מרפאה ולא ועדה. מי שנמצא במשבר מתחיל בעמוד עזרה דחופה. מי שכבר יודע איזה טיפול או איזו זכות הוא מחפש ימצא אותם בעמודים המתאימים. כאן נאספו כלים שעוזרים להבין את המפה, למצוא מענה קרוב לבית, להגיע פיזית, או ללמוד מניסיון של אחרים דרך ספר, סרט או הרצאה.
 
 פורטלים ומידע הם אתרים ואינדקסים: הסבר על המערכת, רשימות ארציות, ונקודת פתיחה למי שלא יודע איך קוראים לשירות שחסר לו. הם חוסכים חיפוש עיוור, והם מתיישנים. כתובת שמופיעה בפורטל כדאי לאמת מול הכרטיס במדריך הזה ומול הארגון. שירותים מקומיים הם ההפך מקו ארצי: מרפאה, עמותה או מוקד שפועלים באזור מסוים. אם אתם גרים מחוץ לאזור שכתוב בכרטיס, השירות כנראה לא שלכם, גם אם הוא נשמע מתאים.
@@ -5184,10 +5191,9 @@
             const [showAllCards, setShowAllCards] = useState(() => {
                 try { return localStorage.getItem('mh-show-all') === '1'; } catch (_) { return false; }
             });
-            const [langMenuOpen, setLangMenuOpen] = useState(false);
-            const langMenuRef = useRef(null);
             const t = (key) => mhUi(locale, key);
             const shownTitle = (node) => (locale !== 'he' && node && node.titleEn ? node.titleEn : (node && node.title) || '');
+            const shownDesc = (node) => (locale !== 'he' && node && node.descEn ? node.descEn : (node && node.desc) || '');
             useEffect(() => { mhPersistLocale(locale); }, [locale]);
             useEffect(() => {
                 window.__mhUiLang = locale === 'en' ? 'en' : 'he';
@@ -5780,7 +5786,21 @@
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "05.11.2026"; 
+            const LAST_UPDATED = "05.11.2026";
+            const dateRank = (value) => {
+                const match = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(value || '').trim());
+                if (!match) return null;
+                const day = Number(match[1]);
+                const month = Number(match[2]);
+                const year = Number(match[3]);
+                if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+                return year * 10000 + month * 100 + day;
+            };
+            const catalogRank = dateRank(LAST_UPDATED);
+            const editedRank = dateRank(directoryEditedOn);
+            const shownUpdated = editedRank != null && (catalogRank == null || editedRank > catalogRank)
+                ? directoryEditedOn
+                : LAST_UPDATED; 
             
             const TERM_CATEGORIES = {
                 rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
@@ -6487,19 +6507,15 @@
                 } catch (_) {}
             }, []);
             useEffect(() => {
-                if (!accountMenuOpen && !langMenuOpen) return;
+                if (!accountMenuOpen) return;
                 const onDoc = (e) => {
                     if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
                         setAccountMenuOpen(false);
-                    }
-                    if (langMenuRef.current && !langMenuRef.current.contains(e.target)) {
-                        setLangMenuOpen(false);
                     }
                 };
                 const onKey = (e) => {
                     if (e.key !== 'Escape') return;
                     setAccountMenuOpen(false);
-                    setLangMenuOpen(false);
                 };
                 document.addEventListener('mousedown', onDoc);
                 document.addEventListener('keydown', onKey);
@@ -6507,10 +6523,9 @@
                     document.removeEventListener('mousedown', onDoc);
                     document.removeEventListener('keydown', onKey);
                 };
-            }, [accountMenuOpen, langMenuOpen]);
+            }, [accountMenuOpen]);
             const chooseLocale = (code) => {
                 const next = mhNormalizeLocale(code) || 'he';
-                setLangMenuOpen(false);
                 setLocale(next);
             };
             const openAuth = (tab) => {
@@ -8045,7 +8060,7 @@
                         <div>
                             <div className="mh-category-card-title">{shownTitle(group)}</div>
                         </div>
-                        {group.desc && <p className="mh-category-card-desc" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>{group.desc}</p>}
+                        {shownDesc(group) && <p className="mh-category-card-desc" lang={locale === 'en' ? 'en' : undefined} dir={locale === 'en' ? 'ltr' : undefined}>{shownDesc(group)}</p>}
                         <div className="mh-category-card-meta">
                             <span className="mh-category-card-badge">
                                 {count} {count === 1 ? t('service') : t('services')}
@@ -8553,38 +8568,23 @@
 
 
             const languageControl = (onHero) => (
-                <div className="mh-lang" ref={langMenuRef}>
-                    <button
-                        type="button"
-                        className={`mh-btn mh-lang-btn${onHero ? ' mh-hero-btn-ghost' : ''}`}
-                        style={onHero ? undefined : { background: 'var(--primary)', color: 'white' }}
-                        aria-expanded={langMenuOpen}
-                        aria-haspopup="menu"
-                        aria-controls="mh-lang-menu"
-                        aria-label={t('language')}
-                        title={t('language')}
-                        onClick={() => { setLangMenuOpen((v) => !v); setAccountMenuOpen(false); }}
-                        data-tracking-name="language_menu"
-                    >
-                        <i className="fas fa-language" aria-hidden="true"></i>
-                    </button>
-                    {langMenuOpen && (
-                        <div id="mh-lang-menu" className="mh-lang-menu" role="menu" aria-label={t('language')}>
-                            {MH_LOCALES.map((item) => (
-                                <button
-                                    key={item.code}
-                                    type="button"
-                                    role="menuitemradio"
-                                    aria-checked={locale === item.code}
-                                    className={locale === item.code ? 'mh-lang-current' : ''}
-                                    onClick={() => chooseLocale(item.code)}
-                                    data-tracking-name={`language_${item.code}`}
-                                >
-                                    {item.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                <div className={`mh-lang${onHero ? ' mh-lang-hero' : ''}`} role="group" aria-label={t('language')}>
+                    {[...MH_LOCALES].reverse().map((item) => (
+                        item.code === locale ? (
+                            <span key={item.code} className="mh-lang-opt" lang={item.code} aria-current="true">{item.label}</span>
+                        ) : (
+                            <button
+                                key={item.code}
+                                type="button"
+                                className="mh-lang-opt"
+                                lang={item.code}
+                                onClick={() => chooseLocale(item.code)}
+                                data-tracking-name={`language_${item.code}`}
+                            >
+                                {item.label}
+                            </button>
+                        )
+                    ))}
                 </div>
             );
 
@@ -9234,7 +9234,7 @@
                                             aria-expanded={accountMenuOpen}
                                             aria-haspopup="menu"
                                             aria-controls="mh-account-menu"
-                                            onClick={() => { setAccountMenuOpen((v) => !v); setLangMenuOpen(false); }}
+                                            onClick={() => setAccountMenuOpen((v) => !v)}
                                             data-tracking-name="auth_account_menu"
                                         >
                                             <i className="fas fa-user"></i> {t('myAccount')}
@@ -10342,7 +10342,7 @@
                             {t('disclaimerBody')}
                         </p>
                         <p style={{ margin: 0, fontSize: 'var(--text-sm)', opacity: 0.7 }}>
-                            {`${t('updated')} ${directoryEditedOn || LAST_UPDATED}`}
+                            {`${t('updated')} ${shownUpdated}`}
                             {' · '}
                             <a href="/privacy" style={{ color: 'inherit' }}>{t('privacy')}</a>
                         </p>
