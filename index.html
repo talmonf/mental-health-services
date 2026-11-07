@@ -2386,12 +2386,16 @@
         };
         const MH_TRANSLATION_KEYS = [
             'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
-            'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3'
+            'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3',
+            'phone', 'phoneLabel', 'phoneLabel2', 'phoneLabel3', 'phoneLabel4', 'phoneLabel5', 'phoneLabel6',
+            'emailLabel', 'emailLabel2', 'emailLabel3'
         ];
         // Hebrew stays on the card. A non-empty key in translations[locale] replaces it for that language.
         // The replaced Hebrew stays in cardSearchFallback so a Hebrew query still finds the card.
+        // A card already marked dir:ltr still takes an overlay when one was written, so a leftover
+        // Hebrew phrase in the notes can be replaced without rewriting the Hebrew record.
         const mhLocaleOverlay = (svc, locale) => {
-            if (!svc || !locale || locale === 'he' || svc.dir === 'ltr') return svc;
+            if (!svc || !locale || locale === 'he') return svc;
             const block = svc.cardTranslations && svc.cardTranslations[locale];
             if (!block || typeof block !== 'object') return svc;
             const next = { ...svc };
@@ -2405,6 +2409,22 @@
                 next[key] = value;
                 used = true;
             });
+            if (Array.isArray(block.siteLabels) || Array.isArray(block.siteAddresses)) {
+                const base = (Array.isArray(next.cardSites) && next.cardSites.length)
+                    ? next.cardSites
+                    : mhGetLocationsForRow(next.row);
+                if (base.length) {
+                    const labels = Array.isArray(block.siteLabels) ? block.siteLabels : [];
+                    const addresses = Array.isArray(block.siteAddresses) ? block.siteAddresses : [];
+                    next.cardSites = base.map((site, i) => ({
+                        ...site,
+                        ...(labels[i] ? { label: labels[i] } : {}),
+                        ...(addresses[i] ? { address: addresses[i] } : {})
+                    }));
+                    hebrew.push(base.map((site) => `${site.label || ''} ${site.address || ''}`).join(' '));
+                    used = true;
+                }
+            }
             if (!used) return svc;
             next.cardSearchFallback = hebrew.join(' ');
             next.dir = 'ltr';
@@ -3051,7 +3071,7 @@
 
         // Embedded data
         const DATA = {
-         "emergency": {"icon": "🆘", "title": "עזרה דחופה", "titleEn": "Emergency Assistance", "desc": "במצב משבר - התקשרו מיד", "services": [
+         "emergency": {"icon": "🆘", "title": "עזרה דחופה", "titleEn": "Emergency Assistance", "desc": "במצב משבר - התקשרו מיד", "descEn": "In a crisis, call now", "services": [
          MOD_MT_360,
          {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל. זמין 24/7 לחיילים, מילואים וכוחות הביטחון. סיוע נפשי מיידי; במידת הצורך הפניה להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
          {"row": 11, "org": "\"נפש אחת בישראל\"\n(אגף השיקום, משרד הבטחון)", "svc": "קו המעניק תמיכה נפשית ראשונית", "phone": "*8944", "web": "https://shikum.mod.gov.il/ContactUs/helpline", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "קו המופעל על ידי אגף השיקום ומעניק תמיכה נפשית ראשונית לכוחות הביטחון וחיילים וחיילות משוחררים המתמודדים עם פוסט טראומה בעקבות שירותם הצבאי. ניתן לפנות באופן אנונימי.", "languages": "", "diseases": "", "add": ""},
@@ -3064,7 +3084,7 @@
          {"row": 40, "org": "שרן רפואה עד הבית", "svc": "צוות משבר (חלופה לחדר מיון)", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "", "cost": "לאומית ומאוחדת", "specialty": "", "notes": "התערבות במשבר בבית המטופל", "languages": "", "diseases": "", "add": ""}]},
 
         
-         "helplines": {"icon": "📞", "title": "קווי סיוע", "titleEn": "Helplines", "desc": "תמיכה טלפונית", "services": [
+         "helplines": {"icon": "📞", "title": "קווי סיוע", "titleEn": "Helplines", "desc": "תמיכה טלפונית", "descEn": "Support by phone", "services": [
          {"row": 10, "org": "מערך בריאות הנפש במשרד הביטחון", "svc": "קבלת סיוע נפשי מיידי", "phone": "*6690", "web": "", "target": "כלל המשרתים", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "מופעל על ידי מערך בריאות הנפש בצה״ל. זמין 24/7 לחיילים, מילואים וכוחות הביטחון. סיוע נפשי מיידי; במידת הצורך הפניה להמשך טיפול.", "languages": "", "diseases": "", "add": ""},
          {"row": 11, "org": "\"נפש אחת בישראל\"\n(אגף השיקום, משרד הבטחון)", "svc": "קו המעניק תמיכה נפשית ראשונית", "phone": "*8944", "web": "https://shikum.mod.gov.il/ContactUs/helpline", "target": "נכי צה\"ל וכוחות הביטחון, ולחיילים משוחררים שמתמודדים עם פוסט טראומה עקב שירותם הצבאי ", "region": "", "cost": "", "specialty": "", "notes": "קו המופעל על ידי אגף השיקום ומעניק תמיכה נפשית ראשונית לכוחות הביטחון וחיילים וחיילות משוחררים המתמודדים עם פוסט טראומה בעקבות שירותם הצבאי. ניתן לפנות באופן אנונימי.", "languages": "", "diseases": "", "add": ""},
          {"row": 13, "org": "בנפש בריאה - משרד הבריאות", "svc": "קווי סיוע והכוונה", "phone": "", "web": "https://me.health.gov.il/mental-health/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית, אנגלית, רוסית, וערבית", "diseases": "", "add": ""},
@@ -3116,7 +3136,7 @@
          {"row": 294, "org": "מזור (הרב שמעון רגובי)", "svc": "הכוונה וליווי למציאת מענה בפסיכיאטריה ובריאות הנפש", "phone": "03-6351111", "phoneLabel": "משרד", "phoneShowNumber": true, "whatsapp": "97236351111", "email": "yr@mazormed.org.il", "web": "https://mazormed.org.il/%D7%91%D7%A8%D7%99%D7%90%D7%95%D7%AA-%D7%94%D7%A0%D7%A4%D7%A9/", "web2": "https://mazormed.org.il/%D7%A4%D7%A0%D7%99%D7%94-%D7%90%D7%95%D7%A0%D7%9C%D7%99%D7%99%D7%9F/", "webLabel2": "פנייה אונליין", "target": "פונים ובני משפחות", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "בראשות מנחם ברקוביץ: הקשבה והתאמה לאנשי מקצוע ולמסגרות בפסיכיאטריה ובריאות הנפש. אגף לטיפול רגשי בהכוונת גולדי רייסנר מלווה גם משפחות במצב רפואי קשה. מענה טלפוני א׳–ה׳ 10:00–15:00; למקרים דחופים נכתב שהצוות זמין 24/7 באותו מספר. משרד: מצדה 7, בני ברק. שונה מהמרכז הרפואי לבריאות הנפש מזור בעכו.", "languages": "", "diseases": "", "add": ""}]},
          
          "rights": {"icon": "💰", "title": "מיצוי זכויות", "titleEn": "Rights & Benefits", "desc": "ייעוץ והכנה לוועדות", "services": [
-         {"row": 776, "org": "מיכל יום טוב", "svc": "חוברת זכויות בריאות הנפש", "web": "", "webLabel": "", "add": "/downloads/חוברת-זכויות-לב-השרון.pdf", "addLabel": "הורדת החוברת (PDF)", "addDownloadName": "חוברת-זכויות-לב-השרון.pdf", "target": "מתמודדים, בני משפחה, ואנשי צוות שמלווים אותם", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "נכתבה בנובמבר 2022 על ידי מיכל יום טוב, עובדת סוציאלית קלינית. מרכזת זכויות בביטוח לאומי, בסל שיקום, בדיור, בתעסוקה, בהשכלה, בטיפול נפשי, באשפוז ובאפוטרופסות. החומר נאסף ממקורות שונים ואינו כולל את כל האפשרויות. אינו ייעוץ רפואי או משפטי, וייתכן שחלק מהפרטים השתנו. יש לאמת מול הגורם עצמו.", "languages": "עברית", "diseases": "", "cardTranslations": {"en": {"org": "Michal Yom Tov", "svc": "Mental-health rights booklet (Hebrew)", "target": "People in care, family members, and staff who support them", "region": "Nationwide", "cost": "Free", "languages": "Hebrew", "notes": "Written in November 2022 by Michal Yom Tov, a clinical social worker. The PDF is in Hebrew. It was compiled from several sources and does not list every option. It is not medical or legal advice, and some details may have changed. Check with the relevant office.", "addLabel": "Download the booklet (PDF)"}}},
+         {"row": 776, "org": "חוברת זכויות בריאות הנפש", "svc": "חוברת זכויות בריאות הנפש", "web": "", "webLabel": "", "add": "/downloads/חוברת-זכויות-לב-השרון.pdf", "addLabel": "הורדת החוברת (PDF)", "addDownloadName": "חוברת-זכויות-לב-השרון.pdf", "target": "מתמודדים, בני משפחה, ואנשי צוות שמלווים אותם", "region": "כל הארץ", "cost": "חינם", "specialty": "", "notes": "נכתבה בנובמבר 2022 על ידי מיכל יום טוב, עובדת סוציאלית קלינית. מרכזת זכויות בביטוח לאומי, בסל שיקום, בדיור, בתעסוקה, בהשכלה, בטיפול נפשי, באשפוז ובאפוטרופסות. החומר נאסף ממקורות שונים ואינו כולל את כל האפשרויות. אינו ייעוץ רפואי או משפטי, וייתכן שחלק מהפרטים השתנו. יש לאמת מול הגורם עצמו.", "languages": "עברית", "diseases": "", "locales": ["he"]},
          {"row": 85, "org": "כל זכות", "svc": "מדריך מיצוי זכויות למתמודדי נפש ובני משפחותיהם", "phone": "", "web": "https://www.kolzchut.org.il/he/%D7%9E%D7%93%D7%A8%D7%99%D7%9A_%D7%9E%D7%99%D7%A6%D7%95%D7%99_%D7%96%D7%9B%D7%95%D7%99%D7%95%D7%AA_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9_%D7%95%D7%91%D7%A0%D7%99_%D7%9E%D7%A9%D7%A4%D7%97%D7%95%D7%AA%D7%99%D7%94%D7%9D", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 82, "org": "כל זכות", "svc": "קביעת נכות למתמודדי נפש", "phone": "", "web": "https://www.kolzchut.org.il/he/%D7%A7%D7%91%D7%99%D7%A2%D7%AA_%D7%A0%D7%9B%D7%95%D7%AA_%D7%9C%D7%9E%D7%AA%D7%9E%D7%95%D7%93%D7%93%D7%99_%D7%A0%D7%A4%D7%A9", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
          {"row": 83, "org": "כל זכות", "svc": "קצבת שירותים מיוחדים למתמודדי נפש", "phone": "", "web": "https://www.kolzchut.org.il/he/%D7%A7%D7%A6%D7%91%D7%AA_%D7%A9%D7%99%D7%A8%D7%95%D7%AA%D7%99%D7%9D_%D7%9E%D7%99%D7%95%D7%97%D7%93%D7%99%D7%9D", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
@@ -3505,7 +3525,7 @@
         {"row": 58, "org": "ייעוץ פסיכולוגי - שאלות למטפלים פסיכולוגים", "svc": "קבוצה בפייסבוק", "phone": "", "web": "https://www.facebook.com/groups/emotional.support.forum/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
        ]}, 
 
-       "anxiety_apps": {"icon": "📱", "title": "אפליקציות בזמן התקף חרדה", "titleEn": "Apps for Anxiety Attacks", "desc": "אפליקציות המספקות עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה", "services": [
+       "anxiety_apps": {"icon": "📱", "title": "אפליקציות בזמן התקף חרדה", "titleEn": "Apps for Anxiety Attacks", "desc": "אפליקציות המספקות עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה", "descEn": "Apps that give mental-health first aid during an anxiety attack", "services": [
        {"row": 101, "org": "אפליקציית Rescue", "svc": "אפליקציה חינמית המספקת עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה, ומלווה את המשתמש עד חזרה הדרגתית לשגרה.", "phone": "", "web": "https://rescueanxietyapp.org/", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "האפליקציה אינה תחליף לייעוץ או טיפול מקצועי.", "languages": "עברית, אנגלית", "diseases": "חרדה", "add": ""},
        {"row": 102, "org": "VIVID - The Flexible App for Life-Changing Practices", "svc": "אפליקציה אינטראקטיבית לבניית תוכניות תרגול יומי ומעקב לאורך זמן.", "phone": "", "web": "https://www.vivid.me/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "מסייעת ליישם תכנים בעזרת תרגול, תזכורות וכלים להתמדה.", "languages": "English", "diseases": "", "add": ""},
        {"row": 103, "org": "המדריך ל-PTSD", "svc": "אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).", "phone": "", "web": "https://shikum.mod.gov.il/medical/mental-therapy/ptsd-app", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית", "diseases": "PTSD", "add": ""}
@@ -4942,6 +4962,13 @@
 קווי סיוע הם השכבה הבאה: שיחה, הכוונה או צ׳אט, גם כשאין סכנת חיים ברגע זה. ברשימה מוקדים של משרד הבריאות ומשרד החינוך להורים ולתלמידים, קו של ביטוח לאומי לנפגעי טרור ולשכול, נט״ל, סה״ר למי שמעדיף לכתוב במקום לדבר, מטיבת״א לציבור הדתי והחרדי, וקו למשפחות של מתמודדי נפש. חלק מהקווים ארציים, וחלקם פונים לקהל מוגדר. שעות הפעילות והתנאים כתובים בכרטיס, ולא כדאי להסיק אותם מהשם בלבד.
 
 אפליקציות בזמן התקף חרדה אינן מחליפות את הקווים האלה. הן תרגול קצר מהטלפון, כשקשה לנשום ואין כוח לחפש מספר. בכל כרטיס יש קישור לעמוד השירות. המידע נאסף ממקורות ציבוריים ומתעדכן ידנית. הוא אינו ייעוץ רפואי, ויש לאשר פרטים מול הגורם עצמו לפני פנייה.`,
+                introEn: `This page is for the moment when you cannot wait for a clinic appointment. If you or someone with you is in immediate danger, leave this page and call. The standing emergency lines appear at the top of every page, starting with ERAN 1201 for mental-health first aid, *2201 for soldiers and reservists, *6690 for the IDF mental-health service, and 1202 and 1203 for women and men who have been sexually assaulted. Below this text are the sections of the page, and each service links to its own page.
+
+Emergency Assistance gathers responses for an acute situation, not ongoing treatment. It includes the Nefesh Achat line of the Rehabilitation Department, for people dealing with post-trauma after military service, resilience centers around the country, and safe houses that serve as a short alternative to hospitalization for someone recognized with a mental injury who is in crisis. Beside them is a crisis team that comes to the patient's home through some of the health funds, as an alternative to the emergency room. Each service lists who it is for, the phone number if one was published, and the notes as they appeared in the source.
+
+Helplines are the next layer: a call, guidance, or a chat, even when there is no immediate danger to life. The list includes hotlines of the Ministry of Health and the Ministry of Education for parents and students, a National Insurance line for victims of terrorism and the bereaved, NATAL, SAHAR for people who would rather write than talk, Metivta for the religious and Haredi public, and a line for families of people living with mental illness. Some lines are nationwide, and some are for a defined audience. Hours and conditions are written on the card, and should not be guessed from the name alone.
+
+Apps for an anxiety attack do not replace these lines. They are a short exercise on the phone, when it is hard to breathe and there is no energy to look up a number. Each card links to the service page. The information was gathered from public sources and is updated by hand. It is not medical advice, and details should be confirmed with the service itself before you contact it.`,
                 icon: "fa-life-ring",
                 priority: "urgent",
                 subcategories: ["emergency", "helplines", "anxiety_apps"]
@@ -5623,21 +5650,25 @@
                     return mhLocaleOverlay(next, locale);
                 };
                 const requested = requestedEntryId ? String(requestedEntryId) : '';
-                const visibleInHebrew = (svc, categoryId) => {
+                // locales limits a card to those languages. The rights booklet is Hebrew
+                // only: the file itself is Hebrew, so the card is left out of English.
+                // A direct link still opens it. showAllCards does not override this.
+                const listedInLocale = (svc, categoryId) => {
+                    const requestedHit = requested && (String(svc.row) === requested || mhGetEntryId(svc, categoryId) === requested);
+                    if (requestedHit) return true;
+                    if (Array.isArray(svc.locales) && svc.locales.length && !svc.locales.includes(locale)) return false;
                     if (locale !== 'he' || showAllCards || !mhCardIsEnglishOnly(svc)) return true;
-                    if (!requested) return false;
-                    if (String(svc.row) === requested) return true;
-                    return mhGetEntryId(svc, categoryId) === requested;
+                    return false;
                 };
                 Object.keys(out).forEach((id) => {
                     const cat = out[id];
                     if (Array.isArray(cat.services)) {
-                        cat.services = cat.services.map(applyCardEdit).filter((svc) => svc && visibleInHebrew(svc, id));
+                        cat.services = cat.services.map(applyCardEdit).filter((svc) => svc && listedInLocale(svc, id));
                     }
                     if (cat.subsections) {
                         Object.keys(cat.subsections).forEach((subId) => {
                             const sub = cat.subsections[subId];
-                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit).filter((svc) => svc && visibleInHebrew(svc, id)) };
+                            cat.subsections[subId] = { ...sub, services: (sub.services || []).map(applyCardEdit).filter((svc) => svc && listedInLocale(svc, id)) };
                         });
                     }
                 });
@@ -6248,7 +6279,8 @@
                     text: "מרכז או מרפאה לבריאות הנפש שעובדים בגישה כוללנית: מסתכלים על האדם כמכלול, לא רק על אבחנה אחת, ויש בהם צוות מכמה מקצועות. בצוות יש פסיכיאטרים, פסיכולוגים או פסיכותרפיסטים, ועובדים סוציאליים, ולעיתים גם מרפאים בעיסוק, דיאטנים ואחיות. כך אפשר לקבל באותו מקום אבחון, טיפול תרופתי, שיחות וליווי נוסף לפי הצורך.\nברשימה יש מרכזים שנבדקו מול האתר שלהם, וגם מסגרות ציבוריות מרשימות משרד הבריאות: מרפאות בקהילה לפי העדכון מ־28.12.2025, טיפול יום ואשפוז יום לפי רשימת 2023, ובתי חולים פסיכיאטריים ומחלקות. במסגרות הציבוריות הרכב הצוות הוא לפי הגדרת המשרד למרפאה רב-מקצועית, ולא נבדק מרפאה-מרפאה. בפועל הצוות משתנה ממקום למקום.\nאפשר לסנן לפי סוג בעלות. רשימת «מרפאות בריאות הנפש» נשארת הקצרה. המסגרות הציבוריות נמצאות כאן ובחיפוש. מרפאות של לאומית שקרויות על שם רופא לא נכללו, חוץ ממרפאות ציפור הנפש וממרפאות שסומנו כרב-מקצועיות.",
                     category: "mh_clinics",
                     related: ["mental_health_clinic", "psychiatrist", "psychologist", "social_worker", "occupational_therapy"],
-                    aliases: ["מרכז רב-צוותי", "מרכזים רב-צוותיים", "צוות רב-תחומי", "גישה כוללנית"]
+                    aliases: ["מרכז רב-צוותי", "מרכזים רב-צוותיים", "צוות רב-תחומי", "גישה כוללנית"],
+                    readMoreUrl: "https://me.health.gov.il/mental-health/therapy-rehabilitation/public-care/community-treatment/multidisciplinary-clinics/"
                 },
                 psychiatric_er: {
                     title: "חדר מיון פסיכיאטרי",
@@ -7092,10 +7124,13 @@
                 );
             };
             const CategoryIntro = ({ cat, showSectionLinks }) => {
-                if (!cat.intro && !cat.desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
+                const intro = locale !== 'he' && cat.introEn ? cat.introEn : cat.intro;
+                const desc = locale !== 'he' && cat.descEn ? cat.descEn : cat.desc;
+                const english = locale !== 'he' && !!(cat.introEn || cat.descEn);
+                if (!intro && !desc && !(showSectionLinks && cat.sectionLinks?.length)) return null;
                 return (
-                    <div className="mh-cat-desc" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
-                        {cat.intro && <p style={{ margin: '0 0 var(--space-md)' }}>{cat.intro}</p>}
+                    <div className="mh-cat-desc" lang={english ? 'en' : (locale === 'en' ? 'he' : undefined)} dir={english ? 'ltr' : (locale === 'en' ? 'rtl' : undefined)}>
+                        {intro && <p style={{ margin: '0 0 var(--space-md)' }}>{intro}</p>}
                         {showSectionLinks && cat.sectionLinks?.length > 0 && (
                             <ul style={{ margin: '0 0 var(--space-md)', paddingRight: 'var(--space-lg)' }}>
                                 {cat.sectionLinks.map(link => (
@@ -7112,7 +7147,7 @@
                                 ))}
                             </ul>
                         )}
-                        {cat.desc && <p style={{ margin: 0 }}>{cat.desc}</p>}
+                        {desc && <p style={{ margin: 0 }}>{desc}</p>}
                     </div>
                 );
             };
@@ -7684,7 +7719,7 @@
                                 <i className="fas fa-shield-halved"></i> {t('hbCta')}
                             </button>
                         )}
-                        {s.svc && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{mhDialText(s.svc, `svc-${s.row}`)}</p>}
+                        {s.svc && s.svc !== s.org && <p style={{ color: 'var(--text-muted)', margin: '0 0 var(--space-md)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>{mhDialText(s.svc, `svc-${s.row}`)}</p>}
                         {(() => {
                             const own = ind && ind.referral.length ? ind : null;
                             const rec = own ? null : mhReferralRecord(s.row);
@@ -10296,13 +10331,19 @@
                             <h1 style={{ margin: '0 0 var(--space-md)', color: 'var(--primary-dark)', fontSize: 'var(--text-2xl)' }}>
                                 {shownTitle(CATEGORY_GROUPS[selectedCategoryGroup])}
                             </h1>
-                            {CATEGORY_GROUPS[selectedCategoryGroup].intro && (
-                                <div className="mh-group-lede" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
-                                    {CATEGORY_GROUPS[selectedCategoryGroup].intro.split(/\n\n+/).filter(Boolean).map((para, i) => (
-                                        <p key={i}>{para}</p>
-                                    ))}
-                                </div>
-                            )}
+                            {(() => {
+                                const group = CATEGORY_GROUPS[selectedCategoryGroup];
+                                const intro = locale !== 'he' && group.introEn ? group.introEn : group.intro;
+                                if (!intro) return null;
+                                const english = locale !== 'he' && !!group.introEn;
+                                return (
+                                    <div className="mh-group-lede" lang={english ? 'en' : (locale === 'en' ? 'he' : undefined)} dir={english ? 'ltr' : (locale === 'en' ? 'rtl' : undefined)}>
+                                        {intro.split(/\n\n+/).filter(Boolean).map((para, i) => (
+                                            <p key={i}>{para}</p>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
                             {CATEGORY_GROUPS[selectedCategoryGroup].subcategories.filter(id => filtered[id]).map(id => {
                                 const cat = filtered[id];
                                 return (

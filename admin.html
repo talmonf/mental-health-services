@@ -1911,10 +1911,16 @@
           const enDraft = (state.cardTextDraft && state.cardTextDraft.en) || {};
           const publicFields = {};
           DIR_TEXT.forEach(([name]) => { publicFields[name] = String(heDraft[name] || '').trim(); });
-          const en = {};
+          // Phone and email labels can be translated without a box on this form.
+          // Keep those keys, and replace only the fields this form edits.
+          const previousEn = card.translations && card.translations.en && typeof card.translations.en === 'object'
+            ? card.translations.en
+            : {};
+          const en = { ...previousEn };
           DIR_TEXT.forEach(([name]) => {
             const value = String(enDraft[name] || '').trim();
             if (value) en[name] = value;
+            else delete en[name];
           });
           DIR_PHONES.forEach((suffix) => {
             publicFields[`phone${suffix}`] = text(`phone${suffix}`);
