@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 117_rights_booklet_standalone.sql
 [x] 116_lev_hasharon_rights_booklet.sql
 [x] 115_guide_visit_audit.sql
 [x] 114_language_chrome.sql
