@@ -6400,7 +6400,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     phone2: "*2496",
                     phoneLabel2: "יד מכוונת",
                     web: "https://www.btl.gov.il/",
-                    related: ["disability", "sharam", "medical_committee", "guidance_service"],
+                    related: ["disability", "sharam", "medical_committee", "guidance_service", "one_soul"],
                     aliases: ["ביטוח לאומי", "הביטוח הלאומי", "המוסד לביטוח לאומי", "בל\"ל"]
                 },
                 moh: {
@@ -6414,15 +6414,29 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 },
                 mod_rehab: {
                     title: "אגף השיקום במשרד הביטחון",
-                    text: "האגף שמטפל בחיילים ובאנשי כוחות הביטחון שנפגעו בגוף או בנפש במהלך השירות, כולל פוסט טראומה. מי שהוכר מקבל טיפול נפשי, תגמולים, ליווי של קצין או קצינת שיקום ושירותים נוספים.\nבמקרים מסוימים אפשר לקבל טיפול נפשי ראשוני עוד לפני שתהליך ההכרה הסתיים.\nמוקד אגף השיקום: *8150.\nקו התמיכה הנפשית «נפש אחת», 24 שעות ביממה: *8944.",
+                    text: "האגף שמטפל בחיילים ובאנשי כוחות הביטחון שנפגעו בגוף או בנפש במהלך השירות, כולל פוסט טראומה. מי שהוכר מקבל טיפול נפשי, תגמולים, ליווי של קצין או קצינת שיקום ושירותים נוספים.\nבמקרים מסוימים אפשר לקבל טיפול נפשי ראשוני עוד לפני שתהליך ההכרה הסתיים.\nמוקד אגף השיקום: *8150.\nקו התמיכה הנפשית «נפש אחת», 24 שעות ביממה: *8944. הזכויות והטיפולים שהורחבו: [רפורמת נפש אחת](https://nefesh-il.org/glossary?term=one_soul).",
                     category: "rights",
                     phone: "*8150",
                     phoneLabel: "מוקד אגף השיקום",
                     phone2: "*8944",
                     phoneLabel2: "נפש אחת",
                     web: "https://shikum.mod.gov.il/",
-                    related: ["ptsd", "safe_house", "trauma"],
+                    related: ["ptsd", "safe_house", "trauma", "one_soul"],
                     aliases: ["אגף השיקום", "משרד הביטחון", "משרד הבטחון", "נכי צה\"ל", "נפש אחת"]
+                },
+                one_soul: {
+                    title: "רפורמת נפש אחת",
+                    text: "רפורמה של אגף השיקום במשרד הביטחון שהרחיבה זכויות וטיפולים לנכי צה״ל ולנכי כוחות הביטחון. בין השאר: טיפול נפשי לבני משפחה, בתים טיפוליים, טיפולי רפואה משלימה למתמודדים עם פוסט טראומה, פגיעה נפשית או פגיעת ראש, ומסלול הכרה מהיר יותר לפוסט טראומה. קו התמיכה «נפש אחת» (*8944) פועל כל יום ובכל שעה.\nאותה רפורמה חלה גם על נפגעי פעולות איבה בביטוח הלאומי, אם נקבעה להם נכות של 20% ומעלה והם מקבלים תגמול חודשי בשל פוסט טראומה, פגיעה נפשית או פגיעת ראש, או אם נקבעה להם נכות של 100% ומעלה מכל סוג פגיעה. במסגרתה הורחבה הזכאות לטיפולים.\nמוקד הביטוח הלאומי לרפורמה: 03-5127118, בימים א׳–ה׳, 8:00–16:00.",
+                    category: "rights",
+                    phone: "03-5127118",
+                    phoneLabel: "ביטוח לאומי",
+                    phoneShowNumber: false,
+                    web: "https://www.btl.gov.il/benefits/Victims_of_Hostilities/NefeSH_Ahat/Pages/default.aspx",
+                    webLabel: "באתר ביטוח לאומי",
+                    web2: "https://shikum.mod.gov.il/about/one-soul",
+                    webLabel2: "באתר אגף השיקום",
+                    related: ["mod_rehab", "btl", "ptsd"],
+                    aliases: ["רפורמת \"נפש אחת\""]
                 },
                 family_doctor: {
                     title: "רופא משפחה",
@@ -8337,7 +8351,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                         color: 'var(--text)',
                         margin: i === parts.length - 1 ? '0 0 var(--space-md)' : '0 0 var(--space-sm)'
                     }}>
-                        {mhDialText(part, `${keyPrefix}-${i}`)}
+                        {mhRenderLinkedNotes(part)}
                     </p>
                 ));
             };
@@ -8365,12 +8379,12 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     }}>
                         {t.phone && (
                             <a href={mhTelHref(t.phone)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
-                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone, t.phoneLabel, true, false, `tp-${k}`)}
+                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone, t.phoneLabel, t.phoneShowNumber !== false, false, `tp-${k}`)}
                             </a>
                         )}
                         {t.phone2 && (
                             <a href={mhTelHref(t.phone2)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
-                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone2, t.phoneLabel2, true, false, `tp2-${k}`)}
+                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone2, t.phoneLabel2, t.phoneShowNumber2 !== false, false, `tp2-${k}`)}
                             </a>
                         )}
                         {t.web && (
