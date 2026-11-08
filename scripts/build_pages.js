@@ -346,12 +346,14 @@ function renderContact(entry, emitted, sites) {
 
 function renderIndicatorBadges(entry) {
   const ind = cardIndicators(entry.raw);
-  if (!ind || (!ind.offers.length && !ind.wholeOrg)) return '';
+  if (!ind || (!ind.offers.length && !ind.wholeOrg && !ind.app)) return '';
   const lang = entry.raw.dir === 'ltr' ? 'en' : 'he';
   const badges = [];
   if (ind.wholeOrg) badges.push(lang === 'en' ? 'Organization overview' : 'כרטיס כללי של הארגון');
   if (ind.infoOnly) badges.push(lang === 'en' ? 'Information only' : 'מידע בלבד');
   else ind.offers.forEach((code) => badges.push(vocabLabel('card_offer', code, lang)));
+  if (ind.app === 'self_help') badges.push(lang === 'en' ? 'Self-help app' : 'אפליקציה לעזרה עצמית');
+  if (ind.app === 'via_app') badges.push(lang === 'en' ? 'Through an app' : 'שירות דרך אפליקציה');
   return `<p class="badges">${badges.map((b) => `<span class="badge">${esc(b)}</span>`).join('')}</p>`;
 }
 

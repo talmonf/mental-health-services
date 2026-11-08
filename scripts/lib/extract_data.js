@@ -374,10 +374,11 @@ function cardIndicators(raw) {
   const offers = Array.isArray(ind.offers) ? ind.offers.filter(Boolean) : [];
   const funding = Array.isArray(ind.funding) ? ind.funding.filter((f) => f && f.channel) : [];
   const wholeOrg = ind.whole_org === true;
-  if (!offers.length && !funding.length && !wholeOrg && !(Array.isArray(ind.referral) && ind.referral.length)) return null;
+  const app = ind.app === 'self_help' || ind.app === 'via_app' ? ind.app : '';
+  if (!offers.length && !funding.length && !wholeOrg && !(Array.isArray(ind.referral) && ind.referral.length) && !app) return null;
   const infoOnly = offers.length === 1 && offers[0] === 'info';
   const showFunding = !infoOnly && (!offers.length || wholeOrg || offers.some((c) => c === 'care' || c === 'claim' || c === 'community'));
-  return { offers, funding: showFunding ? funding : [], wholeOrg, infoOnly };
+  return { offers, funding: showFunding ? funding : [], wholeOrg, infoOnly, app };
 }
 
 function fundingLabel(entry, lang = 'he') {

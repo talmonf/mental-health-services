@@ -338,6 +338,8 @@ export type FundingEntry = {
 };
 
 export const OWNERSHIP_CODES = ['private', 'nonprofit', 'hmo', 'government', 'hospital', 'unspecified'] as const;
+/** A card has at most one. Empty means the card is not an app. */
+export const APP_CODES = ['self_help', 'via_app'] as const;
 
 export type Indicators = {
   offers: (typeof OFFER_CODES)[number][];
@@ -347,10 +349,12 @@ export type Indicators = {
   referral_source: string;
   /** Visitor filter on the multidisciplinary-center glossary term. Empty means unset. */
   ownership: (typeof OWNERSHIP_CODES)[number] | '';
+  /** self_help: the app is the tool. via_app: a human service reached through an app. */
+  app: (typeof APP_CODES)[number] | '';
 };
 
 export function emptyIndicators(): Indicators {
-  return { offers: [], whole_org: false, funding: [], referral: [], referral_source: '', ownership: '' };
+  return { offers: [], whole_org: false, funding: [], referral: [], referral_source: '', ownership: '', app: '' };
 }
 
 function codeList<T extends string>(raw: unknown, allowed: readonly T[], label: string): T[] {
@@ -387,6 +391,7 @@ export function normalizeIndicators(raw: unknown): Indicators {
     referral: codeList(src.referral, REFERRAL_CODES, 'דרך ההפניה'),
     referral_source: referralSource,
     ownership: oneOf(src.ownership, ['', ...OWNERSHIP_CODES], 'סוג בעלות', ''),
+    app: oneOf(src.app, ['', ...APP_CODES], 'אפליקציה', ''),
   };
 }
 

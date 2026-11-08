@@ -265,7 +265,7 @@
       'emergency', 'helplines', 'portals', 'rights', 'moh', 'mod', 'mh_clinics', 'hmo',
       'hospitalization', 'day_care', 'alternatives', 'rehabilitation', 'therapists', 'treatments',
       'addictions', 'trauma', 'families', 'youth', 'populations', 'facebook',
-      'anxiety_apps', 'nutrition', 'local', 'books_movies', 'transport'
+      'nutrition', 'local', 'books_movies', 'transport'
     ];
     const CATEGORY_SET = new Set(CATEGORY_KEYS);
     const GROUP_KEYS = {
@@ -1608,6 +1608,11 @@
       ['edu', 'משרד החינוך', true]
     ];
     const DIR_FUNDING_TERMS = [['', 'לא צוין'], ['full', 'מלא'], ['partial', 'השתתפות עצמית'], ['eligible', 'לזכאים']];
+    const DIR_APP = [
+      ['', 'אין', ''],
+      ['self_help', 'אפליקציה לעזרה עצמית', 'האפליקציה עצמה היא הכלי: תרגול, מעקב או מידע'],
+      ['via_app', 'שירות דרך אפליקציה', 'שירות אנושי שמגיעים אליו דרך אפליקציה']
+    ];
     const DIR_REFERRALS = [
       ['self_referral', 'אפשר לפנות ישירות'],
       ['gp_referral', 'הפניה מרופא משפחה'],
@@ -1769,6 +1774,10 @@
             <p class="dir-help">משמש לסינון במונח «מרכז רב-צוותי». לא מוצג כסימון על הכרטיס.</p>
             <fieldset class="dir-fieldset"><legend>מה יש בכרטיס</legend>
               ${DIR_OFFERS.map(([code, label, help]) => `<label class="dir-check" title="${esc(help)}"><input type="checkbox" name="offer_${code}"${indOffers.includes(code) ? ' checked' : ''}> ${esc(label)} <span class="dir-help">— ${esc(help)}</span></label>`).join('')}
+            </fieldset>
+            <fieldset class="dir-fieldset"><legend>אפליקציה</legend>
+              ${DIR_APP.map(([code, label, help]) => `<label class="dir-check"><input type="radio" name="app" value="${esc(code)}"${(ind.app || '') === code ? ' checked' : ''}> ${esc(label)}${help ? ` <span class="dir-help">— ${esc(help)}</span>` : ''}</label>`).join('')}
+              <p class="dir-help">סימון אחד. מוצג על הכרטיס. סינון לפי אפליקציה מציג רק כרטיסים עם הסימון שנבחר.</p>
             </fieldset>
             <fieldset class="dir-fieldset"><legend>מימון</legend>
               <div class="dir-grid">
@@ -2046,7 +2055,8 @@
               funding: DIR_FUNDING.filter(([code]) => checked(`fund_${code}`)).map(([code]) => ({ channel: code, terms: text(`fundterms_${code}`) })),
               referral: DIR_REFERRALS.map(([code]) => code).filter((code) => checked(`ref_${code}`)),
               referral_source: text('referral_source'),
-              ownership: text('ownership')
+              ownership: text('ownership'),
+              app: (form.querySelector('[name="app"]:checked') || {}).value || ''
             };
             body.orgMembers = Array.from(form.querySelectorAll('.member-row')).map((li) => Number(li.dataset.id));
           }

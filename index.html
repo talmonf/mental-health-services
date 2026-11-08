@@ -1433,6 +1433,9 @@
                 funding: 'מימון:',
                 fundingLabel: 'מימון',
                 unmarkedAlways: 'כרטיסים שעוד לא סומנו מוצגים תמיד.',
+                app: 'אפליקציה:',
+                appLabel: 'אפליקציה',
+                appStrict: 'סינון לפי אפליקציה מציג רק כרטיסים עם הסימון שנבחר.',
                 clearFilter: 'ניקוי הסינון',
                 nearby: 'שירותים קרובים אלי',
                 nearbyHint: 'הזינו כתובת, או לחצו לשימוש במיקום שזיהה הדפדפן',
@@ -1561,6 +1564,9 @@
                 funding: 'Funding:',
                 fundingLabel: 'Funding',
                 unmarkedAlways: 'Cards that are not marked yet are always shown.',
+                app: 'App:',
+                appLabel: 'App',
+                appStrict: 'The app filter shows only cards with the mark you choose.',
                 clearFilter: 'Clear filter',
                 nearby: 'Services near me',
                 nearbyHint: 'Enter an address, or use the location the browser detected',
@@ -2342,6 +2348,9 @@
         const MH_FUNDING_LABELS_EN = { private: 'Paid', free: 'Free', hmo: 'Health funds (Kupot)', moh: 'Ministry of Health', mod: 'Ministry of Defense', welfare: 'Social services', btl: 'National Insurance', supplementary: 'Supplementary insurance', edu: 'Ministry of Education' };
         const MH_FUNDING_TERMS_HE = { full: 'מימון מלא', partial: 'השתתפות עצמית', eligible: 'לזכאים' };
         const MH_FUNDING_TERMS_EN = { full: 'fully covered', partial: 'co-payment', eligible: 'if eligible' };
+        const MH_APP_ORDER = ['self_help', 'via_app'];
+        const MH_APP_LABELS_HE = { self_help: 'אפליקציה לעזרה עצמית', via_app: 'שירות דרך אפליקציה' };
+        const MH_APP_LABELS_EN = { self_help: 'Self-help app', via_app: 'Through an app' };
         const MH_OWNERSHIP_ORDER = ['private', 'nonprofit', 'hmo', 'government', 'hospital', 'unspecified'];
         const MH_OWNERSHIP_LABELS_HE = { private: 'פרטי', nonprofit: 'עמותה', hmo: 'קופת חולים', government: 'ממשלתי', hospital: 'בית חולים', unspecified: 'לא צוין' };
         const MH_OWNERSHIP_LABELS_EN = { private: 'Private', nonprofit: 'Nonprofit', hmo: 'Health fund', government: 'Government', hospital: 'Hospital', unspecified: 'Not stated' };
@@ -2351,7 +2360,8 @@
             return (s && s.ownership) || '';
         };
         // Indicators come only from directory_card_edits. A card with none set is "unknown",
-        // so filters never hide it and the embedded referral codes stay in use for it.
+        // so the offer and funding filters never hide it. The app filter is strict:
+        // it shows only cards with the chosen mark.
         const mhCardIndicators = (s) => {
             const ind = s && s.cardIndicators;
             if (!ind || typeof ind !== 'object') return null;
@@ -2359,7 +2369,8 @@
             const funding = Array.isArray(ind.funding) ? ind.funding.filter((f) => f && MH_FUNDING_LABELS_HE[f.channel]) : [];
             const referral = Array.isArray(ind.referral) ? ind.referral.filter(Boolean) : [];
             const wholeOrg = ind.whole_org === true;
-            if (!offers.length && !funding.length && !referral.length && !wholeOrg) return null;
+            const app = MH_APP_LABELS_HE[ind.app] ? ind.app : '';
+            if (!offers.length && !funding.length && !referral.length && !wholeOrg && !app) return null;
             const infoOnly = offers.length === 1 && offers[0] === 'info';
             return {
                 offers,
@@ -2367,13 +2378,19 @@
                 referral,
                 referralSource: typeof ind.referral_source === 'string' ? ind.referral_source : '',
                 wholeOrg,
-                infoOnly
+                infoOnly,
+                app
             };
         };
-        const MH_CARD_FILTER_EMPTY = { offer: '', funding: '', hideInfoOnly: false };
-        const mhCardFilterActive = (f) => Boolean(f && (f.offer || f.funding || f.hideInfoOnly));
+        const MH_CARD_FILTER_EMPTY = { offer: '', funding: '', hideInfoOnly: false, app: '' };
+        const mhCardFilterActive = (f) => Boolean(f && (f.offer || f.funding || f.hideInfoOnly || f.app));
         const mhServiceMatchesCardFilter = (s, f) => {
             if (!mhCardFilterActive(f)) return true;
+            if (f.app) {
+                const raw = s && s.cardIndicators;
+                const app = raw && MH_APP_LABELS_HE[raw.app] ? raw.app : '';
+                if (app !== f.app) return false;
+            }
             const ind = mhCardIndicators(s);
             if (!ind) return true;
             if (f.hideInfoOnly && ind.infoOnly) return false;
@@ -3174,7 +3191,8 @@
 
          {"row": 77, "org": "Avnei Chein", "svc": "Israel's Emergency Mental Health Resources During War - Comprehensive list of mental health resources", "phone": "", "web": "https://www.avneichein.org/emergency-mental-health-resources/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "Comprehensive English-language directory of emergency mental health resources", "languages": "English", "diseases": "", "add": "", "dir": "ltr"},
          {"row": 39, "org": "אגף השיקום, משרד הבטחון", "svc": "בית בטוח לטיפול מיידי - חלופת אשפוז", "phone": "*8944", "phoneLabel": "מוקד", "phoneShowNumber": false, "phone2": "052-4614896", "phoneLabel2": "באר שבע", "phoneShowNumber2": false, "phone3": "02-6551303", "phoneLabel3": "ירושלים", "phoneShowNumber3": false, "phone4": "052-6669512", "phoneLabel4": "טירת הכרמל", "phoneShowNumber4": false, "phone5": "052-6669512", "phoneLabel5": "תל השומר", "phoneShowNumber5": false, "web": "https://shikum.mod.gov.il/medical/mental-therapy/safe_housing", "target": "נכי ונכות צה\"ל שהוכרו עם פוסט טראומה, או למי שנמצאים בתהליך הכרה על פגיעה נפשית, ונמצאים במשבר נפשי הדורש מיון, חלופת אשפוז זמנית או השגחה", "region": "", "cost": "", "specialty": "", "notes": "הבתים הבטוחים מהווים חלופת אשפוז מיידית ונקודתית למתמודדים עם פוסט טראומה בזמן של משבר נפשי ואישי. ירושלים שלוחה 2815", "languages": "", "diseases": "", "add": "https://shikum.mod.gov.il/medical/hospitalization/safehouse#1"},
-         {"row": 40, "org": "שרן רפואה עד הבית", "svc": "צוות משבר (חלופה לחדר מיון)", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "", "cost": "לאומית ומאוחדת", "specialty": "", "notes": "התערבות במשבר בבית המטופל", "languages": "", "diseases": "", "add": ""}]},
+         {"row": 40, "org": "שרן רפואה עד הבית", "svc": "צוות משבר (חלופה לחדר מיון)", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "", "target": "", "region": "", "cost": "לאומית ומאוחדת", "specialty": "", "notes": "התערבות במשבר בבית המטופל", "languages": "", "diseases": "", "add": ""},
+         {"row": 101, "org": "אפליקציית Rescue", "svc": "אפליקציה חינמית המספקת עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה, ומלווה את המשתמש עד חזרה הדרגתית לשגרה.", "phone": "", "web": "https://rescueanxietyapp.org/", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "האפליקציה אינה תחליף לייעוץ או טיפול מקצועי.", "languages": "עברית, אנגלית", "diseases": "חרדה", "add": ""}]},
 
         
          "helplines": {"icon": "📞", "title": "קווי סיוע", "titleEn": "Helplines", "desc": "תמיכה טלפונית", "descEn": "Support by phone", "services": [
@@ -3506,7 +3524,8 @@
         {"row": 65, "org": "מכון למרחב\n(מרכז טיפולי רב תחומי)", "svc": "מענה מקצועי מותאם תרבות בתחום בריאות הנפש לאוכלוסיה הדתית - חרדית.", "phone": "02-5954571", "web": "https://www.lamerchav.org.il/", "target": "", "region": "מרפאות בירושלים, בית שמש, ביתר עילית, רחובות\n", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
         {"row": 69, "org": "דיאלוג פתוח בישראל (דפ\"י)", "svc": "טיפול משפחתי-מערכתי למצבי משבר", "phone": "04-9059215", "web": "https://opendialogue.co.il/therapy/", "target": "מתמודדים עם משבר נפשי או כל אחד ממעגל התמיכה שלהם", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": "https://www.facebook.com/opendialogueisrael"},
         {"row": 343, "org": "חיים של טובה", "svc": "הכוונה לטיפול הפסיכולוגי המתאים וסבסוד טיפולים פסיכולוגיים", "phone": "", "whatsapp": "972585720770", "email": "hst.org.il@gmail.com", "web": "https://hst.org.il/", "target": "", "region": "כל הארץ", "cost": "", "specialty": "", "notes": "העמותה מסייעת בהכוונה ובסבסוד של טיפולים פסיכולוגיים שונים.", "languages": "", "diseases": "", "add": ""},
-        {"row": 773, "org": "אור לב", "svc": "קבוצת תמיכה למתמודדים עם OCD", "phone": "055-262-9976", "phoneShowNumber": true, "iconOnly": true, "whatsapp": "972552629976", "email": "Or.lev.books@gmail.com", "web": "https://fighting-ocd.com/ocdgroup/", "target": "מבוגרים מגיל 18 שמתמודדים עם OCD", "region": "אונליין", "cost": "400 ₪ לחודש, לארבעה מפגשים, בלי התחייבות", "specialty": "OCD", "notes": "מפגש זום של 60 דקות, בקבוצה קטנה. מנחה אור לב, מתמודדת עם OCD מגיל 8 ומחברת הספר להילחם ב-OCD (2020). אין חובה לדבר, והמפגשים אינם מוקלטים. הקבוצה רציפה, ומצטרפים פעם בחודש לפני מחזור חדש. זו קבוצת תמיכה, לא טיפול נפשי. אור גם מרצה על OCD ומציעה מפגש אישי. קבוצה להורים: [הורים למתמודדים עם OCD](https://nefesh-il.org/support?entry=774&section=families).", "languages": "עברית", "diseases": "", "add": "", "ownership": "private"}
+        {"row": 773, "org": "אור לב", "svc": "קבוצת תמיכה למתמודדים עם OCD", "phone": "055-262-9976", "phoneShowNumber": true, "iconOnly": true, "whatsapp": "972552629976", "email": "Or.lev.books@gmail.com", "web": "https://fighting-ocd.com/ocdgroup/", "target": "מבוגרים מגיל 18 שמתמודדים עם OCD", "region": "אונליין", "cost": "400 ₪ לחודש, לארבעה מפגשים, בלי התחייבות", "specialty": "OCD", "notes": "מפגש זום של 60 דקות, בקבוצה קטנה. מנחה אור לב, מתמודדת עם OCD מגיל 8 ומחברת הספר להילחם ב-OCD (2020). אין חובה לדבר, והמפגשים אינם מוקלטים. הקבוצה רציפה, ומצטרפים פעם בחודש לפני מחזור חדש. זו קבוצת תמיכה, לא טיפול נפשי. אור גם מרצה על OCD ומציעה מפגש אישי. קבוצה להורים: [הורים למתמודדים עם OCD](https://nefesh-il.org/support?entry=774&section=families).", "languages": "עברית", "diseases": "", "add": "", "ownership": "private"},
+        {"row": 102, "org": "VIVID - The Flexible App for Life-Changing Practices", "svc": "אפליקציה אינטראקטיבית לבניית תוכניות תרגול יומי ומעקב לאורך זמן.", "phone": "", "web": "https://www.vivid.me/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "מסייעת ליישם תכנים בעזרת תרגול, תזכורות וכלים להתמדה.", "languages": "English", "diseases": "", "add": ""}
         ]},
         "others": {"title": "אחר", "titleEn": "Others", "services": [
         {"row": 36, "org": "מהפנטים", "svc": "אינדקס משרד הבריאות - מהפנטים בעלי רשיון", "phone": "", "web": "https://practitioners.health.gov.il/Hypnotists/901", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
@@ -3547,7 +3566,8 @@
          {"row":341,"org":"לב השרון — טראומה מינית","svc":"אשפוז ממוקד ל-16 יום, וטיפול יום במרכז עוגן","phone":"09-8980429","phoneLabel":"מערך","phoneShowNumber":true,"phone2":"09-8980427","phoneShowNumber2":true,"phoneLabel2":"טלפקס","web":"https://www.lev-hasharon.co.il/?ward=%D7%9E%D7%A2%D7%A8%D7%9A-%D7%9C%D7%98%D7%99%D7%A4%D7%95%D7%9C-%D7%91%D7%98%D7%A8%D7%90%D7%95%D7%9E%D7%94-%D7%9E%D7%99%D7%A0%D7%99%D7%AA","webLabel":"המערך","web2":"https://www.lev-hasharon.co.il/?clinic=%D7%90%D7%A9%D7%A4%D7%95%D7%96-%D7%9E%D7%9E%D7%95%D7%A7%D7%93-%D7%9C%D7%A0%D7%A4%D7%92%D7%A2%D7%95%D7%AA-%D7%98%D7%A8%D7%90%D7%95%D7%9E%D7%94-%D7%9E%D7%99%D7%A0%D7%99%D7%AA","webLabel2":"אשפוז ממוקד","add":"https://www.kolzchut.org.il/he/מרכזי_יום_ומרפאות_לטיפול_נפש_בנפגעות_תקיפה_מינית","addLabel":"כל זכות · טיפול יום","target":"מגיל 18, בטיפול פרטני בקהילה","region":"לב השרון","cost":"","specialty":"טראומה מינית","notes":"אשפוז ממוקד ומתוכנן ל-16 יום, במחלקת נשים פתוחה או במחלקה פתוחה מעורבת, לייצוב במשבר. מנהל התכנית: ד״ר עדיאל דורון. מנהלת המערך: עו״ס עמליה בן משה. טיפול היום של עוגן, וטיפול יום להפרעות אכילה וטראומה במרפאת המבוגרים בנתניה, רשומים בכל זכות בלי כתובת נפרדת, ולכן סיכה אחת. נפרד מ[התכנית לשורדי מסיבות](https://nefesh-il.org/treatment?entry=235&section=trauma). כל זכות מונה גם מיטות לנפגעות טראומה מינית ברמב״ם, בברזילי, בזיו, בבאר שבע ובכפר שאול, בלי דף יחידה עדכני. [הרשימה](https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית).","languages":"","diseases":""},
          {"row":342,"org":"מגן (איכילוב)","svc":"יחידת אשפוז לנשים אחרי פגיעה מינית","web":"https://www.tasmc.org.il/health/psychiatry/magen/","add":"https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית","addLabel":"כל זכות","target":"נשים מגיל 18, מכל הארץ, שנמצאות בטיפול","region":"תל אביב","cost":"","specialty":"טראומה מינית","notes":"ארבע מיטות בתוך המחלקה הפסיכיאטרית הפתוחה. שהות עד שלושה שבועות, מרצון, עם מקום מגורים קבוע לחזור אליו. לא לשימוש לרעה בחומרים, לא להפרעת אכילה שדורשת מחלקה ייעודית, ולא למצב שדורש מחלקה סגורה. יצירת קשר דרך הטופס בדף היחידה. כל זכות מונה גם מיטות לנפגעות טראומה מינית ברמב״ם, בברזילי, בזיו, בבאר שבע ובכפר שאול, בלי דף יחידה עדכני. [הרשימה](https://www.kolzchut.org.il/he/אשפוז_פסיכיאטרי_לנפגעות_תקיפה_מינית). גם [לצידך](https://nefesh-il.org/treatment?entry=293&section=hospitalization).","languages":"","diseases":""},
          {"row": 771, "org": "גירז (Geerz)", "svc": "רכיבת הרים טיפולית ללוחמים ומילואימניקים", "phone": "058-766-2212", "phoneLabel": "מרים, רכזת התוכנית", "phoneShowNumber": false, "phone2": "052-772-3500", "phoneLabel2": "משרד", "phoneShowNumber2": false, "email": "admin@geerz.org", "emailLabel": "משרד", "web": "https://www.geerz.org/en/veterans.php", "target": "לוחמים ומילואימניקים קרביים, גם בלי אבחנה, במעבר לשגרה", "region": "בית שמש, מעלה אדומים, גוש עציון, אבן שמואל, גוש טלמונים, חוף הכרמל, מועצה אזורית שומרון", "cost": "600 ₪ ל-16 מפגשים; ניתן לשלם ממענק הטיפולים האישי", "specialty": "", "notes": "16 מפגשים שבועיים של שעתיים. בחלק מהקבוצות אין צורך בניסיון, והאופניים ניתנים למשך התוכנית. פיילוט בשבי דרום, מרץ 2025. קבוצה נוספת נפתחת לפי בקשה בקהילה. קבוצות הילדים והנוער: [גירז לנוער](https://nefesh-il.org/support?entry=770&section=youth).", "languages": "", "diseases": "", "add": "https://www.facebook.com/GeerzIsrael/", "add2": "https://www.linkedin.com/company/geerz/home/", "add3": "https://www.instagram.com/geerz_il/"},
-         {"row": 772, "org": "Healing in Nature (HiN)", "svc": "ריטריט בטבע ללוחמים קרביים", "phone": "054-203-0339", "phoneShowNumber": true, "email": "contact@hin-group.org", "emailLabel": "פניות", "web": "https://www.hin-group.org/", "target": "לוחמים קרביים, בקבוצה מהיחידה", "region": "", "cost": "לא צוין מחיר למשתתף; שבוע הריטריט מתואר כממומן בתרומות", "specialty": "", "notes": "שבוע בטבע, כולל רכיבה טיפולית, ואחר כך קהילת בוגרים. הערכה לפני ואחרי, כולל באוניברסיטת תל אביב. צוות עם פסיכיאטר ופסיכולוגים קליניים. פנייה באימייל; הקבוצות לפי יחידה. משרד העמותה: חוט השני 1, מודיעין. הריטריט שפורסם באתר ובעיתונות (2024) היה במונטנה, לא במשרד.", "languages": "", "diseases": "", "add": ""}
+         {"row": 772, "org": "Healing in Nature (HiN)", "svc": "ריטריט בטבע ללוחמים קרביים", "phone": "054-203-0339", "phoneShowNumber": true, "email": "contact@hin-group.org", "emailLabel": "פניות", "web": "https://www.hin-group.org/", "target": "לוחמים קרביים, בקבוצה מהיחידה", "region": "", "cost": "לא צוין מחיר למשתתף; שבוע הריטריט מתואר כממומן בתרומות", "specialty": "", "notes": "שבוע בטבע, כולל רכיבה טיפולית, ואחר כך קהילת בוגרים. הערכה לפני ואחרי, כולל באוניברסיטת תל אביב. צוות עם פסיכיאטר ופסיכולוגים קליניים. פנייה באימייל; הקבוצות לפי יחידה. משרד העמותה: חוט השני 1, מודיעין. הריטריט שפורסם באתר ובעיתונות (2024) היה במונטנה, לא במשרד.", "languages": "", "diseases": "", "add": ""},
+         {"row": 103, "org": "המדריך ל-PTSD", "svc": "אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).", "phone": "", "web": "https://shikum.mod.gov.il/medical/mental-therapy/ptsd-app", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית", "diseases": "PTSD", "add": ""}
         ]}, 
          
          "families": {"icon": "👨‍👩‍👧", "title": "תמיכה למשפחות", "titleEn": "Family Support", "desc": "ייעוץ והכוונה", "services": [
@@ -3620,12 +3640,6 @@
         {"row": 277, "org": "מתייעצים עם מטפלים מוסמכים", "svc": "קבוצה בפייסבוק", "phone": "", "web": "https://www.facebook.com/groups/1734809967609705/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "קבוצה ציבורית — ייעוץ עם עו״סים, פסיכולוגים, מטפלים באומנויות ואנשי טיפול מוסמכים", "languages": "", "diseases": "", "add": ""},
         {"row": 86, "org": "המלצות ואזהרות על פסיכיאטרים, מטפלים ושירותי בריאות הנפש", "svc": "קבוצה בפייסבוק", "phone": "", "web": "https://www.facebook.com/groups/1225241461655254/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
         {"row": 58, "org": "ייעוץ פסיכולוגי - שאלות למטפלים פסיכולוגים", "svc": "קבוצה בפייסבוק", "phone": "", "web": "https://www.facebook.com/groups/emotional.support.forum/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""}
-       ]}, 
-
-       "anxiety_apps": {"icon": "📱", "title": "אפליקציות בזמן התקף חרדה", "titleEn": "Apps for Anxiety Attacks", "desc": "אפליקציות המספקות עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה", "descEn": "Apps that give mental-health first aid during an anxiety attack", "services": [
-       {"row": 101, "org": "אפליקציית Rescue", "svc": "אפליקציה חינמית המספקת עזרה ראשונה נפשית ותמיכה מיידית בזמן התקף חרדה, ומלווה את המשתמש עד חזרה הדרגתית לשגרה.", "phone": "", "web": "https://rescueanxietyapp.org/", "target": "", "region": "", "cost": "חינם", "specialty": "", "notes": "האפליקציה אינה תחליף לייעוץ או טיפול מקצועי.", "languages": "עברית, אנגלית", "diseases": "חרדה", "add": ""},
-       {"row": 102, "org": "VIVID - The Flexible App for Life-Changing Practices", "svc": "אפליקציה אינטראקטיבית לבניית תוכניות תרגול יומי ומעקב לאורך זמן.", "phone": "", "web": "https://www.vivid.me/", "target": "", "region": "", "cost": "", "specialty": "", "notes": "מסייעת ליישם תכנים בעזרת תרגול, תזכורות וכלים להתמדה.", "languages": "English", "diseases": "", "add": ""},
-       {"row": 103, "org": "המדריך ל-PTSD", "svc": "אפליקציה/מדריך דיגיטלי להתמודדות עם PTSD, מטעם אגף השיקום (משרד הביטחון).", "phone": "", "web": "https://shikum.mod.gov.il/medical/mental-therapy/ptsd-app", "target": "", "region": "", "cost": "", "specialty": "", "notes": "", "languages": "עברית", "diseases": "PTSD", "add": ""}
        ]}, 
 
        "nutrition": {"icon": "🍎", "title": "טיפול תזונתי לנפגעי נפש", "titleEn": "Nutrition & Mental Health", "desc": "", "services": [
@@ -5058,17 +5072,17 @@
 
 קווי סיוע הם השכבה הבאה: שיחה, הכוונה או צ׳אט, גם כשאין סכנת חיים ברגע זה. ברשימה מוקדים של משרד הבריאות ומשרד החינוך להורים ולתלמידים, קו של ביטוח לאומי לנפגעי טרור ולשכול, נט״ל, סה״ר למי שמעדיף לכתוב במקום לדבר, מטיבת״א לציבור הדתי והחרדי, וקו למשפחות של מתמודדי נפש. חלק מהקווים ארציים, וחלקם פונים לקהל מוגדר. שעות הפעילות והתנאים כתובים בכרטיס, ולא כדאי להסיק אותם מהשם בלבד.
 
-אפליקציות בזמן התקף חרדה אינן מחליפות את הקווים האלה. הן תרגול קצר מהטלפון, כשקשה לנשום ואין כוח לחפש מספר. בכל כרטיס יש קישור לעמוד השירות. המידע נאסף ממקורות ציבוריים ומתעדכן ידנית. הוא אינו ייעוץ רפואי, ויש לאשר פרטים מול הגורם עצמו לפני פנייה.`,
+אפליקציית Rescue, בכרטיסים של עזרה דחופה, היא תרגול קצר בטלפון בזמן התקף חרדה. היא אינה מחליפה את הקווים. אפליקציות אחרות יושבות בקטגוריה שלהן, ומסומנות על הכרטיס. בכל כרטיס יש קישור לעמוד השירות. המידע נאסף ממקורות ציבוריים ומתעדכן ידנית. הוא אינו ייעוץ רפואי, ויש לאשר פרטים מול הגורם עצמו לפני פנייה.`,
                 introEn: `This page is for the moment when you cannot wait for a clinic appointment. If you or someone with you is in immediate danger, leave this page and call. The standing emergency lines appear at the top of every page, starting with ERAN 1201 for mental-health first aid, *2201 for soldiers and reservists, *6690 for the IDF mental-health service, and 1202 and 1203 for women and men who have been sexually assaulted. Below this text are the sections of the page, and each service links to its own page.
 
 Emergency Assistance gathers responses for an acute situation, not ongoing treatment. It includes the Nefesh Achat line of the Rehabilitation Department, for people dealing with post-trauma after military service, resilience centers around the country, and safe houses that serve as a short alternative to hospitalization for someone recognized with a mental injury who is in crisis. Beside them is a crisis team that comes to the patient's home through some of the health funds, as an alternative to the emergency room. Each service lists who it is for, the phone number if one was published, and the notes as they appeared in the source.
 
 Helplines are the next layer: a call, guidance, or a chat, even when there is no immediate danger to life. The list includes hotlines of the Ministry of Health and the Ministry of Education for parents and students, a National Insurance line for victims of terrorism and the bereaved, NATAL, SAHAR for people who would rather write than talk, Metivta for the religious and Haredi public, and a line for families of people living with mental illness. Some lines are nationwide, and some are for a defined audience. Hours and conditions are written on the card, and should not be guessed from the name alone.
 
-Apps for an anxiety attack do not replace these lines. They are a short exercise on the phone, when it is hard to breathe and there is no energy to look up a number. Each card links to the service page. The information was gathered from public sources and is updated by hand. It is not medical advice, and details should be confirmed with the service itself before you contact it.`,
+The Rescue app, in the Emergency Assistance cards, is a short exercise on the phone during an anxiety attack. It does not replace these lines. Other apps sit in their own category and are marked on the card. Each card links to the service page. The information was gathered from public sources and is updated by hand. It is not medical advice, and details should be confirmed with the service itself before you contact it.`,
                 icon: "fa-life-ring",
                 priority: "urgent",
-                subcategories: ["emergency", "helplines", "anxiety_apps"]
+                subcategories: ["emergency", "helplines"]
             },
             treatment: {
                 title: "טיפול וטיפולים",
@@ -5136,7 +5150,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
             }
         };
 
-        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', mh_public: 'fa-hospital', hmo: 'fa-hospital', hospitalization: 'fa-hospital', day_care: 'fa-sun', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', anxiety_apps: 'fa-mobile-screen', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical', books_movies: 'fa-clapperboard' };
+        const CAT_ICONS = { emergency: 'fa-life-ring', helplines: 'fa-phone', portals: 'fa-globe', rights: 'fa-coins', moh: 'fa-hospital', mod: 'fa-medal', mh_clinics: 'fa-stethoscope', mh_public: 'fa-hospital', hmo: 'fa-hospital', hospitalization: 'fa-hospital', day_care: 'fa-sun', therapists: 'fa-user-doctor', treatments: 'fa-brain', addictions: 'fa-pills', trauma: 'fa-bolt', families: 'fa-people-group', youth: 'fa-child', populations: 'fa-users', facebook: 'fa-facebook', nutrition: 'fa-apple-whole', local: 'fa-location-dot', transport: 'fa-truck-medical', rehabilitation: 'fa-arrows-rotate', alternatives: 'fa-house-medical', books_movies: 'fa-clapperboard' };
 
         const AUTH_QUALIFICATIONS = [
             { value: 'social_worker', label: 'עובד/ת סוציאלי/ת' },
@@ -8266,7 +8280,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             paddingLeft: entryId && s.dir !== 'ltr' ? '40px' : undefined,
                             paddingRight: entryId && s.dir === 'ltr' ? '40px' : undefined
                         }}>{s.org}</h3>
-                        {ind && (ind.offers.length > 0 || ind.wholeOrg) && (
+                        {ind && (ind.offers.length > 0 || ind.wholeOrg || ind.app) && (
                             <div className="mh-card-badges">
                                 {ind.wholeOrg && (
                                     <span className="mh-card-badge mh-card-badge-org">
@@ -8282,6 +8296,11 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         <i className={`fas ${MH_OFFER_ICONS[code]}`} aria-hidden="true"></i> {(ltr ? MH_OFFER_LABELS_EN : MH_OFFER_LABELS_HE)[code]}
                                     </span>
                                 ))}
+                                {ind.app && (
+                                    <span className="mh-card-badge">
+                                        <i className="fas fa-mobile-screen" aria-hidden="true"></i> {(ltr ? MH_APP_LABELS_EN : MH_APP_LABELS_HE)[ind.app]}
+                                    </span>
+                                )}
                             </div>
                         )}
                         {distanceLabel && <p className="mh-nearby-distance">{distanceLabel}</p>}
@@ -10728,6 +10747,21 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         {t('hideInfo')}
                                     </button>
                                 </div>
+                                <div className="mh-card-filter-group" role="group" aria-label={t('appLabel')}>
+                                    <span className="mh-card-filter-label">{t('app')}</span>
+                                    {MH_APP_ORDER.map((code) => (
+                                        <button
+                                            key={code}
+                                            type="button"
+                                            className={`mh-resource-chip${cardFilter.app === code ? ' active' : ''}`}
+                                            aria-pressed={cardFilter.app === code}
+                                            onClick={() => setCardFilter((f) => ({ ...f, app: f.app === code ? '' : code }))}
+                                            data-tracking-name={`card_filter_app_${code}`}
+                                        >
+                                            {(locale === 'en' ? MH_APP_LABELS_EN : MH_APP_LABELS_HE)[code]}
+                                        </button>
+                                    ))}
+                                </div>
                                 <div className="mh-card-filter-group" role="group" aria-label={t('fundingLabel')}>
                                     <span className="mh-card-filter-label">{t('funding')}</span>
                                     {MH_FUNDING_ORDER.map((code) => (
@@ -10744,7 +10778,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                     ))}
                                 </div>
                                 <p className="mh-helper-text mh-card-filter-note">
-                                    {t('unmarkedAlways')}
+                                    {t('unmarkedAlways')} {t('appStrict')}
                                     {cardFilterOn && (
                                         <>
                                             {' '}
