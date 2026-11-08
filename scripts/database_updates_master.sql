@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 126_glossary_english.sql
 [x] 125_glossary_one_soul.sql
 [x] 124_site_languages.sql
 [x] 123_ruah_yam_phone_buttons.sql

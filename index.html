@@ -1483,7 +1483,26 @@
                 introDismiss: 'הסתרת הודעת הפתיחה',
                 introDismissTitle: 'הסתרה. אפשר לפתוח שוב מאתם לא לבד.',
                 hbBanner: 'החיפוש «חרבות ברזל» הופעל. הרחיבו את המקטעים למטה (במיוחד «עזרה דחופה» ו«טראומה») כדי לראות את כל המענים והחוברת.',
-                hbCta: 'הצגת כל המענים לחרבות ברזל'
+                hbCta: 'הצגת כל המענים לחרבות ברזל',
+                glossaryCount: '{count} מונחים זמינים. חפשו לפי שם או קטגוריה, או עיינו לפי אותיות.',
+                glossaryLinkHint: 'סמל הקישור ליד הכותרת, ליד כל קטגוריה או מונח — לשליחה ישירה לאותו מקום בדף.',
+                searchTermPlaceholder: 'חפש מונח...',
+                byCategory: 'לפי קטגוריות',
+                byAlphabet: 'לפי א-ב',
+                allTerms: 'הכל',
+                noTerms: 'לא נמצאו מונחים התואמים לחיפוש',
+                relatedTermsLabel: 'מונחים קשורים:',
+                allServicesDirectory: 'כל השירותים במדריך ({count})',
+                servicesInDirectory: 'שירותים במדריך:',
+                allServicesCategory: 'לכל השירותים בקטגוריה: {title} ({count})',
+                allServicesThisCategory: 'לכל השירותים בקטגוריה ({count})',
+                showLess: 'הצג פחות',
+                showMoreCount: 'הצג עוד ({count})',
+                toWebsite: 'לאתר',
+                copyTermCardsLink: 'העתקת קישור לרשימת השירותים',
+                copyGlossaryLink: 'העתקת קישור למילון המונחים',
+                copyTermCatLink: 'העתקת קישור שפותח את הקטגוריה הזאת במילון',
+                copyTermLink: 'העתקת קישור שפותח את המונח הזה במילון'
             },
             en: {
                 language: 'Language',
@@ -1592,7 +1611,26 @@
                 introDismiss: 'Hide the welcome note',
                 introDismissTitle: 'Hide. You can open it again from You are not alone.',
                 hbBanner: 'The Iron Swords search is on. Open the sections below, especially Emergency and Trauma, to see every related service.',
-                hbCta: 'Show every Iron Swords service'
+                hbCta: 'Show every Iron Swords service',
+                glossaryCount: '{count} terms. Search by name or category, or browse by letter.',
+                glossaryLinkHint: 'The link icon beside the title, a category, or a term copies a link that opens that place on the page.',
+                searchTermPlaceholder: 'Search for a term...',
+                byCategory: 'By category',
+                byAlphabet: 'A–Z',
+                allTerms: 'All',
+                noTerms: 'No terms match this search',
+                relatedTermsLabel: 'Related terms:',
+                allServicesDirectory: 'All services in the directory ({count})',
+                servicesInDirectory: 'Services in the directory:',
+                allServicesCategory: 'All services in {title} ({count})',
+                allServicesThisCategory: 'All services in this category ({count})',
+                showLess: 'Show less',
+                showMoreCount: 'Show more ({count})',
+                toWebsite: 'Website',
+                copyTermCardsLink: 'Copy a link to this list of services',
+                copyGlossaryLink: 'Copy a link to the glossary',
+                copyTermCatLink: 'Copy a link that opens this category in the glossary',
+                copyTermLink: 'Copy a link that opens this term in the glossary'
             }
         };
         const mhUi = (locale, key) => {
@@ -5899,15 +5937,15 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 : LAST_UPDATED; 
             
             const TERM_CATEGORIES = {
-                rights: { title: "זכויות וקצבאות", icon: "fa-coins", color: "#2d5a7b" },
-                treatment: { title: "סוגי טיפולים", icon: "fa-brain", color: "#52b788" },
-                professionals: { title: "מטפלים ואנשי מקצוע", icon: "fa-user-doctor", color: "#e67e22" },
-                hospitalization: { title: "אשפוז וחלופות", icon: "fa-hospital", color: "#c0392b" },
-                rehabilitation: { title: "שיקום", icon: "fa-arrows-rotate", color: "#9b59b6" },
-                hmo: { title: "קופות חולים", icon: "fa-hospital", color: "#3498db" },
-                mh_clinics: { title: "מרפאות בריאות הנפש", icon: "fa-stethoscope", color: "#3498db" },
-                conditions: { title: "הפרעות ומצבים", icon: "fa-heart-pulse", color: "#e74c3c" },
-                other: { title: "אחר", icon: "fa-info-circle", color: "#95a5a6" }
+                rights: { title: "זכויות וקצבאות", titleEn: "Rights and benefits", icon: "fa-coins", color: "#2d5a7b" },
+                treatment: { title: "סוגי טיפולים", titleEn: "Types of treatment", icon: "fa-brain", color: "#52b788" },
+                professionals: { title: "מטפלים ואנשי מקצוע", titleEn: "Practitioners", icon: "fa-user-doctor", color: "#e67e22" },
+                hospitalization: { title: "אשפוז וחלופות", titleEn: "Hospitalization and alternatives", icon: "fa-hospital", color: "#c0392b" },
+                rehabilitation: { title: "שיקום", titleEn: "Rehabilitation", icon: "fa-arrows-rotate", color: "#9b59b6" },
+                hmo: { title: "קופות חולים", titleEn: "Health funds", icon: "fa-hospital", color: "#3498db" },
+                mh_clinics: { title: "מרפאות בריאות הנפש", titleEn: "Mental health clinics", icon: "fa-stethoscope", color: "#3498db" },
+                conditions: { title: "הפרעות ומצבים", titleEn: "Conditions", icon: "fa-heart-pulse", color: "#e74c3c" },
+                other: { title: "אחר", titleEn: "Other", icon: "fa-info-circle", color: "#95a5a6" }
             };
 
             const terms = {
@@ -6553,6 +6591,470 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 }
             };
 
+            // English wording for each glossary term. Hebrew fields on the term stay the Hebrew source.
+            // A term is shown in English only from this block. A missing field is left empty.
+            const TERM_EN = {
+                disability: {
+                    title: "Disability pension",
+                    aliases: ["general disability pension", "mental disability"],
+                    text: "A monthly pension from the National Insurance Institute for someone whose ability to earn has fallen because of a medical or mental condition. There are 3 levels: partial (20–74%), full (75–100%), and full with a supplement.\nThe percentage is set by a National Insurance medical committee. The pension follows that percentage.\nFor information: *6050 or the National Insurance website."
+                },
+                sharam: {
+                    title: "Special services benefit",
+                    aliases: ["attendance allowance", "special services"],
+                    text: "A National Insurance benefit for extra help with rehabilitation. It can cover personal accompaniment, psychological and psychiatric treatment, vocational rehabilitation, supported housing, and help claiming rights.\nIt is for someone with a serious mental illness or a significant disability (75% or more) who needs extensive help. The services are free through approved providers."
+                },
+                nursing: {
+                    title: "Long-term care benefit",
+                    aliases: ["nursing benefit", "attendance benefit"],
+                    text: "A monthly National Insurance benefit for someone who needs another person's help with basic activities: eating, dressing, bathing, moving around, and continence. There are 6 levels of dependence (1 to 6).\nIt is paid in money. The person can hire a carer or pass the money to the family. It is for someone who has reached retirement age, or who needs close supervision.\nFor information: *2637."
+                },
+                rehab_basket: {
+                    title: "Rehabilitation basket",
+                    aliases: ["mental health rehabilitation basket", "rehab basket"],
+                    text: "Free community services from the Ministry of Health for eligible people aged 18–67 who live with a psychiatric disability. The basket includes supported housing, rehabilitation clubs, vocational rehabilitation, community accompaniment, emotional support, and help claiming rights.\nThe main providers are Enosh, Kidum, Yedid Nefesh, and Or Lanefesh. Eligibility is decided by a committee.\nFor information: *5400."
+                },
+                medical_committee: {
+                    title: "Medical committee",
+                    aliases: ["National Insurance medical committee", "disability committee"],
+                    text: "A National Insurance committee that sets the disability percentage and entitlement to benefits. It includes a specialist who reviews the medical documents and carries out a physical or mental examination.\nArrive prepared with every medical document, opinions from practitioners, and medical records. Help preparing for the committee is available through Yad Mechavenet (*2496) and through other organizations."
+                },
+                rights_utilization: {
+                    title: "Claiming rights",
+                    aliases: ["rights", "benefits advice"],
+                    text: "The process of recognizing and receiving the rights that people living with mental illness are entitled to from the state and from other institutions. It includes the disability pension, the rehabilitation basket, the special services benefit, the long-term care benefit, and other rights.\nHelp is available from organizations such as Kol Zchut, Yad Mechavenet, and family counseling centers. It is worth knowing the rights and asking for them."
+                },
+                guidance_service: {
+                    title: "Yad Mechavenet",
+                    aliases: ["guided preparation", "committee preparation"],
+                    text: "A free National Insurance service that helps someone prepare for the medical committee. It includes advice before the committee, help collecting documents, and preparation for the questions that are likely to be asked.\nThe service is free and available at National Insurance branches.\nFor information: *2496.",
+                    webLabel: "Yad Mechavenet",
+                    webLabel2: "List of centers"
+                },
+                cbt: {
+                    title: "CBT — cognitive behavioral therapy",
+                    aliases: ["cognitive behavioral therapy", "cognitive behaviour therapy"],
+                    text: "A psychotherapy that focuses on identifying and changing unhelpful thoughts and behaviors. It includes spotting negative thought patterns, challenging thoughts that do not hold up, and building practical ways to cope.\nIt is especially useful for depression, anxiety, PTSD, eating disorders, OCD, and sleep problems. A course is usually 12–20 weekly sessions.\nIt is available through the health funds (subsidized) or privately."
+                },
+                somatic: {
+                    title: "Somatic therapy — Somatic Experiencing",
+                    aliases: ["somatic experiencing", "body-based trauma therapy"],
+                    text: "A trauma therapy developed by Peter Levine. It focuses on releasing physical tension that the body stored after trauma. It works with bodily sensations and does not require retelling the traumatic event.\nIt is used for trauma, PTSD, anxiety, panic, and complex trauma. The work focuses on regulating the nervous system and restoring a sense of control."
+                },
+                emdr: {
+                    title: "EMDR — eye movement desensitization and reprocessing",
+                    aliases: ["eye movement therapy", "trauma reprocessing"],
+                    text: "A trauma therapy that uses eye movements, or another form of bilateral stimulation, while traumatic memories are processed. The aim is to reprocess those memories so they stop flooding the person and getting in the way.\nIt is used for PTSD, a single traumatic event, and anxiety. A course is often relatively short (8–12 sessions).\nThe practitioner needs specific training."
+                },
+                therapy: {
+                    title: "Psychotherapy",
+                    aliases: ["talk therapy", "counseling", "counselling"],
+                    text: "Talking treatment that helps with emotional, mental, and behavioral difficulties. Forms include CBT (cognitive behavioral), psychodynamic therapy (focused on the past and on patterns outside awareness), family or couples therapy, group therapy, and others.\nIt is available through the health funds (subsidized, with a referral from the family doctor) or privately. How long it lasts depends on the need and on the method."
+                },
+                psychodynamic: {
+                    title: "Psychodynamic therapy",
+                    aliases: ["psychodynamic psychotherapy"],
+                    text: "A psychotherapy focused on patterns outside awareness, inner conflicts, and the way the past shapes the present. It works with dreams, associations, and the relationship with the therapist.\nIt suits someone who wants to understand themselves, their relationship patterns, and their inner conflicts in depth. It is usually long-term (months to years).\nIt is available through the health funds or privately."
+                },
+                group_therapy: {
+                    title: "Group therapy",
+                    aliases: ["group psychotherapy"],
+                    text: "Psychotherapy held in a group of several people (usually 6–10) with one or more therapists. The group offers mutual support, a chance to learn from others, and practice of social skills.\nIt is especially useful for social anxiety, personality disorders, addictions, and support in similar life situations. Groups may be open, or closed (everyone starts together)."
+                },
+                couples_therapy: {
+                    title: "Couples therapy",
+                    aliases: ["relationship therapy"],
+                    text: "Psychotherapy for couples dealing with difficulties in the relationship, in communication, or with a mental-health crisis of one partner. It helps improve communication, resolve conflicts, and strengthen the relationship.\nIt also suits couples in which one partner lives with a psychiatric disability and both want to support each other better."
+                },
+                family_therapy: {
+                    title: "Family therapy",
+                    aliases: ["family psychotherapy"],
+                    text: "Psychotherapy focused on the family system, not only on one person. It helps improve family communication, understand relationship patterns, and support the person living with mental illness.\nIt matters especially when one family member lives with a psychiatric disability. The work can include the whole family or part of it."
+                },
+                art_therapy: {
+                    title: "Arts therapy",
+                    aliases: ["art therapy", "creative therapy"],
+                    text: "A psychotherapy that uses art (drawing, sculpture, music, movement) as a way to express feelings and work through mental distress. It especially suits someone who finds words difficult, children and teenagers, and trauma treatment.\nIt is given by an arts therapist with specific training. It is available through the health funds, the rehabilitation basket, or privately."
+                },
+                occupational_therapy: {
+                    title: "Occupational therapy",
+                    aliases: ["daily living skills"],
+                    text: "Treatment focused on everyday functioning and taking part in daily life. The occupational therapist helps develop skills, increase independence, and adapt the surroundings to the person's needs.\nThe work covers cognitive, motor, and social functioning. It is especially important in rehabilitation.\nIt is available through the health funds, the rehabilitation basket, or hospitals."
+                },
+                hypnosis: {
+                    title: "Hypnosis",
+                    aliases: ["clinical hypnosis"],
+                    text: "A treatment that uses a state of heightened concentration and suggestibility for various problems. It is especially used for anxiety, phobias, unwanted habits, and sleep problems.\nThe practitioner needs a specific license. A list of licensed hypnotists is on the Ministry of Health website."
+                },
+                online_therapy: {
+                    title: "Online therapy",
+                    aliases: ["remote therapy", "video therapy", "Zoom therapy"],
+                    text: "Psychotherapy held at a distance by video (Zoom, Skype) or by phone. It makes treatment easier to reach without traveling, which matters for someone who lives far away or finds it hard to leave home.\nSome health funds offer subsidized online therapy. Check that the practitioner is properly trained and that the session is in a safe, secure setting."
+                },
+                tms: {
+                    title: "TMS / dTMS — transcranial magnetic stimulation",
+                    aliases: ["transcranial magnetic stimulation", "deep TMS", "magnetic brain stimulation"],
+                    text: "A non-invasive treatment that uses magnetic fields to stimulate brain areas involved in mood regulation. It is given as a series of short clinic sessions, usually without anesthesia and without a hospital stay.\ndTMS (deep TMS) is a more focused and deeper form, given with a dedicated coil. It is used mainly for depression that has not responded to medication, and sometimes for other conditions when a doctor decides it is suitable."
+                },
+                ketamine: {
+                    title: "Ketamine",
+                    aliases: ["ketamine treatment"],
+                    text: "A medication treatment given in dedicated clinics, mainly for depression that has not responded to other treatment, and sometimes for other conditions, according to medical guidance. It needs a medical assessment and close follow-up because of possible side effects and short-term effects during or after the session."
+                },
+                ect: {
+                    title: "ECT — electroconvulsive therapy",
+                    aliases: ["electroconvulsive therapy"],
+                    text: "A biological treatment given in hospital under a short anesthetic. A controlled electrical activity is induced in the brain in order to bring a rapid improvement in severe mental conditions. It is used mainly for severe depression, catatonia, and other conditions when a psychiatrist recommends it.\nIt is given as a series of sessions under full medical supervision."
+                },
+                sgb: {
+                    title: "SGB — stellate ganglion block",
+                    aliases: ["stellate ganglion block"],
+                    text: "A short medical procedure in which a local anesthetic is injected, under ultrasound guidance, near a nerve bundle in the neck (the stellate ganglion). The aim is to calm the fight-or-flight system and ease physical symptoms of post-traumatic stress and anxiety, such as hyperarousal and sleep difficulty.\nIt does not replace psychological treatment, and it is usually given alongside it."
+                },
+                prism: {
+                    title: "Prism — neurofeedback for post-traumatic stress",
+                    aliases: ["PTSD neurofeedback", "EEG neurofeedback"],
+                    text: "A non-invasive EEG treatment in which the person learns to regulate brain activity linked to post-traumatic stress, without describing the traumatic event. It is given as a series of clinic sessions, as an added treatment.\nThe technology is FDA-cleared and approved in Israel (AMAR), and in some cases it is recognized by the Rehabilitation Department."
+                },
+                spravato: {
+                    title: "Spravato (esketamine)",
+                    aliases: ["esketamine", "esketamine nasal spray"],
+                    text: "An esketamine nasal spray for treatment-resistant major depression. It is given only in a licensed clinic under medical supervision. In Israel it is in the health basket for adults who have not responded adequately to two antidepressant treatments, together with an SSRI or an SNRI.\nIt is not for use at home."
+                },
+                tdcs: {
+                    title: "tDCS — transcranial direct current stimulation",
+                    aliases: ["direct current stimulation", "transcranial stimulation"],
+                    text: "A non-invasive treatment in which a weak electrical current is passed through electrodes on the scalp, in order to change the excitability of brain areas. It is used in research settings and in dedicated clinics (for example Herzog) for psychiatric and neurological conditions.\nIt is not a first-line treatment and needs a medical assessment."
+                },
+                vns: {
+                    title: "VNS — vagus nerve stimulation",
+                    aliases: ["vagus nerve stimulation"],
+                    text: "An invasive treatment for severe treatment-resistant depression, in which a small stimulator is implanted to stimulate the vagus nerve in the neck. In Israel it is available only in a limited setting (assessment at Lev Hasharon and implantation at Ichilov).\nIt is not a first-line treatment and needs a referral from a psychiatrist."
+                },
+                dbs: {
+                    title: "DBS — deep brain stimulation",
+                    aliases: ["deep brain stimulation"],
+                    text: "A neurosurgical procedure that implants electrodes in deep brain areas and connects them to a stimulator, in order to regulate abnormal nerve activity. In psychiatry it is used mainly for severe OCD that has not responded to treatment.\nIn Israel it is not in the health basket. It is available only in exceptional cases, with Ministry of Health approval, or in research."
+                },
+                psychiatrist: {
+                    title: "Psychiatrist",
+                    aliases: ["psychiatrist doctor"],
+                    text: "A medical doctor licensed in medicine and specialized in mental health. A psychiatrist can diagnose mental disorders, prescribe psychiatric medication, and provide psychotherapy.\nA referral usually comes from the family doctor. Treatment is available through the health funds (subsidized) or privately.\nA psychiatrist is a doctor and can prescribe medication. A psychologist cannot."
+                },
+                psychologist: {
+                    title: "Clinical psychologist",
+                    aliases: ["psychologist", "clinical psychology"],
+                    text: "A mental-health practitioner with a master's or doctoral degree in clinical psychology. A clinical psychologist can carry out psychological assessments and psychotherapy, but cannot prescribe medication.\nThe training includes an in-depth clinical internship. Treatment is available through the health funds (subsidized, with a referral) or privately.\nCheck that the practitioner is listed in the Ministry of Health register of psychologists."
+                },
+                social_worker: {
+                    title: "Psychiatric social worker",
+                    aliases: ["social worker", "mental health social worker"],
+                    text: "A social worker with specific training in mental health. A social worker helps with claiming rights, accompaniment through the various systems, talk therapy (psychotherapy), and contact with family and community.\nPsychiatric social workers work in hospitals, mental health clinics, and the rehabilitation basket. Some have a master's degree (MSW) and specialize in clinical treatment."
+                },
+                art_therapist: {
+                    title: "Arts therapist",
+                    aliases: ["art therapist", "creative arts therapist"],
+                    text: "A practitioner trained to treat through the arts (drawing, sculpture, music, movement, drama). An arts therapist uses creative tools for emotional expression and for working through mental distress.\nThe training includes a master's degree in arts therapy and a clinical internship. It especially suits children, teenagers, and someone who finds words difficult."
+                },
+                occupational_therapist_prof: {
+                    title: "Occupational therapist",
+                    aliases: ["OT"],
+                    text: "A practitioner with a bachelor's or master's degree in occupational therapy, specialized in everyday functioning. An occupational therapist helps develop skills, increase independence, and adapt the surroundings to the person's needs.\nOccupational therapists work in hospitals, clinics, the rehabilitation basket, and schools. The work matters in rehabilitation and in returning to functioning."
+                },
+                hospitalization: {
+                    title: "Psychiatric hospitalization",
+                    aliases: ["psychiatric ward", "inpatient psychiatry", "full hospitalization"],
+                    text: "A stay in a psychiatric hospital or in a psychiatric ward of a general hospital. There are two kinds: voluntary hospitalization (with the person's agreement) and involuntary hospitalization (under a psychiatric order, when there is danger to the person or to others).\nDuring a stay there are rights: legal protection, appropriate treatment, contact with the outside world, and the right to appeal the hospitalization. Alternatives to a full stay include day hospitalization, home hospitalization, and balancing homes."
+                },
+                voluntary_hosp: {
+                    title: "Voluntary hospitalization",
+                    aliases: ["voluntary admission"],
+                    text: "A psychiatric hospital stay with the person's agreement. The person signs a consent form and agrees to remain in the hospital for treatment.\nIn a voluntary stay the person has more rights and more control over the process. Discharge can be requested at any time, although the medical team can recommend staying longer."
+                },
+                involuntary_hosp: {
+                    title: "Involuntary hospitalization",
+                    aliases: ["compulsory admission", "forced hospitalization"],
+                    text: "A psychiatric hospital stay without the person's agreement, under a psychiatric order. It is used when there is immediate danger to the person or to others, and the person refuses a voluntary stay.\nThe order is issued by a district psychiatrist or by a doctor in the emergency department. The person has rights: legal protection, a lawyer, and an appeal against the order.\nAn involuntary stay is time-limited and has to be renewed."
+                },
+                psychiatric_order: {
+                    title: "Psychiatric order",
+                    aliases: ["involuntary treatment order", "commitment order"],
+                    text: "A legal order that allows involuntary hospitalization of someone in a mental-health crisis when there is immediate danger to that person or to others. It is issued by a district psychiatrist or by a doctor in a psychiatric emergency department.\nThe order is time-limited (usually 7 days) and can be renewed. The person has the right to appeal it in court.\nIt requires a medical examination and an assessment."
+                },
+                day_hosp: {
+                    title: "Day hospitalization",
+                    aliases: ["day admission", "psychiatric day hospital"],
+                    text: "The name \"day hospitalization\" is used in two ways. In some hospitals it is a short step after a full stay, on the same ward or a neighboring one, so the return home is gradual.\nElsewhere it is another name for day treatment: the person arrives in the morning, receives treatment during the day (talks, medication, activity), and goes home in the evening, instead of a full hospital stay. Ask the ward which of the two it offers.\nIt is available through the health funds or hospitals."
+                },
+                home_hosp: {
+                    title: "Home hospitalization",
+                    aliases: ["hospital at home", "home treatment team"],
+                    text: "An alternative to hospital in which a multidisciplinary team comes to the person's home and provides intensive treatment. The team includes a psychiatrist, a psychologist, a social worker, and nurses.\nTreatment usually lasts 6–8 weeks and takes place in the person's own surroundings. It suits someone who needs intensive treatment but prefers to stay at home.\nIt is available through the health funds (Clalit, Maccabi, Meuhedet, Leumit) or the Ministry of Defense."
+                },
+                balancing_homes: {
+                    title: "Balancing homes",
+                    aliases: ["balancing home", "crisis house"],
+                    text: "Temporary housing that serves as an alternative to hospital. It offers a supportive setting and a daily structure for someone in a mental-health crisis.\nThe stay is temporary (weeks to months). Its purpose is stability and support during a crisis. It includes a professional team, rehabilitation activities, and emotional support.\nSome homes belong to the Ministry of Health and some are private."
+                },
+                safe_house: {
+                    title: "Safe house",
+                    aliases: ["Ministry of Defense safe house"],
+                    text: "Temporary housing run by the Ministry of Defense for someone with post-traumatic stress who is in a mental-health crisis. It provides immediate treatment, assessment, and a short alternative to hospital.\nIt is for recognized disabled veterans of the IDF with post-traumatic stress, or for someone still in the recognition process. The stay is short and is meant to provide immediate stability.\nThere are safe houses in Jerusalem, Beersheba, Tirat Carmel, and Tel Hashomer.\nFor information: *8944."
+                },
+                crisis_team: {
+                    title: "Crisis team",
+                    aliases: ["crisis teams", "home crisis team"],
+                    text: "A professional team that comes to the person's home in an acute mental-health crisis. It is an alternative to a psychiatric emergency department and allows a rapid response in the person's own surroundings.\nThe team includes a psychiatrist, a social worker, and nurses. It suits mental-health emergencies that need an immediate response.\nIt is available through the health funds (Leumit and Meuhedet) or through private services."
+                },
+                alternatives: {
+                    title: "Alternatives to hospitalization",
+                    aliases: ["hospital alternative"],
+                    text: "Intensive treatment without a full hospital stay: day hospitalization or day treatment (the person comes to the ward by day and sleeps at home), home hospitalization (a team comes to the home), balancing homes (temporary supported housing), a crisis team (a response at home in an acute situation, instead of the emergency department), and a safe house (Ministry of Defense, immediate treatment).\nThese alternatives allow intensive treatment while keeping family ties and some daily functioning. They suit someone who needs treatment and can manage in their own surroundings."
+                },
+                supported_housing: {
+                    title: "Supported housing",
+                    aliases: ["protected housing", "supported accommodation"],
+                    text: "Housing with professional support for people living with mental illness, so they can live independently with help available. It includes shared apartments or houses with a professional team on hand.\nThe level of support varies, from full supported housing with close supervision to lighter housing with help as needed. It is part of the rehabilitation basket and allows rehabilitation and life in the community with ongoing support."
+                },
+                rehab_club: {
+                    title: "Rehabilitation club",
+                    aliases: ["social club", "rehabilitation clubs"],
+                    text: "A community setting for people living with mental illness, with social and vocational activities and emotional support. Clubs run during the day and offer contact with other people, meaningful activity, and mutual support.\nThey are part of the rehabilitation basket and are free for eligible people. Clubs differ in the activities they offer and in who they are for.\nThey matter in rehabilitation and recovery."
+                },
+                vocational_rehab: {
+                    title: "Vocational rehabilitation",
+                    aliases: ["work rehabilitation", "occupational rehabilitation"],
+                    text: "A service that helps people living with mental illness take part in work or in meaningful vocational activity. It includes a vocational assessment, professional training, support at the workplace, and help settling in.\nIt can include work in the open market, sheltered work, or vocational activity inside a rehabilitation setting. It is part of the rehabilitation basket and is free.\nIt matters in rehabilitation and in building independence."
+                },
+                community_support: {
+                    title: "Community accompaniment",
+                    aliases: ["community support", "personal accompaniment"],
+                    text: "Personal professional accompaniment for people living with mental illness in the community. It helps with claiming rights, finding a way through the systems, emotional support, and everyday functioning.\nIt is given by social workers or rehabilitation supporters. It is part of the rehabilitation basket and is free.\nIt matters especially during transitions, crises, and when ongoing support is needed."
+                },
+                rehabilitation: {
+                    title: "Rehabilitation",
+                    aliases: ["psychiatric rehabilitation", "recovery and rehabilitation"],
+                    text: "A broad process of returning to functioning and taking part in the community after a mental-health crisis or with a psychiatric disability. It includes mental-health treatment, vocational rehabilitation, supported housing, social support, and building skills.\nIt is provided through the rehabilitation basket, the special services benefit, and various rehabilitation settings. The aim is a meaningful and as independent a life as possible in the community."
+                },
+                hmo: {
+                    title: "Health fund",
+                    aliases: ["health funds", "kupat holim", "HMO"],
+                    text: "A health organization that provides medical care and health insurance to residents of Israel. There are 4 health funds: Clalit, Maccabi, Meuhedet, and Leumit.\nEach health fund provides mental-health services, including mental health clinics, psychiatrists, psychologists, and psychotherapy. The services are subsidized, with a referral from the family doctor.\nEach fund also offers mental-health emergency services."
+                },
+                clalit: {
+                    title: "Clalit",
+                    aliases: ["Clalit Health Services"],
+                    text: "The largest health fund in Israel. It provides mental-health services, including mental health clinics, psychiatrists, psychologists, and psychotherapy.\nThe services are subsidized, with a referral from the family doctor.\nMental-health support line, 24 hours: *8703.\nFor information: *2700."
+                },
+                maccabi: {
+                    title: "Maccabi",
+                    aliases: ["Maccabi Healthcare Services"],
+                    text: "A health fund that provides mental-health services, including mental health clinics, psychiatrists, psychologists, and psychotherapy. A doctor's referral is not required: contact the clinic on an online form.\nMental-health support line, 24 hours: *3555."
+                },
+                meuhedet: {
+                    title: "Meuhedet",
+                    aliases: ["Meuhedet Health Fund"],
+                    text: "A health fund that provides mental-health services, including mental health clinics, psychiatrists, psychologists, and psychotherapy. A doctor's referral is not required: book an intake appointment through the call center.\nMental-health support line, 24 hours: *3833."
+                },
+                leumit: {
+                    title: "Leumit",
+                    aliases: ["Leumit Health Fund"],
+                    text: "A health fund that provides mental-health services, including mental health clinics, psychiatrists, psychologists, and psychotherapy. You can come with a doctor's referral, or contact a mental-health supporter directly.\nMental-health support line, 24 hours: *507."
+                },
+                ptsd: {
+                    title: "PTSD — post-traumatic stress disorder",
+                    aliases: ["post-traumatic stress", "post traumatic stress disorder"],
+                    text: "A mental disorder that develops after exposure to a traumatic event (war, an accident, an attack, assault, or rape). Symptoms include intrusive memories and dreams, avoidance of reminders of the trauma, hyperarousal, and changes in mood and thinking.\nTreatment includes CBT, EMDR, medication (SSRI), and somatic therapy. It helps to start treatment early.\nNATAL, a support organization for people affected by trauma: *3362."
+                },
+                cptsd: {
+                    title: "C-PTSD — complex post-traumatic stress",
+                    aliases: ["complex PTSD", "complex trauma"],
+                    text: "A mental disorder that develops after prolonged exposure to trauma (abuse, domestic violence, neglect). Alongside the usual PTSD symptoms it includes difficulty regulating emotions, a damaged sense of self-worth, difficulty in relationships, and a shaky sense of identity.\nIt needs longer and broader treatment than PTSD. Treatment includes long-term therapy, somatic therapy, EMDR, and group support."
+                },
+                depression: {
+                    title: "Depression",
+                    aliases: ["major depression", "depressive disorder"],
+                    text: "A mental disorder marked by a depressed mood, loss of interest and pleasure, fatigue, difficulty concentrating, and changes in appetite and sleep. It can be mild, moderate, or severe.\nTreatment includes psychotherapy (especially CBT), antidepressant medication (SSRI), and sometimes both. It helps to start treatment early.\nTreatment is available through the health funds or privately. Severe cases may need a hospital stay."
+                },
+                anxiety: {
+                    title: "Anxiety",
+                    aliases: ["anxiety disorder", "panic"],
+                    text: "A mental disorder marked by excessive worry, fear, tension, and physical symptoms (a racing heart, sweating, shortness of breath). Forms include generalized anxiety disorder, panic disorder, phobias, and social anxiety.\nTreatment includes CBT (often very effective), medication (SSRI, benzodiazepines), and other treatments. It is available through the health funds or privately.\nChronic anxiety is worth treating rather than leaving it."
+                },
+                eating_disorders: {
+                    title: "Eating disorders",
+                    aliases: ["anorexia", "bulimia", "binge eating"],
+                    text: "Mental disorders connected to eating and to body image. They include anorexia nervosa, bulimia nervosa, and binge-eating disorder (BED).\nThey involve disordered eating, excessive concern about weight and body image, and impaired functioning. Treatment includes psychotherapy (CBT), nutritional treatment, and sometimes medication or a hospital stay.\nThey need specialized professional treatment. It is available through the health funds or dedicated centers."
+                },
+                bipolar: {
+                    title: "Bipolar disorder",
+                    aliases: ["manic depression", "bipolar"],
+                    text: "A mental disorder marked by extreme shifts in mood between manic episodes (elevated mood, high energy) and depressive episodes. There are two types: bipolar I (with full mania) and bipolar II (with hypomania).\nTreatment includes mood-stabilizing medication (lithium, valproate), psychotherapy, and support. It needs ongoing psychiatric care.\nTaking the medication as prescribed matters a great deal."
+                },
+                schizophrenia: {
+                    title: "Schizophrenia",
+                    aliases: ["psychosis"],
+                    text: "A severe mental disorder marked by psychosis: hallucinations, delusions, disturbed thinking, and impaired functioning. It usually begins at a young age (late teens or early twenties).\nTreatment includes antipsychotic medication, psychotherapy, rehabilitation, and family support. It needs ongoing psychiatric care.\nTaking the medication as prescribed matters a great deal. Treatment is available through the health funds, hospitals, and the rehabilitation basket."
+                },
+                ocd: {
+                    title: "OCD — obsessive-compulsive disorder",
+                    aliases: ["obsessive compulsive disorder", "obsessions and compulsions"],
+                    text: "A mental disorder marked by intrusive thoughts (obsessions) and compulsive behaviors (compulsions). The thoughts cause anxiety, and the behaviors are meant to reduce that anxiety.\nThe most effective treatment is CBT with exposure and response prevention (ERP). SSRI medication can also help.\nTreatment can take a long time and can be very effective. It is available through the health funds or privately."
+                },
+                adhd: {
+                    title: "ADHD — attention deficit hyperactivity disorder",
+                    aliases: ["attention deficit", "ADD"],
+                    text: "A neurodevelopmental disorder marked by difficulty with attention, hyperactivity, and impulsivity. It can appear in childhood and continue into adulthood.\nTreatment includes medication (Ritalin, Concerta, Adderall), behavioral treatment, and support with studies or work. It needs a professional diagnosis (a neurologist or a psychiatrist).\nTreatment is available through the health funds or privately. It is a real disorder, not a behavior problem."
+                },
+                mental_health_clinic: {
+                    title: "Mental health clinic",
+                    aliases: ["outpatient mental health clinic", "community mental health clinic"],
+                    text: "A health-fund clinic that provides mental-health services. It includes psychiatrists, psychologists, social workers, and psychotherapy.\nThe services are subsidized, with a referral from the family doctor. An appointment is booked through the health fund.\nBring a referral from the family doctor and any relevant medical documents."
+                },
+                multidisciplinary_center: {
+                    title: "Multidisciplinary mental health center",
+                    aliases: ["multidisciplinary clinic", "multidisciplinary team", "whole-person approach"],
+                    text: "A mental-health center or clinic that works in a whole-person way: it looks at the person as a whole, not only at one diagnosis, and its team comes from several professions. The team includes psychiatrists, psychologists or psychotherapists, and social workers, and sometimes occupational therapists, dietitians, and nurses. In one place a person can receive assessment, medication, talking treatment, and further support as needed.\nThe list includes centers checked against their own websites, and public settings from Ministry of Health lists: community clinics as updated on 28.12.2025, day treatment and day hospitalization from the 2023 list, and psychiatric hospitals and wards. In the public settings the team composition follows the Ministry's definition of a multidisciplinary clinic, and was not checked clinic by clinic. In practice the team differs from place to place.\nYou can filter by type of ownership. The shorter \"Mental health clinics\" list stays as it is. The public settings are listed here and in search. Leumit clinics named after a doctor were left out, except Soul Bird clinics and clinics marked as multidisciplinary."
+                },
+                psychiatric_er: {
+                    title: "Psychiatric emergency department",
+                    aliases: ["psychiatric ER", "psychiatric emergency room"],
+                    text: "A hospital department that treats mental-health emergencies. It is for someone in an acute mental-health crisis, in danger to themselves or to others, or in acute psychosis.\nThe team includes psychiatrists, nurses, and social workers. They assess, give immediate treatment, and decide what happens next (discharge, hospitalization, or an alternative to hospital).\nThere is one in every large hospital."
+                },
+                resilience_center: {
+                    title: "Resilience center",
+                    aliases: ["resilience centers"],
+                    text: "National Insurance centers that provide emotional support and treatment for people living with mental illness. They include professional teams, psychotherapy, and rehabilitation activities.\nThey are for someone who needs more emotional support than the health funds provide. A list of resilience centers is on the National Insurance website."
+                },
+                helpline: {
+                    title: "Helpline",
+                    aliases: ["support line", "hotline", "crisis line"],
+                    text: "A telephone service that offers initial emotional support, listening, and guidance. Helplines include ERAN (1201) for the general public, NATAL (*3362) for trauma, SAHAR online, and others.\nThe lines operate 24/7 or at set hours. Some are anonymous.\nThey matter especially in a crisis, in loneliness, and when support is needed at once. They do not replace professional treatment, and they can help a great deal."
+                },
+                mental_support: {
+                    title: "Emotional support",
+                    aliases: ["mental support", "peer support"],
+                    text: "Emotional and mental help given by professionals or by the community. It includes listening, understanding, encouragement, and guidance.\nEmotional support can be professional (treatment) or not professional (peer support, family, community). It matters a great deal in recovery and rehabilitation.\nThere are support groups, helplines, and family support. Emotional support is an important part of treatment and recovery."
+                },
+                day_treatment: {
+                    title: "Day treatment",
+                    aliases: ["psychiatric day treatment", "day program"],
+                    text: "An intensive treatment setting. The person arrives at the ward in the morning, receives treatment during the day (individual and group talks, medication, activity), and goes home in the afternoon. Some hospitals call this day treatment and some call it day hospitalization. Sometimes \"day treatment\" means a longer and less intensive program.\nThere are separate wards for adults and for children and teenagers. A Form 17 from the health fund is usually required, and sometimes the person arrives after a full hospital stay."
+                },
+                form17: {
+                    title: "Form 17 (payment guarantee)",
+                    aliases: ["form 17", "health fund commitment", "payment voucher"],
+                    text: "Approval from the health fund that it will pay for a service given by someone else, for example a hospital, a day-treatment ward, or an outside clinic. Ask the fund for it (through the doctor, the fund's call center, or the website) before you go.\nWithout a valid Form 17, the provider can ask for payment. The form is valid for a limited time, and it refers to a specific service and place."
+                },
+                btl: {
+                    title: "National Insurance Institute",
+                    aliases: ["National Insurance", "Bituah Leumi", "NII"],
+                    text: "The National Insurance Institute is the state body that pays pensions and benefits, including the general disability pension, the special services benefit, and the long-term care benefit. Entitlement to most benefits because of a mental-health condition is decided by the Institute's medical committee.\nNational Insurance also runs Yad Mechavenet, which helps someone prepare for the committee.\nCall center: *6050.",
+                    phoneLabel: "National Insurance",
+                    phoneLabel2: "Yad Mechavenet"
+                },
+                moh: {
+                    title: "Ministry of Health",
+                    aliases: ["Health Ministry"],
+                    text: "The government ministry responsible for the mental-health system. It supervises psychiatric hospitals and mental health clinics, runs the rehabilitation basket through rehabilitation-basket committees, and is responsible for involuntary hospitalization through the district psychiatrists.\nSince the mental-health reform of 2015, community mental-health treatment is provided through the health funds.\nThe \"Voice of Health\" call center: *5400."
+                },
+                mod_rehab: {
+                    title: "Rehabilitation Department, Ministry of Defense",
+                    aliases: ["Rehabilitation Department", "Ministry of Defense", "disabled IDF veterans", "Nefesh Achat"],
+                    text: "The department that cares for soldiers and members of the security forces who were injured in body or mind during service, including post-traumatic stress. Someone who has been recognized receives mental-health treatment, payments, accompaniment by a rehabilitation officer, and other services.\nIn some cases initial mental-health treatment is available before the recognition process has finished.\nRehabilitation Department call center: *8150.\nThe Nefesh Achat emotional support line, 24 hours: *8944. The expanded rights and treatments: [Nefesh Achat reform](https://nefesh-il.org/glossary?term=one_soul&lang=en).",
+                    phoneLabel: "Rehabilitation Department hotline",
+                    phoneLabel2: "Nefesh Achat"
+                },
+                one_soul: {
+                    title: "Nefesh Achat reform",
+                    aliases: ["One Soul reform", "Nefesh Achat"],
+                    text: "A reform by the Rehabilitation Department of the Ministry of Defense that expanded rights and treatments for disabled veterans of the IDF and the security forces. Among other things: mental-health treatment for family members, therapeutic homes, complementary-medicine treatments for people living with post-traumatic stress, a mental injury, or a head injury, and a faster recognition route for post-traumatic stress. The Nefesh Achat support line (*8944) operates every day, at every hour.\nThe same reform also applies to victims of hostilities recognized by National Insurance, if they have a disability of 20% or more and receive a monthly payment for post-traumatic stress, a mental injury, or a head injury, or if they have a disability of 100% or more from any injury. Under the reform, entitlement to treatments was widened.\nThe National Insurance call center for the reform: 03-5127118, Sunday–Thursday, 8:00–16:00.",
+                    phoneLabel: "National Insurance",
+                    webLabel: "On the National Insurance website",
+                    webLabel2: "On the Rehabilitation Department website"
+                },
+                family_doctor: {
+                    title: "Family doctor",
+                    aliases: ["GP", "primary care doctor"],
+                    text: "The first doctor at the health fund. You can go to them with a mental-health difficulty: they can give initial medication, refer to a psychiatrist, a psychologist, or a mental health clinic, and help with forms and approvals.\nSome mental-health services need a referral from the family doctor, and some can be contacted directly."
+                },
+                rehab_committee: {
+                    title: "Rehabilitation-basket committee",
+                    aliases: ["rehabilitation committee", "basket committee"],
+                    text: "The Ministry of Health committee that decides whether a person is eligible for rehabilitation-basket services, and which services they will receive. The application is submitted together with a treating professional (a psychiatrist, a social worker, or a therapist), with medical documents attached.\nThe usual condition is a psychiatric disability of at least 40% set by National Insurance, from age 18. After approval, a rehabilitation coordinator helps choose the services."
+                },
+                supported_employment: {
+                    title: "Supported employment",
+                    aliases: ["supported placement", "job support"],
+                    text: "Paid work in an ordinary workplace, with accompaniment by an employment coordinator from the rehabilitation basket or from a nonprofit. The coordinator helps find a job, settle into it, and sort out difficulties along the way, and keeps accompanying the person after work has started.\nThis is different from a sheltered workshop, where the work happens inside a rehabilitation setting."
+                },
+                hostel: {
+                    title: "Hostel",
+                    aliases: ["rehabilitation hostel", "hostels"],
+                    text: "Rehabilitation housing with staff on site at all hours. It is the highest level of housing support in the rehabilitation basket, for someone who cannot yet live alone or in supported housing.\nA hostel provides meals, activity, and daily support. The aim is to move later to more independent housing. Eligibility is decided by the rehabilitation-basket committee.\nThere are also hostels for teenagers."
+                },
+                open_closed_ward: {
+                    title: "Open ward and closed ward",
+                    aliases: ["open ward", "closed ward", "locked ward"],
+                    text: "On an open psychiatric ward a person can come and go according to the day's schedule and in coordination with the staff, and the stay is usually voluntary. On a closed ward the doors are locked and leaving requires permission, because some of the people there are a danger to themselves or to others, and some are hospitalized involuntarily.\nMoving from a closed ward to an open one is usually a step in recovery."
+                },
+                sexual_trauma: {
+                    title: "Sexual trauma",
+                    aliases: ["sexual assault", "sexual violence"],
+                    text: "Mental injury following sexual harm, at any age and in any form. The effects can appear at once or years later, and include post-traumatic stress, depression, anxiety, dissociation, difficulty with trust and intimacy, and self-harm.\nThe rape crisis centers are available on 1202 (women) and 1203 (men). There are also dedicated treatment units in hospitals and in the community."
+                },
+                medication: {
+                    title: "Psychiatric medication",
+                    aliases: ["medication", "psychiatric drugs", "SSRI"],
+                    text: "Treatment with psychiatric medicines prescribed by a psychiatrist or a family doctor: antidepressants (such as an SSRI), mood stabilizers, antipsychotic medicines, medicines for attention disorders, and medicines for calming and sleep. Most antidepressants take several weeks before the effect is felt.\nDo not stop a medicine all at once without asking a doctor. A sudden stop can cause symptoms. In many conditions, medication and psychotherapy together help more than either one alone."
+                },
+                natal: {
+                    title: "NATAL",
+                    aliases: ["NATAL trauma center"],
+                    text: "A nonprofit for treatment and support of people affected by national trauma, such as war and attacks, and of their families. NATAL runs a helpline, individual and group treatment, and support communities."
+                },
+                eran: {
+                    title: "ERAN",
+                    aliases: ["emotional first aid", "1201"],
+                    text: "Emotional first aid: a nationwide anonymous helpline, 24 hours, on 1201. You can also contact ERAN by chat and WhatsApp through its website.\nThe volunteers listen and support in the conversation, and in immediate danger they can refer the caller to help."
+                },
+                postpartum_depression: {
+                    title: "Postpartum depression",
+                    aliases: ["postnatal depression", "depression after birth", "perinatal depression"],
+                    text: "Depression that appears in the first year after birth, and sometimes already during pregnancy. It is different from the \"baby blues\", sadness and crying in the first days that pass on their own within two weeks.\nIn postpartum depression the sadness or anxiety continues. It can be hard to enjoy the baby or to feel connected, hard to sleep even when the baby is asleep, and there can be guilt and harsh thoughts. It is common, and it is treated well with talking therapy, with medicines that can also suit breastfeeding, and with support.\nYou can turn to a family health clinic, the family doctor, or a mental health clinic. Thoughts of harming yourself or the baby call for immediate help."
+                },
+                health_basket: {
+                    title: "Health basket",
+                    aliases: ["national health basket", "basket of health services"],
+                    text: "The list of services and medicines that every health fund must provide to its members under the National Health Insurance Law. Since 2015, mental-health treatment, psychiatry, and psychotherapy are also in the basket, so they are provided through the health fund.\nThe basket is updated every year. It is not the same as the rehabilitation basket, which is rehabilitation services from the Ministry of Health."
+                },
+                kol_zchut: {
+                    title: "Kol Zchut",
+                    aliases: ["All Rights", "Kolzchut"],
+                    text: "A nonprofit information website that explains rights in plain language: pensions, benefits, services, and processes with state bodies, including pages specifically about mental health. The site does not submit applications for you. It helps you understand what you are entitled to and how to ask for it."
+                },
+                trauma: {
+                    title: "Trauma",
+                    aliases: ["psychological trauma", "traumatic event"],
+                    text: "Mental injury following a threatening or overwhelming event: war, an attack, an accident, violence, sexual harm, or a sudden loss. Most people have strong reactions in the days and weeks after the event, and most recover.\nWhen the symptoms last more than a month and get in the way of functioning, it may be post-traumatic stress (PTSD). Treatments focused on trauma, such as trauma-focused CBT and EMDR, are effective even years after the event."
+                },
+                family_support: {
+                    title: "Support for families",
+                    aliases: ["family counseling center", "family members", "family support"],
+                    text: "Family members of someone living with a mental-health difficulty need support too. They have a right to information (with the person's consent), guidance, and accompaniment.\nThe Ministry of Health runs family counseling centers in the community and in hospitals. Family organizations also run support and guidance groups. Some of these services are free."
+                },
+                addictions: {
+                    title: "Addictions",
+                    aliases: ["addiction", "withdrawal", "dual diagnosis"],
+                    text: "An addiction is compulsive use of a substance (alcohol, drugs, medication) or of a behavior (gambling, screens) that continues despite the harm. It often appears together with depression, anxiety, and post-traumatic stress, and is sometimes used to ease them. That combination is called a dual diagnosis.\nTreatment includes physical withdrawal when it is needed, mental-health treatment, groups such as AA and NA, and settings in the community and in therapeutic communities."
+                }
+            };
+            Object.keys(TERM_EN).forEach((key) => {
+                if (terms[key]) terms[key].en = TERM_EN[key];
+            });
+
+
+
             // Moving between the home page and a group page. Deep-link targets are cleared, or
             // their effects would pull the view straight back to the linked group.
             const goToGroup = (groupId) => {
@@ -7098,12 +7600,12 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             ? buildGlossaryShareLink()
                             : buildGlossaryShareLink({ termcards: glossaryKey });
                 const idle = kind === 'termcards'
-                    ? 'העתקת קישור לרשימת השירותים'
+                    ? t('copyTermCardsLink')
                     : kind === 'glossary'
-                        ? 'העתקת קישור למילון המונחים'
+                        ? t('copyGlossaryLink')
                         : kind === 'termcat'
-                            ? 'העתקת קישור שפותח את הקטגוריה הזאת במילון'
-                            : 'העתקת קישור שפותח את המונח הזה במילון';
+                            ? t('copyTermCatLink')
+                            : t('copyTermLink');
                 return (
                     <button
                         type="button"
@@ -7118,8 +7620,8 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             e.stopPropagation();
                             copyText(link, { onSuccess: () => markGlossaryLinkCopied(copiedId) });
                         }}
-                        title={isCopied ? 'הקישור הועתק' : idle}
-                        aria-label={isCopied ? 'הקישור הועתק' : idle}
+                        title={isCopied ? t('linkCopied') : idle}
+                        aria-label={isCopied ? t('linkCopied') : idle}
                         data-tracking-name={`copy_${kind}_link_${glossaryKey}`}
                         data-analytics-type="share"
                         data-share-kind={kind}
@@ -7869,13 +8371,13 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                 {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes, hiddenLinkRows)}</div>}
                             </div>
                         )}
-                        {Array.isArray(s.cardTerms) && s.cardTerms.some((k) => terms[k]) && (
+                        {Array.isArray(s.cardTerms) && s.cardTerms.some((k) => mhTermText(terms[k]).title) && (
                             <div className="mh-card-terms">
-                                <strong>{s.dir === 'ltr' ? 'Glossary:' : 'מונחים קשורים:'}</strong>
-                                {s.cardTerms.filter((k) => terms[k]).map((k) => (
+                                <strong>{locale === 'en' ? 'Glossary:' : 'מונחים קשורים:'}</strong>
+                                {s.cardTerms.filter((k) => mhTermText(terms[k]).title).map((k) => (
                                     <a
                                         key={k}
-                                        href={`/glossary?term=${k}`}
+                                        href={`/glossary?term=${k}${locale === 'en' ? '&lang=en' : ''}`}
                                         className="mh-card-term-chip"
                                         onClick={(e) => {
                                             e.preventDefault();
@@ -7885,10 +8387,10 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         data-analytics-id="card_to_glossary"
                                         data-analytics-type="card_to_glossary"
                                         data-analytics-term={k}
-                                        data-analytics-text={terms[k].title}
+                                        data-analytics-text={mhTermText(terms[k]).title}
                                         data-tracking-name={`${s.trackingName || s.org}_term_${k}`}
                                     >
-                                        <i className="fas fa-book" aria-hidden="true"></i> {terms[k].title}
+                                        <i className="fas fa-book" aria-hidden="true"></i> {mhTermText(terms[k]).title}
                                     </a>
                                 ))}
                             </div>
@@ -8259,68 +8761,86 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 );
             };
 
+            // English reads term.en only. A missing English field stays empty, so Hebrew is not shown in its place.
+            const mhTermText = (term) => {
+                const empty = { title: '', text: '', aliases: [], webLabel: '', webLabel2: '', phoneLabel: '', phoneLabel2: '' };
+                if (!term) return empty;
+                const source = locale === 'en' ? (term.en || {}) : term;
+                return {
+                    title: source.title || '',
+                    text: source.text || '',
+                    aliases: Array.isArray(source.aliases) ? source.aliases : [],
+                    webLabel: source.webLabel || '',
+                    webLabel2: source.webLabel2 || '',
+                    phoneLabel: source.phoneLabel || '',
+                    phoneLabel2: source.phoneLabel2 || ''
+                };
+            };
+            const mhTermCatTitle = (cat) => {
+                if (!cat) return '';
+                return locale === 'en' ? (cat.titleEn || '') : (cat.title || '');
+            };
+            const mhNameIsHebrew = (value) => /[\u0590-\u05FF]/.test(String(value || ''));
+            const glossaryAlphabet = locale === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : 'אבגדהוזחטיכלמנסעפצקרשת';
+            const termInitial = (term) => {
+                const ch = mhTermText(term).title.charAt(0);
+                return locale === 'en' ? ch.toUpperCase() : ch;
+            };
+
             // Terms filtering and organization
             const filteredTerms = useMemo(() => {
-                let result = Object.entries(terms);
+                let result = Object.entries(terms).filter(([, term]) => mhTermText(term).title);
                 
                 // Filter by search term
                 if (termsSearch) {
                     const search = termsSearch.toLowerCase();
-                    result = result.filter(([k, t]) => 
-                        t.title.toLowerCase().includes(search) || 
-                        t.text.toLowerCase().includes(search) ||
-                        (t.category && TERM_CATEGORIES[t.category]?.title.toLowerCase().includes(search))
-                    );
+                    result = result.filter(([, term]) => {
+                        const face = mhTermText(term);
+                        const catTitle = mhTermCatTitle(TERM_CATEGORIES[term.category]);
+                        return [face.title, face.text, ...(face.aliases || []), catTitle].join('\n').toLowerCase().includes(search);
+                    });
                 }
                 
                 // Filter by category
                 if (termsCategory) {
-                    result = result.filter(([k, t]) => t.category === termsCategory);
+                    result = result.filter(([, term]) => term.category === termsCategory);
                 }
                 
                 // Filter by letter (for alphabetical view)
                 if (selectedLetter) {
-                    result = result.filter(([k, t]) => {
-                        const firstChar = t.title.charAt(0);
-                        return firstChar === selectedLetter;
-                    });
+                    result = result.filter(([, term]) => termInitial(term) === selectedLetter);
                 }
                 
                 return result;
-            }, [termsSearch, termsCategory, selectedLetter]);
+            }, [termsSearch, termsCategory, selectedLetter, locale]);
 
             // Group terms by category
             const termsByCategory = useMemo(() => {
                 const grouped = {};
-                filteredTerms.forEach(([k, t]) => {
-                    const cat = t.category || 'other';
+                const sortLocale = locale === 'en' ? 'en' : 'he';
+                filteredTerms.forEach(([k, term]) => {
+                    const cat = term.category || 'other';
                     if (!grouped[cat]) grouped[cat] = [];
-                    grouped[cat].push([k, t]);
+                    grouped[cat].push([k, term]);
                 });
-                // Sort within each category
                 Object.keys(grouped).forEach(cat => {
-                    grouped[cat].sort((a, b) => a[1].title.localeCompare(b[1].title, 'he'));
+                    grouped[cat].sort((a, b) => mhTermText(a[1]).title.localeCompare(mhTermText(b[1]).title, sortLocale));
                 });
                 return grouped;
-            }, [filteredTerms]);
+            }, [filteredTerms, locale]);
 
-            // Get all first letters for A-Z navigation
             const firstLetters = useMemo(() => {
                 const letters = new Set();
-                Object.values(terms).forEach(t => {
-                    const firstChar = t.title.charAt(0);
-                    if (/[\u0590-\u05FF]/.test(firstChar)) {
-                        letters.add(firstChar);
-                    }
+                const letterRe = locale === 'en' ? /^[A-Z]$/ : /^[\u0590-\u05FF]$/;
+                Object.values(terms).forEach(term => {
+                    const firstChar = termInitial(term);
+                    if (letterRe.test(firstChar)) letters.add(firstChar);
                 });
-                return Array.from(letters).sort((a, b) => a.localeCompare(b, 'he'));
-            }, []);
+                return Array.from(letters).sort((a, b) => a.localeCompare(b, locale === 'en' ? 'en' : 'he'));
+            }, [locale]);
 
-            // Get Hebrew alphabet for A-Z navigation
-            const hebrewAlphabet = 'אבגדהוזחטיכלמנסעפצקרשת';
-
-            const renderTermReadMore = (t) => {
-                if (!t?.readMoreUrl) return null;
+            const renderTermReadMore = (term) => {
+                if (!term?.readMoreUrl) return null;
                 return (
                     <p style={{
                         lineHeight: 1.8,
@@ -8330,13 +8850,13 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                         marginTop: 0
                     }}>
                         <a
-                            href={t.readMoreUrl}
+                            href={term.readMoreUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'underline' }}
                             data-tracking-name="terms_read_more"
                         >
-                            קרא עוד
+                            {t('readMore')}
                         </a>
                     </p>
                 );
@@ -8356,8 +8876,9 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 ));
             };
 
-            const renderTermActions = (t, k) => {
-                if (!t.phone && !t.phone2 && !t.web && !t.web2) return null;
+            const renderTermActions = (term, k) => {
+                if (!term.phone && !term.phone2 && !term.web && !term.web2) return null;
+                const face = mhTermText(term);
                 const btn = {
                     padding: 'var(--space-sm) var(--space-md)',
                     borderRadius: 'var(--radius-sm)',
@@ -8377,24 +8898,24 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                         gap: 'var(--space-md)',
                         flexWrap: 'wrap'
                     }}>
-                        {t.phone && (
-                            <a href={mhTelHref(t.phone)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
-                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone, t.phoneLabel, t.phoneShowNumber !== false, false, `tp-${k}`)}
+                        {term.phone && (
+                            <a href={mhTelHref(term.phone)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone_${k}`} data-analytics-type="phone">
+                                <i className="fas fa-phone"></i> {mhPhoneFace(term.phone, face.phoneLabel, term.phoneShowNumber !== false, false, `tp-${k}`)}
                             </a>
                         )}
-                        {t.phone2 && (
-                            <a href={mhTelHref(t.phone2)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
-                                <i className="fas fa-phone"></i> {mhPhoneFace(t.phone2, t.phoneLabel2, t.phoneShowNumber2 !== false, false, `tp2-${k}`)}
+                        {term.phone2 && (
+                            <a href={mhTelHref(term.phone2)} style={{ ...btn, background: 'var(--accent)' }} data-tracking-name={`terms_phone2_${k}`} data-analytics-type="phone">
+                                <i className="fas fa-phone"></i> {mhPhoneFace(term.phone2, face.phoneLabel2, term.phoneShowNumber2 !== false, false, `tp2-${k}`)}
                             </a>
                         )}
-                        {t.web && (
-                            <a href={t.web} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" style={{ ...btn, background: 'var(--primary)' }} data-tracking-name={`terms_web_${k}`} data-analytics-type="website">
-                                <i className="fas fa-external-link-alt"></i> {t.webLabel || 'לאתר'}
+                        {term.web && (
+                            <a href={term.web} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" style={{ ...btn, background: 'var(--primary)' }} data-tracking-name={`terms_web_${k}`} data-analytics-type="website">
+                                <i className="fas fa-external-link-alt"></i> {face.webLabel || t('toWebsite')}
                             </a>
                         )}
-                        {t.web2 && (
-                            <a href={t.web2} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" style={{ ...btn, background: 'var(--primary)' }} data-tracking-name={`terms_web2_${k}`} data-analytics-type="website">
-                                <i className="fas fa-external-link-alt"></i> {t.webLabel2 || 'לאתר'}
+                        {term.web2 && (
+                            <a href={term.web2} target="_blank" rel="noopener noreferrer" data-probe-external-link="true" style={{ ...btn, background: 'var(--primary)' }} data-tracking-name={`terms_web2_${k}`} data-analytics-type="website">
+                                <i className="fas fa-external-link-alt"></i> {face.webLabel2 || t('toWebsite')}
                             </a>
                         )}
                     </div>
@@ -8502,9 +9023,10 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     (cat.services || []).forEach((svc) => add(svc, categoryKey));
                     Object.values(cat.subsections || {}).forEach((sub) => (sub.services || []).forEach((svc) => add(svc, categoryKey)));
                 });
-                Object.values(byTerm).forEach((list) => list.sort((a, b) => String(a.org).localeCompare(String(b.org), 'he')));
+                const sortLocale = locale === 'en' ? 'en' : 'he';
+                Object.values(byTerm).forEach((list) => list.sort((a, b) => String(a.org).localeCompare(String(b.org), sortLocale)));
                 return byTerm;
-            }, [data]);
+            }, [data, locale]);
 
             const TERM_SERVICES_VISIBLE = 8;
             const [expandedTermGroups, setExpandedTermGroups] = useState([]);
@@ -8524,6 +9046,21 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 const sectionIds = (terms[key]?.sections || []).filter((id) => data[id]);
                 if (!list.length && !sectionIds.length) return null;
                 const linkColor = color || 'var(--primary)';
+                const namedItem = (item) => locale !== 'en' || !mhNameIsHebrew(item.org);
+                const svcSuffix = (item, orgCounts) => {
+                    if (!(orgCounts[item.org] > 1 && item.svc)) return '';
+                    if (locale === 'en' && mhNameIsHebrew(item.svc)) return '';
+                    const s = String(item.svc || '').trim();
+                    const short = s.length > 40 ? `${s.slice(0, 40).trim()}…` : s;
+                    return short ? ` (${short})` : '';
+                };
+                const sectionLinkLabel = (id) => {
+                    const count = countSectionServices(id);
+                    const title = locale === 'en' ? (data[id].titleEn || '') : (data[id].title || '');
+                    return title
+                        ? mhFill(t('allServicesCategory'), { title, count })
+                        : mhFill(t('allServicesThisCategory'), { count });
+                };
                 if (key === 'multidisciplinary_center') {
                     const counts = {};
                     list.forEach((item) => {
@@ -8531,13 +9068,9 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                         counts[item.ownership] = (counts[item.ownership] || 0) + 1;
                     });
                     const shownList = ownershipFilter ? list.filter((item) => item.ownership === ownershipFilter) : list;
-                    const sample = ownershipFilter ? shownList.slice(0, TERM_SERVICES_VISIBLE) : [];
+                    const sample = (ownershipFilter ? shownList.slice(0, TERM_SERVICES_VISIBLE) : []).filter(namedItem);
                     const orgCounts = {};
                     shownList.forEach((item) => { orgCounts[item.org] = (orgCounts[item.org] || 0) + 1; });
-                    const shortSvc = (svc) => {
-                        const s = String(svc || '').trim();
-                        return s.length > 40 ? `${s.slice(0, 40).trim()}…` : s;
-                    };
                     return (
                         <div className="mh-term-services" style={{ borderTopColor: 'var(--border)' }}>
                             <div className="mh-card-filter" style={{ marginBottom: 'var(--space-xs)' }}>
@@ -8550,7 +9083,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         onClick={() => setOwnershipFilter((cur) => (cur === code ? '' : code))}
                                         data-tracking-name={`terms_ownership_${code}`}
                                     >
-                                        {MH_OWNERSHIP_LABELS_HE[code]} ({counts[code]})
+                                        {(locale === 'en' ? MH_OWNERSHIP_LABELS_EN : MH_OWNERSHIP_LABELS_HE)[code]} ({counts[code]})
                                     </button>
                                 ))}
                             </div>
@@ -8562,13 +9095,13 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         onClick={() => openTermCards(key)}
                                         data-tracking-name={`terms_cards_${key}`}
                                     >
-                                        כל השירותים במדריך ({shownList.length})
+                                        {mhFill(t('allServicesDirectory'), { count: shownList.length })}
                                     </button>
                                 </div>
                             )}
                             {sample.length > 0 && (
                                 <div>
-                                    <strong style={{ color: 'var(--text-muted)' }}>שירותים במדריך: </strong>
+                                    {sample.length > 0 && <strong style={{ color: 'var(--text-muted)' }}>{t('servicesInDirectory')} </strong>}
                                     {sample.map((item, idx) => (
                                         <span key={`${item.row}|${item.svc}`}>
                                             {idx > 0 && ' · '}
@@ -8578,7 +9111,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                 data-tracking-name={`terms_service_${key}_${item.row}`}
                                             >
                                                 {item.org}
-                                                {orgCounts[item.org] > 1 && item.svc ? ` (${shortSvc(item.svc)})` : ''}
+                                                {svcSuffix(item, orgCounts)}
                                             </a>
                                         </span>
                                     ))}
@@ -8595,10 +9128,6 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                 });
                 const orgCounts = {};
                 list.forEach((item) => { orgCounts[item.org] = (orgCounts[item.org] || 0) + 1; });
-                const shortSvc = (svc) => {
-                    const s = String(svc || '').trim();
-                    return s.length > 40 ? `${s.slice(0, 40).trim()}…` : s;
-                };
                 return (
                     <div className="mh-term-services" style={{ borderTopColor: 'var(--border)' }}>
                         {sectionIds.map((id) => (
@@ -8609,7 +9138,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                     onClick={() => openSectionFromTerms(id)}
                                     data-tracking-name={`terms_section_${key}_${id}`}
                                 >
-                                    לכל השירותים בקטגוריה: {data[id].title} ({countSectionServices(id)})
+                                    {sectionLinkLabel(id)}
                                 </button>
                             </div>
                         ))}
@@ -8623,23 +9152,26 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                     data-analytics-type="glossary_to_cards"
                                     data-analytics-term={key}
                                     data-analytics-section="glossary"
-                                    data-analytics-text={terms[key].title}
+                                    data-analytics-text={mhTermText(terms[key]).title}
                                     data-tracking-name={`terms_cards_${key}`}
                                 >
-                                    כל השירותים במדריך ({list.length})
+                                    {mhFill(t('allServicesDirectory'), { count: list.length })}
                                 </button>
                             </div>
                         )}
                         {groups.map((g) => {
                             const groupId = `${key}|${g.categoryKey}`;
                             const expanded = expandedTermGroups.includes(groupId);
-                            const shown = expanded ? g.items : g.items.slice(0, TERM_SERVICES_VISIBLE);
-                            const hidden = g.items.length - shown.length;
+                            const named = g.items.filter(namedItem);
+                            const shown = expanded ? named : named.slice(0, TERM_SERVICES_VISIBLE);
+                            const hidden = named.length - shown.length;
                             return (
                                 <div key={groupId}>
-                                    <strong style={{ color: 'var(--text-muted)' }}>
-                                        {groups.length > 1 ? `${data[g.categoryKey]?.title || 'שירותים במדריך'}: ` : 'שירותים במדריך: '}
-                                    </strong>
+                                    {shown.length > 0 && <strong style={{ color: 'var(--text-muted)' }}>
+                                        {groups.length > 1 && (locale === 'en' ? data[g.categoryKey]?.titleEn : data[g.categoryKey]?.title)
+                                            ? `${locale === 'en' ? data[g.categoryKey].titleEn : data[g.categoryKey].title}: `
+                                            : `${t('servicesInDirectory')} `}
+                                    </strong>}
                                     {shown.map((item, idx) => (
                                         <span key={`${item.row}|${item.svc}`}>
                                             {idx > 0 && ' · '}
@@ -8651,15 +9183,15 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                 data-analytics-term={key}
                                                 data-analytics-entry={mhGetEntryId({ org: item.org, svc: item.svc, row: item.row }, item.categoryKey)}
                                                 data-analytics-section={item.categoryKey}
-                                                data-analytics-text={terms[key].title}
+                                                data-analytics-text={mhTermText(terms[key]).title}
                                                 data-tracking-name={`terms_service_${key}_${item.row}`}
                                             >
                                                 {item.org}
-                                                {orgCounts[item.org] > 1 && item.svc ? ` (${shortSvc(item.svc)})` : ''}
+                                                {svcSuffix(item, orgCounts)}
                                             </a>
                                         </span>
                                     ))}
-                                    {(hidden > 0 || expanded) && g.items.length > TERM_SERVICES_VISIBLE && (
+                                    {(hidden > 0 || expanded) && named.length > TERM_SERVICES_VISIBLE && (
                                         <>
                                             {' '}
                                             <button
@@ -8669,7 +9201,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                 aria-expanded={expanded}
                                                 data-tracking-name={`terms_services_more_${key}`}
                                             >
-                                                {expanded ? 'הצג פחות' : `הצג עוד (${hidden})`}
+                                                {expanded ? t('showLess') : mhFill(t('showMoreCount'), { count: hidden })}
                                             </button>
                                         </>
                                     )}
@@ -8940,33 +9472,33 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             </button>
                             {languageControl(false)}
                         </div>
-                        <div className="mh-modal mh-modal-terms-flow" lang={locale === 'en' ? 'he' : undefined} dir={locale === 'en' ? 'rtl' : undefined}>
+                        <div className="mh-modal mh-modal-terms-flow" lang={locale === 'en' ? 'en' : undefined} dir={locale === 'en' ? 'ltr' : undefined}>
                             <div className="mh-terms-wrap">
                                 <h1 style={{ color: 'var(--primary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                                     <i className="fas fa-book"></i>
-                                    <span style={{ flex: 1 }}>מילון מונחים</span>
-                                    <GlossaryCopyButton kind="glossary" label="מילון מונחים" />
+                                    <span style={{ flex: 1 }}>{t('glossary')}</span>
+                                    <GlossaryCopyButton kind="glossary" label={t('glossary')} />
                                 </h1>
                                 <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-xl)', fontSize: 'var(--text-base)' }}>
-                                    {Object.keys(terms).length} מונחים זמינים. חפשו לפי שם או קטגוריה, או עיינו לפי אותיות.
-                                    {' '}סמל הקישור ליד הכותרת, ליד כל קטגוריה או מונח — לשליחה ישירה לאותו מקום בדף.
+                                    {mhFill(t('glossaryCount'), { count: Object.keys(terms).length })}
+                                    {' '}{t('glossaryLinkHint')}
                                 </p>
 
                                 {/* Search Box */}
                                 <div className="mh-search-wrap" style={{ marginBottom: 'var(--space-lg)' }}>
                                     <div style={{ position: 'relative' }}>
-                                        <i className="fas fa-search" style={{ position: 'absolute', right: 'var(--space-md)', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+                                        <i className="fas fa-search" style={{ position: 'absolute', insetInlineEnd: 'var(--space-md)', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
                                         <input
                                             type="text"
                                             className="mh-search-input"
-                                            placeholder="חפש מונח..."
+                                            placeholder={t('searchTermPlaceholder')}
                                             value={termsSearch}
                                             onChange={(e) => {
                                                 setTermsSearch(e.target.value);
                                                 setSelectedLetter(null);
                                             }}
                                             onBlur={(e) => window.mhAnalytics?.trackSearch('terms_glossary', e.target.value, { results_count: filteredTerms.length })}
-                                            style={{ paddingRight: '40px' }}
+                                            style={{ paddingInlineEnd: '40px' }}
                                         />
                                     </div>
                                 </div>
@@ -8986,7 +9518,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         }}
                                         data-tracking-name="terms_view_categories"
                                     >
-                                        <i className="fas fa-th-large"></i> לפי קטגוריות
+                                        <i className="fas fa-th-large"></i> {t('byCategory')}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -9001,7 +9533,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         }}
                                         data-tracking-name="terms_view_alphabetical"
                                     >
-                                        <i className="fas fa-sort-alpha-down"></i> לפי א-ב
+                                        <i className="fas fa-sort-alpha-down"></i> {t('byAlphabet')}
                                     </button>
                                 </div>
 
@@ -9020,7 +9552,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                             }}
                                             data-tracking-name="terms_filter_all"
                                         >
-                                            הכל
+                                            {t('allTerms')}
                                         </button>
                                         {Object.entries(TERM_CATEGORIES).map(([catId, cat]) => (
                                             <button
@@ -9039,7 +9571,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                 }}
                                                 data-tracking-name={`terms_filter_${catId}`}
                                             >
-                                                <i className={`fas ${cat.icon}`}></i> {cat.title}
+                                                <i className={`fas ${cat.icon}`}></i> {mhTermCatTitle(cat)}
                                             </button>
                                         ))}
                                     </div>
@@ -9057,7 +9589,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                         background: 'var(--bg)',
                                         borderRadius: 'var(--radius-md)'
                                     }}>
-                                        {hebrewAlphabet.split('').map(letter => {
+                                        {glossaryAlphabet.split('').map(letter => {
                                             const hasTerms = firstLetters.includes(letter);
                                             return (
                                                 <button
@@ -9093,7 +9625,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                 {filteredTerms.length === 0 && (
                                     <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
                                         <i className="fas fa-search" style={{ fontSize: '3rem', marginBottom: 'var(--space-md)', opacity: 0.3 }}></i>
-                                        <p style={{ fontSize: 'var(--text-lg)' }}>לא נמצאו מונחים התואמים לחיפוש</p>
+                                        <p style={{ fontSize: 'var(--text-lg)' }}>{t('noTerms')}</p>
                                     </div>
                                 )}
 
@@ -9117,18 +9649,20 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                         borderBottom: `3px solid ${cat.color}`
                                                     }}>
                                                         <i className={`fas ${cat.icon}`}></i>
-                                                        <span style={{ flex: 1 }}>{cat.title} ({catTerms.length})</span>
-                                                        <GlossaryCopyButton kind="termcat" glossaryKey={catId} label={cat.title} />
+                                                        <span style={{ flex: 1 }}>{mhTermCatTitle(cat)} ({catTerms.length})</span>
+                                                        <GlossaryCopyButton kind="termcat" glossaryKey={catId} label={mhTermCatTitle(cat)} />
                                                     </h2>
                                                     <div className="mh-terms-grid">
-                                                        {catTerms.map(([k, t]) => (
+                                                        {catTerms.map(([k, term]) => {
+                                                            const face = mhTermText(term);
+                                                            return (
                                                             <div key={k} id={`term-${k}`} className={`mh-term-card${focusedTerm === k ? ' mh-term-card-focused' : ''}`} style={{
                                                                 background: 'var(--bg-card)',
                                                                 border: `2px solid var(--border)`,
                                                                 borderRadius: 'var(--radius-md)',
                                                                 padding: 'var(--space-lg)',
                                                                 marginBottom: 'var(--space-lg)',
-                                                                borderRight: `4px solid ${cat.color}`,
+                                                                borderInlineStart: `4px solid ${cat.color}`,
                                                                 transition: 'all 0.2s',
                                                                 boxShadow: 'var(--shadow-card)'
                                                             }}
@@ -9149,32 +9683,32 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                         fontWeight: 700,
                                                                         flex: 1
                                                                     }}>
-                                                                        {t.title}
+                                                                        {face.title}
                                                                     </h3>
-                                                                    <GlossaryCopyButton kind="term" glossaryKey={k} label={t.title} />
+                                                                    <GlossaryCopyButton kind="term" glossaryKey={k} label={face.title} />
                                                                 </div>
-                                                                {renderTermParagraphs(t.text, `tt-${k}`)}
-                                                                {renderTermReadMore(t)}
+                                                                {renderTermParagraphs(face.text, `tt-${k}`)}
+                                                                {renderTermReadMore(term)}
                                                                 {renderTermServices(k, cat?.color)}
-                                                                {renderTermActions(t, k)}
-                                                                {t.related && t.related.length > 0 && (
+                                                                {renderTermActions(term, k)}
+                                                                {term.related && term.related.length > 0 && (
                                                                     <div style={{ 
                                                                         marginTop: 'var(--space-md)', 
                                                                         paddingTop: 'var(--space-md)', 
                                                                         borderTop: '1px solid var(--border)',
                                                                         fontSize: 'var(--text-sm)'
                                                                     }}>
-                                                                        <strong style={{ color: 'var(--text-muted)' }}>מונחים קשורים: </strong>
+                                                                        <strong style={{ color: 'var(--text-muted)' }}>{t('relatedTermsLabel')} </strong>
                                                                         <span style={{ color: 'var(--text-muted)' }}>
-                                                                            {t.related.map((relKey, idx) => {
-                                                                                const relTerm = terms[relKey];
-                                                                                if (!relTerm) return null;
+                                                                            {term.related.map((relKey, idx) => {
+                                                                                const relFace = mhTermText(terms[relKey]);
+                                                                                if (!relFace.title) return null;
                                                                                 return (
                                                                                     <span key={relKey}>
                                                                                         {idx > 0 && ', '}
                                                                                         <button
                                                                                             onClick={() => {
-                                                                                                setTermsSearch(relTerm.title);
+                                                                                                setTermsSearch(relFace.title);
                                                                                                 setTermsCategory(null);
                                                                                                 setSelectedLetter(null);
                                                                                                 document.getElementById(`term-${relKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -9190,7 +9724,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                                             }}
                                                                                             data-tracking-name={`terms_related_${relKey}`}
                                                                                         >
-                                                                                            {relTerm.title}
+                                                                                            {relFace.title}
                                                                                         </button>
                                                                                     </span>
                                                                                 );
@@ -9199,7 +9733,8 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             );
@@ -9210,8 +9745,8 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                 {/* Terms Display - Alphabetical View */}
                                 {termsViewMode === 'alphabetical' && filteredTerms.length > 0 && (
                                     <div>
-                                        {hebrewAlphabet.split('').map(letter => {
-                                            const letterTerms = filteredTerms.filter(([k, t]) => t.title.charAt(0) === letter);
+                                        {glossaryAlphabet.split('').map(letter => {
+                                            const letterTerms = filteredTerms.filter(([, term]) => termInitial(term) === letter);
                                             if (letterTerms.length === 0) return null;
                                             
                                             return (
@@ -9226,8 +9761,9 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                         {letter} ({letterTerms.length})
                                                     </h2>
                                                     <div className="mh-terms-grid">
-                                                        {letterTerms.map(([k, t]) => {
-                                                            const cat = TERM_CATEGORIES[t.category || 'other'];
+                                                        {letterTerms.map(([k, term]) => {
+                                                            const face = mhTermText(term);
+                                                            const cat = TERM_CATEGORIES[term.category || 'other'];
                                                             return (
                                                                 <div key={k} id={`term-${k}`} className={`mh-term-card${focusedTerm === k ? ' mh-term-card-focused' : ''}`} style={{
                                                                     background: 'var(--bg-card)',
@@ -9235,7 +9771,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                     borderRadius: 'var(--radius-md)',
                                                                     padding: 'var(--space-lg)',
                                                                     marginBottom: 'var(--space-lg)',
-                                                                    borderRight: `4px solid ${cat?.color || 'var(--primary)'}`,
+                                                                    borderInlineStart: `4px solid ${cat?.color || 'var(--primary)'}`,
                                                                     transition: 'all 0.2s',
                                                                     boxShadow: 'var(--shadow-card)'
                                                                 }}
@@ -9256,9 +9792,9 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                             fontWeight: 700,
                                                                             flex: 1
                                                                         }}>
-                                                                            {t.title}
+                                                                            {face.title}
                                                                         </h3>
-                                                                        {cat && (
+                                                                        {cat && mhTermCatTitle(cat) && (
                                                                             <span style={{
                                                                                 background: `${cat.color}15`,
                                                                                 color: cat.color,
@@ -9267,33 +9803,33 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                                 fontSize: 'var(--text-xs)',
                                                                                 fontWeight: 600
                                                                             }}>
-                                                                                {cat.title}
+                                                                                {mhTermCatTitle(cat)}
                                                                             </span>
                                                                         )}
-                                                                        <GlossaryCopyButton kind="term" glossaryKey={k} label={t.title} />
+                                                                        <GlossaryCopyButton kind="term" glossaryKey={k} label={face.title} />
                                                                     </div>
-                                                                    {renderTermParagraphs(t.text, `tt-${k}`)}
-                                                                    {renderTermReadMore(t)}
+                                                                    {renderTermParagraphs(face.text, `tt-${k}`)}
+                                                                    {renderTermReadMore(term)}
                                                                 {renderTermServices(k, cat?.color)}
-                                                                    {renderTermActions(t, k)}
-                                                                    {t.related && t.related.length > 0 && (
+                                                                    {renderTermActions(term, k)}
+                                                                    {term.related && term.related.length > 0 && (
                                                                         <div style={{ 
                                                                             marginTop: 'var(--space-md)', 
                                                                             paddingTop: 'var(--space-md)', 
                                                                             borderTop: '1px solid var(--border)',
                                                                             fontSize: 'var(--text-sm)'
                                                                         }}>
-                                                                            <strong style={{ color: 'var(--text-muted)' }}>מונחים קשורים: </strong>
+                                                                            <strong style={{ color: 'var(--text-muted)' }}>{t('relatedTermsLabel')} </strong>
                                                                             <span style={{ color: 'var(--text-muted)' }}>
-                                                                                {t.related.map((relKey, idx) => {
-                                                                                    const relTerm = terms[relKey];
-                                                                                    if (!relTerm) return null;
+                                                                                {term.related.map((relKey, idx) => {
+                                                                                    const relFace = mhTermText(terms[relKey]);
+                                                                                    if (!relFace.title) return null;
                                                                                     return (
                                                                                         <span key={relKey}>
                                                                                             {idx > 0 && ', '}
                                                                                             <button
                                                                                                 onClick={() => {
-                                                                                                    setTermsSearch(relTerm.title);
+                                                                                                    setTermsSearch(relFace.title);
                                                                                                     setTermsCategory(null);
                                                                                                     setSelectedLetter(null);
                                                                                                     setTimeout(() => {
@@ -9311,7 +9847,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                                                                                 }}
                                                                                                 data-tracking-name={`terms_related_${relKey}`}
                                                                                             >
-                                                                                                {relTerm.title}
+                                                                                                {relFace.title}
                                                                                             </button>
                                                                                         </span>
                                                                                     );
@@ -10315,7 +10851,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     {activeTermCardsKey && (
                         <div className="mh-termcards-banner">
                             <p className="mh-helper-text" style={{ margin: 0 }}>
-                                {mhFill(t('relatedServices'), { title: terms[activeTermCardsKey].title })}
+                                {mhFill(t('relatedServices'), { title: mhTermText(terms[activeTermCardsKey]).title })}
                             </p>
                             {activeTermCardsKey === 'multidisciplinary_center' && (
                                 <div className="mh-card-filter">
@@ -10333,8 +10869,8 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                                     ))}
                                 </div>
                             )}
-                            <GlossaryCopyButton kind="termcards" glossaryKey={activeTermCardsKey} label={terms[activeTermCardsKey].title} />
-                            <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-analytics-id="cards_to_glossary" data-analytics-type="cards_to_glossary" data-analytics-term={activeTermCardsKey} data-analytics-section="glossary" data-analytics-text={terms[activeTermCardsKey].title} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
+                            <GlossaryCopyButton kind="termcards" glossaryKey={activeTermCardsKey} label={mhTermText(terms[activeTermCardsKey]).title} />
+                            <button type="button" className="mh-search-scope-all" onClick={() => openTerm(activeTermCardsKey)} data-analytics-id="cards_to_glossary" data-analytics-type="cards_to_glossary" data-analytics-term={activeTermCardsKey} data-analytics-section="glossary" data-analytics-text={mhTermText(terms[activeTermCardsKey]).title} data-tracking-name={`termcards_back_${activeTermCardsKey}`}>
                                 {t('backToTerm')}
                             </button>
                             <button type="button" className="mh-search-scope-all" onClick={clearTermCards} data-tracking-name="termcards_clear">
