@@ -11,7 +11,7 @@ Do not edit the text of an existing card in `index.html`. That file is the catal
 
 When **adding** a card:
 
-1. **Edit `index.html`** — add the service to `DATA` (where it sits, and the initial text) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`, unless a later admin edit of visible text is newer).
+1. **Edit `index.html`** — add the service to `DATA` (where it sits, and the initial text) and set `LAST_UPDATED` to today's date as `DD.MM.YYYY` (footer shows `עודכן: …`, unless a later admin edit of visible text is newer). A card that sits in two sections is one object: declare it as a `const` before `DATA`, and add that name to `LITERAL_NAMES` in `scripts/lib/extract_data.js` before `DATA`. The page build evaluates those names in order; a name missing from the list fails the build with "is not defined".
 2. **Add a numbered migration** under `scripts/` with `INSERT ... ON CONFLICT` for `directory_entries`, and an `INSERT` into `directory_card_edits` (`card_key` = `` `${row}|||${svc}` `` from the new service object, `public_fields` jsonb, `eligibility` all `any` / empty, `public_edited_at` null) with `ON CONFLICT (card_key) DO NOTHING`. The `public_fields` in that insert are the card's text until an admin edits it.
 3. **Register the migration** at the top of `scripts/database_updates_master.sql` as `[ ]` (unchecked). **Never** mark it `[x]` — the user checks it off after they run the script.
 
