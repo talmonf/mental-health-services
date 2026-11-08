@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 123_ruah_yam_phone_buttons.sql
 [x] 122_ruah_yam.sql
 [x] 121_shikum_acher.sql
 [x] 120_elah_name_phone_button.sql
