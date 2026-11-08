@@ -2433,6 +2433,56 @@
             next.dir = 'ltr';
             return next;
         };
+        const MH_SITE_URL_KEYS = ['web', 'web2', 'add', 'add2', 'add3'];
+        const mhIsSocialUrl = (url) => /(?:^|\.)(?:facebook|fb|instagram|linkedin|youtube|youtu\.be|wa\.me|whatsapp|t\.me|twitter|x|tiktok)\./i.test(String(url || ''));
+        const mhSiteLabelKey = (slot) => {
+            const match = /^(web|add)(\d*)$/.exec(slot);
+            return match ? `${match[1]}Label${match[2]}` : '';
+        };
+        const MH_LANGUAGE_LABEL = /^(english|hebrew|arabic|russian|french|עברית|אנגלית|ערבית|רוסית|צרפתית|français|francais)$/i;
+        const mhCardHasEnglishSite = (svc) => {
+            const site = svc && svc.siteLanguages;
+            return !!(site && site.en && typeof site.en === 'object');
+        };
+        // In English, a card whose own pages exist in English opens those pages.
+        // A slot with no English page is left off the card. Social links stay.
+        // The same address is not offered twice.
+        const mhApplySiteLanguages = (overlaid, hebrew, locale) => {
+            if (!overlaid || locale !== 'en' || !overlaid.siteLanguages) return overlaid;
+            if (!mhCardHasEnglishSite(overlaid)) {
+                const restored = { ...overlaid };
+                MH_SITE_URL_KEYS.forEach((key) => {
+                    if (!hebrew || hebrew[key] == null) return;
+                    restored[key] = hebrew[key];
+                    const labelKey = mhSiteLabelKey(key);
+                    if (labelKey) restored[labelKey] = hebrew[labelKey];
+                });
+                return restored;
+            }
+            const urls = overlaid.siteLanguages.en;
+            const next = { ...overlaid };
+            const seen = new Set();
+            MH_SITE_URL_KEYS.forEach((key) => {
+                const original = hebrew ? hebrew[key] : '';
+                if (!original) return;
+                if (mhIsSocialUrl(original)) return;
+                const enUrl = urls && typeof urls[key] === 'string' ? urls[key].trim() : '';
+                if (!enUrl) {
+                    next[key] = '';
+                    return;
+                }
+                const id = enUrl.replace(/\/+$/, '').toLowerCase();
+                if (seen.has(id)) {
+                    next[key] = '';
+                    return;
+                }
+                seen.add(id);
+                next[key] = enUrl;
+                const labelKey = mhSiteLabelKey(key);
+                if (labelKey && MH_LANGUAGE_LABEL.test(String((hebrew && hebrew[labelKey]) || ''))) next[labelKey] = '';
+            });
+            return next;
+        };
         const mhServiceSearchText = (s) => {
             const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
             return mhNormalizeSearchText(`${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${s.region || ''} ${s.cost || ''} ${tagPart} ${s.cardSearchFallback || ''}`);
@@ -5216,6 +5266,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
             const copiedGlossaryTimeoutRef = useRef(null);
             const [authUser, setAuthUser] = useState(null);
             const [cardEditMap, setCardEditMap] = useState(null);
+            const [siteLanguagesOn, setSiteLanguagesOn] = useState(false);
             // 'loading' hides card text until directory_card_edits answers, so the copy
             // embedded in this file is never shown and then swapped. 'fallback' is only
             // when that request fails; 'database' means those rows replaced the copy.
@@ -5558,6 +5609,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             if (Number.isFinite(t) && (latest == null || t > latest)) latest = t;
                         });
                         setCardEditMap(map);
+                        setSiteLanguagesOn(body.siteLanguagesInstalled === true);
                         setDirectorySource('database');
                         if (latest != null) {
                             const d = new Date(latest);
@@ -5656,18 +5708,22 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     if (Array.isArray(edit.orgMembers) && edit.orgMembers.length) next.cardOrgMembers = edit.orgMembers;
                     if (edit.id) next.cardEditId = edit.id;
                     if (edit.translations && typeof edit.translations === 'object') next.cardTranslations = edit.translations;
-                    return mhLocaleOverlay(next, locale);
+                    if (edit.siteLanguages && typeof edit.siteLanguages === 'object') next.siteLanguages = edit.siteLanguages;
+                    return mhApplySiteLanguages(mhLocaleOverlay(next, locale), next, locale);
                 };
                 const requested = requestedEntryId ? String(requestedEntryId) : '';
                 // locales limits a card to those languages. The rights booklet is Hebrew
                 // only: the file itself is Hebrew, so the card is left out of English.
                 // A direct link still opens it. showAllCards does not override this.
+                // Once site languages are installed, English mode lists a card only when
+                // that card's own page exists in English, unless the visitor asks for every language.
                 const listedInLocale = (svc, categoryId) => {
                     const requestedHit = requested && (String(svc.row) === requested || mhGetEntryId(svc, categoryId) === requested);
                     if (requestedHit) return true;
                     if (Array.isArray(svc.locales) && svc.locales.length && !svc.locales.includes(locale)) return false;
-                    if (locale !== 'he' || showAllCards || !mhCardIsEnglishOnly(svc)) return true;
-                    return false;
+                    if (locale === 'he') return showAllCards || !mhCardIsEnglishOnly(svc);
+                    if (locale === 'en' && siteLanguagesOn && !showAllCards) return mhCardHasEnglishSite(svc);
+                    return true;
                 };
                 Object.keys(out).forEach((id) => {
                     const cat = out[id];
@@ -5682,7 +5738,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                     }
                 });
                 return out;
-            }, [cardEditMap, locale, requestedEntryId, showAllCards]);
+            }, [cardEditMap, locale, requestedEntryId, showAllCards, siteLanguagesOn]);
 
             // A row is link-hidden only when every card on it is hidden. A shared row that
             // still has a visible card keeps links that use that row number.
@@ -9978,7 +10034,7 @@ Apps for an anxiety attack do not replace these lines. They are a short exercise
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('sahar')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('supportLine')}</span></h3>
-                                <a href="https://sahar.org.il" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
+                                <a href={locale === 'en' ? 'https://sahar.org.il/en/' : 'https://sahar.org.il'} target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
                                     <i className="fas fa-comment"></i> {t('toChat')}
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('whatsappAnon')}</p>

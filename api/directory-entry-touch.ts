@@ -72,17 +72,19 @@ async function handlePublicCards(res: VercelResponse) {
     await client.connect();
     let rows: Array<Record<string, unknown>>;
     let includeHidden = false;
+    let includeSiteLanguages = false;
     try {
       const columns = await client.query(
         `SELECT column_name FROM information_schema.columns
           WHERE table_schema = 'public' AND table_name = 'directory_card_edits'
             AND column_name = ANY($1::text[])`,
-        [['sites', 'hidden', 'translations']]
+        [['sites', 'hidden', 'translations', 'site_languages']]
       );
       const names = new Set(columns.rows.map((r) => String(r.column_name)));
       includeHidden = names.has('hidden');
+      includeSiteLanguages = names.has('site_languages');
       const result = await client.query(
-        `SELECT id, card_key, row_id, public_fields, eligibility${names.has('sites') ? ', sites' : ''}, public_edited_at${includeHidden ? ', hidden' : ''}${names.has('translations') ? ', translations' : ''}
+        `SELECT id, card_key, row_id, public_fields, eligibility${names.has('sites') ? ', sites' : ''}, public_edited_at${includeHidden ? ', hidden' : ''}${names.has('translations') ? ', translations' : ''}${names.has('site_languages') ? ', site_languages' : ''}
            FROM directory_card_edits
           ORDER BY row_id, id`
       );
@@ -97,6 +99,7 @@ async function handlePublicCards(res: VercelResponse) {
       );
       rows = result.rows;
       includeHidden = false;
+      includeSiteLanguages = false;
     }
     const termsByCard = new Map<string, string[]>();
     try {
@@ -140,6 +143,7 @@ async function handlePublicCards(res: VercelResponse) {
       includeHidden ? rows.filter((row) => row.hidden === true).map((row) => Number(row.id)) : []
     );
     return res.status(200).json({
+      siteLanguagesInstalled: includeSiteLanguages,
       cards: rows.map((row) => ({
         id: Number(row.id),
         // index.html is served with \n line breaks; keys seeded on Windows carry \r\n.
@@ -147,6 +151,7 @@ async function handlePublicCards(res: VercelResponse) {
         rowId: Number(row.row_id),
         publicFields: row.public_fields && typeof row.public_fields === 'object' ? row.public_fields : {},
         translations: row.translations && typeof row.translations === 'object' && !Array.isArray(row.translations) ? row.translations : {},
+        ...(includeSiteLanguages ? { siteLanguages: row.site_languages && typeof row.site_languages === 'object' && !Array.isArray(row.site_languages) ? row.site_languages : {} } : {}),
         eligibility: row.eligibility && typeof row.eligibility === 'object' ? row.eligibility : {},
         sites: Array.isArray(row.sites) ? row.sites : [],
         terms: termsByCard.get(String(row.card_key || '').replace(/\r/g, '')) || [],

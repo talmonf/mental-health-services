@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const { load } = require('./lib/extract_data');
+const { classifyAlternate } = require('./lib/site_languages');
 
 const OUT = path.join(__dirname, 'card_language_pages.json');
 const LINK_FIELDS = ['web', 'web2', 'add', 'add2', 'add3'];
@@ -254,7 +255,9 @@ async function main() {
       const labeled = labeledAlternate(link);
       if (labeled) alternates.push(labeled);
       for (const alt of page.alternates || []) {
-        if (!alternates.some((item) => item.lang === alt.lang && item.url === alt.url)) alternates.push(alt);
+        if (!alternates.some((item) => item.lang === alt.lang && item.url === alt.url)) {
+          alternates.push({ ...alt, kind: classifyAlternate(link.url, alt.url, alt.source) });
+        }
       }
       const item = {
         field: link.field,

@@ -342,6 +342,7 @@
       directoryCards: null,
       directoryCard: null,
       directoryMsg: '',
+      siteLanguagesInstalled: false,
       directoryLang: 'he',
       directoryLangCardId: null,
       cardTextDraft: null,
@@ -1569,6 +1570,15 @@
     };
     const DIR_PHONES = ['', '2', '3', '4', '5', '6'];
     const DIR_EMAILS = ['', '2', '3'];
+    const SITE_LANGS = [['he', 'עברית'], ['en', 'English'], ['ar', 'العربية'], ['ru', 'Русский'], ['fr', 'Français'], ['am', 'አማርኛ']];
+    const SITE_URL_KEYS = ['web', 'web2', 'add', 'add2', 'add3'];
+    const SITE_URL_LABELS = { web: 'אתר', web2: 'אתר נוסף', add: 'קישור נוסף', add2: 'קישור נוסף 2', add3: 'קישור נוסף 3' };
+    const siteUrlIsWeb = (url) => /^https?:\/\//i.test(String(url || '')) && !/(?:^|\.)(?:facebook|fb|instagram|linkedin|youtube|youtu\.be|wa\.me|whatsapp|t\.me|twitter|x|tiktok)\./i.test(String(url || ''));
+    const siteLabelKey = (slot) => {
+      const match = /^(web|add)(\d*)$/.exec(slot);
+      return match ? `${match[1]}Label${match[2]}` : '';
+    };
+    const SITE_LANG_LABEL = /^(english|hebrew|arabic|russian|french|עברית|אנגלית|ערבית|רוסית|צרפתית|français|francais)$/i;
     const DIR_LTR = new Set(['whatsapp', 'web', 'web2', 'add', 'add2', 'add3']);
     const DIR_OWNERSHIP = [
       ['', 'לא סומן'],
@@ -1627,6 +1637,7 @@
         return;
       }
       state.error = '';
+      state.siteLanguagesInstalled = data.siteLanguagesInstalled === true;
       state.directoryCards = data.cards || [];
     }
 
@@ -1785,6 +1796,24 @@
           ? '<p class="dir-help">ההסתרה תופיע כאן אחרי הרצת סקריפט 101.</p>'
           : `<label class="dir-check"><input type="checkbox" name="hidden"${card.hidden ? ' checked' : ''}> הכרטיס מוסתר מהאתר</label>
             <p class="dir-help">כרטיס מוסתר נשאר ברשימה, עם אנשי הקשר שלו, ולא מופיע באתר. קישורים אליו מוצגים כטקסט.</p>`;
+        const storedSites = card.siteLanguages && typeof card.siteLanguages === 'object' ? card.siteLanguages : {};
+        const enTrans = card.translations && card.translations.en && typeof card.translations.en === 'object' ? card.translations.en : {};
+        const siteSlots = SITE_URL_KEYS.filter((key) => siteUrlIsWeb(fields[key]) || SITE_LANGS.some(([code]) => storedSites[code] && storedSites[code][key]));
+        const siteLanguageSection = card.siteLanguagesInstalled === false
+          ? '<h2>שפות האתר</h2><p class="dir-help">שפות האתר יופיעו כאן אחרי הרצת סקריפט 124.</p>'
+          : `<h2>שפות האתר</h2>
+            <p class="dir-help">השפות שבהן העמוד של הארגון עצמו קיים. במצב אנגלית הכרטיס מוצג רק כשמסומנת אנגלית, והקישור נפתח בכתובת של אותה שפה. תיבה מסומנת בלי כתובת נפרדת פירושה שאותה כתובת היא העמוד בשפה הזו.</p>
+            ${SITE_LANGS.map(([code, label]) => {
+              const on = !!(storedSites[code] && typeof storedSites[code] === 'object');
+              const urls = siteSlots.map((key) => {
+                const stored = storedSites[code] && storedSites[code][key] ? String(storedSites[code][key]) : '';
+                const value = stored || (code === 'en' ? String(enTrans[key] || '') : (code === 'he' ? String(fields[key] || '') : ''));
+                if (!value && code === 'he') return '';
+                if (code === 'he') return `<p class="dir-help" dir="ltr">${esc(SITE_URL_LABELS[key])}: ${esc(value)}</p>`;
+                return `<label for="d-site-${code}-${key}">${esc(SITE_URL_LABELS[key])}</label><input id="d-site-${code}-${key}" name="site_${code}_${key}" type="url" dir="ltr" value="${esc(value)}">`;
+              }).join('');
+              return `<label class="dir-check"><input type="checkbox" name="site_lang_${code}"${on ? ' checked' : ''}> ${esc(label)}</label><div data-site-urls="${code}"${on ? '' : ' hidden'}>${urls}</div>`;
+            }).join('')}`;
         const viewLine = card.hidden
           ? `<p class="dir-help">שורה ${esc(card.rowId)}. הכרטיס מוסתר מהאתר.</p>`
           : `<p class="dir-help">שורה ${esc(card.rowId)}. <a href="/?entry=${encodeURIComponent(card.rowId)}">צפייה בכרטיס</a></p>`;
@@ -1803,6 +1832,7 @@
               : 'הנוסח העברי הוא המקור. באנגלית, שדה ריק מציג את העברית. טלפון, דוא״ל, מרפאות והתאמה נשארים משותפים.'}</p>
             ${card.translationsInstalled === false ? '<p class="dir-help">שמירת נוסח אנגלי תתאפשר אחרי הרצת סקריפט 112.</p>' : ''}
             <div class="dir-grid"${cardLang === 'en' ? ' lang="en" dir="ltr"' : ''}>${textInputs}</div>
+            ${siteLanguageSection}
             <div${cardLang === 'en' ? ' hidden' : ''}>
             <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
               <summary>טלפונים</summary>
@@ -1845,6 +1875,12 @@
         const regionsWrap = form.querySelector('#d-regions-wrap');
         mode.addEventListener('change', () => {
           regionsWrap.hidden = mode.value !== 'regions';
+        });
+        form.querySelectorAll('[name^=site_lang_]').forEach((box) => {
+          box.addEventListener('change', () => {
+            const wrap = form.querySelector(`[data-site-urls="${box.name.replace('site_lang_', '')}"]`);
+            if (wrap) wrap.hidden = !box.checked;
+          });
         });
         form.querySelector('[data-act=back]').addEventListener('click', () => {
           state.directoryId = null;
@@ -1922,6 +1958,37 @@
             if (value) en[name] = value;
             else delete en[name];
           });
+          let siteLanguages;
+          if (card.siteLanguagesInstalled !== false) {
+            siteLanguages = {};
+            const checked = (code) => {
+              const box = form.querySelector(`[name="site_lang_${code}"]`);
+              return !!(box && box.checked);
+            };
+            SITE_LANGS.forEach(([code]) => {
+              if (!checked(code)) return;
+              const urls = {};
+              SITE_URL_KEYS.forEach((key) => {
+                const hebrew = String(publicFields[key] || '').trim();
+                const hebrewWeb = siteUrlIsWeb(hebrew) ? hebrew : '';
+                if (code === 'he') {
+                  if (hebrewWeb) urls[key] = hebrewWeb;
+                  return;
+                }
+                const typed = text(`site_${code}_${key}`);
+                const chosen = typed || hebrewWeb;
+                if (chosen) urls[key] = chosen;
+              });
+              siteLanguages[code] = urls;
+            });
+            if (siteLanguages.en) {
+              SITE_URL_KEYS.forEach((key) => {
+                if (siteLanguages.en[key]) en[key] = siteLanguages.en[key];
+                const labelKey = siteLabelKey(key);
+                if (labelKey && siteLanguages.en[key] && SITE_LANG_LABEL.test(String(publicFields[labelKey] || ''))) en[labelKey] = 'Website';
+              });
+            }
+          }
           DIR_PHONES.forEach((suffix) => {
             publicFields[`phone${suffix}`] = text(`phone${suffix}`);
             publicFields[`phoneLabel${suffix}`] = text(`phoneLabel${suffix}`);
@@ -1940,6 +2007,7 @@
             id: card.id,
             publicFields,
             translations: { en },
+            ...(siteLanguages ? { siteLanguages } : {}),
             eligibility: {
               age_min: age('age_min'),
               age_max: age('age_max'),
@@ -2006,6 +2074,9 @@
                 org: (data.card.publicFields && data.card.publicFields.org) || '',
                 svc: (data.card.publicFields && data.card.publicFields.svc) || '',
                 hasEligibility: data.card.hasEligibility,
+                siteLanguages: data.card.siteLanguages && typeof data.card.siteLanguages === 'object'
+                  ? ['he', 'en', 'ar', 'ru', 'fr', 'am'].filter((code) => data.card.siteLanguages[code] && typeof data.card.siteLanguages[code] === 'object')
+                  : [],
                 hidden: data.card.hidden,
                 hiddenInstalled: data.card.hiddenInstalled,
                 publicEditedAt: data.card.publicEditedAt
@@ -2039,10 +2110,12 @@
         const mark = card.hasEligibility
           ? '<span class="elig-mark yes" title="יש מידע פנימי" aria-label="יש מידע פנימי">✓</span>'
           : '<span class="elig-mark no" title="אין מידע פנימי" aria-label="אין מידע פנימי">✗</span>';
+        const langs = Array.isArray(card.siteLanguages) ? card.siteLanguages.join(' · ') : '';
         return `<tr data-card-row data-hay="${esc(hay)}" data-elig="${elig}"${hidden ? ' hidden' : ''}>
           <td>${esc(card.rowId)}</td>
           <td>${esc(card.org)}${card.hidden ? ' <span class="badge warn">מוסתר</span>' : ''}</td>
           <td>${esc(card.svc)}</td>
+          <td>${esc(langs)}</td>
           <td>${mark}</td>
           <td><button type="button" data-open="${esc(card.id)}">עריכה</button></td>
         </tr>`;
@@ -2050,6 +2123,7 @@
       root.appendChild(el(`<div class="card he-panel">
         ${msg}
         <p class="dir-help">עריכת הטקסט שמוצג בכרטיס, ומידע התאמה שאינו מוצג על הכרטיס אך נכלל במקור הדף למנועי חיפוש.</p>
+        ${state.siteLanguagesInstalled ? '' : '<p class="dir-help">שפות האתר יופיעו אחרי הרצת סקריפט 124.</p>'}
         <div class="dir-list-filters">
           <div class="dir-list-search">
             <label for="dir-q">חיפוש</label>
@@ -2067,8 +2141,8 @@
         <p class="muted" id="dir-count">מוצגים ${shown} מתוך ${cards.length}</p>
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>שורה</th><th>ארגון</th><th>תיאור</th><th>מידע פנימי</th><th></th></tr></thead>
-            <tbody>${rows || '<tr><td colspan="5">אין כרטיסים. הריצו את סקריפט 045.</td></tr>'}</tbody>
+            <thead><tr><th>שורה</th><th>ארגון</th><th>תיאור</th><th>שפות אתר</th><th>מידע פנימי</th><th></th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6">אין כרטיסים. הריצו את סקריפט 045.</td></tr>'}</tbody>
           </table>
         </div>
       </div>`));

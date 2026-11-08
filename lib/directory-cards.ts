@@ -453,6 +453,34 @@ export function translationsEqual(a: unknown, b: unknown): boolean {
   return stable(normalizeTranslations(a)) === stable(normalizeTranslations(b));
 }
 
+export const SITE_LANGUAGE_CODES = ['he', 'en', 'ar', 'ru', 'fr', 'am'] as const;
+export const SITE_URL_KEYS = ['web', 'web2', 'add', 'add2', 'add3'] as const;
+
+/** Languages in which this card's own pages exist, and the URL of each page. An empty object for a language means the language is offered and there is no separate page URL. */
+export function normalizeSiteLanguages(raw: unknown): Record<string, Record<string, string>> {
+  const src = asObject(raw);
+  const out: Record<string, Record<string, string>> = {};
+  for (const code of SITE_LANGUAGE_CODES) {
+    if (!Object.prototype.hasOwnProperty.call(src, code)) continue;
+    const block = asObject(src[code]);
+    const urls: Record<string, string> = {};
+    for (const key of SITE_URL_KEYS) {
+      if (!Object.prototype.hasOwnProperty.call(block, key)) continue;
+      const value = textField(block[key]);
+      if (!value) continue;
+      if (value.length > 2000) throw new DirectoryCardError('כתובת האתר ארוכה מדי');
+      if (!/^https?:\/\//i.test(value)) throw new DirectoryCardError('כתובת האתר אינה תקינה');
+      urls[key] = value;
+    }
+    out[code] = urls;
+  }
+  return out;
+}
+
+export function siteLanguagesEqual(a: unknown, b: unknown): boolean {
+  return stable(normalizeSiteLanguages(a)) === stable(normalizeSiteLanguages(b));
+}
+
 export function eligibilityEqual(a: unknown, b: unknown): boolean {
   return stable(normalizeEligibility(a)) === stable(normalizeEligibility(b));
 }
