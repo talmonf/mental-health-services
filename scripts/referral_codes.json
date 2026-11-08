@@ -1508,6 +1508,13 @@
       ],
       "source": "",
       "confidence": "curated"
+    },
+    "777": {
+      "codes": [
+        "rehab_basket_committee"
+      ],
+      "source": "זכאי סל שיקום; אישור ועדה לתעסוקה נתמכת",
+      "confidence": "curated"
     }
   }
 }

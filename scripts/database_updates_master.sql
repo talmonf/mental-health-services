@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 121_shikum_acher.sql
 [x] 120_elah_name_phone_button.sql
 [x] 119_rights_booklet_title.sql
 [x] 118_emergency_english.sql
