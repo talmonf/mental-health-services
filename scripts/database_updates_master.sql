@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 128_mh_public_names_english.sql
 [x] 127_app_marks.sql
 [x] 126_glossary_english.sql
 [x] 125_glossary_one_soul.sql
