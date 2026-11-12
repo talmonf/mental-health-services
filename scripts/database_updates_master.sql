@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 131_tahel.sql
 [x] 130_just_smile_notes.sql
 [x] 129_sherak_techayech.sql
 [x] 128_mh_public_names_english.sql
