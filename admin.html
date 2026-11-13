@@ -77,8 +77,12 @@
       white-space: nowrap;
     }
     .filters .check-field input { width: auto; margin: 0; flex: none; }
-    .chart { display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; overflow-x: auto; padding: 8px 0 0; }
-    .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 22px; }
+    .chart-frame { display: flex; direction: ltr; align-items: flex-end; gap: 8px; }
+    .chart-axis { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .chart-y { position: relative; height: 120px; font-size: 0.65rem; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .chart-tick { position: absolute; right: 0; transform: translateY(50%); white-space: nowrap; }
+    .chart { display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; flex: 1; min-width: 0; overflow-x: auto; padding: 8px 0 0; }
+    .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 22px; }
     .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: 120px; border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
     .chart-seg { width: 100%; }
     .chart-seg.pv { background: var(--pv); }
@@ -175,7 +179,7 @@
     .contact-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
     .contact-row .who { flex: 1 1 220px; }
     .contact-row .role-view { flex: 0 1 auto; min-width: 0; max-width: 100%; }
-    .contact-row input { flex: 1 1 200px; width: auto; }
+    .contact-row input[type="text"] { flex: 1 1 200px; width: auto; }
     .contact-row .role-saved { font-weight: 700; }
     .contact-row .role-error { flex: 1 1 100%; margin: 0; }
     .spin {
@@ -183,9 +187,31 @@
       border-radius: 50%; flex: none; animation: contact-spin 0.7s linear infinite;
     }
     @keyframes contact-spin { to { transform: rotate(360deg); } }
+    .gloss-toolbar { margin-bottom: 0; }
+    .gloss-toolbar .dir-check { margin: 0; }
     .gloss-term { margin-bottom: 16px; }
-    .gloss-term h3 { display: flex; gap: 8px; align-items: center; }
-    .gloss-term label.dir-check { font-weight: 400; }
+    .gloss-term-head,
+    .gloss-link {
+      display: grid;
+      grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+      column-gap: 12px;
+      align-items: center;
+    }
+    .gloss-term-head { margin: 0 0 4px; }
+    .gloss-term-name,
+    .gloss-main { min-width: 0; }
+    .gloss-link { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .gloss-term .gloss-link:last-child { border-bottom: 0; padding-bottom: 0; }
+    .gloss-check {
+      display: flex; align-items: center; justify-content: center;
+      margin: 0; width: 1.25rem; font-weight: 400;
+    }
+    .gloss-check input { width: 1.05rem; height: 1.05rem; margin: 0; flex: none; }
+    .gloss-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 700px) {
+      .gloss-link { grid-template-columns: 1.25rem minmax(0, 1fr); row-gap: 8px; }
+      .gloss-actions { grid-column: 2; }
+    }
     [dir=auto] { unicode-bidi: plaintext; }
     @media (max-width: 700px) {
       .filters .wide, .filters .exclude { grid-column: span 1; }
@@ -732,16 +758,44 @@
       location.hash = tab === 'directory' && state.directoryId ? `directory/${state.directoryId}` : tab;
     }
 
+    function volumeAxis(max) {
+      const maxVal = Math.max(1, Math.ceil(max));
+      const intervals = 4;
+      if (maxVal <= intervals) {
+        const ticks = [];
+        for (let v = maxVal; v >= 0; v--) ticks.push(v);
+        return { top: maxVal, ticks };
+      }
+      const rough = maxVal / intervals;
+      const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+      const err = rough / pow;
+      const nice = err <= 1 ? 1 : err <= 2 ? 2 : err <= 5 ? 5 : 10;
+      const step = nice * pow;
+      const top = Math.ceil(maxVal / step) * step;
+      const n = Math.round(top / step);
+      const ticks = [];
+      for (let i = n; i >= 0; i--) ticks.push(i * step);
+      return { top, ticks };
+    }
+
     function barChart(rows) {
       if (!rows || !rows.length) return '<p class="lede">No data in this window.</p>';
+      const plotH = 120;
       const max = Math.max(...rows.map((r) => Number(r.total) || ((Number(r.page_view)||0)+(Number(r.search)||0)+(Number(r.click)||0)+(Number(r.other)||0))), 1);
+      const axis = volumeAxis(max);
+      const scale = plotH / axis.top;
+      const labels = axis.ticks.map((v) => v.toLocaleString('en-GB'));
+      const axisWidth = labels.reduce((n, label) => Math.max(n, label.length), 1);
+      const ticks = labels.map((label, i) => {
+        const v = axis.ticks[i];
+        return `<span class="chart-tick" style="bottom:${(v / axis.top) * 100}%">${esc(label)}</span>`;
+      }).join('');
       const cols = rows.map((r) => {
         const pv = Number(r.page_view) || 0;
         const se = Number(r.search) || 0;
         const cl = Number(r.click) || 0;
         const ot = Number(r.other) || 0;
         const total = Number(r.total) || (pv + se + cl + ot);
-        const scale = 120 / max;
         return `<div class="chart-col" title="${esc(fmtDay(r.day))}: ${total}">
           <div class="chart-stack">
             <div class="chart-seg pv" style="height:${pv * scale}px"></div>
@@ -752,7 +806,13 @@
           <span class="chart-label">${esc(fmtDay(r.day))}</span>
         </div>`;
       }).join('');
-      return `<div class="chart">${cols}</div>
+      return `<div class="chart-frame">
+          <div class="chart-axis" aria-hidden="true">
+            <div class="chart-y" style="width:${axisWidth}ch">${ticks}</div>
+            <span class="chart-label">&nbsp;</span>
+          </div>
+          <div class="chart">${cols}</div>
+        </div>
         <div class="legend">
           <span><i style="background:var(--pv)"></i>Page views</span>
           <span><i style="background:var(--search)"></i>Searches</span>
@@ -3258,16 +3318,19 @@
           <p class="dir-help">קישורים בין מונחים במילון לכרטיסים. ההצעות נוצרות מהתאמת שם המונח וכינוייו לטקסט של הכרטיס. רק קישור מאושר מופיע באתר, בכרטיס ובדף המונח.</p>
           <div class="status-filters">${Object.entries(statusLabels).map(([k, v]) => `<button type="button" class="${k === state.glossStatus ? '' : 'secondary'}" data-gstatus="${k}">${esc(v)}</button>`).join('')}</div>
           ${links == null ? '<p>טוען…</p>' : !links.length ? '<p class="lede">אין קישורים במצב הזה.</p>' : `<p class="muted">${links.length} קישורים, ${groups.length} מונחים</p>
-            <div class="toolbar">${actions.map(([s, t]) => `<button type="button" class="secondary" data-bulk="${s}">${esc(t)} למסומנים</button>`).join('')}
+            <div class="toolbar gloss-toolbar">${actions.map(([s, t]) => `<button type="button" class="secondary" data-bulk="${s}">${esc(t)} למסומנים</button>`).join('')}
               <label class="dir-check"><input type="checkbox" id="g-all"> סימון הכול</label></div>`}
         </div>
         ${groups.map(([key, list]) => `<div class="card gloss-term">
-          <h3><label class="dir-check" style="margin:0"><input type="checkbox" data-term-all="${esc(key)}"></label>${esc(termTitle(key))} <span class="badge muted" dir="ltr">${esc(key)}</span> <span class="muted">${list.length}</span></h3>
-          ${list.map((l) => `<div class="contact-row">
-            <label class="dir-check who" style="margin:0"><input type="checkbox" data-gid="${esc(l.id)}" data-gterm="${esc(key)}">
-              <span><a class="name-link" href="#directory/${esc(l.card.id)}">${esc(l.card.rowId)} · ${esc(l.card.org)}</a> <span class="muted" dir="auto">${esc(l.card.svc)}</span>
-              ${l.matchedText ? `<div class="muted" dir="auto">«${esc(l.matchedText)}»</div>` : ''}</span></label>
-            ${actions.map(([s, t]) => `<button type="button" class="secondary" data-gone="${s}" data-gid-one="${esc(l.id)}">${esc(t)}</button>`).join('')}
+          <h3 class="gloss-term-head">
+            <label class="gloss-check"><input type="checkbox" data-term-all="${esc(key)}"></label>
+            <span class="gloss-term-name">${esc(termTitle(key))} <span class="badge muted" dir="ltr">${esc(key)}</span> <span class="muted">${list.length}</span></span>
+          </h3>
+          ${list.map((l) => `<div class="gloss-link">
+            <label class="gloss-check"><input type="checkbox" data-gid="${esc(l.id)}" data-gterm="${esc(key)}"></label>
+            <div class="gloss-main"><a class="name-link" href="#directory/${esc(l.card.id)}">${esc(l.card.rowId)} · ${esc(l.card.org)}</a> <span class="muted" dir="auto">${esc(l.card.svc)}</span>
+              ${l.matchedText ? `<div class="muted" dir="auto">«${esc(l.matchedText)}»</div>` : ''}</div>
+            <div class="gloss-actions">${actions.map(([s, t]) => `<button type="button" class="secondary" data-gone="${s}" data-gid-one="${esc(l.id)}">${esc(t)}</button>`).join('')}</div>
           </div>`).join('')}
         </div>`).join('')}
       </div>`));
