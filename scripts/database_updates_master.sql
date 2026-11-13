@@ -1,4 +1,6 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 135_alma_cost.sql
+[x] 134_chava.sql
 [x] 133_alma_whatsapp.sql
 [x] 132_alma.sql
 [x] 131_tahel.sql
