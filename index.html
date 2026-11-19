@@ -86,6 +86,10 @@
             --accent: #52b788;
             --danger: #c0392b;
             --danger-bg: #d63447;
+            --rose-bg: #f7f1f1;
+            --rose-text: #6e3038;
+            --rose-border: #e4cfd0;
+            --rose-strong: #8f3d48;
             --text: #333;
             --text-muted: #5a5a5a;
             --border: #e0e0e0;
@@ -151,6 +155,12 @@
         .mh-hero-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.75); color: white; }
         .mh-hero-btn-ghost:hover { background: rgba(255,255,255,0.12); }
         .mh-hero-btn-ghost:focus { outline: 2px solid #fff; outline-offset: 2px; }
+        .mh-hero-search { background: #fff; color: var(--primary-dark); border: none; font-weight: 700; }
+        .mh-hero-search:hover { background: #f3f6f8; }
+        .mh-hero .mh-hero-search:focus { outline: 2px solid #fff; outline-offset: 2px; }
+        .mh-hero .mh-btn.mh-hero-iron { background: var(--rose-bg); color: var(--rose-text); border: 1px solid var(--rose-border); box-shadow: none; font-weight: 600; }
+        .mh-hero-iron:hover { background: #f0e6e7; }
+        .mh-hero .mh-hero-iron:focus { outline: 2px solid #fff; outline-offset: 2px; }
         .mh-hero-account-bar {
             display: flex;
             justify-content: flex-end;
@@ -525,24 +535,25 @@
         .mh-search-scope { margin: var(--space-sm) 0 0; font-size: var(--text-sm); }
         .mh-search-scope-all { background: none; border: none; padding: 4px 2px; min-height: 32px; font: inherit; font-weight: 600; color: var(--primary); text-decoration: underline; cursor: pointer; }
         .mh-nearby-toggle {
-            display: inline-flex;
+            display: flex;
+            width: 100%;
             align-items: center;
             justify-content: center;
             gap: var(--space-sm);
             margin-top: var(--space-md);
             min-height: var(--touch-min);
             padding: var(--space-sm) var(--space-lg);
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
+            background: var(--primary);
+            border: none;
+            color: #fff;
             border-radius: var(--radius-md);
             font-family: inherit;
-            font-size: var(--text-sm);
+            font-size: var(--text-base);
             font-weight: 600;
             cursor: pointer;
         }
         .mh-nearby-toggle:hover,
-        .mh-nearby-toggle[aria-expanded="true"] { background: rgba(45, 90, 123, 0.08); }
+        .mh-nearby-toggle[aria-expanded="true"] { background: var(--primary-dark); }
         .mh-nearby-toggle:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
         .mh-nearby-panel { margin-top: var(--space-sm); }
         .mh-cat-header { padding: var(--space-lg) var(--space-md); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); min-height: var(--touch-min); color: white; }
@@ -555,6 +566,23 @@
         .mh-section-link:hover { color: var(--primary-dark, #1e4460); }
         .mh-cat-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-md) var(--space-lg) var(--space-xl); align-items: start; }
         .mh-emergency { background: var(--danger-bg); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-elevated); }
+        .mh-emergency:not(.mh-emergency-collapsed) { background: var(--rose-bg); color: var(--text); border: 1px solid var(--rose-border); box-shadow: none; padding: var(--space-lg); }
+        .mh-emergency:not(.mh-emergency-collapsed) h2,
+        .mh-emergency:not(.mh-emergency-collapsed) h3 { color: var(--rose-text); }
+        .mh-emergency:not(.mh-emergency-collapsed) .mh-emergency-toggle:focus-visible { outline-color: var(--rose-text); }
+        .mh-emergency-item { background: #fff; border: 1px solid var(--rose-border); padding: var(--space-md); border-radius: var(--radius-md); }
+        .mh-emergency-dial { color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); min-height: var(--touch-min); padding: var(--space-sm) var(--space-lg); border-radius: var(--radius-md); background: var(--rose-strong); border: none; }
+        .mh-emergency-dial-lg { font-size: var(--text-2xl); min-width: var(--touch-min); }
+        .mh-emergency-dial-md { font-size: var(--text-lg); min-height: 40px; padding: 6px 14px; flex-shrink: 0; }
+        .mh-emergency-dial:hover,
+        .mh-emergency-dial:focus { background: #7a343d; color: #fff; }
+        .mh-emergency-dial:focus { outline: 2px solid var(--rose-text); outline-offset: 2px; }
+        .mh-intro-crisis { background: var(--rose-bg); color: var(--text); border: 1px solid var(--rose-border); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); }
+        .mh-intro-crisis-lead { font-weight: 700; margin: 0 0 var(--space-md); font-size: var(--text-lg); color: var(--rose-text); }
+        .mh-intro-crisis-line { background: #fff; border: 1px solid var(--rose-border); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md); }
+        .mh-intro-crisis-line p { margin: 6px 0 0; font-size: 0.95rem; color: var(--text-muted); }
+        .mh-intro-crisis a { color: var(--rose-strong); font-size: 1.5rem; font-weight: 700; text-decoration: none; }
+        .mh-intro-crisis a:focus { outline: 2px solid var(--rose-text); outline-offset: 2px; }
         .mh-emergency-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
         .mh-emergency-toggle { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; column-gap: var(--space-md); row-gap: 2px; flex-wrap: wrap; background: none; border: none; color: inherit; font: inherit; padding: 0; cursor: pointer; text-align: start; min-height: var(--touch-min); }
         .mh-emergency-toggle:focus-visible { outline: 2px solid white; outline-offset: 2px; }
@@ -562,7 +590,7 @@
         .mh-emergency-quick { flex-shrink: 0; white-space: nowrap; color: white; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm); min-height: var(--touch-min); padding: 6px 14px; border-radius: var(--radius-md); background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); }
         .mh-emergency-collapsed { padding-top: var(--space-md); padding-bottom: var(--space-md); }
         .mh-emergency-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
-        .mh-emergency-call:hover { background: rgba(255,255,255,0.3) !important; }
+        .mh-emergency-quick:hover { background: rgba(255,255,255,0.3) !important; }
         .mh-footer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; }
         .mh-modal { background: var(--bg-card); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl); box-shadow: var(--shadow-card); position: relative; max-height: 85vh; overflow-y: auto; }
         /* Glossary: single page scroll instead of nested scroll inside the card */
@@ -827,16 +855,12 @@
         .mh-category-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
         .mh-category-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); padding: var(--space-xl); cursor: pointer; transition: all 0.2s; min-height: var(--touch-min); display: flex; flex-direction: column; gap: var(--space-md); box-shadow: var(--shadow-card); position: relative; }
         .mh-category-card:hover { border-color: var(--primary); box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
-        .mh-category-card.mh-category-card-urgent { border-color: var(--danger-bg); border-width: 3px; box-shadow: 0 4px 12px rgba(214, 52, 71, 0.25); }
-        .mh-category-card.mh-category-card-urgent:hover { box-shadow: 0 6px 20px rgba(214, 52, 71, 0.35); }
         .mh-category-card-icon { font-size: 2rem; color: var(--primary); }
-        .mh-category-card.mh-category-card-urgent .mh-category-card-icon { color: var(--danger-bg); }
         .mh-category-card-title { font-weight: 700; font-size: var(--text-lg); color: var(--primary); }
-        .mh-category-card.mh-category-card-urgent .mh-category-card-title { color: var(--danger-bg); }
         .mh-category-card-desc { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
         .mh-category-card-meta { display: flex; align-items: center; gap: var(--space-md); }
         .mh-category-card-badge { background: rgba(45, 90, 123, 0.15); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
-        .mh-category-card.mh-category-card-urgent .mh-category-card-badge { background: rgba(214, 52, 71, 0.2); color: var(--danger-bg); }
+        .mh-category-card-badge-urgent { background: var(--rose-bg); color: var(--rose-text); }
         .mh-helper-text { text-align: center; color: var(--text-muted); font-size: var(--text-base); margin-bottom: var(--space-lg); line-height: 1.6; }
         .mh-subcategory-back { margin-bottom: var(--space-lg); }
         .mh-disclaimer { background: var(--primary-dark); color: white; padding: var(--space-xl); border-radius: var(--radius-md); margin-top: var(--space-3xl); text-align: center; border: 2px solid rgba(255,255,255,0.2); }
@@ -916,7 +940,6 @@
             .mh-modal.mh-intro-card { padding: var(--space-md) var(--space-lg); }
             .mh-terms-wrap { padding: var(--space-2xl); }
             .mh-intro-card .mh-intro-wrap { padding: 0 0 0 36px; }
-            .mh-intro-preview { grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: start; }
             .mh-category-cards { grid-template-columns: repeat(2, 1fr); }
             .mh-terms-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -924,6 +947,7 @@
             .mh-hero-inner { flex-direction: column; align-items: stretch; justify-content: flex-start; }
             .mh-hero-text, .mh-hero-actions { flex: 0 0 auto; }
             .mh-hero-actions { justify-content: flex-start; }
+            .mh-hero-actions .mh-hero-search { flex: 1 1 100%; min-height: var(--touch-min); }
             .mh-intro-more-split { display: none !important; }
             .mh-intro-more-end { display: block; }
         }
@@ -1213,6 +1237,11 @@
         .mh-nearby-bar-hint { margin: 0; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.4; }
         .mh-nearby-bar input, .mh-nearby-bar select { min-height: var(--touch-min); padding: var(--space-sm) var(--space-md); border: 2px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); background: var(--bg); flex: 1 1 160px; }
         .mh-nearby-bar select { flex: 0 0 auto; }
+        @media (max-width: 599px) {
+            form.mh-nearby-bar > input,
+            form.mh-nearby-bar > select,
+            form.mh-nearby-bar > .mh-nearby-bar-btn { flex: 1 1 100%; }
+        }
         .mh-nearby-bar-btn { min-height: var(--touch-min); min-width: var(--touch-min); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
         .mh-nearby-or { color: var(--text-muted); font-size: var(--text-sm); font-weight: 700; }
         .mh-nearby-bar-btn-gps { background: var(--accent); border: none; color: white; }
@@ -1413,10 +1442,11 @@
                 supportLine: 'קו תמיכה',
                 soldiers: 'חיילים וכוחות ביטחון',
                 sahar: 'סה"ר - צ\'אט',
-                toChat: 'לצ\'אט →',
+                toChat: 'לצ\'אט',
                 whatsappAnon: 'ווואטסאפ | אנונימי',
                 searchIn: 'חיפוש ב{title}',
                 searchPlaceholder: 'חיפוש לפי ארגון, נושא או אוכלוסייה (למשל: טראומה, נוער)',
+                searchJump: 'חיפוש',
                 searchLabel: 'חיפוש שירותים',
                 clearSearch: 'ניקוי החיפוש',
                 linkCopied: 'הקישור הועתק',
@@ -1548,10 +1578,11 @@
                 supportLine: 'support line',
                 soldiers: 'Soldiers and security forces',
                 sahar: 'SAHAR chat',
-                toChat: 'Chat →',
+                toChat: 'Chat',
                 whatsappAnon: 'WhatsApp | Anonymous',
                 searchIn: 'Search in {title}',
                 searchPlaceholder: 'Search by organization, topic, or who it is for (for example: trauma, youth)',
+                searchJump: 'Search',
                 searchLabel: 'Search services',
                 clearSearch: 'Clear search',
                 linkCopied: 'Link copied',
@@ -8897,7 +8928,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                     >
                         <SectionCopyButton groupId={groupId} label={shownTitle(group)} variant="group" />
                         <div className="mh-category-card-icon">
-                            <i className={`fas ${isUrgent ? 'fa-exclamation-triangle' : group.icon}`}></i>
+                            <i className={`fas ${group.icon}`}></i>
                         </div>
                         <div>
                             <div className="mh-category-card-title">{shownTitle(group)}</div>
@@ -8907,7 +8938,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                             <span className="mh-category-card-badge">
                                 {count} {count === 1 ? t('service') : t('services')}
                             </span>
-                            {isUrgent && <span className="mh-category-card-badge">{t('urgent')}</span>}
+                            {isUrgent && <span className="mh-category-card-badge mh-category-card-badge-urgent">{t('urgent')}</span>}
                         </div>
                     </div>
                 );
@@ -10146,18 +10177,24 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                 <p>{t('tagline')}</p>
                             </div>
                             <div className="mh-hero-actions">
+                                <button
+                                    type="button"
+                                    className="mh-btn mh-hero-search"
+                                    onClick={() => {
+                                        const field = document.getElementById('mh-search-input');
+                                        field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        field?.focus({ preventScroll: true });
+                                    }}
+                                    aria-label={t('searchLabel')}
+                                    data-tracking-name="search_jump"
+                                >
+                                    <i className="fas fa-search" aria-hidden="true"></i> {t('searchJump')}
+                                </button>
                                 <span className="mh-hb-tooltip-wrap">
                                     <button
                                         type="button"
                                         onClick={() => applyHaravotBarzelSearch('hero')}
-                                        className="mh-btn"
-                                        style={{
-                                            background: '#8b2635',
-                                            color: 'white',
-                                            border: '2px solid #6d1e2a',
-                                            fontWeight: 700,
-                                            boxShadow: '0 4px 12px rgba(139, 38, 53, 0.35)'
-                                        }}
+                                        className="mh-btn mh-hero-iron"
                                         aria-describedby="mh-hb-tooltip-text"
                                         aria-label={t('ironSwordsLabel')}
                                         data-tracking-name="haravot_barzel_filter"
@@ -10655,17 +10692,17 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                             איך משתמשים במדריך הזה?
                                         </h3>
 
-                                        <div style={{ background: 'var(--danger-bg)', color: 'white', padding: 'var(--space-xl)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-xl)', boxShadow: 'var(--shadow-elevated)' }}>
-                                            <p style={{ fontWeight: 'bold', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-xl)' }}>
+                                        <div className="mh-intro-crisis">
+                                            <p className="mh-intro-crisis-lead">
                                                 <i className="fas fa-exclamation-triangle"></i> אם אתם במצב של משבר או סכנה מיידית - אל תחפשו. פשוט תתקשרו עכשיו:
                                             </p>
-                                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_eran_1201" data-analytics-type="phone">1201</a></strong>
-                                                <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>זמין 24/7 | חינם | אנונימי לגמרי</p>
+                                            <div className="mh-intro-crisis-line">
+                                                <strong style={{ fontSize: '1.1rem' }}>ער"ן: <a href="tel:1201" data-tracking-name="intro_eran_1201" data-analytics-type="phone">1201</a></strong>
+                                                <p>זמין 24/7 | חינם | אנונימי לגמרי</p>
                                             </div>
-                                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '20px', borderRadius: '15px', marginBottom: '15px' }}>
-                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" style={{ color: 'white', fontSize: '1.5rem', textDecoration: 'none' }} data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone"><bdi dir="ltr" className="mh-dial">*8944</bdi></a></strong>
-                                                <p style={{ margin: '5px 0 0', fontSize: '0.95rem', opacity: 0.9 }}>לחיילים וכוחות ביטחון | אנונימי</p>
+                                            <div className="mh-intro-crisis-line">
+                                                <strong style={{ fontSize: '1.1rem' }}>נפש אחת: <a href="tel:*8944" data-tracking-name="intro_nefesh_achat_8944" data-analytics-type="phone"><bdi dir="ltr" className="mh-dial">*8944</bdi></a></strong>
+                                                <p>לחיילים וכוחות ביטחון | אנונימי</p>
                                             </div>
                                             <p style={{ marginTop: '20px', lineHeight: 1.6 }}>
                                                 <strong>אנחנו מבינים - לפעמים קשה לדבר.</strong> יש בושה, יש חשש, יש פחד מה יגידו או מה יחשבו. אז חשוב שתדעו: השיחות האלה <strong>אנונימיות לחלוטין</strong>. אתם לא צריכים לומר את השם שלכם, לא צריכים להסביר יותר ממה שנוח לכם. ואם קשה לדבר בטלפון - <strong>יש גם צ'אט ווואטסאפ אנונימי</strong> (סה"ר - סיוע והקשבה ברשת). המתנדבים והמטפלים האלה כאן בשביל זה, הם שומעים והם מבינים. זה בסדר לבקש עזרה.
@@ -10726,7 +10763,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                             אתם מגיעים לכאן. אתם עושים את זה. ואנחנו כאן לעזור.
                                         </p>
                                         <div style={{ textAlign: 'center', marginTop: 'var(--space-xl)' }}>
-<button type="button" onClick={() => setIntroVisible(false)} className="mh-btn" style={{ background: 'var(--danger-bg)', color: 'white' }} data-tracking-name="intro_close_btn">
+<button type="button" onClick={() => setIntroVisible(false)} className="mh-btn" style={{ background: 'var(--primary)', color: 'white' }} data-tracking-name="intro_close_btn">
                                             סגור
                                             </button>
                                             <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
@@ -10776,41 +10813,41 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                             {t('tapToCall')}
                         </p>
                         <div className="mh-emergency-grid">
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="mh-emergency-item">
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('eranName')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('hotline')}</span></h3>
-                                <a href="tel:1201" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_eran_1201" data-analytics-type="phone">
+                                <a href="tel:1201" className="mh-emergency-dial mh-emergency-dial-lg" data-tracking-name="emergency_eran_1201" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> 1201
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('freeAnon')}</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="mh-emergency-item">
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)', lineHeight: 1.3 }}>{t('assaultTitle')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('helplines')}</span></h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
-                                        <a href="tel:1202" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-lg)', fontWeight: 'bold', textDecoration: 'none', minHeight: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', flexShrink: 0 }} data-tracking-name="emergency_igud_1202_women" data-analytics-type="phone">
+                                        <a href="tel:1202" className="mh-emergency-dial mh-emergency-dial-md" data-tracking-name="emergency_igud_1202_women" data-analytics-type="phone">
                                             <i className="fas fa-phone"></i> 1202
                                         </a>
-                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>{t('answeredByWomen')}</span>
+                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4 }}>{t('answeredByWomen')}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
-                                        <a href="tel:1203" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-lg)', fontWeight: 'bold', textDecoration: 'none', minHeight: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', flexShrink: 0 }} data-tracking-name="emergency_igud_1203_men" data-analytics-type="phone">
+                                        <a href="tel:1203" className="mh-emergency-dial mh-emergency-dial-md" data-tracking-name="emergency_igud_1203_men" data-analytics-type="phone">
                                             <i className="fas fa-phone"></i> 1203
                                         </a>
-                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4, opacity: 0.95 }}>{t('answeredByMen')}</span>
+                                        <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1.4 }}>{t('answeredByMen')}</span>
                                     </div>
                                 </div>
-                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)', opacity: 0.9 }}>24/7</p>
+                                <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>24/7</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="mh-emergency-item">
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('nefeshAchat')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('supportLine')}</span></h3>
-                                <a href="tel:*8944" className="mh-emergency-call" style={{ color: 'white', fontSize: 'var(--text-2xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
+                                <a href="tel:*8944" className="mh-emergency-dial mh-emergency-dial-lg" data-tracking-name="emergency_nefesh_achat_8944" data-analytics-type="phone">
                                     <i className="fas fa-phone"></i> <bdi dir="ltr" className="mh-dial">*8944</bdi>
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('soldiers')}</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="mh-emergency-item">
                                 <h3 style={{ margin: '0 0 var(--space-md)', fontSize: 'var(--text-base)' }}>{t('sahar')} <span style={{ fontWeight: 'normal', opacity: 0.9 }}>— {t('supportLine')}</span></h3>
-                                <a href={locale === 'en' ? 'https://sahar.org.il/en/' : 'https://sahar.org.il'} target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: 'var(--text-xl)', fontWeight: 'bold', textDecoration: 'none', minHeight: 'var(--touch-min)', minWidth: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-sm) var(--space-lg)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }} data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
+                                <a href={locale === 'en' ? 'https://sahar.org.il/en/' : 'https://sahar.org.il'} target="_blank" rel="noopener noreferrer" className="mh-emergency-dial mh-emergency-dial-lg" data-tracking-name="emergency_sahar_chat" data-analytics-type="website">
                                     <i className="fas fa-comment"></i> {t('toChat')}
                                 </a>
                                 <p style={{ margin: 'var(--space-md) 0 0', fontSize: 'var(--text-sm)' }}>{t('whatsappAnon')}</p>
@@ -10820,10 +10857,11 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                         )}
                     </div>
 
-                    <div className="mh-search-wrap">
+                    <div className="mh-search-wrap" id="mh-search">
                         <div className="mh-search-field">
                             <i className="fas fa-search mh-search-icon" aria-hidden="true"></i>
                             <input
+                                id="mh-search-input"
                                 type="text"
                                 placeholder={selectedCategoryGroup
                                     ? mhFill(t('searchIn'), { title: shownTitle(CATEGORY_GROUPS[selectedCategoryGroup]) })

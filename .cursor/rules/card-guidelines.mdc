@@ -1,0 +1,49 @@
+---
+description: How to word a directory card — description, audience, cost, conditions, notes, and contacts
+alwaysApply: true
+---
+
+# Card wording
+
+One organization is one card. Conditions belong in במה מטפלים. Do not open a separate card per condition.
+
+The name is the name on the organization's own site, in both languages. A Latin name stays Latin in Hebrew (`IsraClinic`).
+
+## Description, under the name
+
+Two plain sentences:
+
+1. What kind of care. Say psychiatric treatment (assessment and medication), psychotherapy, or both. Do not leave that ambiguous.
+2. How you meet: at the clinic, on Zoom, or both, in those words.
+
+Also set `meeting` to `in_person`, `online`, or `both`. Leave it empty when the site does not say. An empty value still shows when the meeting filter is on. במרפאה matches in person or both. זום matches Zoom or both. Do not write אונליין in אזור to mean this. Do not backfill `meeting` on existing cards unless asked.
+
+Clinic type (private clinic, day treatment) belongs in this description. The founding year does not.
+
+IsraClinic: `מרפאה פסיכיאטרית פרטית: אבחון וטיפול תרופתי, וגם פסיכותרפיה. במרפאה או בזום.` with `meeting` `both`.
+
+## Who it is for
+
+למי is the usual audience only (`מבוגרים`). An edge case, such as age 17 and a half with a parent's consent, goes at the end of הערות. Leave out what already follows from the service, such as "also people outside Israel" on a private clinic.
+
+## Place, year, cost
+
+אזור is only a place. See the directory-entries rule. Face-to-face and Zoom are not places.
+
+`founded` is the year alone (`2005`), shown as הוקם. Fill it when the year is published. Do not backfill cards that lack it.
+
+עלות is who pays, not a price list: the health fund or the Ministry of Defense, in full or in part (12 sessions at no charge, subsidized), or private. A tariff stays behind a מחירון link. Do not write session prices on the card.
+
+## Conditions, approaches, notes
+
+במה מטפלים is the conditions. גישות is the approaches (CBT, EMDR, and so on). Both fold after two lines, so the main list comes first. Do not paste the same list into הערות.
+
+הערות is a detail that has no field. It folds after two lines, so the ordinary fact comes first and the exception last. Leave out opening hours, a disclaimer that this is not a crisis line, and any restatement of the cost, the conditions, or the approaches.
+
+## Contacts
+
+More than one phone is one טלפון button that opens the list. More than one email is one אימייל button. One number or one address stays a direct button. The button does not print the number or the address; the opened list does, each row with a language or role label. `phoneShowNumber` and `emailShowAddress` stay false.
+
+A label is the language (עברית, אנגלית, רוסית), not a country. Do not add a line a visitor could read as a country (רוסיה beside רוסית). A number for callers outside Israel stays off the card unless asked.
+
+Telegram is the Telegram icon only. Do not add Viber.
