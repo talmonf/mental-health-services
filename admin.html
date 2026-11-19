@@ -1585,8 +1585,10 @@
       ['svc', 'תיאור קצר', false],
       ['target', 'למי', true],
       ['region', 'אזור', false],
+      ['founded', 'שנת הקמה', false],
       ['cost', 'עלות', false],
-      ['specialty', 'התמחות', true],
+      ['specialty', 'במה מטפלים', true],
+      ['approaches', 'גישות', true],
       ['languages', 'שפות', false],
       ['diseases', 'מצבים', true],
       ['notes', 'הערות', true],
@@ -1609,8 +1611,10 @@
       svc: 'Short description',
       target: 'Who it is for',
       region: 'Area',
+      founded: 'Founded',
       cost: 'Cost',
-      specialty: 'Specialty',
+      specialty: 'Conditions treated',
+      approaches: 'Approaches',
       languages: 'Languages of service',
       diseases: 'Conditions',
       notes: 'Notes',
@@ -1903,6 +1907,17 @@
             <div class="dir-grid"${cardLang === 'en' ? ' lang="en" dir="ltr"' : ''}>${textInputs}</div>
             ${siteLanguageSection}
             <div${cardLang === 'en' ? ' hidden' : ''}>
+            <div class="dir-grid">
+              <div>
+                <label for="d-meeting">איך נפגשים</label>
+                <select id="d-meeting" name="meeting">
+                  <option value=""${fields.meeting ? '' : ' selected'}>לא סומן</option>
+                  <option value="in_person"${fields.meeting === 'in_person' ? ' selected' : ''}>במרפאה</option>
+                  <option value="online"${fields.meeting === 'online' ? ' selected' : ''}>זום</option>
+                  <option value="both"${fields.meeting === 'both' ? ' selected' : ''}>במרפאה ובזום</option>
+                </select>
+              </div>
+            </div>
             <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
               <summary>טלפונים</summary>
               <div class="dir-grid">${phones}</div>
@@ -2058,6 +2073,7 @@
               });
             }
           }
+          publicFields.meeting = text('meeting');
           DIR_PHONES.forEach((suffix) => {
             publicFields[`phone${suffix}`] = text(`phone${suffix}`);
             publicFields[`phoneLabel${suffix}`] = text(`phoneLabel${suffix}`);

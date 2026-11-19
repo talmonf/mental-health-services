@@ -974,6 +974,8 @@
         .mh-ted-list a:hover { text-decoration: underline; }
         .mh-map-btn { background: #1a73e8 !important; color: #fff; border: none; }
         .mh-map-picker { position: relative; display: inline-flex; }
+        .mh-clamp-2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .mh-clamp-more { display: inline; margin: 2px 0 0; padding: 0; border: 0; background: none; color: var(--text-muted); font: inherit; font-size: 0.85em; font-weight: 400; text-decoration: underline; cursor: pointer; }
         .mh-map-panel {
             position: absolute;
             z-index: 20;
@@ -1426,7 +1428,11 @@
                 noResults: 'לא נמצאו שירותים התואמים לחיפוש. נסו מילות מפתח אחרות.',
                 searchingOnly: 'מחפשים רק ב{title}.',
                 searchAll: 'חיפוש בכל המדריך',
-                filterSummary: 'סינון לפי סוג הכרטיס והמימון',
+                filterSummary: 'סינון לפי סוג הכרטיס, המפגש והמימון',
+                meeting: 'איך נפגשים:',
+                meetingLabel: 'איך נפגשים',
+                meetingInPerson: 'במרפאה',
+                meetingOnline: 'זום',
                 onTheCard: 'מה יש בכרטיס:',
                 onTheCardLabel: 'מה יש בכרטיס',
                 hideInfo: 'הסתרת «מידע בלבד»',
@@ -1557,7 +1563,11 @@
                 noResults: 'No services match this search. Try other words.',
                 searchingOnly: 'Searching only in {title}.',
                 searchAll: 'Search the whole directory',
-                filterSummary: 'Filter by what the card offers and how it is funded',
+                filterSummary: 'Filter by what the card offers, how you meet, and how it is funded',
+                meeting: 'How you meet:',
+                meetingLabel: 'How you meet',
+                meetingInPerson: 'In the clinic',
+                meetingOnline: 'Zoom',
                 onTheCard: 'On the card:',
                 onTheCardLabel: 'On the card',
                 hideInfo: 'Hide “information only”',
@@ -2228,7 +2238,8 @@
             778: [{ label: "הרצליה", address: "רמת ים 77, הרצליה", lat: 32.169976, lng: 34.800575 }],
             779: [{ label: "הרצליה", address: "נחשון 2, הרצליה", lat: 32.1741673, lng: 34.8146496 }],
             780: [{ label: "ירושלים", address: "קרן היסוד 23, ירושלים", lat: 31.7735681, lng: 35.2197131 }],
-            782: [{ label: "צהלה", address: "צה״ל 2א, צהלה, תל אביב", lat: 32.122469, lng: 34.827065 }]
+            782: [{ label: "צהלה", address: "צה״ל 2א, צהלה, תל אביב", lat: 32.122469, lng: 34.827065 }],
+            784: [{ label: "תל אביב", address: "ברודצקי 43, תל אביב, 6905234", lat: 32.111776, lng: 34.797624 }]
         };
         const mhGetLocationsForRow = (row) => ENTRY_LOCATIONS[Number(row)] || [];
         const mhNormPlace = (s) => String(s || '').replace(/\s+/g, ' ').trim();
@@ -2393,10 +2404,18 @@
                 app
             };
         };
-        const MH_CARD_FILTER_EMPTY = { offer: '', funding: '', hideInfoOnly: false, app: '' };
-        const mhCardFilterActive = (f) => Boolean(f && (f.offer || f.funding || f.hideInfoOnly || f.app));
+        const MH_CARD_FILTER_EMPTY = { offer: '', funding: '', hideInfoOnly: false, app: '', meeting: '' };
+        const mhCardFilterActive = (f) => Boolean(f && (f.offer || f.funding || f.hideInfoOnly || f.app || f.meeting));
+        const mhMeetingMatches = (mode, wanted) => {
+            if (!wanted) return true;
+            if (mode !== 'in_person' && mode !== 'online' && mode !== 'both') return true;
+            if (wanted === 'in_person') return mode === 'in_person' || mode === 'both';
+            if (wanted === 'online') return mode === 'online' || mode === 'both';
+            return true;
+        };
         const mhServiceMatchesCardFilter = (s, f) => {
             if (!mhCardFilterActive(f)) return true;
+            if (f.meeting && !mhMeetingMatches(String((s && s.meeting) || ''), f.meeting)) return false;
             if (f.app) {
                 const raw = s && s.cardIndicators;
                 const app = raw && MH_APP_LABELS_HE[raw.app] ? raw.app : '';
@@ -2444,7 +2463,7 @@
         const mhNormalizeSearchText = (value) => String(value || '').toLowerCase().replace(MH_SEARCH_QUOTE_RE, '');
         const MH_HEBREW_LETTER = /[\u0590-\u05FF]/;
         const MH_LATIN_LETTER = /[A-Za-z]/;
-        const MH_CARD_TEXT_KEYS = ['org', 'svc', 'target', 'region', 'cost', 'specialty', 'notes', 'languages', 'diseases', 'tags'];
+        const MH_CARD_TEXT_KEYS = ['org', 'svc', 'target', 'region', 'founded', 'cost', 'specialty', 'approaches', 'notes', 'languages', 'diseases', 'tags'];
         // A card written only in English stays out of the Hebrew lists. A Hebrew letter anywhere in the
         // visible wording keeps it, including a dir:ltr card such as Hakshiva or Hevlei Kesher.
         const mhCardIsEnglishOnly = (svc) => {
@@ -2454,7 +2473,7 @@
             return MH_LATIN_LETTER.test(`${svc.org || ''} ${svc.svc || ''}`);
         };
         const MH_TRANSLATION_KEYS = [
-            'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
+            'org', 'svc', 'target', 'region', 'founded', 'cost', 'specialty', 'approaches', 'languages', 'diseases', 'notes', 'tags',
             'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3',
             'phone', 'phoneLabel', 'phoneLabel2', 'phoneLabel3', 'phoneLabel4', 'phoneLabel5', 'phoneLabel6',
             'emailLabel', 'emailLabel2', 'emailLabel3'
@@ -2500,7 +2519,7 @@
             return next;
         };
         const MH_SITE_URL_KEYS = ['web', 'web2', 'add', 'add2', 'add3'];
-        const mhIsSocialUrl = (url) => /(?:^|\.)(?:facebook|fb|instagram|linkedin|youtube|youtu\.be|wa\.me|whatsapp|t\.me|twitter|x|tiktok)\./i.test(String(url || ''));
+        const mhIsSocialUrl = (url) => /(?:^|\.|\/\/)(?:facebook|fb|instagram|linkedin|youtube|youtu\.be|wa\.me|whatsapp|t\.me|twitter|x\.com|tiktok)(?:\.|\/)/i.test(String(url || ''));
         const mhSiteLabelKey = (slot) => {
             const match = /^(web|add)(\d*)$/.exec(slot);
             return match ? `${match[1]}Label${match[2]}` : '';
@@ -2551,7 +2570,14 @@
         };
         const mhServiceSearchText = (s) => {
             const tagPart = `${s.tags || ''}${HARAVOT_BARZEL_ROWS.has(Number(s.row)) ? ' ' + HARAVOT_BARZEL_SEARCH : ''}`;
-            return mhNormalizeSearchText(`${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.diseases || ''} ${s.languages || ''} ${s.region || ''} ${s.cost || ''} ${tagPart} ${s.cardSearchFallback || ''}`);
+            const meetingWords = s.meeting === 'both'
+                ? 'פרונטלי במרפאה זום אונליין zoom online in person'
+                : s.meeting === 'online'
+                    ? 'זום אונליין zoom online'
+                    : s.meeting === 'in_person'
+                        ? 'פרונטלי במרפאה in person'
+                        : '';
+            return mhNormalizeSearchText(`${s.org} ${s.svc} ${s.target || ''} ${s.notes || ''} ${s.specialty || ''} ${s.approaches || ''} ${s.diseases || ''} ${s.languages || ''} ${s.region || ''} ${s.founded || ''} ${s.cost || ''} ${meetingWords} ${tagPart} ${s.cardSearchFallback || ''}`);
         };
 
         // טיפול יום and אשפוז יום name the same service. A query that uses either phrase
@@ -3195,6 +3221,8 @@
 
         const CHAVA_783 = {"row": 783, "org": "מרכז חוה", "svc": "יחידה לפסיכיאטריה של הפריון", "phone": "03-5303352", "phoneLabel": "מזכירות", "phoneShowNumber": false, "email": "mirp.hava@sheba.gov.il", "emailLabel": "אימייל", "emailShowAddress": false, "email2": "mirp.hava@sheba.health.gov.il", "emailLabel2": "טיפול יום", "emailShowAddress2": false, "web": "https://www.sheba.co.il/pregnancy/clinics/chava-center-mental-health-for-women", "web2": "https://www.sheba.co.il/general/forms/contact-chava-center", "webLabel2": "פנייה", "target": "נשים בהריון, ועד שנה אחרי לידה (פנייה עד ארבעה חודשים מהלידה). אחרי אובדן הריון משבוע 20: פנייה עד ארבעה חודשים, וטיפול עד שנה. גם ייעוץ חד-פעמי לפני הריון, וליווי פסיכיאטרי לנשים עם אנדומטריוזיס שמטופלות במרפאת האנדומטריוזיס בשיבא", "region": "תל השומר", "cost": "טופס 17, או תשלום פרטי לפי תעריפי משרד הבריאות", "specialty": "פסיכיאטריה של הפריון", "notes": "פנייה בטופס באתר, ואחר כך שאלון ב-SMS. מילוי השאלון אינו מבטיח קבלה. פגישת הערכה, ואז התאמה של סוג הטיפול. אובדן הריון לפני שבוע 20 מופנה ל[מרכז בדרכך](https://www.sheba.co.il/gynecology/clinics/bedarkech-center) בשיבא. במרפאה: מעקב פסיכיאטרי, טיפול פסיכולוגי, התערבות זוגית, ליווי סוציאלי וטיפול קבוצתי. המרפאה בבניין הפסיכיאטריה. מזכירות א׳–ה׳ 07:00–16:00, מענה טלפוני 08:00–13:00. [יחידת טיפול יום אם-תינוק](https://www.sheba.co.il/pregnancy/clinics/mother-baby-intensive-therapy-unit): עד שנה אחרי הלידה, א׳, ג׳ וה׳ 10:00–15:00. בא׳ ובה׳ עם התינוק, בג׳ בלי. קומה 1−, מתחת למלון שי-לב, ליד חדר הכושר. [מחלקת אשפוז דיאדי אם-תינוק](https://www.sheba.co.il/pregnancy/departments/mother-baby-hospitalization-department): נשים בשליש השלישי, או עד ארבעה חודשים אחרי הלידה, עם פסיכוזה אחרי לידה, משבר נפשי או דיכאון חמור. האשפוז בלי להיפרד מהתינוק. ביתן 37, מול בית החולים השיקומי. מ-1.9.2023 מבוטחות כל הקופות, מכל הארץ, זכאיות לאשפוז פסיכיאטרי בשיבא. גם [אשפוז בית פסיכיאטרי מקוון](https://www.sheba.co.il/beyond/clinics/pregnancy-post-partum-home-psychiatric-hospitalization), [מפגש מקוון להכנה רגשית ללידה ולהורות](https://www.sheba.co.il/pregnancy/courses/online-meeting-emotional-preparation-birth-and-parenthood) (התאריך יפורסם), ו[מרפאת נגה](https://www.sheba.co.il/gynecology/clinics/menopause-psychiatry-noga-clinic) לנשים בגיל המעבר ולתסמונת קדם-וסתית. אין רחוב באתר, ולכן אין מפה.", "languages": "", "diseases": "", "add": "", "ownership": "hospital", "cardTranslations": {"en": {"org": "Chava Center", "svc": "Reproductive psychiatry unit", "phoneLabel": "Secretary", "emailLabel": "Email", "emailLabel2": "Day treatment", "webLabel2": "Inquiry", "target": "Women in pregnancy, and up to a year after birth (apply within four months of the birth). After a pregnancy loss from week 20: apply within four months, with treatment for up to a year. Also a one-time consultation before pregnancy, and psychiatric follow-up for women with endometriosis who are treated at Sheba's endometriosis clinic", "region": "Tel Hashomer", "cost": "Form 17, or private payment at Ministry of Health rates", "specialty": "Reproductive psychiatry", "notes": "Apply on the form on the website, then a questionnaire by SMS. Filling in the questionnaire does not guarantee a place. An assessment meeting follows, and the kind of care is matched then. A pregnancy loss before week 20 is referred to [the Bedarkech center at Sheba](https://www.sheba.co.il/gynecology/clinics/bedarkech-center). At the clinic: psychiatric follow-up, psychological treatment, couples work, social support, and group therapy. The clinic is in the psychiatry building. The office is open Sunday to Thursday, 07:00–16:00, and the phone is answered 08:00–13:00. [Mother-baby day unit](https://www.sheba.co.il/pregnancy/clinics/mother-baby-intensive-therapy-unit): up to a year after birth, on Sunday, Tuesday, and Thursday, 10:00–15:00. Sunday and Thursday with the baby, Tuesday without. Floor −1, under the Shi-Lev hotel, next to the gym. [Mother-baby inpatient unit](https://www.sheba.co.il/pregnancy/departments/mother-baby-hospitalization-department): women in the third trimester, or up to four months after birth, with postpartum psychosis, a mental-health crisis, or severe depression. Hospitalization does not separate the mother from the baby. Pavilion 37, opposite the rehabilitation hospital. Since 1 September 2023, members of all health funds, from anywhere in the country, are entitled to psychiatric hospitalization at Sheba. Also [online psychiatric home hospitalization](https://www.sheba.co.il/beyond/clinics/pregnancy-post-partum-home-psychiatric-hospitalization), an [online meeting to prepare for birth and parenthood](https://www.sheba.co.il/pregnancy/courses/online-meeting-emotional-preparation-birth-and-parenthood) (the date will be published), and the [Noga clinic](https://www.sheba.co.il/gynecology/clinics/menopause-psychiatry-noga-clinic) for women in menopause and with premenstrual syndrome. No street is published, so there is no map."}}};
 
+        const ISRACLINIC_784 = {"row":784,"org":"IsraClinic","svc":"מרפאה פסיכיאטרית פרטית: אבחון וטיפול תרופתי, וגם פסיכותרפיה. במרפאה או בזום.","target":"מבוגרים","region":"תל אביב","cost":"פרטי. אין חיוב ישיר לקופה. אפשר לקבל מסמכים להחזר מביטוח. בירור ראשוני ללא עלות.","specialty":"דיכאון, חרדה, התקפי פאניקה, OCD, פוסט־טראומה (כולל מלחמה ושירות), דו־קוטבית, סכיזופרניה והפרעה סכיזואפקטיבית, הפרעות אישיות (כולל גבולית), קשב במבוגרים, תחלואה כפולה, כאב כרוני, פסיכיאטריה בגיל המבוגר","languages":"עברית, רוסית, אנגלית","notes":"גם טיפול זוגי, קבוצתי והדרכת משפחה. אחרי ייעוץ יש חודש מעקב. חוות דעת לביטוח לאומי, לצה״ל או לאגף השיקום היא תהליך נפרד. בהפרעות אכילה מפנים הלאה. מגיל 17 וחצי אפשר לפנות בהסכמת הורים או אפוטרופוס.","whatsapp":"972587707173","whatsappLabel":"וואטסאפ","email":"info@israclinic.org","emailLabel":"עברית","emailShowAddress":false,"email2":"info@psy.clinic","emailLabel2":"אנגלית","emailShowAddress2":false,"email3":"info@israclinic.com","emailLabel3":"רוסית","emailShowAddress3":false,"web":"https://israclinic.org/","web2":"https://israclinic.org/treatment-at-israclinic","webLabel2":"איך מתנהל הטיפול","add":"https://psy.clinic/treatment-at-israclinic/services_and_prices_israclinic","addLabel":"מחירון","add2":"https://t.me/israclinic_bot","addLabel2":"טלגרם","phone":"03-375-1819","phoneLabel":"עברית","phoneShowNumber":false,"phone2":"03-375-1370","phoneLabel2":"אנגלית","phoneShowNumber2":false,"phone3":"077-556-5790","phoneLabel3":"רוסית","phoneShowNumber3":false,"ownership":"private","cardTranslations":{"en":{"org":"IsraClinic","svc":"Private psychiatric clinic: assessment and medication, and also psychotherapy. At the clinic or on Zoom.","target":"Adults","region":"Tel Aviv","cost":"Private. The clinic does not bill a health fund directly. Documents can be provided for an insurance reimbursement. A first inquiry is free.","specialty":"Depression, anxiety, panic attacks, OCD, post-trauma (including war and military service), bipolar disorder, schizophrenia and schizoaffective disorder, personality disorders (including borderline), adult ADHD, dual diagnosis, chronic pain, psychiatry in older age","languages":"Hebrew, Russian, English","notes":"Also couples therapy, group therapy, and family guidance. After a consultation there is a month of follow-up. An opinion for the National Insurance Institute, the IDF, or the Ministry of Defense rehabilitation department is a separate process. Eating disorders are referred elsewhere. From age 17 and a half, a person can apply with a parent or guardian's consent.","phoneLabel":"Hebrew","phoneLabel2":"English","phoneLabel3":"Russian","emailLabel":"Hebrew","emailLabel2":"English","emailLabel3":"Russian","web":"https://psy.clinic/","web2":"https://psy.clinic/treatment-at-israclinic/About-IsraClinic","webLabel2":"How treatment works","add":"https://psy.clinic/treatment-at-israclinic/services_and_prices_israclinic","addLabel":"Prices","addLabel2":"Telegram","whatsappLabel":"WhatsApp","siteLabels":["Tel Aviv"],"siteAddresses":["43 Brodetsky St, Tel Aviv, 6905234"],"founded":"2005","approaches":"CBT, dynamic therapy, EMDR, DBT, schema therapy, TFP, supportive therapy, ERP, mindfulness, art therapy, virtual reality, and psychodrama."}},"diseases":"","founded":"2005","approaches":"CBT, טיפול דינמי, EMDR, DBT, סכמה תרפיה, TFP, טיפול תמיכתי, ERP, מיינדפולנס, טיפול באומנות, מציאות מדומה ופסיכודרמה","meeting":"both"};
+
         const SHIKUM_ACHER_777 = {"row": 777, "org": "שיקום אחר", "svc": "תעסוקה נתמכת ופיתוח קריירה לזכאי סל שיקום", "phone": "073-3745040", "phoneLabel": "טלפון", "phoneShowNumber": false, "email": "info@shikumacher.org.il", "emailLabel": "אימייל", "emailShowAddress": false, "web": "https://shikumacher.org.il/", "web2": "https://shikumacher.org.il/programs/", "webLabel2": "תכניות", "target": "זכאי סל שיקום מגיל 18. וורקאיט: 18–35. אמצע החיים: 45 ומעלה", "region": "כל הארץ", "cost": "במימון סל שיקום", "specialty": "", "notes": "וורקאיט: חקר קריירה והתנסות לצעירים, בליווי בעיר שלהם. ג׳ובי: תעסוקה נתמכת בשוק החופשי לפי בחירת המשתתף, גם אחרי ההשתלבות. אמצע החיים: חזרה לעבודה או שינוי קריירה. גם סדנאות הכנה לעבודה. הכניסה אחרי אישור ועדת סל שיקום לתעסוקה נתמכת.", "languages": "", "diseases": "", "add": "", "cardTranslations": {"en": {"org": "Shikum Acher", "svc": "Supported employment and career development for rehabilitation-basket recipients", "web": "https://shikumacher.org.il/en/", "web2": "https://shikumacher.org.il/en/", "webLabel2": "Programs", "phoneLabel": "Phone", "emailLabel": "Email", "target": "Rehabilitation-basket recipients, age 18 and up. WORKIT: ages 18–35. Mid-Life: age 45 and over", "region": "Nationwide", "cost": "Funded by the rehabilitation basket", "notes": "WORKIT: career exploration for young adults, with support in their own city. Jobbi: supported employment in the open job market, in a role the participant chooses, including after placement. Mid-Life: returning to work or a career change. Short workshops on preparing for work are also offered. Joining requires the rehabilitation-basket committee's approval for supported employment.", "siteLabels": ["Petah Tikva"], "siteAddresses": ["HaMartz 20, Kiryat Aryeh, Petah Tikva"]}}};
 
         // Embedded data
@@ -3360,7 +3388,8 @@
         ,
          {"row":357,"org":"ת.ל.מ.","svc":"רשת לטיפול פסיכולוגי, ייעוץ ואבחון (ע\"ר, קבוצת עמל)","target":"","region":"רעננה, תל אביב, ראשון לציון, אשדוד, באר שבע","cost":"לא צוין באתר (לפי מאגר \"קשר\": תשלום לפי מחירון לשעת טיפול; סבסוד חלקי למשפחות מאמצות)","specialty":"לא בלעדי: דיכאון, חרדה (יחידה ייעודית לחרדה ופסיכו-רפואה בת\"א, כולל OCD ומצבים פסיכוסומטיים), ADHD, טראומה, הפרעות אכילה, אימוץ, הורות, משברים זוגיים ומשפחתיים, לקויות למידה","notes":"סוג בעלות: עמותה (ע\"ר, קבוצת עמל). פסיכיאטרים – בסניף רעננה (ילדים ונוער; מבוגרים) ובסניף תל אביב פסיכולוגים קליניים, חינוכיים, התפתחותיים ורפואיים עובדים סוציאליים קליניים (רעננה, ראשון לציון) (+ מטפלים זוגיים ומשפחתיים, מטפלים בהבעה ויצירה) כתובת: רעננה: אחוזה 301 (טל׳ 077-6704806) תל אביב: מנחם בגין 116, בית קלקא, קומה 3 ראשון לציון: ירושלים 12 (טל׳ 03-6097373) אשדוד: הציונות 50, קומה 1 באר שבע: רגר 11, בניין 7, קומה 3 (טל׳ 08-6230349).","languages":"","diseases":"","add":"","ownership":"nonprofit","cardTerms":["multidisciplinary_center"],"web":"https://www.telem.org.il"}
         ,
-         CHAVA_783
+         CHAVA_783,
+         ISRACLINIC_784
         ]},
 
          "hmo": {"icon": "🏥", "title": "קופות חולים", "titleEn": "Health Funds", "desc": "מוקדי הקופות לבריאות הנפש", "intro": "קופות החולים מספקות לחבריהן שירותי בריאות נפש רחבים. להלן מוקדי הקופות למידע, תיאום והפניה. בין השירותים הנוספים שמכוסים דרך הקופה:", "sectionLinks": [
@@ -3521,7 +3550,8 @@
         {"row": 78, "org": "המרכז הירושלמי לבריאות הנפש (כפר שאול-איתנים)", "svc": "המרכז מעניק רצף טיפולי למגוון הפרעות הנפש, בכל הגילאים, למצבים פסיכוטיים חריפים, מצבים ממושכים עם דגש שיקומי ושירות קהילתי. מערך הטיפול כולל את כל סוגי הטיפולים הביולוגיים המקובלים (תרופות חדישות לסוגיהן, חדר סנוסלן – גרייה רב חושית ונזעי חשמל), טיפול זוגי ומשפחתי, פסיכותראפיה פרטנית וקבוצתית, טיפול באומנות וריפוי בעיסוק.", "phone": "", "web": "http://www.psjer.org.il/", "target": "", "region": "ירושלים, בית שמש, מעלה אדומים, מבשרת ציון, יישובי פרוזדור ירושלים", "cost": "", "specialty": "", "notes": "", "languages": "", "diseases": "", "add": ""},
         {"row": 41, "org": "שרן רפואה עד הבית", "svc": "ייעוץ פסיכיאטרי מקוון", "phone": "", "web": "https://sharanmedical.co.il/psychiatric-consultation-at-home/", "target": "", "region": "", "cost": "שירות פרטי", "specialty": "", "notes": "פגישה עם פסיכיאטר ב-Zoom תוך 48 שעות ממועד הפנייה.", "languages": "", "diseases": "", "add": ""},
         {"row": 42, "org": "שרן רפואה עד הבית", "svc": "ייעוץ פסיכיאטרי מקוון", "phone": "03-7545938", "phoneLabel": "מוקד שרן", "phoneShowNumber": false, "web": "https://sharanmedical.co.il/online-psychiatric-consultation-for-idf/", "target": "", "region": "", "cost": "זכאי משרד הבטחון", "specialty": "", "notes": "ייעוץ וטיפולי מעקב בוידאו לחיילים משוחררים באישור אגף השיקום. ", "languages": "", "diseases": "", "add": ""},
-        {"row": 104, "org": "מיינדמי (MindMe)", "svc": "מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד", "phone": "03-6511229", "phoneLabel": "קווי", "phone2": "050-953-6345", "phoneLabel2": "נייד", "whatsapp": "972509536345", "email": "office@mindme.co.il", "web": "https://mindme.co.il/", "target": "", "region": "תל אביב", "cost": "פרטי", "specialty": "", "notes": "כתובת: מנחם בגין 148, תל אביב", "languages": "עברית, אנגלית", "diseases": "", "add": "https://www.facebook.com/MindMeTLV/", "addLabel": "פייסבוק", "iconOnly": true,"ownership":"private"}
+        {"row": 104, "org": "מיינדמי (MindMe)", "svc": "מרכז פסיכיאטרי וטיפול רגשי: פסיכותרפיה, טיפול קוגניטיבי-התנהגותי (CBT), טיפול זוגי ומשפחתי, פסיכיאטריה ומתן תרופות, EMDR/DBT/NLP, חרדה, דיכאון, טראומה, התמכרויות ועוד", "phone": "03-6511229", "phoneLabel": "קווי", "phone2": "050-953-6345", "phoneLabel2": "נייד", "whatsapp": "972509536345", "email": "office@mindme.co.il", "web": "https://mindme.co.il/", "target": "", "region": "תל אביב", "cost": "פרטי", "specialty": "", "notes": "כתובת: מנחם בגין 148, תל אביב", "languages": "עברית, אנגלית", "diseases": "", "add": "https://www.facebook.com/MindMeTLV/", "addLabel": "פייסבוק", "iconOnly": true,"ownership":"private"},
+        ISRACLINIC_784
         ]},
         "medical": {"title": "טיפולים רפואיים", "titleEn": "Medical treatments", "services": [
         {"row": 268, "org": "SGB — סטלה ישראל", "svc": "הליך רפואי קצר (Stellate Ganglion Block): שתי זריקות הרדמה מקומית בצידי הצוואר תחת אולטרסאונד, להקלה על תסמינים פיזיים של פוסט־טראומה, חרדה ודיכאון. מיועד לשילוב עם טיפול רגשי.", "phone": "073-332-9259", "phoneShowNumber": true, "email": "israel@stellacenter.com", "web": "https://israel.stellacenter.com/", "target": "", "region": "תל אביב, חיפה", "cost": "פרטי; סבסוד אפשרי — פרטים באתר", "specialty": "SGB", "notes": "מתבצע במדיקה (הברזל 28, רמת החייל) ובבית החולים אלישע (יאיר כ\"ץ 12, חיפה). נדרשת אבחנה של פסיכיאטר.", "languages": "עברית, אנגלית", "diseases": "PTSD, חרדה, דיכאון", "add": ""},
@@ -5296,6 +5326,31 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
             } catch (_) {}
         };
 
+        const MhClamp = ({ watch, ltr, children }) => {
+            const ref = useRef(null);
+            const [open, setOpen] = useState(false);
+            const [overflows, setOverflows] = useState(false);
+            useEffect(() => {
+                const el = ref.current;
+                if (!el || open) return undefined;
+                const measure = () => setOverflows(el.scrollHeight > el.clientHeight + 1);
+                measure();
+                if (typeof ResizeObserver !== 'function') return undefined;
+                const obs = new ResizeObserver(measure);
+                obs.observe(el);
+                return () => obs.disconnect();
+            }, [watch, open]);
+            return (
+                <div style={{ marginBottom: '6px' }}>
+                    <div ref={ref} className={open ? undefined : 'mh-clamp-2'}>{children}</div>
+                    {(overflows || open) && (
+                        <button type="button" className="mh-clamp-more" onClick={() => setOpen((v) => !v)}>
+                            {open ? (ltr ? 'Less' : 'פחות') : (ltr ? 'More' : 'עוד')}
+                        </button>
+                    )}
+                </div>
+            );
+        };
         const MentalHealthIsrael = () => {
             const initialUrlState = mhReadUrlState();
             const [searchTerm, setSearchTerm] = useState(() => initialUrlState.q);
@@ -5756,7 +5811,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                 // A hidden card is left out. The database flag wins once it arrives;
                 // until then, or if the request fails, the copy in this file is used.
                 const publicKeys = new Set([
-                    'org', 'svc', 'target', 'region', 'cost', 'specialty', 'languages', 'diseases', 'notes', 'tags',
+                    'org', 'svc', 'target', 'region', 'founded', 'meeting', 'cost', 'specialty', 'approaches', 'languages', 'diseases', 'notes', 'tags',
                     'whatsapp', 'whatsappLabel', 'web', 'webLabel', 'web2', 'webLabel2', 'add', 'addLabel', 'add2', 'addLabel2', 'add3', 'addLabel3',
                     'email', 'emailLabel', 'emailShowAddress',
                     'email2', 'emailLabel2', 'emailShowAddress2',
@@ -5963,7 +6018,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "13.11.2026";
+            const LAST_UPDATED = "19.11.2026";
             const dateRank = (value) => {
                 const match = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(value || '').trim());
                 if (!match) return null;
@@ -8219,6 +8274,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                     if (/facebook\.com|fb\.com|fb\.watch/i.test(u)) return { icon: 'fab fa-facebook-f', name: ltr ? 'Facebook' : 'פייסבוק' };
                     if (/instagram\.com/i.test(u)) return { icon: 'fab fa-instagram', name: ltr ? 'Instagram' : 'אינסטגרם' };
                     if (/linkedin\.com/i.test(u)) return { icon: 'fab fa-linkedin-in', name: ltr ? 'LinkedIn' : 'לינקדאין' };
+                    if (/(?:^|\/\/|\.)t\.me\/|telegram\.(?:me|org)/i.test(u)) return { icon: 'fab fa-telegram', name: ltr ? 'Telegram' : 'טלגרם' };
                     return null;
                 };
                 const isHbBooklet = Number(s.row) === 209;
@@ -8229,6 +8285,16 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                 const emailGroups = mhBranchEmailGroups(locs);
                 const branchPhones = mhBranchPhones(locs);
                 const showCardPhone = (num, label) => Boolean(num) && !mhCardPhoneHiddenByBranch(label, num, locs);
+                const cardPhones = [
+                    [s.phone, s.phoneLabel, s.phoneShowNumber, `p-${s.row}`, 'phone', false],
+                    [s.phone2, s.phoneLabel2, s.phoneShowNumber2, `p2-${s.row}`, 'phone2', true],
+                    [s.phone3, s.phoneLabel3, s.phoneShowNumber3, `p3-${s.row}`, 'phone3', true],
+                    [s.phone4, s.phoneLabel4, s.phoneShowNumber4, `p4-${s.row}`, 'phone4', true],
+                    [s.phone5, s.phoneLabel5, s.phoneShowNumber5, `p5-${s.row}`, 'phone5', true],
+                    [s.phone6, s.phoneLabel6, s.phoneShowNumber6, `p6-${s.row}`, 'phone6', true]
+                ].filter(([num, label]) => showCardPhone(num, label));
+                const cardMails = ['', '2', '3'].map((suffix) => mhEmailButton(s, suffix)).filter(Boolean)
+                    .filter((mail) => !(emailGroups.length > 1 && emailGroups.some((g) => g.address.toLowerCase() === String(mail.address).trim().toLowerCase())));
                 const rankedLocs = locs.map((loc, locIdx) => ({
                     loc,
                     locIdx,
@@ -8416,7 +8482,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                 ))}
                             </div>
                         )}
-                        {(s.target || s.notes || s.region || s.cost || s.specialty || s.languages || s.diseases || locs.length > 0) && (
+                        {(s.target || s.notes || s.region || s.founded || s.cost || s.specialty || s.approaches || s.languages || s.diseases || locs.length > 0) && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)' }}>
                                 {s.target && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'For:' : 'למי:'}</strong> {mhDialText(s.target, `for-${s.row}`)}</div>}
                                 {s.region && !((locs.length === 1 && locs[0].address && mhRegionCoveredByAddress(s.region, locs[0].address)) || mhRegionCoveredByBranches(s.region, locs)) && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Region:' : 'אזור:'}</strong> {mhDialText(s.region, `reg-${s.row}`)}</div>}
@@ -8426,11 +8492,13 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                 {locs.length > 1 && (
                                     <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Sites:' : 'סניפים:'}</strong> {locs.map(l => l.label).join(' · ')}</div>
                                 )}
+                                {s.founded && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Founded:' : 'הוקם:'}</strong> {s.founded}</div>}
                                 {s.cost && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Cost:' : 'עלות:'}</strong> {mhDialText(s.cost, `cost-${s.row}`)}</div>}
-                                {s.specialty && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Specialty:' : 'התמחות:'}</strong> {mhDialText(s.specialty, `spec-${s.row}`)}</div>}
+                                {s.specialty && <MhClamp watch={s.specialty} ltr={s.dir === 'ltr'}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions treated:' : 'במה מטפלים:'}</strong> {mhDialText(s.specialty, `spec-${s.row}`)}</MhClamp>}
+                                {s.approaches && <MhClamp watch={s.approaches} ltr={s.dir === 'ltr'}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Approaches:' : 'גישות:'}</strong> {mhDialText(s.approaches, `appr-${s.row}`)}</MhClamp>}
                                 {s.languages && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Languages:' : 'שפות:'}</strong> {mhDialText(s.languages, `lang-${s.row}`)}</div>}
                                 {s.diseases && <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Conditions:' : 'מחלות:'}</strong> {mhDialText(s.diseases, `dis-${s.row}`)}</div>}
-                                {s.notes && <div><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes, hiddenLinkRows)}</div>}
+                                {s.notes && <MhClamp watch={s.notes} ltr={s.dir === 'ltr'}><strong style={{ color: 'var(--primary)' }}>{s.dir === 'ltr' ? 'Notes:' : 'הערות:'}</strong> {mhRenderLinkedNotes(s.notes, hiddenLinkRows)}</MhClamp>}
                             </div>
                         )}
                         {Array.isArray(s.cardTerms) && s.cardTerms.some((k) => mhTermText(terms[k]).title) && (
@@ -8458,12 +8526,55 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                             </div>
                         )}
                         <div className="mh-card-actions">
-                            {renderPhone(s.phone, s.phoneLabel, s.phoneShowNumber, `p-${s.row}`, 'phone', false)}
-                            {renderPhone(s.phone2, s.phoneLabel2, s.phoneShowNumber2, `p2-${s.row}`, 'phone2', true)}
-                            {renderPhone(s.phone3, s.phoneLabel3, s.phoneShowNumber3, `p3-${s.row}`, 'phone3', true)}
-                            {renderPhone(s.phone4, s.phoneLabel4, s.phoneShowNumber4, `p4-${s.row}`, 'phone4', true)}
-                            {renderPhone(s.phone5, s.phoneLabel5, s.phoneShowNumber5, `p5-${s.row}`, 'phone5', true)}
-                            {renderPhone(s.phone6, s.phoneLabel6, s.phoneShowNumber6, `p6-${s.row}`, 'phone6', true)}
+                            {cardPhones.length > 1 ? (() => {
+                                const open = contactOpen === 'card-phone';
+                                const needle = contactFilter.trim();
+                                const rows = needle ? cardPhones.filter((row) => `${row[1] || ''} ${row[0]}`.includes(needle)) : cardPhones;
+                                return (
+                                    <div className="mh-map-picker">
+                                        <button type="button" style={{ background: 'var(--accent)' }} aria-expanded={open} aria-haspopup="listbox" onClick={() => { setContactFilter(''); setContactOpen(open ? null : 'card-phone'); setMapOpen(false); }} data-tracking-name={`${s.trackingName || s.org}_phones`} data-analytics-type="phone">
+                                            <i className="fas fa-phone" aria-hidden="true"></i> {ltr ? 'Phone' : 'טלפון'}
+                                        </button>
+                                        {open && <button type="button" className="mh-map-backdrop" aria-label={ltr ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)} />}
+                                        {open && (
+                                            <div className="mh-map-panel mh-pick-panel" role="listbox" aria-label={ltr ? 'Choose a phone' : 'בחירת טלפון'}>
+                                                <div className="mh-map-panel-bar">
+                                                    {cardPhones.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={ltr ? 'Filter phones' : 'סינון טלפונים'} />}
+                                                    <button type="button" className="mh-map-close" aria-label={ltr ? 'Close phone list' : 'סגירת רשימת הטלפונים'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
+                                                </div>
+                                                <div className="mh-map-list">
+                                                    {rows.map((row) => {
+                                                        const [num, label, , keyPrefix, track] = row;
+                                                        const plain = mhDialPlain(num);
+                                                        const key = `card-phone:${s.row}:${track}:${num}`;
+                                                        const copied = copiedKey === key;
+                                                        const title = label || (ltr ? 'Phone' : 'טלפון');
+                                                        const copyLabel = copied ? (ltr ? 'Number copied' : 'המספר הועתק') : (ltr ? `Copy ${plain}` : `העתקת ${plain}`);
+                                                        const dialLabel = ltr ? `Call ${plain}` : `חיוג אל ${plain}`;
+                                                        return (
+                                                            <div key={`${s.row}_${track}`} className="mh-pick-option" role="option">
+                                                                <span className="mh-pick-text">
+                                                                    <span className="mh-pick-title">{title}</span>
+                                                                    <span className="mh-pick-detail" dir="ltr">{mhDialText(num, keyPrefix)}</span>
+                                                                </span>
+                                                                <span className="mh-pick-actions">
+                                                                    <a className="mh-pick-phone" href={mhTelHref(num)} aria-label={dialLabel} title={dialLabel} data-tracking-name={`${s.trackingName || s.org}_${track}`} data-analytics-type="phone">
+                                                                        <i className="fas fa-phone" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <button type="button" className="mh-pick-copy" aria-label={copyLabel} title={copyLabel} onClick={() => copyText(plain, { onSuccess: () => markCopied(key), fallbackPrompt: ltr ? 'Copy this number:' : 'העתיקו את המספר:' })} data-tracking-name={`${s.trackingName || s.org}_${track}_copy`} data-analytics-type="phone">
+                                                                        <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {!rows.length && <p className="mh-map-empty">{ltr ? 'No matching phone' : 'אין טלפון תואם'}</p>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })() : cardPhones.map((row) => <React.Fragment key={`${s.row}_${row[4]}`}>{renderPhone(row[0], row[1], row[2], row[3], row[4], row[5])}</React.Fragment>)}
                             {branchPhones.length > 1 && (() => {
                                 const open = contactOpen === 'phone';
                                 const needle = contactFilter.trim();
@@ -8526,14 +8637,55 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                     <a href={href} target="_blank" rel="noopener noreferrer" style={{background: '#25D366', gap: '4px'}} title={title} aria-label={text ? undefined : (channelOnly || !label ? fallback : label)} data-tracking-name={`${s.trackingName || s.org}_whatsapp`} data-analytics-type="whatsapp"><i className="fab fa-whatsapp" aria-hidden="true"></i>{text ? ` ${text}` : ''}</a>
                                 );
                             })()}
-                            {['', '2', '3'].map((suffix) => {
-                                const mail = mhEmailButton(s, suffix);
-                                if (!mail) return null;
-                                if (emailGroups.length > 1 && emailGroups.some((g) => g.address.toLowerCase() === String(mail.address).trim().toLowerCase())) return null;
+                            {cardMails.length > 1 ? (() => {
+                                const open = contactOpen === 'card-email';
+                                const needle = contactFilter.trim().toLowerCase();
+                                const rows = needle ? cardMails.filter((mail) => `${mail.text} ${mail.address}`.toLowerCase().includes(needle)) : cardMails;
                                 return (
-                                    <a key={`${s.row}_${mail.tracking}`} href={`mailto:${mail.address}`} style={{background: '#e67e22'}} title={mail.title} aria-label={mail.text ? undefined : (s.dir === 'ltr' ? 'Email' : 'אימייל')} data-tracking-name={`${s.trackingName || s.org}_${mail.tracking}`} data-analytics-type="email"><i className="fas fa-envelope" aria-hidden="true"></i>{mail.text ? ` ${mail.text}` : ''}</a>
+                                    <div className="mh-map-picker">
+                                        <button type="button" style={{ background: '#e67e22' }} aria-expanded={open} aria-haspopup="listbox" onClick={() => { setContactFilter(''); setContactOpen(open ? null : 'card-email'); setMapOpen(false); }} data-tracking-name={`${s.trackingName || s.org}_emails`} data-analytics-type="email">
+                                            <i className="fas fa-envelope" aria-hidden="true"></i> {ltr ? 'Email' : 'אימייל'}
+                                        </button>
+                                        {open && <button type="button" className="mh-map-backdrop" aria-label={ltr ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)} />}
+                                        {open && (
+                                            <div className="mh-map-panel mh-pick-panel" role="listbox" aria-label={ltr ? 'Choose an email' : 'בחירת דוא״ל'}>
+                                                <div className="mh-map-panel-bar">
+                                                    {cardMails.length > 6 && <input type="text" className="mh-map-filter" value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} placeholder={ltr ? 'Filter emails' : 'סינון דוא״ל'} />}
+                                                    <button type="button" className="mh-map-close" aria-label={ltr ? 'Close email list' : 'סגירת רשימת הדוא״ל'} onClick={() => setContactOpen(null)}><i className="fas fa-times" aria-hidden="true"></i></button>
+                                                </div>
+                                                <div className="mh-map-list">
+                                                    {rows.map((mail) => {
+                                                        const key = `card-email:${s.row}:${mail.tracking}:${mail.address}`;
+                                                        const copied = copiedKey === key;
+                                                        const title = mail.text || (ltr ? 'Email' : 'אימייל');
+                                                        const copyLabel = copied ? (ltr ? 'Email address copied' : 'הכתובת הועתקה') : (ltr ? `Copy ${mail.address}` : `העתקת ${mail.address}`);
+                                                        const sendLabel = ltr ? `Email ${mail.address}` : `שליחת דוא״ל אל ${mail.address}`;
+                                                        return (
+                                                            <div key={`${s.row}_${mail.tracking}`} className="mh-pick-option" role="option">
+                                                                <span className="mh-pick-text">
+                                                                    <span className="mh-pick-title">{title}</span>
+                                                                    <span className="mh-pick-detail" dir="ltr">{mail.address}</span>
+                                                                </span>
+                                                                <span className="mh-pick-actions">
+                                                                    <a className="mh-pick-mail" href={`mailto:${mail.address}`} aria-label={sendLabel} title={sendLabel} data-tracking-name={`${s.trackingName || s.org}_${mail.tracking}`} data-analytics-type="email">
+                                                                        <i className="fas fa-envelope" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    <button type="button" className="mh-pick-copy" aria-label={copyLabel} title={copyLabel} onClick={() => copyText(mail.address, { onSuccess: () => markCopied(key), fallbackPrompt: ltr ? 'Copy this email address:' : 'העתיקו את כתובת הדוא״ל:' })} data-tracking-name={`${s.trackingName || s.org}_${mail.tracking}_copy`} data-analytics-type="email">
+                                                                        <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {!rows.length && <p className="mh-map-empty">{ltr ? 'No matching email' : 'אין דוא״ל תואם'}</p>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 );
-                            })}
+                            })() : cardMails.map((mail) => (
+                                <a key={`${s.row}_${mail.tracking}`} href={`mailto:${mail.address}`} style={{background: '#e67e22'}} title={mail.title} aria-label={mail.text ? undefined : (ltr ? 'Email' : 'אימייל')} data-tracking-name={`${s.trackingName || s.org}_${mail.tracking}`} data-analytics-type="email"><i className="fas fa-envelope" aria-hidden="true"></i>{mail.text ? ` ${mail.text}` : ''}</a>
+                            ))}
                             {emailGroups.length === 1 && !mhCardHasEmail(s, emailGroups[0].address) && (
                                 <a href={`mailto:${emailGroups[0].address}`} style={{background: '#e67e22'}} title={emailGroups[0].address} aria-label={s.dir === 'ltr' ? 'Email' : 'אימייל'} data-tracking-name={`${s.trackingName || s.org}_email_site`} data-analytics-type="email"><i className="fas fa-envelope" aria-hidden="true"></i></a>
                             )}
@@ -10814,6 +10966,21 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                             data-tracking-name={`card_filter_app_${code}`}
                                         >
                                             {(locale === 'en' ? MH_APP_LABELS_EN : MH_APP_LABELS_HE)[code]}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="mh-card-filter-group" role="group" aria-label={t('meetingLabel')}>
+                                    <span className="mh-card-filter-label">{t('meeting')}</span>
+                                    {['in_person', 'online'].map((code) => (
+                                        <button
+                                            key={code}
+                                            type="button"
+                                            className={`mh-resource-chip${cardFilter.meeting === code ? ' active' : ''}`}
+                                            aria-pressed={cardFilter.meeting === code}
+                                            onClick={() => setCardFilter((f) => ({ ...f, meeting: f.meeting === code ? '' : code }))}
+                                            data-tracking-name={`card_filter_meeting_${code}`}
+                                        >
+                                            {code === 'in_person' ? t('meetingInPerson') : t('meetingOnline')}
                                         </button>
                                     ))}
                                 </div>
