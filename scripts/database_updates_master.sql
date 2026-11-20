@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 139_shivtaya.sql
 [x] 138_home_calmer_ui.sql
 [x] 137_israclinic.sql
 [x] 136_alma_name.sql

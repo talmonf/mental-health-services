@@ -42,8 +42,8 @@ IsraClinic: `מרפאה פסיכיאטרית פרטית: אבחון וטיפול
 
 ## Contacts
 
-More than one phone is one טלפון button that opens the list. More than one email is one אימייל button. One number or one address stays a direct button. The button does not print the number or the address; the opened list does, each row with a language or role label. `phoneShowNumber` and `emailShowAddress` stay false.
+One phone is the phone icon alone. One email is the envelope icon alone. No word on the button, and not the number or the address. The label is טלפון or אימייל, which is not printed. `phoneShowNumber` and `emailShowAddress` stay false. Do not label a single button עברית, אנגלית, or a role. An empty label prints the number, so the channel name is required.
 
-A label is the language (עברית, אנגלית, רוסית), not a country. Do not add a line a visitor could read as a country (רוסיה beside רוסית). A number for callers outside Israel stays off the card unless asked.
+More than one phone is one טלפון button that opens the list. More than one email is one אימייל button. The opened list prints the number or the address. Each row there has a language or a role (עברית, אנגלית, רוסית, מוקד). That label is the language, not a country. Do not add a line a visitor could read as a country (רוסיה beside רוסית). A number for callers outside Israel stays off the card unless asked.
 
 Telegram is the Telegram icon only. Do not add Viber.
