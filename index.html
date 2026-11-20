@@ -602,7 +602,8 @@
         .mh-credits { background: transparent; box-shadow: none; padding: 2px var(--space-sm) var(--space-sm); margin-bottom: var(--space-sm); font-size: var(--text-sm); color: var(--text-muted); text-align: center; line-height: 1.45; }
         .mh-credits p { margin: 0; display: inline; }
         .mh-credits p + p::before { content: ' · '; }
-        .mh-credits-phone { white-space: nowrap; }
+        .mh-credits-link { color: var(--primary); font-weight: 400; text-decoration: underline; text-underline-offset: 2px; }
+        .mh-credits-link:hover { opacity: 0.85; }
         .mh-modal.mh-intro-card { margin-bottom: var(--space-md); max-height: none; overflow: visible; }
         .mh-intro-card .mh-intro-wrap { padding: var(--space-sm) var(--space-md) var(--space-sm) 40px; }
         .mh-intro-preview { display: grid; gap: var(--space-sm); }
@@ -1502,8 +1503,8 @@
                 welcomeLead: 'אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.',
                 readMore: 'קרא עוד',
                 creditsCreated: 'אתר זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר',
-                creditsContact: 'להערות, תיקונים והוספות, נא ליצור קשר',
-                creditsWhatsapp: 'בוואטסאפ',
+                creditsContact: 'להערות, תיקונים והוספות, נא',
+                creditsLink: 'ליצור קשר',
                 linkHint: 'סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף',
                 loading: 'טוען את המדריך…',
                 noLinked: 'אין שירותים במדריך שמקושרים למונח הזה.',
@@ -1639,8 +1640,8 @@
                 welcomeLead: 'If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.',
                 readMore: 'Read more',
                 creditsCreated: 'This site was created by Yossi Shimonovitz and Talmon Friedlander.',
-                creditsContact: 'For comments, corrections, and additions, contact us on',
-                creditsWhatsapp: 'WhatsApp',
+                creditsContact: 'For comments, corrections, and additions,',
+                creditsLink: 'contact us',
                 linkHint: 'The link icon beside a section or a card copies a link that opens that place on the page',
                 loading: 'Loading the directory…',
                 noLinked: 'No services in the directory are linked to this term.',
@@ -10251,18 +10252,11 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                 href="https://wa.me/972544787720"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mh-credits-phone"
+                                className="mh-credits-link"
                                 data-tracking-name="contact_whatsapp"
                                 data-analytics-type="whatsapp"
-                                style={{
-                                    color: '#25D366',
-                                    fontWeight: 'bold',
-                                    textDecoration: 'none',
-                                    borderBottom: '2px solid #25D366',
-                                    whiteSpace: 'nowrap'
-                                }}
                             >
-                                {t('creditsWhatsapp')}
+                                {t('creditsLink')}
                             </a>
                         </p>
                     </div>
