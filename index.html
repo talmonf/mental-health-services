@@ -1502,7 +1502,8 @@
                 welcomeLead: 'אם הגעתם לכאן, ייתכן שאתם או אדם קרוב מחפשים מידע או תמיכה בתחום בריאות הנפש. בעמוד זה תמצאו הסברים ומשאבים שיכולים לעזור לכם להבין את האפשרויות הקיימות.',
                 readMore: 'קרא עוד',
                 creditsCreated: 'אתר זה נוצר על ידי יוסי שמעונוביץ וטלמון פרידלנדר',
-                creditsContact: 'להערות, תיקונים והוספות, נא ליצור קשר בוואטסאפ',
+                creditsContact: 'להערות, תיקונים והוספות, נא ליצור קשר',
+                creditsWhatsapp: 'בוואטסאפ',
                 linkHint: 'סמל הקישור ליד כל מקטע או כרטיס — לשליחה ישירה לאותו מקום בדף',
                 loading: 'טוען את המדריך…',
                 noLinked: 'אין שירותים במדריך שמקושרים למונח הזה.',
@@ -1638,7 +1639,8 @@
                 welcomeLead: 'If you have come here, you or a loved one may be looking for information or support in mental health. On this page you will find explanations and resources that can help you understand the options available.',
                 readMore: 'Read more',
                 creditsCreated: 'This site was created by Yossi Shimonovitz and Talmon Friedlander.',
-                creditsContact: 'For comments, corrections, and additions, contact us on WhatsApp',
+                creditsContact: 'For comments, corrections, and additions, contact us on',
+                creditsWhatsapp: 'WhatsApp',
                 linkHint: 'The link icon beside a section or a card copies a link that opens that place on the page',
                 loading: 'Loading the directory…',
                 noLinked: 'No services in the directory are linked to this term.',
@@ -6053,7 +6055,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                 });
                 return targets;
             }, [data]);
-            const LAST_UPDATED = "19.11.2026";
+            const LAST_UPDATED = "20.11.2026";
             const dateRank = (value) => {
                 const match = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(value || '').trim());
                 if (!match) return null;
@@ -10260,7 +10262,7 @@ The Rescue app, in the Emergency Assistance cards, is a short exercise on the ph
                                     whiteSpace: 'nowrap'
                                 }}
                             >
-                                054-478-7720
+                                {t('creditsWhatsapp')}
                             </a>
                         </p>
                     </div>
