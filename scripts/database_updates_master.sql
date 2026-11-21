@@ -1,4 +1,5 @@
 -- Numbered migrations (newest first — add new lines at the top after each migration).
+[x] 142_day_care_wording.sql
 [x] 141_mybenefits.sql
 [x] 140_mh_clinics_wording.sql
 [x] 139_shivtaya.sql
