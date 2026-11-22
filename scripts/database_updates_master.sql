@@ -1,3 +1,4 @@
+[x] 143_therapist_finders_wording.sql
 -- Numbered migrations (newest first — add new lines at the top after each migration).
 [x] 142_day_care_wording.sql
 [x] 141_mybenefits.sql
