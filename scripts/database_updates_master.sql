@@ -1,3 +1,4 @@
+[x] 145_trauma_wording.sql
 [x] 144_addictions_wording.sql
 [x] 143_therapist_finders_wording.sql
 -- Numbered migrations (newest first — add new lines at the top after each migration).
