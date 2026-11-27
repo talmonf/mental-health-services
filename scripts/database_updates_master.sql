@@ -1,3 +1,4 @@
+[x] 154_rothschild_clinic.sql
 [x] 153_helpline_wording.sql
 [x] 152_emergency_wording.sql
 [x] 151_poster_helplines.sql
