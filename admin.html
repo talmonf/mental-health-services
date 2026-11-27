@@ -117,6 +117,33 @@
     #d-members { margin: 0 0 8px; padding-inline-start: 18px; }
     .member-row { margin: 4px 0; }
     .dir-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    details.dir-section {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 12px 0 0;
+      background: #fff;
+    }
+    details.dir-section > summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--primary);
+      padding: 10px 14px;
+      list-style: none;
+    }
+    details.dir-section > summary::-webkit-details-marker { display: none; }
+    details.dir-section > summary::before {
+      content: "◀";
+      font-size: 0.65rem;
+      line-height: 1;
+    }
+    details.dir-section[open] > summary::before { content: "▼"; }
+    details.dir-section[open] > summary { border-bottom: 1px solid var(--border); }
+    details.dir-section > .dir-section-body { padding: 12px 14px 14px; }
+    details.dir-section > .dir-section-body > .dir-actions:first-child { margin-top: 0; }
     @media (max-width: 700px) { .dir-grid { grid-template-columns: 1fr; } }
     .users-table-wrap { overflow-x: auto; }
     .users-table-wrap table { min-width: 1240px; }
@@ -171,7 +198,6 @@
     .lvl-1 { background: #fdf3e7; color: #8a5a12; }
     .lvl-2 { background: #eef4f8; color: var(--primary-dark); }
     .lvl-3 { background: #e7f6ee; color: #1e7a4a; }
-    .internal-section { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 16px; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
     .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: 4px 6px 4px 10px; background: #fff; font-size: 0.85rem; }
     .chip.suggested { border-style: dashed; background: #fdfaf3; }
@@ -376,6 +402,8 @@
       directoryLangCardId: null,
       cardTextDraft: null,
       directoryEligFilter: '',
+      directoryOpen: [],
+      directoryOpenCardId: null,
       cardInternal: null,
       cardInternalMsg: '',
       cardInternalAnchor: '',
@@ -1743,6 +1771,30 @@
       if (state.directoryId) await loadDirectoryCard(state.directoryId);
     }
 
+    function directorySectionOpen(id) {
+      return Array.isArray(state.directoryOpen) && state.directoryOpen.indexOf(id) !== -1;
+    }
+
+    function dirSection(id, title, body) {
+      const open = directorySectionOpen(id) ? ' open' : '';
+      return `<details class="dir-section" id="${id}"${open}><summary>${title}</summary><div class="dir-section-body">${body}</div></details>`;
+    }
+
+    function rememberDirectorySections() {
+      const onCard = state.tab === 'directory' && state.directoryId != null;
+      const sameCard = onCard && state.directoryOpenCardId === state.directoryId;
+      const open = sameCard
+        ? Array.from(document.querySelectorAll('details.dir-section[open]')).map((node) => node.id).filter(Boolean)
+        : [];
+      if (onCard) {
+        const ensure = (id) => { if (id && open.indexOf(id) === -1) open.push(id); };
+        ensure(state.cardInternalAnchor);
+        if (state.contactEditing != null) ensure('card-contacts');
+      }
+      state.directoryOpen = open;
+      state.directoryOpenCardId = onCard ? state.directoryId : null;
+    }
+
     function renderDirectory(root) {
       const msg = state.directoryMsg
         ? `<p class="${state.directoryMsg === 'נשמר.' ? 'ok' : 'err'}">${esc(state.directoryMsg)}</p>`
@@ -1839,10 +1891,9 @@
           .filter((c) => c.id !== card.id)
           .map((c) => `<option value="${esc(c.id)}">שורה ${esc(c.rowId)} · ${esc(c.org)}${c.svc ? ` — ${esc(String(c.svc).split('\n')[0].slice(0, 60))}` : ''}${c.hidden ? ' · מוסתר' : ''}</option>`)
           .join('');
-        const indicatorsSection = card.indicatorsInstalled === false
-          ? '<h2>סימונים בכרטיס</h2><p class="dir-help">הסימונים יופיעו כאן אחרי הרצת סקריפט 077.</p>'
-          : `<h2>סימונים בכרטיס</h2>
-            <p class="dir-help">מוצגים על הכרטיס ומשמשים לסינון. שינוי בסימונים לא משנה את תאריך העדכון בכרטיס. כשמסמנים רק «מידע», הכרטיס מוצג כ«מידע בלבד» ובלי מימון.</p>
+        const indicatorsBody = card.indicatorsInstalled === false
+          ? '<p class="dir-help">הסימונים יופיעו כאן אחרי הרצת סקריפט 077.</p>'
+          : `<p class="dir-help">מוצגים על הכרטיס ומשמשים לסינון. שינוי בסימונים לא משנה את תאריך העדכון בכרטיס. כשמסמנים רק «מידע», הכרטיס מוצג כ«מידע בלבד» ובלי מימון.</p>
             ${select('ownership', 'סוג בעלות', ind.ownership || '', DIR_OWNERSHIP)}
             <p class="dir-help">משמש לסינון במונח «מרכז רב-צוותי». לא מוצג כסימון על הכרטיס.</p>
             <fieldset class="dir-fieldset"><legend>מה יש בכרטיס</legend>
@@ -1881,10 +1932,9 @@
         const storedSites = card.siteLanguages && typeof card.siteLanguages === 'object' ? card.siteLanguages : {};
         const enTrans = card.translations && card.translations.en && typeof card.translations.en === 'object' ? card.translations.en : {};
         const siteSlots = SITE_URL_KEYS.filter((key) => siteUrlIsWeb(fields[key]) || SITE_LANGS.some(([code]) => storedSites[code] && storedSites[code][key]));
-        const siteLanguageSection = card.siteLanguagesInstalled === false
-          ? '<h2>שפות האתר</h2><p class="dir-help">שפות האתר יופיעו כאן אחרי הרצת סקריפט 124.</p>'
-          : `<h2>שפות האתר</h2>
-            <p class="dir-help">השפות שבהן העמוד של הארגון עצמו קיים. במצב אנגלית הכרטיס מוצג רק כשמסומנת אנגלית, והקישור נפתח בכתובת של אותה שפה. תיבה מסומנת בלי כתובת נפרדת פירושה שאותה כתובת היא העמוד בשפה הזו.</p>
+        const siteLanguageBody = card.siteLanguagesInstalled === false
+          ? '<p class="dir-help">שפות האתר יופיעו כאן אחרי הרצת סקריפט 124.</p>'
+          : `<p class="dir-help">השפות שבהן העמוד של הארגון עצמו קיים. במצב אנגלית הכרטיס מוצג רק כשמסומנת אנגלית, והקישור נפתח בכתובת של אותה שפה. תיבה מסומנת בלי כתובת נפרדת פירושה שאותה כתובת היא העמוד בשפה הזו.</p>
             ${SITE_LANGS.map(([code, label]) => {
               const on = !!(storedSites[code] && typeof storedSites[code] === 'object');
               const urls = siteSlots.map((key) => {
@@ -1904,7 +1954,7 @@
           ${viewLine}
           <form id="dir-form">
             ${hiddenControl}
-            <h2>${cardLang === 'en' ? 'English text' : 'מוצג בכרטיס'}</h2>
+            ${dirSection('sec-text', cardLang === 'en' ? 'English text' : 'מוצג בכרטיס', `
             <div class="dir-actions">
               <button type="button" data-act="card-lang" data-lang="he" class="${cardLang === 'he' ? '' : 'secondary'}">עברית</button>
               <button type="button" data-act="card-lang" data-lang="en" class="${cardLang === 'en' ? '' : 'secondary'}">English</button>
@@ -1914,9 +1964,7 @@
               : 'הנוסח העברי הוא המקור. באנגלית, שדה ריק מציג את העברית. טלפון, דוא״ל, מרפאות והתאמה נשארים משותפים.'}</p>
             ${card.translationsInstalled === false ? '<p class="dir-help">שמירת נוסח אנגלי תתאפשר אחרי הרצת סקריפט 112.</p>' : ''}
             <div class="dir-grid"${cardLang === 'en' ? ' lang="en" dir="ltr"' : ''}>${textInputs}</div>
-            ${siteLanguageSection}
-            <div${cardLang === 'en' ? ' hidden' : ''}>
-            <div class="dir-grid">
+            <div class="dir-grid"${cardLang === 'en' ? ' hidden' : ''}>
               <div>
                 <label for="d-meeting">איך נפגשים</label>
                 <select id="d-meeting" name="meeting">
@@ -1926,17 +1974,13 @@
                   <option value="both"${fields.meeting === 'both' ? ' selected' : ''}>במרפאה ובזום</option>
                 </select>
               </div>
-            </div>
-            <details class="chrome" ${DIR_PHONES.some((suffix) => fields[`phone${suffix}`]) ? 'open' : ''}>
-              <summary>טלפונים</summary>
-              <div class="dir-grid">${phones}</div>
-            </details>
-            <details class="chrome" ${DIR_EMAILS.some((suffix) => fields[`email${suffix}`]) ? 'open' : ''}>
-              <summary>דוא״ל</summary>
-              <div class="dir-grid">${emails}</div>
-            </details>
-            ${indicatorsSection}
-            <h2>התאמה — לא מוצג בכרטיס</h2>
+            </div>`)}
+            ${dirSection('sec-langs', 'שפות האתר', siteLanguageBody)}
+            <div${cardLang === 'en' ? ' hidden' : ''}>
+            ${dirSection('sec-phones', 'טלפונים', `<div class="dir-grid">${phones}</div>`)}
+            ${dirSection('sec-emails', 'דוא״ל', `<div class="dir-grid">${emails}</div>`)}
+            ${dirSection('sec-indicators', 'סימונים בכרטיס', indicatorsBody)}
+            ${dirSection('sec-eligibility', 'התאמה — לא מוצג בכרטיס', `
             <p class="dir-help">השדות כאן לא מופיעים על הכרטיס, אבל נכללים במקור הדף כדי שמנועי חיפוש וכלים דומים יוכלו לקרוא אותם. שדה ריק או «ללא הגבלה» פירושו שאין תנאי בממד הזה. תנאי שמולא הוא תנאי הכרחי, לא סיבה מספיקה בפני עצמה להתאים את השירות. הערות פנימיות נכללות גם הן במקור הדף — לא לרשום בהן הערות תפעוליות פרטיות.</p>
             <div class="dir-grid">
               <div><label for="d-age_min">גיל מינימום</label><input id="d-age_min" name="age_min" type="number" min="0" max="120" value="${elig.age_min == null ? '' : esc(elig.age_min)}"></div>
@@ -1951,11 +1995,11 @@
               ${select('rec_mod', 'משרד הביטחון', rec.mod || 'any', anyReq)}
               ${select('rec_rehab', 'סל שיקום', rec.rehab_basket || 'any', anyReq)}
               <div class="full"><label for="d-internal_notes">הערות פנימיות (במקור הדף, לא על הכרטיס)</label><textarea id="d-internal_notes" name="internal_notes">${esc(elig.internal_notes || '')}</textarea></div>
-            </div>
-            <h2>מרפאות</h2>
+            </div>`)}
+            ${dirSection('sec-clinics', 'מרפאות', `
             <p class="dir-help">שם המקום מופיע ברשימת הסניפים ובכפתור המפה. טלפון ודוא״ל של כמה מרפאות נפתחים מכפתור אחד. הערה קצרה מופיעה מתחת לכתובת במפה, למשל שעות או סימן דרך. קואורדינטות ריקות ימולאו בשמירה לפי הכתובת.</p>
             <div id="d-sites">${(Array.isArray(card.sites) ? card.sites : []).map((site) => siteRow(site)).join('')}</div>
-            <p><button type="button" class="secondary" id="d-add-site">הוספת מרפאה</button></p>
+            <p><button type="button" class="secondary" id="d-add-site">הוספת מרפאה</button></p>`)}
             </div>
             <div class="dir-actions">
               <button type="submit">שמירה</button>
@@ -3129,8 +3173,7 @@
         ${data.errors.length ? `<p class="err">${esc(data.errors.join(' · '))}</p>` : ''}
         ${comp ? `<p class="dir-help">שלמות הכרטיס: <b>${esc(comp.score)}%</b>${comp.gaps.length ? ` · חסר: ${comp.gaps.map((g) => esc(g.label + (g.detail ? ` (${g.detail})` : ''))).join(' · ')}` : ''}</p>` : ''}
 
-        <div class="internal-section" id="card-verif">
-          <h3>אימות</h3>
+        ${dirSection('card-verif', 'אימות', `
           ${sectionMsg('card-verif')}
           <p>${current ? `${levelBadge(current.level)} ${esc(LEVELS[current.level])} · ${esc(ymdToDmy(current.verifiedOn))} · ${contactLink(current.contact && current.contact.displayName, current.contact && current.contact.contactUrl)}` : `${levelBadge(0)} ${esc(LEVELS[0])}`}</p>
           <form id="verif-form" class="dir-grid">
@@ -3149,10 +3192,9 @@
             `<span dir="auto" style="white-space:pre-wrap">${esc(v.methodNote)}</span>`,
             `<span class="muted" dir="ltr">${esc(v.recordedBy)}</span>`
           ])}</details>` : ''}
-        </div>
+        `)}
 
-        <div class="internal-section" id="card-contacts">
-          <h3>אנשי קשר שקשורים לכרטיס</h3>
+        ${dirSection('card-contacts', 'אנשי קשר שקשורים לכרטיס', `
           ${sectionMsg('card-contacts')}
           ${contacts.length ? contacts.map(contactRowHtml).join('') : '<p class="muted">אין אנשי קשר.</p>'}
           <div style="margin-top:12px">
@@ -3160,10 +3202,9 @@
             <input id="cc-role" type="text" maxlength="500">
             ${contactPickerHtml('cc')}
           </div>
-        </div>
+        `)}
 
-        <div class="internal-section" id="card-glossary">
-          <h3>מונחים במילון</h3>
+        ${dirSection('card-glossary', 'מונחים במילון', `
           ${sectionMsg('card-glossary')}
           <p class="dir-help">מונח מאושר מופיע בכרטיס תחת «מונחים קשורים», והכרטיס מופיע בדף המונח תחת «שירותים במדריך».</p>
           <div class="chips">${links.length ? links.map((l) => `<span class="chip ${l.status === 'suggested' ? 'suggested' : ''}" title="${esc(l.matchedText)}">
@@ -3172,7 +3213,7 @@
               <button type="button" class="secondary" data-link-status="rejected" data-link-id="${esc(l.id)}">${l.status === 'suggested' ? 'דחייה' : 'הסרה'}</button>
             </span>`).join('') : '<span class="muted">אין מונחים מקושרים.</span>'}</div>
           <div class="toolbar"><select id="term-add" style="max-width:320px"><option value="">הוספת מונח…</option>${termOptions}</select><button type="button" class="secondary" id="term-add-btn">הוספה</button></div>
-        </div>
+        `)}
       </div>`));
 
       const panel = root.querySelector('#card-internal');
@@ -3430,6 +3471,7 @@
         return;
       }
 
+      rememberDirectorySections();
       app.innerHTML = '';
       const wrap = el(`<div>
         <div class="toolbar">
