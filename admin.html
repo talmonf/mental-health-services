@@ -205,12 +205,19 @@
     .picker-results { max-height: 260px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 8px; }
     .picker-results button.kz-hit { padding: 8px 10px; border-bottom: 1px solid var(--border); }
     .picker-results .muted { font-size: 0.8rem; }
-    .contact-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .contact-row .who { flex: 1 1 220px; }
-    .contact-row .role-view { flex: 0 1 auto; min-width: 0; max-width: 100%; }
-    .contact-row input[type="text"] { flex: 1 1 200px; width: auto; }
-    .contact-row .role-saved { font-weight: 700; }
-    .contact-row .role-error { flex: 1 1 100%; margin: 0; }
+    .contact-table-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .contact-table-actions button { min-height: 32px; padding: 4px 10px; font-size: 0.85rem; }
+    dialog.contact-dialog {
+      border: none; border-radius: 10px; padding: 0; max-width: 560px; width: calc(100% - 32px);
+      color: var(--text); background: var(--card);
+    }
+    dialog.contact-dialog::backdrop { background: rgba(30, 63, 90, 0.45); }
+    .contact-dialog form { padding: 16px 20px 20px; }
+    .contact-dialog h3 { margin: 0 0 8px; }
+    .contact-dialog .contact-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .contact-picked { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 0; }
+    .contact-picked[hidden] { display: none; }
+    .contact-picked button { min-height: 32px; padding: 4px 10px; }
     .spin {
       width: 14px; height: 14px; border: 2px solid currentColor; border-inline-end-color: transparent;
       border-radius: 50%; flex: none; animation: contact-spin 0.7s linear infinite;
@@ -407,10 +414,7 @@
       cardInternal: null,
       cardInternalMsg: '',
       cardInternalAnchor: '',
-      contactDrafts: {},
-      contactEditing: null,
-      contactJustSaved: null,
-      contactError: null,
+      contactModal: null,
       audit: null,
       auditMsg: '',
       auditFilter: { area: '', card: '', from: '', to: '' },
@@ -1759,10 +1763,7 @@
       state.directoryCard = data.card;
       state.cardInternalMsg = '';
       state.cardInternalAnchor = '';
-      state.contactDrafts = {};
-      state.contactEditing = null;
-      state.contactJustSaved = null;
-      state.contactError = null;
+      state.contactModal = null;
       await loadCardInternal(data.card.id);
     }
 
@@ -1789,7 +1790,7 @@
       if (onCard) {
         const ensure = (id) => { if (id && open.indexOf(id) === -1) open.push(id); };
         ensure(state.cardInternalAnchor);
-        if (state.contactEditing != null) ensure('card-contacts');
+        if (state.contactModal) ensure('card-contacts');
       }
       state.directoryOpen = open;
       state.directoryOpenCardId = onCard ? state.directoryId : null;
@@ -3040,77 +3041,6 @@
       });
     }
 
-    /** Search box over saved contacts and Google, with paste-a-link and type-a-name fallbacks. */
-    function contactPickerHtml(prefix) {
-      return `<div class="contact-picker" data-picker="${prefix}">
-        <label for="${prefix}-q">חיפוש איש קשר (שם, דוא״ל, ארגון)</label>
-        <input id="${prefix}-q" type="text" autocomplete="off">
-        <div class="picker-results" id="${prefix}-results" hidden></div>
-        <details class="chrome" style="margin-top:8px">
-          <summary>הדבקת קישור או הקלדת פרטים</summary>
-          <div class="dir-grid">
-            <div class="full"><label for="${prefix}-url">קישור מ-contacts.google.com</label><input id="${prefix}-url" type="text" dir="ltr" placeholder="https://contacts.google.com/person/c123…"></div>
-            <div><label for="${prefix}-name">שם</label><input id="${prefix}-name" type="text"></div>
-            <div><label for="${prefix}-org">ארגון ותפקיד</label><input id="${prefix}-org" type="text"></div>
-            <div><label for="${prefix}-email">דוא״ל</label><input id="${prefix}-email" type="text" dir="ltr"></div>
-            <div><label for="${prefix}-phone">טלפון</label><input id="${prefix}-phone" type="text" dir="ltr"></div>
-            <div class="full"><button type="button" class="secondary" id="${prefix}-manual">שימוש בפרטים האלה</button></div>
-          </div>
-        </details>
-      </div>`;
-    }
-
-    function bindContactPicker(root, prefix, onPick) {
-      const q = root.querySelector(`#${prefix}-q`);
-      const box = root.querySelector(`#${prefix}-results`);
-      let timer = null;
-      let found = [];
-      const show = (data) => {
-        const local = data.local || [];
-        const localIds = new Set(local.map((c) => c.resourceName).filter(Boolean));
-        const google = (data.google || []).filter((c) => !localIds.has(c.resourceName));
-        found = [...local.map((c) => ({ kind: 'local', c })), ...google.map((c) => ({ kind: 'google', c }))];
-        const note = data.googleError
-          ? `<p class="err" style="padding:0 10px">${esc(data.googleError)}</p>`
-          : !data.connected ? '<p class="muted" style="padding:0 10px">Google Contacts לא מחובר, מוצגים רק אנשי קשר שכבר נשמרו.</p>' : '';
-        box.innerHTML = note + (found.length ? found.map((item, i) => `<button type="button" class="kz-hit" data-pick="${i}">
-            <b dir="auto">${esc(item.c.displayName)}</b>
-            <span class="muted">${item.kind === 'google' ? ' · Google' : ' · שמור'}</span>
-            <div class="muted" dir="auto">${esc([item.c.organization, item.c.email, item.c.phone].filter(Boolean).join(' · '))}</div>
-          </button>`).join('') : '<p class="muted" style="padding:0 10px">אין תוצאות.</p>');
-        box.hidden = false;
-      };
-      q.addEventListener('input', () => {
-        clearTimeout(timer);
-        const v = q.value.trim();
-        if (v.length < 2) { box.hidden = true; return; }
-        timer = setTimeout(async () => {
-          try {
-            show(await api('/api/admin/contacts?q=' + encodeURIComponent(v)));
-          } catch (e) {
-            box.innerHTML = `<p class="err" style="padding:0 10px">${esc(e.message)}</p>`;
-            box.hidden = false;
-          }
-        }, 300);
-      });
-      box.addEventListener('click', (ev) => {
-        const btn = ev.target.closest('[data-pick]');
-        if (!btn) return;
-        const item = found[Number(btn.getAttribute('data-pick'))];
-        if (!item) return;
-        onPick(item.kind === 'local' ? { contactId: item.c.id } : { contact: { resourceName: item.c.resourceName, displayName: item.c.displayName } });
-      });
-      root.querySelector(`#${prefix}-manual`).addEventListener('click', () => {
-        const val = (s) => root.querySelector(`#${prefix}-${s}`).value.trim();
-        const contact = { url: val('url'), displayName: val('name'), organization: val('org'), email: val('email'), phone: val('phone') };
-        if (!contact.url && !contact.displayName) {
-          alert('צריך קישור או שם.');
-          return;
-        }
-        onPick({ contact });
-      });
-    }
-
     async function loadCardInternal(id) {
       const out = { verifications: null, completeness: null, contacts: null, links: null, errors: [] };
       const tasks = [
@@ -3139,33 +3069,52 @@
         .filter(([k]) => !links.some((l) => l.termKey === k))
         .sort((a, b) => a[1].localeCompare(b[1], 'he'))
         .map(([k, t]) => `<option value="${esc(k)}">${esc(t)}</option>`).join('');
-      const roleOf = (c) => {
-        const drafts = state.contactDrafts || {};
-        return Object.prototype.hasOwnProperty.call(drafts, c.linkId) ? drafts[c.linkId] : (c.roleNote || '');
-      };
-      const sameLink = (a, b) => Number(a) === Number(b);
-      const contactRowHtml = (c) => {
-        const editing = sameLink(state.contactEditing, c.linkId);
-        const role = roleOf(c);
-        const justSaved = !editing && sameLink(state.contactJustSaved, c.linkId);
-        const rowError = state.contactError && sameLink(state.contactError.linkId, c.linkId) ? state.contactError.message : '';
-        const roleView = role
-          ? `<div class="role-view" dir="auto">${esc(role)}</div>`
-          : '<div class="role-view muted">לא צוין תפקיד</div>';
-        const body = editing
-          ? `<input type="text" name="role" value="${esc(role)}" placeholder="תפקיד או הקשר" maxlength="500">
-              <button type="button" class="secondary" data-act="save-role">שמירה</button>
-              <button type="button" class="secondary" data-act="cancel-role">ביטול</button>`
-          : `${roleView}${justSaved ? '<span class="ok role-saved">נשמר</span>' : ''}
-              <button type="button" class="secondary" data-act="edit-role">עריכה</button>`;
-        return `<div class="contact-row" data-link="${esc(c.linkId)}">
-              <div class="who">${contactLink(c.contact.displayName, c.contact.contactUrl)}
-                <div class="muted" dir="auto">${esc([c.contact.organization, c.contact.email, c.contact.phone].filter(Boolean).join(' · '))}</div></div>
-              ${body}
+      const emptyContactFields = () => ({ name: '', phone: '', role: '', url: '', email: '', org: '' });
+      const modal = state.contactModal;
+      const fieldVal = (key) => esc(modal && modal.fields && modal.fields[key] ? modal.fields[key] : '');
+      const dash = '—';
+      const contactRows = contacts.map((c) => {
+        const person = c.contact || {};
+        const phone = person.phone ? `<span dir="ltr">${esc(person.phone)}</span>` : dash;
+        const role = c.roleNote ? `<span dir="auto">${esc(c.roleNote)}</span>` : dash;
+        const link = person.contactUrl
+          ? `<a class="name-link" href="${esc(person.contactUrl)}" target="_blank" rel="noopener noreferrer">Google Contacts</a>`
+          : dash;
+        return `<tr data-link="${esc(c.linkId)}">
+            <td><span dir="auto">${esc(person.displayName || '')}</span></td>
+            <td>${phone}</td>
+            <td>${role}</td>
+            <td>${link}</td>
+            <td><div class="contact-table-actions">
+              <button type="button" class="secondary" data-act="edit-contact">עריכה</button>
               <button type="button" class="secondary" data-act="remove-contact">הסרה</button>
-              ${rowError ? `<p class="err role-error">${esc(rowError)}</p>` : ''}
-            </div>`;
-      };
+            </div></td>
+          </tr>`;
+      }).join('');
+      const contactDialog = !modal ? '' : `<dialog id="cc-dialog" class="contact-dialog" dir="rtl">
+          <form id="cc-form">
+            <h3>${modal.mode === 'edit' ? 'עריכת איש קשר' : 'הוספת איש קשר'}</h3>
+            <p class="dir-help">התפקיד שייך רק לכרטיס הזה. השם, הטלפון, הדוא״ל, הארגון והקישור נשמרים על איש הקשר ומתעדכנים בכל כרטיס שמקושר אליו. הקישור פותח את האדם ב-Google. השמירה לא נכתבת ל-Google Contacts.</p>
+            ${modal.error ? `<p class="err">${esc(modal.error)}</p>` : ''}
+            ${modal.mode === 'add' ? `<label for="cc-q">חיפוש איש קשר שכבר שמור או ב-Google</label>
+              <input id="cc-q" type="text" autocomplete="off" value="${esc(modal.query || '')}">
+              <div class="picker-results" id="cc-results" hidden></div>
+              <p class="contact-picked"${modal.pickedName ? '' : ' hidden'}>נבחר: <b dir="auto">${esc(modal.pickedName || '')}</b>
+                <button type="button" class="secondary" id="cc-clear">ניקוי הבחירה</button></p>` : ''}
+            <div class="dir-grid" style="margin-top:12px">
+              <div><label for="cc-name">שם</label><input id="cc-name" type="text" required maxlength="200" value="${fieldVal('name')}"></div>
+              <div><label for="cc-phone">טלפון</label><input id="cc-phone" type="text" dir="ltr" maxlength="60" value="${fieldVal('phone')}"></div>
+              <div class="full"><label for="cc-role">תפקיד</label><input id="cc-role" type="text" maxlength="500" value="${fieldVal('role')}"></div>
+              <div class="full"><label for="cc-url">קישור ל-Google Contacts</label><input id="cc-url" type="text" dir="ltr" maxlength="500" placeholder="https://contacts.google.com/person/c123…" value="${fieldVal('url')}"></div>
+              <div><label for="cc-email">דוא״ל</label><input id="cc-email" type="text" dir="ltr" maxlength="320" value="${fieldVal('email')}"></div>
+              <div><label for="cc-org">ארגון</label><input id="cc-org" type="text" maxlength="200" value="${fieldVal('org')}"></div>
+              <div class="full contact-actions">
+                <button type="submit">${modal.mode === 'edit' ? 'שמירה' : 'הוספה'}</button>
+                <button type="button" class="secondary" data-act="cancel-contact">ביטול</button>
+              </div>
+            </div>
+          </form>
+        </dialog>`;
       const sectionMsg = (anchor) => state.cardInternalAnchor === anchor ? msgHtml(state.cardInternalMsg) : '';
       root.appendChild(el(`<div class="card he-panel" id="card-internal">
         <h2>פנימי — לא מוצג באתר</h2>
@@ -3196,12 +3145,12 @@
 
         ${dirSection('card-contacts', 'אנשי קשר שקשורים לכרטיס', `
           ${sectionMsg('card-contacts')}
-          ${contacts.length ? contacts.map(contactRowHtml).join('') : '<p class="muted">אין אנשי קשר.</p>'}
-          <div style="margin-top:12px">
-            <label for="cc-role">תפקיד או הקשר של איש הקשר החדש</label>
-            <input id="cc-role" type="text" maxlength="500">
-            ${contactPickerHtml('cc')}
-          </div>
+          <div class="dir-actions" style="margin-top:0"><button type="button" id="cc-add">הוספת איש קשר</button></div>
+          ${contacts.length ? `<div style="overflow-x:auto"><table>
+            <thead><tr><th>שם</th><th>טלפון</th><th>תפקיד</th><th>Google Contacts</th><th></th></tr></thead>
+            <tbody>${contactRows}</tbody>
+          </table></div>` : '<p class="muted">אין אנשי קשר.</p>'}
+          ${contactDialog}
         `)}
 
         ${dirSection('card-glossary', 'מונחים במילון', `
@@ -3228,8 +3177,7 @@
         render();
         reveal(anchor);
       };
-      const fail = (e, anchor, drafts) => {
-        if (drafts) state.contactDrafts = Object.assign({}, state.contactDrafts, drafts);
+      const fail = (e, anchor) => {
         state.cardInternalMsg = e && e.message ? e.message : 'הבקשה נכשלה';
         state.cardInternalAnchor = anchor || '';
         render();
@@ -3255,61 +3203,33 @@
         } catch (e) { fail(e, 'card-verif'); }
       });
 
-      const contactRowEl = (id) => document.querySelector(`#card-contacts [data-link="${id}"]`);
-      panel.querySelectorAll('.contact-row').forEach((row) => {
-        const linkId = Number(row.getAttribute('data-link'));
-        const editBtn = row.querySelector('[data-act=edit-role]');
-        if (editBtn) editBtn.addEventListener('click', () => {
-          state.contactEditing = linkId;
-          if (state.contactError && sameLink(state.contactError.linkId, linkId)) state.contactError = null;
-          render();
-          const input = contactRowEl(linkId) && contactRowEl(linkId).querySelector('[name=role]');
-          if (input) input.focus();
-        });
-        const cancelBtn = row.querySelector('[data-act=cancel-role]');
-        if (cancelBtn) cancelBtn.addEventListener('click', () => {
-          if (state.contactDrafts) delete state.contactDrafts[linkId];
-          if (sameLink(state.contactEditing, linkId)) state.contactEditing = null;
-          if (state.contactError && sameLink(state.contactError.linkId, linkId)) state.contactError = null;
-          render();
-        });
-        const roleInput = row.querySelector('[name=role]');
-        const saveRole = async () => {
-          const btn = row.querySelector('[data-act=save-role]');
-          if (!btn || btn.disabled) return;
-          const note = roleInput.value.trim();
-          btn.disabled = true;
-          btn.setAttribute('aria-busy', 'true');
-          btn.innerHTML = '<span class="spin" aria-hidden="true"></span> שומר…';
-          try {
-            if (!Number.isInteger(linkId) || linkId < 1) throw new Error('לא ניתן לשמור. רעננו את הדף ונסו שוב.');
-            await api('/api/admin/card-contacts', { method: 'PATCH', body: { linkId, roleNote: note } });
-            if (state.contactDrafts) delete state.contactDrafts[linkId];
-            state.contactEditing = null;
-            state.contactError = null;
-            state.contactJustSaved = linkId;
-            await loadCardInternal(card.id);
-            render();
-            const saved = contactRowEl(linkId);
-            if (saved) saved.scrollIntoView({ block: 'nearest' });
-          } catch (e) {
-            state.contactEditing = linkId;
-            if (sameLink(state.contactJustSaved, linkId)) state.contactJustSaved = null;
-            state.contactDrafts = Object.assign({}, state.contactDrafts, { [linkId]: note });
-            state.contactError = { linkId, message: e && e.message ? e.message : 'הבקשה נכשלה' };
-            render();
-            const failed = contactRowEl(linkId);
-            if (failed) failed.scrollIntoView({ block: 'nearest' });
-          }
+      const openContactModal = (mode, row) => {
+        const person = row && row.contact ? row.contact : null;
+        state.contactModal = {
+          mode,
+          linkId: row ? row.linkId : null,
+          contactId: null,
+          pickedName: '',
+          query: '',
+          error: '',
+          fields: person ? {
+            name: person.displayName || '',
+            phone: person.phone || '',
+            role: row.roleNote || '',
+            url: person.contactUrl || '',
+            email: person.email || '',
+            org: person.organization || ''
+          } : emptyContactFields()
         };
-        if (roleInput) {
-          row.querySelector('[data-act=save-role]').addEventListener('click', saveRole);
-          roleInput.addEventListener('keydown', (ev) => {
-            if (ev.key !== 'Enter') return;
-            ev.preventDefault();
-            saveRole();
-          });
-        }
+        render();
+      };
+      panel.querySelector('#cc-add').addEventListener('click', () => openContactModal('add', null));
+      panel.querySelectorAll('#card-contacts tbody tr').forEach((row) => {
+        const linkId = Number(row.getAttribute('data-link'));
+        row.querySelector('[data-act=edit-contact]').addEventListener('click', () => {
+          const rowData = contacts.find((c) => Number(c.linkId) === linkId);
+          if (rowData) openContactModal('edit', rowData);
+        });
         row.querySelector('[data-act=remove-contact]').addEventListener('click', async () => {
           if (!confirm('להסיר את איש הקשר מהכרטיס? אימותים קודמים שרשומים על שמו יישמרו.')) return;
           const btn = row.querySelector('[data-act=remove-contact]');
@@ -3318,24 +3238,163 @@
             await fetch(`/api/admin/card-contacts?id=${linkId}`, { method: 'DELETE', credentials: 'include' }).then(async (r) => {
               if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'ההסרה נכשלה');
             });
-            if (state.contactDrafts) delete state.contactDrafts[linkId];
-            if (sameLink(state.contactEditing, linkId)) state.contactEditing = null;
-            if (sameLink(state.contactJustSaved, linkId)) state.contactJustSaved = null;
             await refresh('עודכן.', 'card-contacts');
           } catch (e) { fail(e, 'card-contacts'); }
         });
       });
 
-      bindContactPicker(panel, 'cc', async (picked) => {
-        try {
-          await api('/api/admin/card-contacts', {
-            method: 'POST',
-            body: Object.assign({ cardId: card.id, roleNote: panel.querySelector('#cc-role').value.trim() }, picked)
+      const dialog = panel.querySelector('#cc-dialog');
+      if (dialog && state.contactModal) {
+        const readFields = () => ({
+          name: dialog.querySelector('#cc-name').value,
+          phone: dialog.querySelector('#cc-phone').value,
+          role: dialog.querySelector('#cc-role').value,
+          url: dialog.querySelector('#cc-url').value,
+          email: dialog.querySelector('#cc-email').value,
+          org: dialog.querySelector('#cc-org').value
+        });
+        ['name', 'phone', 'role', 'url', 'email', 'org'].forEach((key) => {
+          dialog.querySelector('#cc-' + key).addEventListener('input', (ev) => {
+            if (state.contactModal) state.contactModal.fields[key] = ev.target.value;
           });
-          state.verif = null;
-          await refresh('נוסף.', 'card-contacts');
-        } catch (e) { fail(e, 'card-contacts'); }
-      });
+        });
+        dialog.querySelector('[data-act=cancel-contact]').addEventListener('click', () => {
+          state.contactModal = null;
+          render();
+        });
+        dialog.addEventListener('cancel', () => { state.contactModal = null; });
+        const q = dialog.querySelector('#cc-q');
+        if (q) {
+          const box = dialog.querySelector('#cc-results');
+          let timer = null;
+          let seq = 0;
+          let found = [];
+          const showHits = (data) => {
+            const local = data.local || [];
+            const localIds = new Set(local.map((c) => c.resourceName).filter(Boolean));
+            const google = (data.google || []).filter((c) => !localIds.has(c.resourceName));
+            found = [...local.map((c) => ({ kind: 'local', c })), ...google.map((c) => ({ kind: 'google', c }))];
+            const note = data.googleError
+              ? `<p class="err" style="padding:0 10px">${esc(data.googleError)}</p>`
+              : !data.connected ? '<p class="muted" style="padding:0 10px">Google Contacts לא מחובר, מוצגים רק אנשי קשר שכבר נשמרו.</p>' : '';
+            box.innerHTML = note + (found.length ? found.map((item, i) => `<button type="button" class="kz-hit" data-pick="${i}">
+                <b dir="auto">${esc(item.c.displayName)}</b>
+                <span class="muted">${item.kind === 'google' ? ' · Google' : ' · שמור'}</span>
+                <div class="muted" dir="auto">${esc([item.c.organization, item.c.email, item.c.phone].filter(Boolean).join(' · '))}</div>
+              </button>`).join('') : '<p class="muted" style="padding:0 10px">אין תוצאות.</p>');
+            box.hidden = false;
+          };
+          q.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') ev.preventDefault(); });
+          q.addEventListener('input', () => {
+            clearTimeout(timer);
+            if (state.contactModal) state.contactModal.query = q.value;
+            const v = q.value.trim();
+            if (v.length < 2) { box.hidden = true; return; }
+            const ticket = ++seq;
+            timer = setTimeout(async () => {
+              try {
+                const data = await api('/api/admin/contacts?q=' + encodeURIComponent(v));
+                if (ticket !== seq) return;
+                showHits(data);
+              } catch (e) {
+                if (ticket !== seq) return;
+                box.innerHTML = `<p class="err" style="padding:0 10px">${esc(e.message)}</p>`;
+                box.hidden = false;
+              }
+            }, 300);
+          });
+          box.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('[data-pick]');
+            if (!btn || !state.contactModal) return;
+            const item = found[Number(btn.getAttribute('data-pick'))];
+            if (!item) return;
+            const role = dialog.querySelector('#cc-role').value;
+            state.contactModal = Object.assign({}, state.contactModal, {
+              contactId: item.kind === 'local' ? item.c.id : null,
+              pickedName: item.c.displayName || '',
+              query: '',
+              error: '',
+              fields: {
+                name: item.c.displayName || '',
+                phone: item.c.phone || '',
+                role,
+                url: item.c.contactUrl || '',
+                email: item.c.email || '',
+                org: item.c.organization || ''
+              }
+            });
+            render();
+          });
+          const clearBtn = dialog.querySelector('#cc-clear');
+          if (clearBtn) clearBtn.addEventListener('click', () => {
+            const role = dialog.querySelector('#cc-role').value;
+            state.contactModal = Object.assign({}, state.contactModal, {
+              contactId: null,
+              pickedName: '',
+              query: '',
+              error: '',
+              fields: Object.assign(emptyContactFields(), { role })
+            });
+            render();
+          });
+        }
+        dialog.querySelector('#cc-form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const modalState = state.contactModal;
+          if (!modalState) return;
+          const fields = readFields();
+          state.contactModal.fields = fields;
+          const contact = {
+            displayName: fields.name.trim(),
+            phone: fields.phone.trim(),
+            email: fields.email.trim(),
+            organization: fields.org.trim(),
+            url: fields.url.trim()
+          };
+          if (!contact.displayName) {
+            state.contactModal.error = 'חסר שם איש קשר';
+            render();
+            return;
+          }
+          const btn = dialog.querySelector('[type=submit]');
+          btn.disabled = true;
+          btn.setAttribute('aria-busy', 'true');
+          btn.innerHTML = '<span class="spin" aria-hidden="true"></span> שומר…';
+          const roleNote = fields.role.trim();
+          try {
+            if (modalState.mode === 'edit') {
+              if (!Number.isInteger(Number(modalState.linkId)) || Number(modalState.linkId) < 1) {
+                throw new Error('לא ניתן לשמור. רעננו את הדף ונסו שוב.');
+              }
+              await api('/api/admin/card-contacts', {
+                method: 'PATCH',
+                body: { linkId: modalState.linkId, roleNote, contact }
+              });
+            } else {
+              const body = { cardId: card.id, roleNote, contact };
+              if (modalState.contactId) body.contactId = modalState.contactId;
+              await api('/api/admin/card-contacts', { method: 'POST', body });
+            }
+            state.contactModal = null;
+            state.verif = null;
+            await refresh(modalState.mode === 'edit' ? 'נשמר.' : 'נוסף.', 'card-contacts');
+          } catch (e) {
+            if (state.contactModal) {
+              state.contactModal.error = e && e.message ? e.message : 'הבקשה נכשלה';
+              state.contactModal.fields = fields;
+            }
+            render();
+            reveal('card-contacts');
+          }
+        });
+        dialog.showModal();
+        const blankAdd = state.contactModal.mode === 'add'
+          && !state.contactModal.pickedName
+          && !String(state.contactModal.fields.name || '').trim()
+          && !state.contactModal.error;
+        const focus = dialog.querySelector(blankAdd ? '#cc-q' : '#cc-name');
+        if (focus) focus.focus();
+      }
 
       panel.querySelectorAll('[data-link-status]').forEach((btn) => btn.addEventListener('click', async () => {
         try {

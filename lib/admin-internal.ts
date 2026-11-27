@@ -324,6 +324,107 @@ async function upsertContact(client: Client, raw: unknown) {
   return contactFromRow(rows[0]);
 }
 
+/**
+ * Writes the name, phone, email, organization and Google link the admin typed.
+ * Does not read Google. A link that already belongs to a saved person updates that
+ * person; otherwise the preferred row is updated, or a new row is inserted.
+ */
+async function saveTypedContact(client: Client, raw: unknown, preferredId: number | null) {
+  const src = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const url = str(src.url, 500);
+  const explicitResource = str(src.resourceName, 200);
+  const resourceName = resourceNameFromInput(explicitResource || url);
+  if ((url || explicitResource) && !resourceName) {
+    throw new InputError('הקישור אינו קישור לאיש קשר ב-contacts.google.com');
+  }
+  const displayName = str(src.displayName, 200);
+  if (!displayName) throw new InputError('חסר שם איש קשר');
+  const email = str(src.email, 320);
+  const phone = str(src.phone, 60);
+  const organization = str(src.organization, 200);
+  const contactUrl = resourceName ? contactUrlFor(resourceName) : '';
+  const resourceParam = resourceName || null;
+
+  let targetId = preferredId;
+  if (resourceName) {
+    const found = await client.query(`SELECT id FROM google_contacts WHERE resource_name = $1`, [resourceName]);
+    if (found.rows[0]) targetId = Number(found.rows[0].id);
+  }
+
+  const write = async (id: number) => {
+    const { rows } = await client.query(
+      `UPDATE google_contacts
+          SET display_name = $2, email = $3, phone = $4, organization = $5,
+              resource_name = $6, contact_url = $7
+        WHERE id = $1
+        RETURNING ${CONTACT_COLUMNS}`,
+      [id, displayName, email, phone, organization, resourceParam, contactUrl]
+    );
+    return rows[0] ? contactFromRow(rows[0]) : null;
+  };
+
+  if (targetId != null) {
+    const saved = await write(targetId);
+    if (!saved) throw new InputError('איש הקשר לא נמצא');
+    return saved;
+  }
+
+  try {
+    const { rows } = await client.query(
+      `INSERT INTO google_contacts (resource_name, display_name, email, phone, organization, contact_url)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING ${CONTACT_COLUMNS}`,
+      [resourceParam, displayName, email, phone, organization, contactUrl]
+    );
+    return contactFromRow(rows[0]);
+  } catch (err) {
+    if (pgCode(err) !== '23505' || !resourceName) throw err;
+    const found = await client.query(`SELECT id FROM google_contacts WHERE resource_name = $1`, [resourceName]);
+    if (!found.rows[0]) throw err;
+    const saved = await write(Number(found.rows[0].id));
+    if (!saved) throw err;
+    return saved;
+  }
+}
+
+async function linkCardContact(
+  client: Client,
+  cardId: number,
+  contactId: number,
+  roleNote: string,
+  userId: string
+) {
+  await client.query(
+    `INSERT INTO card_contacts (card_edit_id, contact_id, role_note, created_by)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (card_edit_id, contact_id) DO UPDATE SET role_note = EXCLUDED.role_note`,
+    [cardId, contactId, roleNote, userId]
+  );
+}
+
+/** Points this card link at contactId. If the card already has that person, keeps that link. */
+async function retargetCardContact(
+  client: Client,
+  linkId: number,
+  cardId: number,
+  contactId: number,
+  roleNote: string
+) {
+  const clash = await client.query(
+    `SELECT id FROM card_contacts WHERE card_edit_id = $1 AND contact_id = $2 AND id <> $3`,
+    [cardId, contactId, linkId]
+  );
+  if (clash.rows[0]) {
+    await client.query(`UPDATE card_contacts SET role_note = $2 WHERE id = $1`, [Number(clash.rows[0].id), roleNote]);
+    await client.query(`DELETE FROM card_contacts WHERE id = $1`, [linkId]);
+    return;
+  }
+  await client.query(
+    `UPDATE card_contacts SET contact_id = $2, role_note = $3 WHERE id = $1`,
+    [linkId, contactId, roleNote]
+  );
+}
+
 export async function handleContacts(req: VercelRequest, res: VercelResponse) {
   if (!['GET', 'POST'].includes(req.method || '')) return res.status(405).json({ error: 'Method not allowed' });
   return withAdmin(req, res, '063', async (client) => {
@@ -394,25 +495,31 @@ export async function handleCardContacts(req: VercelRequest, res: VercelResponse
     const body = parseJsonBody(req);
     if (!body) throw new InputError('Invalid JSON');
     const roleNote = str(body.roleNote, 500);
+    const typedContact = body.contact && typeof body.contact === 'object' ? body.contact : null;
     if (req.method === 'PATCH') {
       const linkId = positiveInt(body.linkId);
       if (linkId == null) throw new InputError('Invalid id');
       const { rows } = await client.query(
-        `UPDATE card_contacts SET role_note = $2 WHERE id = $1 RETURNING card_edit_id`,
-        [linkId, roleNote]
+        `SELECT card_edit_id, contact_id FROM card_contacts WHERE id = $1`,
+        [linkId]
       );
       if (!rows[0]) return res.status(404).json({ error: 'Not found' });
-      return res.status(200).json({ contacts: await list(Number(rows[0].card_edit_id)) });
+      const cardId = Number(rows[0].card_edit_id);
+      if (typedContact) {
+        const saved = await saveTypedContact(client, typedContact, Number(rows[0].contact_id));
+        await retargetCardContact(client, linkId, cardId, saved.id, roleNote);
+      } else {
+        await client.query(`UPDATE card_contacts SET role_note = $2 WHERE id = $1`, [linkId, roleNote]);
+      }
+      return res.status(200).json({ contacts: await list(cardId) });
     }
     const cardId = positiveInt(body.cardId);
     if (cardId == null) throw new InputError('Invalid cardId');
-    const contactId = positiveInt(body.contactId) ?? (await upsertContact(client, body.contact)).id;
-    await client.query(
-      `INSERT INTO card_contacts (card_edit_id, contact_id, role_note, created_by)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (card_edit_id, contact_id) DO UPDATE SET role_note = EXCLUDED.role_note`,
-      [cardId, contactId, roleNote, user.id]
-    );
+    const preferredId = positiveInt(body.contactId);
+    const contactId = typedContact
+      ? (await saveTypedContact(client, typedContact, preferredId)).id
+      : preferredId ?? (await upsertContact(client, body.contact)).id;
+    await linkCardContact(client, cardId, contactId, roleNote, user.id);
     return res.status(201).json({ contacts: await list(cardId) });
   });
 }
