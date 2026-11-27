@@ -77,13 +77,16 @@
       white-space: nowrap;
     }
     .filters .check-field input { width: auto; margin: 0; flex: none; }
-    .chart-frame { display: flex; direction: ltr; align-items: flex-end; gap: 8px; }
-    .chart-axis { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-    .chart-y { position: relative; height: 120px; font-size: 0.65rem; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .chart-frame { --plot: 120px; --plot-gap: 10px; --plot-pad: 8px; display: flex; direction: ltr; align-items: flex-start; gap: 8px; }
+    .chart-axis { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: var(--plot-gap); padding-top: var(--plot-pad); }
+    .chart-y { position: relative; height: var(--plot); font-size: 0.65rem; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
     .chart-tick { position: absolute; right: 0; transform: translateY(50%); white-space: nowrap; }
-    .chart { display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; flex: 1; min-width: 0; overflow-x: auto; padding: 8px 0 0; }
-    .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 22px; }
-    .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: 120px; border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
+    .chart { flex: 1; min-width: 0; overflow-x: auto; direction: ltr; }
+    .chart-inner { position: relative; display: flex; flex-direction: row; direction: ltr; align-items: flex-end; gap: 6px; min-height: 140px; width: max-content; min-width: 100%; padding: var(--plot-pad) 0 0; }
+    .chart-grid { position: absolute; left: 0; right: 0; top: var(--plot-pad); height: var(--plot); pointer-events: none; z-index: 1; }
+    .chart-grid-line { position: absolute; left: 0; right: 0; height: 1px; background: rgba(45, 74, 92, 0.38); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); transform: translateY(50%); pointer-events: none; }
+    .chart-col { flex: 1 0 22px; display: flex; flex-direction: column; align-items: center; gap: var(--plot-gap); min-width: 22px; position: relative; z-index: 0; }
+    .chart-stack { width: 100%; display: flex; flex-direction: column-reverse; height: var(--plot); border-radius: 4px 4px 0 0; overflow: hidden; background: #eef2f5; }
     .chart-seg { width: 100%; }
     .chart-seg.pv { background: var(--pv); }
     .chart-seg.search { background: var(--search); }
@@ -790,28 +793,34 @@
         const v = axis.ticks[i];
         return `<span class="chart-tick" style="bottom:${(v / axis.top) * 100}%">${esc(label)}</span>`;
       }).join('');
+      const nfmt = (n) => Number(n).toLocaleString('en-GB');
+      const seg = (cls, name, n, total) =>
+        `<div class="chart-seg ${cls}" style="height:${n * scale}px" title="${esc(name)} ${nfmt(n)}/${nfmt(total)}"></div>`;
       const cols = rows.map((r) => {
         const pv = Number(r.page_view) || 0;
         const se = Number(r.search) || 0;
         const cl = Number(r.click) || 0;
         const ot = Number(r.other) || 0;
         const total = Number(r.total) || (pv + se + cl + ot);
-        return `<div class="chart-col" title="${esc(fmtDay(r.day))}: ${total}">
+        return `<div class="chart-col">
           <div class="chart-stack">
-            <div class="chart-seg pv" style="height:${pv * scale}px"></div>
-            <div class="chart-seg search" style="height:${se * scale}px"></div>
-            <div class="chart-seg click" style="height:${cl * scale}px"></div>
-            <div class="chart-seg other" style="height:${ot * scale}px"></div>
+            ${seg('pv', 'Page views', pv, total)}
+            ${seg('search', 'Searches', se, total)}
+            ${seg('click', 'Clicks', cl, total)}
+            ${seg('other', 'Other', ot, total)}
           </div>
           <span class="chart-label">${esc(fmtDay(r.day))}</span>
         </div>`;
       }).join('');
+      const grid = axis.ticks.filter((v) => v > 0).map((v) =>
+        `<span class="chart-grid-line" style="bottom:${(v / axis.top) * 100}%"></span>`
+      ).join('');
       return `<div class="chart-frame">
           <div class="chart-axis" aria-hidden="true">
             <div class="chart-y" style="width:${axisWidth}ch">${ticks}</div>
             <span class="chart-label">&nbsp;</span>
           </div>
-          <div class="chart">${cols}</div>
+          <div class="chart"><div class="chart-inner"><div class="chart-grid" aria-hidden="true">${grid}</div>${cols}</div></div>
         </div>
         <div class="legend">
           <span><i style="background:var(--pv)"></i>Page views</span>
