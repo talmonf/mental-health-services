@@ -1,3 +1,4 @@
+[ ] 160_rights_wording.sql
 [x] 159_friedlander_referral.sql
 [x] 158_portal_wording.sql
 [x] 157_friedlander.sql
