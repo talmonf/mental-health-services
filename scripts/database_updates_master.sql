@@ -1,3 +1,4 @@
+[x] 162_hospital_wording.sql
 [x] 161_facebook_wording.sql
 [x] 160_rights_wording.sql
 [x] 159_friedlander_referral.sql
