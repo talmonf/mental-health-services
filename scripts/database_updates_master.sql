@@ -1,3 +1,4 @@
+[x] 157_friedlander.sql
 [x] 156_local_populations_wording.sql
 [x] 155_moh_wording.sql
 [x] 154_rothschild_clinic.sql
